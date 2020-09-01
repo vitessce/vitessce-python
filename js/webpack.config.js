@@ -1,10 +1,25 @@
 var path = require('path');
 var version = require('./package.json').version;
 
+process.env.NODE_ENV = 'production';
+
 // Custom webpack rules are generally the same for all webpack bundles, hence
 // stored in a separate local variable.
 var rules = [
-    { test: /\.css$/, use: ['style-loader', 'css-loader']}
+    { test: /\.css$/, use: ['style-loader', 'css-loader']},
+    {
+        test: /\.(js|mjs|jsx|ts|tsx)$/,
+        include: path.resolve(__dirname, 'lib'),
+        loader: require.resolve('babel-loader'),
+        options: {
+          customize: require.resolve(
+            'babel-preset-react-app/webpack-overrides'
+          ),
+          cacheDirectory: true,
+          cacheCompression: false,
+          compact: true,
+        },
+    },
 ]
 
 

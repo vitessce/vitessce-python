@@ -4,14 +4,14 @@ from traitlets import Unicode
 # See js/lib/example.js for the frontend counterpart to this file.
 
 @widgets.register
-class HelloWorld(widgets.DOMWidget):
+class VitessceWidget(widgets.DOMWidget):
     """An example widget."""
 
     # Name of the widget view class in front-end
-    _view_name = Unicode('HelloView').tag(sync=True)
+    _view_name = Unicode('VitessceView').tag(sync=True)
 
     # Name of the widget model class in front-end
-    _model_name = Unicode('HelloModel').tag(sync=True)
+    _model_name = Unicode('VitessceModel').tag(sync=True)
 
     # Name of the front-end module containing widget view
     _view_module = Unicode('vitessce-jupyter').tag(sync=True)

@@ -20,21 +20,30 @@
     "dist/*.js"
   ],
   "scripts": {
-    "clean": "rimraf dist/",
     "prepublish": "webpack",
     "build": "webpack",
     "watch": "webpack --watch --mode=development",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
-    "webpack": "^3.5.5",
-    "rimraf": "^2.6.1"
+    "@babel/core": "7.9.0",
+    "babel-loader": "8.1.0",
+    "babel-preset-react-app": "^9.1.2",
+    "webpack": "^3.5.5"
   },
   "dependencies": {
     "@jupyter-widgets/base": "^1.1 || ^2 || ^3",
-    "lodash": "^4.17.4"
+    "lodash": "^4.17.4",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "vitessce": "^0.2.5"
   },
   "jupyterlab": {
     "extension": "lib/labplugin"
+  },
+  "babel": {
+    "presets": [
+      "react-app"
+    ]
   }
 }

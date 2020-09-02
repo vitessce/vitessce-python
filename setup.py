@@ -105,7 +105,7 @@ class NPM(Command):
         env = os.environ.copy()
         env['PATH'] = npm_path
 
-        if self.should_run_npm_install():
+        if self.should_run_npm_install() and False:
             log.info("Installing build dependencies with npm.  This may take a while...")
             npm_name = self.get_npm_name();
             check_call([npm_name, 'install'], cwd=node_root, stdout=sys.stdout, stderr=sys.stderr)

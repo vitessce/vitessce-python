@@ -1,28 +1,62 @@
-import { DOMWidgetView, JupyterLuminoWidget, DOMWidgetModel } from '@jupyter-widgets/base';
+import { DOMWidgetView, DOMWidgetModel } from '@jupyter-widgets/base';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { Vitessce } from 'vitessce';
+import 'vitessce/dist/es/production/static/css/index.css';
+import './widget.css';
 
 // See example.py for the kernel counterpart to this file.
 
+const config = {
+    "version": "0.1.0",
+    "description": "High Bit Depth (uint16) Multiplex Immunofluorescence Imaging",
+    "layers": [
+      {
+        "name": "raster",
+        "type": "RASTER",
+        "fileType": "raster.json",
+        "url": "https://s3.amazonaws.com/vitessce-data/0.0.31/master_release/spraggins/spraggins.raster.json"
+      }
+    ],
+    "name": "Spraggins",
+    "public": true,
+    "staticLayout": [
+      {
+        "component": "spatial",
+        "props": {
+          "view": {
+            "zoom": -6.5,
+            "target": [
+              20000,
+              20000,
+              0
+            ]
+          }
+        },
+        "x": 0,
+        "y": 0,
+        "w": 9,
+        "h": 2
+      },
+      {
+        "component": "layerController",
+        "x": 9,
+        "y": 0,
+        "w": 3,
+        "h": 2
+      }
+    ]
+};
+
 class VitessceWidget extends React.Component {
-    constructor(props) {
-        super(props);
-        this.el = React.createRef();
-    }
 
-    async componentDidMount() {
-        const { model, view } = this.props;
-        const childView = await view.create_child_view(model);
-        /* JupyterPhosphorWidget.attach() expects this.el.current to be attached to the DOM. This
-         * requires the view to be attached to the DOM. This is the case after view.displayed is
-         * resolved.
-         */
-        await view.displayed;
-        JupyterLuminoWidget.attach(childView.pWidget, this.el.current);
+    componentDidMount() {
+        console.log("componentDidMount");
     }
-
     render() {
-        return React.createElement('div', { ref: this.el }, 'Hello world!');
+        return React.createElement('div', { },
+            React.createElement(Vitessce, { config, height: 500, theme: 'dark' })
+        );
     }
 }
 

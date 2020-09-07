@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Jupyter widget facilitating interactive visualization of spatial single-cell data with Vitessce",
   "author": "Mark Keller",
-  "main": "lib/index.js",
+  "main": "dist/index.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/keller-mark/vitessce-jupyter.git"
@@ -13,6 +13,7 @@
     "widgets",
     "ipython",
     "ipywidgets",
+    "jupyterlab",
     "jupyterlab-extension"
   ],
   "files": [
@@ -20,7 +21,6 @@
     "dist/*.js"
   ],
   "scripts": {
-    "prepublish": "webpack",
     "build": "webpack",
     "watch": "webpack --watch --mode=development",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -30,6 +30,9 @@
     "babel-loader": "8.1.0",
     "babel-preset-react-app": "^9.1.2",
     "css-loader": "^1.0.1",
+    "pnp-webpack-plugin": "^1.6.4",
+    "react-dev-utils": "^10.2.1",
+    "resolve": "^1.17.0",
     "style-loader": "^0.23.1",
     "webpack": "^4.37.0",
     "webpack-cli": "^3.3.6"
@@ -37,12 +40,16 @@
   "dependencies": {
     "@jupyter-widgets/base": "^1.1 || ^2 || ^3",
     "lodash": "^4.17.4",
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1",
+    "pubsub-js": "^1.9.0",
+    "react": "~16.8.6 || ~16.9.0",
+    "react-dom": "~16.8.6 || ~16.9.0",
     "vitessce": "^0.2.5"
   },
   "jupyterlab": {
-    "extension": "lib/labplugin"
+    "extension": "dist/labplugin",
+    "externalExtensions": {
+      "@jupyter-widgets/jupyterlab-manager": "2.0.0"
+    }
   },
   "babel": {
     "presets": [

@@ -8,5 +8,9 @@ node_modules/
 # Compiled javascript
 vitessce/static/
 
+# Created by jupyter labextension install
+js/yarn.lock
+vitessce/yarn.lock
+
 # OS X
 .DS_Store

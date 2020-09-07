@@ -22,7 +22,8 @@ For a development installation (requires npm),
     $ pip install -e .
     $ jupyter nbextension install --py --symlink --sys-prefix vitessce
     $ jupyter nbextension enable --py --sys-prefix vitessce
-    $ jupyter labextension install js
+    $ cd js
+    $ jupyter labextension install
 
 When actively developing your extension, build Jupyter Lab with the command:
 

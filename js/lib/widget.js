@@ -1,6 +1,7 @@
 import { DOMWidgetView, DOMWidgetModel } from '@jupyter-widgets/base';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import extend from 'lodash/extend';
 import { Vitessce } from 'vitessce';
 import 'vitessce/dist/es/production/static/css/index.css';
 import './widget.css';
@@ -76,7 +77,7 @@ class VitessceWidget extends React.Component {
 // When serialiazing the entire widget state for embedding, only values that
 // differ from the defaults will be specified.
 export const VitessceModel = DOMWidgetModel.extend({
-    defaults: _.extend(DOMWidgetModel.prototype.defaults(), {
+    defaults: extend(DOMWidgetModel.prototype.defaults(), {
         _model_name : 'VitessceModel',
         _view_name : 'VitessceView',
         _model_module : 'vitessce-jupyter',

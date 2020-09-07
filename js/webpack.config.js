@@ -1,17 +1,30 @@
-var path = require('path');
-var version = require('./package.json').version;
+const path = require('path');
+const fs = require('fs');
+const version = require('./package.json').version;
+const PnpWebpackPlugin = require('pnp-webpack-plugin');
 
-const mode = 'production';
+const mode = 'development';
 process.env.NODE_ENV = mode;
+
+// Make sure any symlinks in the project folder are resolved:
+function resolveApp(relativePath) {
+    const appDirectory = fs.realpathSync(process.cwd());
+    return path.resolve(appDirectory, relativePath);
+}
 
 // Custom webpack rules are generally the same for all webpack bundles, hence
 // stored in a separate local variable.
-var rules = [
+const rules = [
     {
         test: /\.js$/,
         exclude: /node_modules/,
         use: {
             loader: require.resolve('babel-loader'),
+            options: {
+                customize: require.resolve(
+                  'babel-preset-react-app/webpack-overrides'
+                ),
+            }
         },
     },
     {
@@ -25,8 +38,17 @@ var rules = [
             },
         ],
     },
-]
+];
 
+const resolve = {};
+
+const resolveLoader = {
+    plugins: [
+      // Also related to Plug'n'Play, but this time it tells webpack to load its loaders
+      // from the current package.
+      PnpWebpackPlugin.moduleLoader(module),
+    ],
+};
 
 module.exports = [
     {
@@ -44,7 +66,13 @@ module.exports = [
             filename: 'extension.js',
             path: path.resolve(__dirname, '..', 'vitessce', 'static'),
             libraryTarget: 'amd'
-        }
+        },
+        devtool: 'cheap-source-map',
+        module: {
+            rules: rules
+        },
+        resolve,
+        resolveLoader,
     },
     {
         // Bundle for the notebook containing the custom widget views and models
@@ -65,6 +93,8 @@ module.exports = [
             rules: rules
         },
         externals: ['@jupyter-widgets/base'],
+        resolve,
+        resolveLoader,
     },
     {
         // Embeddable vitessce-jupyter bundle
@@ -93,6 +123,25 @@ module.exports = [
         module: {
             rules: rules
         },
-        externals: ['@jupyter-widgets/base']
+        externals: ['@jupyter-widgets/base'],
+        resolve,
+        resolveLoader,
+    },
+    {
+        // Jupyter Lab plugin
+        mode,
+        entry: './lib/labplugin.js',
+        output: {
+            filename: 'labplugin.js',
+            path: path.resolve(__dirname, 'dist'),
+            libraryTarget: 'amd'
+        },
+        devtool: 'cheap-source-map',
+        module: {
+            rules: rules
+        },
+        externals: ['@jupyter-widgets/base'],
+        resolve,
+        resolveLoader,
     },
 ];

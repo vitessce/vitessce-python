@@ -6,58 +6,41 @@ import { Vitessce } from 'vitessce';
 import 'vitessce/dist/es/production/static/css/index.css';
 import './widget.css';
 
-// See example.py for the kernel counterpart to this file.
-
-const config = {
-    "version": "0.1.0",
-    "description": "High Bit Depth (uint16) Multiplex Immunofluorescence Imaging",
-    "layers": [
-      {
-        "name": "raster",
-        "type": "RASTER",
-        "fileType": "raster.json",
-        "url": "https://s3.amazonaws.com/vitessce-data/0.0.31/master_release/spraggins/spraggins.raster.json"
-      }
-    ],
-    "name": "Spraggins",
-    "public": true,
-    "staticLayout": [
-      {
-        "component": "spatial",
-        "props": {
-          "view": {
-            "zoom": -6.5,
-            "target": [
-              20000,
-              20000,
-              0
-            ]
-          }
-        },
-        "x": 0,
-        "y": 0,
-        "w": 9,
-        "h": 2
-      },
-      {
-        "component": "layerController",
-        "x": 9,
-        "y": 0,
-        "w": 3,
-        "h": 2
-      }
-    ]
-};
+// See widget.py for the kernel counterpart to this file.
 
 class VitessceWidget extends React.Component {
 
-    componentDidMount() {
-        console.log("componentDidMount");
+    constructor(props) {
+      super(props);
+
+      const { model } = props;
+
+      const initialConfig = model.get('config');
+
+      this.state = {
+        config: initialConfig
+      };
+
+      this.onConfigChange = this.onConfigChange.bind(this);
     }
+
+    componentDidUpdate() {
+      console.log("componentDidUpdate")
+    }
+
+    onConfigChange(config) {
+      //this.setState({ config });
+      const { model } = this.props;
+      model.set('config', config);
+      model.save_changes();
+    }
+
     render() {
-        return React.createElement('div', { },
-            React.createElement(Vitessce, { config, height: 500, theme: 'dark' })
-        );
+      const { onConfigChange } = this;
+      const { config } = this.state;
+      return React.createElement('div', { },
+          React.createElement(Vitessce, { config, onConfigChange, height: 500, theme: 'dark' })
+      );
     }
 }
 
@@ -84,7 +67,7 @@ export const VitessceModel = DOMWidgetModel.extend({
         _view_module : 'vitessce-jupyter',
         _model_module_version : '0.1.0',
         _view_module_version : '0.1.0',
-        value : 'Hello World!'
+        config : {},
     })
 });
 

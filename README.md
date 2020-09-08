@@ -33,3 +33,11 @@ This takes a minute or so to get started, but then automatically rebuilds Jupyte
 
 Note on first `jupyter lab --watch`, you may need to touch a file to get Jupyter Lab to open.
 
+## Resources
+
+- [ipywidget docs: Building a Custom Widget](https://ipywidgets.readthedocs.io/en/stable/examples/Widget%20Custom.html)
+- [ipywidget docs: Low Level Widget Tutorial](https://ipywidgets.readthedocs.io/en/latest/examples/Widget%20Low%20Level.html)
+- [ipywidget example: ipyleaflet](https://github.com/jupyter-widgets/ipyleaflet)
+- [ipywidget example (with React): ipymaterialui](https://github.com/maartenbreddels/ipymaterialui)
+- [ipywidget example (with React): higlass-python](https://github.com/higlass/higlass-python)
+- [ipywidget cookiecutter](https://github.com/jupyter-widgets/widget-cookiecutter)

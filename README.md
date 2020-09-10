@@ -3,6 +3,8 @@ vitessce-jupyter
 
 Jupyter widget facilitating interactive visualization of spatial single-cell data with Vitessce
 
+👷🚧 work in progress ⚠️
+
 Installation
 ------------
 

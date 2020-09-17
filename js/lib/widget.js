@@ -16,9 +16,13 @@ class VitessceWidget extends React.Component {
       const { model } = props;
 
       const initialConfig = model.get('config');
+      const initialHeight = model.get('height');
+      const initialTheme = model.get('theme');
 
       this.state = {
-        config: initialConfig
+        config: initialConfig,
+        height: initialHeight,
+        theme: initialTheme,
       };
 
       this.onConfigChange = this.onConfigChange.bind(this);
@@ -37,9 +41,9 @@ class VitessceWidget extends React.Component {
 
     render() {
       const { onConfigChange } = this;
-      const { config } = this.state;
+      const { config, height, theme } = this.state;
       return React.createElement('div', { },
-          React.createElement(Vitessce, { config, onConfigChange, height: 500, theme: 'dark' })
+          React.createElement(Vitessce, { config, onConfigChange, height, theme })
       );
     }
 }
@@ -68,6 +72,8 @@ export const VitessceModel = DOMWidgetModel.extend({
         _model_module_version : '0.1.0',
         _view_module_version : '0.1.0',
         config : {},
+        height: 600,
+        theme: 'dark',
     })
 });
 

@@ -1,3 +1,16 @@
 .vitessce-container {
     height: 800px;
 }
+
+.vitessce-container div {
+    font-size: 14px;
+}
+
+.jss793 {
+    // Layer controller checkbox sizing
+    padding: 0;
+    width: 100%;
+    vertical-align: middle;
+    display: flex;
+    height: 100%;
+}

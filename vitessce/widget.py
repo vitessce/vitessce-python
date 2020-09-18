@@ -8,13 +8,11 @@ from hypercorn.config import Config
 from hypercorn.asyncio import serve
 
 from starlette.applications import Starlette
-from starlette.responses import JSONResponse
-from starlette.routing import Route
+
+# Config creation dependencies
+from .config import create_config_and_routes
 
 # See js/lib/widget.js for the frontend counterpart to this file.
-
-async def homepage(req):
-    return JSONResponse({'hello': 'world'})
 
 @widgets.register
 class VitessceWidget(widgets.DOMWidget):
@@ -46,29 +44,31 @@ class VitessceWidget(widgets.DOMWidget):
     theme = Unicode('dark').tag(sync=True)
     
     def __init__(self, **kwargs):
+        
+        routes = []
+        if 'config' not in kwargs and 'data' in kwargs:
+            kwargs['config'], routes = create_config_and_routes(kwargs['data'])
+
         super(VitessceWidget, self).__init__(**kwargs)
         
-        config = kwargs['config']
-        
-        app = Starlette(debug=True, routes=[
-            Route('/', homepage)
-        ])
-        
-        # We cannot use asyncio.run() directly
-        # since Jupyter runs in its own asyncio loop.
-        # Reference: https://stackoverflow.com/a/61331974
-        try:
-            loop = asyncio.get_running_loop()
-        except RuntimeError:
-            loop = None
-        
-        if loop and loop.is_running():
-            # As expected, there is already an event loop running:
-            # the Jupyter event loop.
-            task = loop.create_task(serve(app, Config()))
-            task.add_done_callback(lambda t: print("Task done"))
-        else:
-            print('Error: did not find the expected notebook asyncio loop')
+        if len(routes) > 0:
+            app = Starlette(debug=True, routes=routes)
+            
+            # We cannot use asyncio.run() directly
+            # since Jupyter runs in its own asyncio loop.
+            # Reference: https://stackoverflow.com/a/61331974
+            try:
+                loop = asyncio.get_running_loop()
+            except RuntimeError:
+                loop = None
+            
+            if loop and loop.is_running():
+                # As expected, there is already an event loop running:
+                # the Jupyter event loop.
+                task = loop.create_task(serve(app, Config()))
+                task.add_done_callback(lambda t: print("Task done"))
+            else:
+                print('Error: did not find the expected notebook asyncio loop')
     
     def _get_coordination_value(self, coordination_type, coordination_scope):
         obj = self.config['coordinationSpace'][coordination_type]

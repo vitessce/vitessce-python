@@ -1,12 +1,11 @@
-vitessce-jupyter
-===============================
+# vitessce-jupyter
 
 Jupyter widget facilitating interactive visualization of spatial single-cell data with Vitessce
 
-👷🚧 work in progress ⚠️
+🚧 work in progress 👷
 
-Installation
-------------
+
+## Installation
 
 To install use pip:
 
@@ -16,6 +15,15 @@ To install use pip:
 To install for jupyterlab
 
     $ jupyter labextension install vitessce
+
+
+## Getting started
+
+Explore our [example notebooks](./notebooks/).
+These contain demos of different use cases and integrations with single-cell data analysis packages.
+
+
+## Development
 
 For a development installation (requires npm),
 
@@ -34,6 +42,7 @@ When actively developing your extension, build Jupyter Lab with the command:
 This takes a minute or so to get started, but then automatically rebuilds JupyterLab when your javascript changes.
 
 Note on first `jupyter lab --watch`, you may need to touch a file to get Jupyter Lab to open.
+
 
 ## Resources
 

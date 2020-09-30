@@ -143,6 +143,8 @@ setup_args = dict(
     ],
     install_requires=[
         'ipywidgets>=7.0.0',
+        'hypercorn>=0.10.2',
+        'starlette>=0.13.8'
     ],
     packages=find_packages(),
     zip_safe=False,
@@ -166,14 +168,8 @@ setup_args = dict(
         'Intended Audience :: Developers',
         'Intended Audience :: Science/Research',
         'Topic :: Multimedia :: Graphics',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
     ],
 )
 

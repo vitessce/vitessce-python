@@ -111,6 +111,7 @@ class NPM(Command):
             check_call([npm_name, 'install'], cwd=node_root, stdout=sys.stdout, stderr=sys.stderr)
             os.utime(self.node_modules, None)
         
+        npm_name = self.get_npm_name();
         check_call([npm_name, 'run', 'build'], cwd=node_root, stdout=sys.stdout, stderr=sys.stderr)
 
         for t in self.targets:

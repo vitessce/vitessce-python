@@ -10,7 +10,7 @@ from hypercorn.asyncio import serve
 from starlette.applications import Starlette
 
 # Config creation dependencies
-from .config import create_config_and_routes
+from .data import create_config_and_routes
 
 # See js/lib/widget.js for the frontend counterpart to this file.
 

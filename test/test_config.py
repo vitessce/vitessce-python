@@ -49,7 +49,6 @@ class TestConfig(unittest.TestCase):
         })
 
     def test_load_config(self):
-
         vc = VitessceConfig(config={
             "version": "1.0.0",
             "name": "Test name",
@@ -72,6 +71,7 @@ class TestConfig(unittest.TestCase):
         })
 
         my_second_dataset = vc.add_dataset(name='My Second Dataset')
+        
         vc_dict = vc.to_dict()
         vc_json = json.dumps(vc_dict)
 

@@ -1,6 +1,6 @@
 from enum import Enum
 
-class CoordinationTypes(Enum):
+class CoordinationType(Enum):
     DATASET = "dataset"
     EMBEDDING_TYPE = "embeddingType"
     EMBEDDING_ZOOM = "embeddingZoom"
@@ -30,3 +30,32 @@ class CoordinationTypes(Enum):
     GENOMIC_ZOOM = "genomicZoom"
     GENOMIC_TARGET_X = "genomicTargetX"
     GENOMIC_TARGET_Y = "genomicTargetY"
+
+class Component(Enum):
+    SCATTERPLOT = "scatterplot"
+    SPATIAL = "spatial"
+    DESCRIPTION = "description"
+    STATUS = "status"
+    CELL_SETS = "cellSets"
+    HEATMAP = "heatmap"
+    LAYER_CONTROLLER = "layerController"
+    HIGLASS = "higlass"
+    CELL_SET_SIZES = "cellSetSizes"
+
+class DataType(Enum):
+    CELLS = "cells"
+    CELL_SETS = "cell-sets"
+    EXPRESSION_MATRIX = "expression-matrix"
+    MOLECULES = "molecules"
+    NEIGHBORHOODS = "neighborhoods"
+    RASTER = "raster"
+
+class FileType(Enum):
+    EXPRESSION_MATRIX_ZARR = "expression-matrix.zarr"
+    CLUSTERS_JSON = "clusters.json"
+    GENES_JSON = "genes.json"
+    CELLS_JSON = "cells.json"
+    MOLECULES_JSON = "molecules.json"
+    NEIGHBORHOODS_JSON = "neighborhoods.json"
+    RASTER_JSON = "raster.json"
+    CELL_SETS_JSON = "cell-sets.json"

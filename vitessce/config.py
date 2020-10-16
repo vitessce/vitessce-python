@@ -1,9 +1,14 @@
 import json
 from uuid import uuid4
 
-from .constants import CoordinationTypes as ct
+from .constants import (
+    CoordinationType as ct,
+    Component as cm,
+    DataType as dt,
+    FileType as ft
+)
 
-def get_next_scope(prev_scopes):
+def _get_next_scope(prev_scopes):
     chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
     next_char_indices = [0]
 
@@ -32,48 +37,10 @@ def get_next_scope(prev_scopes):
     
     return next_scope
 
-"""
-function getNextScope(prevScopes) {
-  // Keep an ordered list of valid characters.
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  // Store the value of the next character for each position
-  // in the new string.
-  // For example, [0] -> "A", [1] -> "B", [0, 1] -> "AB"
-  const nextCharIndices = [0];
-
-  // Generate a new scope name,
-  // potentially conflicting with an existing name.
-  // Reference: https://stackoverflow.com/a/12504061
-  function next() {
-    const r = [];
-    nextCharIndices.forEach((charIndex) => {
-      r.unshift(chars[charIndex]);
-    });
-    let increment = true;
-    for (let i = 0; i < nextCharIndices.length; i++) {
-      const val = ++nextCharIndices[i];
-      if (val >= chars.length) {
-        nextCharIndices[i] = 0;
-      } else {
-        increment = false;
-        break;
-      }
-    }
-    if (increment) {
-      nextCharIndices.push(0);
-    }
-    return r.join('');
-  }
-
-  let nextScope;
-  do {
-    nextScope = next();
-  } while (prevScopes.includes(nextScope));
-  return nextScope;
-}
-"""
-
 class VitessceConfigDatasetFile:
+    """
+    A class to represent a file (described by a URL, data type, and file type) in a Vitessce view config dataset.
+    """
     def __init__(self, url, data_type, file_type):
         self.file = {
             "url": url,
@@ -85,15 +52,52 @@ class VitessceConfigDatasetFile:
         return self.file
 
 class VitessceConfigDataset:
-    def __init__(self, uid=None, name="", files=[]):
+    """
+    A class to represent a dataset (i.e. list of files containing common biological entities) in the Vitessce view config.
+    """
+    def __init__(self, uid, name, files):
+        if files is not None:
+            for f in files:
+                assert type(f) == VitessceConfigDatasetFile
+        
         self.dataset = {
             "uid": uid,
-            "name": name,
-            "files": []
+            "name": name or "",
+            "files": files or [],
         }
     
-    def add_file_url(self, url, **kwargs):
-        self.dataset["files"].append(VitessceConfigDatasetFile(url=url, **kwargs))
+    def add_file(self, url, data_type, file_type):
+        """
+        Add a new file definition to this dataset instance.
+
+        Parameters
+        ----------
+        url : str
+
+        data_type : str or DataType Enum
+
+        file_type : str or FileType Enum
+
+
+        Returns
+        -------
+
+        """
+
+        assert type(data_type) == str or type(data_type) == dt
+        assert type(file_type) == str or type(file_type) == ft
+
+        if type(data_type) == str:
+            data_type_str = data_type
+        else:
+            data_type_str = data_type.value
+        
+        if type(file_type) == str:
+            file_type_str = file_type
+        else:
+            file_type_str = file_type.value
+
+        self.dataset["files"].append(VitessceConfigDatasetFile(url=url, data_type=data_type_str, file_type=file_type_str))
         return self
 
     def to_dict(self):
@@ -103,6 +107,9 @@ class VitessceConfigDataset:
         }
 
 class VitessceConfigView:
+    """
+    A class to represent a view (i.e. visualization component) in the Vitessce view config layout.
+    """
     def __init__(self, component, coordination_scopes):
         self.view = {
             "component": component,
@@ -114,19 +121,51 @@ class VitessceConfigView:
         }
     
     def use_coordination(self, *c_scopes):
+        """
+        Attach a coordination scope to this view instance. All views using the same coordination scope for a particular coordination type will effectively be linked together.
+
+        Parameters
+        ----------
+        *c_scopes : VitessceConfigCoordinationScope
+            Variable number of coordination scope instances can be passed.
+
+        Returns
+        -------
+        VitessceConfigView
+            The view instance, to allow chaining.
+        """
         for c_scope in c_scopes:
             assert type(c_scope) == VitessceConfigCoordinationScope
             self.view["coordinationScopes"][c_scope.c_type] = c_scope.c_scope
         return self
 
 class VitessceConfigCoordinationScope:
+    """
+    A class to represent a coordination scope in the Vitessce view config coordination space.
+    """
     def __init__(self, c_type, c_scope):
         self.c_type = c_type
         self.c_scope = c_scope
         self.c_value = None
 
 class VitessceConfig:
+    """
+    A class to represent a Vitessce view config.
+    """
+
     def __init__(self, config=None, name=None, description=None):
+        """
+        Construct a Vitessce view config object.
+
+        Parameters
+        ----------
+        config : dict
+            Optionally provide an existing Vitessce view config as a dict to allow manipulation through the VitessceConfig API.
+        name : str
+            A name for the view config. Optional.
+        description : str
+            A description for the view config. Optional.
+        """
         self.config = {
             "version": "1.0.0",
             "name": name,
@@ -141,6 +180,7 @@ class VitessceConfig:
         }
 
         if config is None:
+            # No existing config was provided.
             if name is None:
                 self.config["name"] = ""
             else:
@@ -151,30 +191,78 @@ class VitessceConfig:
                 self.config["description"] = description
         
         else:
-            # TODO: validate the incoming config
+            # An existing config was provided.
 
+            # TODO: Validate the incoming config.
+            
             self.config["name"] = config["name"]
             self.config["description"] = config["description"]
 
+            # Add each dataset from the incoming config.
             for d in config["datasets"]:
                 new_dataset = self.add_dataset(uid=d["uid"], name=d["name"])
                 for f in d["files"]:
-                    new_file = new_dataset.add_file_url(
+                    new_file = new_dataset.add_file(
                         url=f["url"],
                         data_type=f["type"],
                         file_type=f["fileType"]
                     )
+                        
+            # TODO: Add each coordination scope from the incoming config.
+
+            # TODO: Add the components (layout) from the incoming config.
 
 
-    def add_dataset(self, **kwargs):
-        kwargs['uid'] = kwargs['uid'] if 'uid' in kwargs else get_next_scope([ d.dataset['uid'] for d in self.config["datasets"] ])
-        vcd = VitessceConfigDataset(**kwargs)
+    def add_dataset(self, name="", uid=None, files=None):
+        """
+        Add a dataset to the config.
+
+        Parameters
+        ----------
+        name : str
+            A name for this dataset.
+        uid : str
+            A unique identifier for this dataset. Optional. If None, will be automatically generated.
+        files : list of VitessceConfigDatasetFile
+            A list of file objects. Optional. Files can also be added to the dataset via the .add_file method on the returned dataset instance.
+
+        Returns
+        -------
+        VitessceConfigDataset
+            The instance for the new dataset.
+        """
+        uid = uid if uid is not None else _get_next_scope([ d.dataset['uid'] for d in self.config["datasets"] ])
+        assert type(uid) == str
+        vcd = VitessceConfigDataset(uid, name, files)
         self.config["datasets"].append(vcd)
-        self.config["coordinationSpace"]["dataset"][get_next_scope(list(self.config["coordinationSpace"]["dataset"].keys()))] = kwargs['uid']
+        self.config["coordinationSpace"]["dataset"][_get_next_scope(list(self.config["coordinationSpace"]["dataset"].keys()))] = uid
         return vcd
     
     def add_view(self, dataset, component, mapping=None):
+        """
+        Add a view to the config.
+
+        Parameters
+        ----------
+        dataset : VitessceConfigDataset
+            A dataset instance to be used for the data visualized in this view.
+        component : str or Component Enum
+            A component name, either as a string or using the Component enum values.
+        mapping : str
+            An optional convenience parameter for setting the EMBEDDING_TYPE coordination scope value. Only applicable to the SCATTERPLOT component.
+
+        Returns
+        -------
+        VitessceConfigView
+            The instance for the new view.
+        """
         assert type(dataset) == VitessceConfigDataset
+        assert type(component) == str or type(component) == cm
+
+        if type(component) == str:
+            component_str = component
+        else:
+            component_str = component.value
 
         # Find the coordination scope name associated with the dataset
         dataset_matches = [
@@ -190,16 +278,33 @@ class VitessceConfig:
         coordination_scopes = {
             "dataset": dataset_scope,
         }
-        vcv = VitessceConfigView(component=component, coordination_scopes=coordination_scopes)
+        vcv = VitessceConfigView(component_str, coordination_scopes)
         self.config["layout"].append(vcv)
         return vcv
     
 
     def add_coordination(self, *c_types):
+        """
+        Add scope(s) for new coordination type(s) to the config.
+
+        Parameters
+        ----------
+        *c_types : str or CoordinationType Enum
+            Variable number of coordination types can be passed.
+        
+        Returns
+        -------
+        list of VitessceConfigCoordinationScope
+            The instances for the new scope objects corresponding to each coordination type. These can be linked to views via the .use_coordination function on the VitessceConfigView class.
+        """
         result = []
         for c_type in c_types:
-            assert type(c_type) == ct
-            scope = VitessceConfigCoordinationScope(c_type.value, get_next_scope(list(self.config["coordinationSpace"][c_type.value].keys())))
+            assert type(c_type) == ct or type(c_type) == str
+            if type(c_type) == ct:
+                c_type_str = c_type.value
+            else:
+                c_type_str = c_type
+            scope = VitessceConfigCoordinationScope(c_type_str, _get_next_scope(list(self.config["coordinationSpace"][c_type_str].keys())))
             if scope.c_type not in self.config["coordinationSpace"]:
                 self.config["coordinationSpace"][scope.c_type] = {}
             self.config["coordinationSpace"][scope.c_type][scope.c_scope] = scope
@@ -207,7 +312,14 @@ class VitessceConfig:
         return result
         
     def to_dict(self):
+        """
+        Convert the view config instance to a dict object.
 
+        Returns
+        -------
+        dict
+            The view config as a dict. Useful if serialization to JSON is required.
+        """
         return {
             **self.config,
             "datasets": [ d.to_dict() for d in self.config["datasets"] ]

@@ -78,7 +78,6 @@ class VitessceConfigDataset:
 
         file_type : str or FileType Enum
 
-
         Returns
         -------
 
@@ -86,6 +85,8 @@ class VitessceConfigDataset:
 
         assert type(data_type) == str or type(data_type) == dt
         assert type(file_type) == str or type(file_type) == ft
+
+        # TODO: assert that the file type is compatible with the data type (and vice versa)
 
         if type(data_type) == str:
             data_type_str = data_type
@@ -110,7 +111,7 @@ class VitessceConfigView:
     """
     A class to represent a view (i.e. visualization component) in the Vitessce view config layout.
     """
-    def __init__(self, component, coordination_scopes):
+    def __init__(self, component, coordination_scopes, x, y, w, h):
         self.view = {
             "component": component,
             "coordinationScopes": coordination_scopes,
@@ -138,6 +139,9 @@ class VitessceConfigView:
             assert type(c_scope) == VitessceConfigCoordinationScope
             self.view["coordinationScopes"][c_scope.c_type] = c_scope.c_scope
         return self
+    
+    def to_dict(self):
+        return self.view
 
 class VitessceConfigCoordinationScope:
     """
@@ -147,6 +151,10 @@ class VitessceConfigCoordinationScope:
         self.c_type = c_type
         self.c_scope = c_scope
         self.c_value = None
+    
+    def set_value(self, v):
+        self.c_value = v
+        return self
 
 class VitessceConfig:
     """
@@ -235,10 +243,11 @@ class VitessceConfig:
         assert type(uid) == str
         vcd = VitessceConfigDataset(uid, name, files)
         self.config["datasets"].append(vcd)
-        self.config["coordinationSpace"]["dataset"][_get_next_scope(list(self.config["coordinationSpace"]["dataset"].keys()))] = uid
+        [d_scope] = self.add_coordination(ct.DATASET)
+        d_scope.set_value(uid)
         return vcd
     
-    def add_view(self, dataset, component, mapping=None):
+    def add_view(self, dataset, component, x=None, y=None, w=None, h=None, mapping=None):
         """
         Add a view to the config.
 
@@ -250,6 +259,14 @@ class VitessceConfig:
             A component name, either as a string or using the Component enum values.
         mapping : str
             An optional convenience parameter for setting the EMBEDDING_TYPE coordination scope value. Only applicable to the SCATTERPLOT component.
+        x : int
+            The horizontal position of the view. Must be an integer between 0 and 11. Optional.
+        y : int
+            The vertical position of the view. Must be an integer between 0 and 11. Optional.
+        w : int
+            The width of the view. Must be an integer between 1 and 12. Optional.
+        h : int
+            The height of the view. Must be an integer between 1 and 12. Optional.
 
         Returns
         -------
@@ -266,19 +283,25 @@ class VitessceConfig:
 
         # Find the coordination scope name associated with the dataset
         dataset_matches = [
-            scope
-            for scope, dataset_id in self.config["coordinationSpace"]["dataset"].items()
-            if dataset_id == dataset.dataset["uid"]
+            scope_name
+            for scope_name, dataset_scope in self.config["coordinationSpace"]["dataset"].items()
+            if dataset_scope.c_value == dataset.dataset["uid"]
         ]
         if len(dataset_matches) == 1:
-            dataset_scope = dataset_matches[0][0]
+            dataset_scope = dataset_matches[0]
         else:
             raise ValueError("The dataset parameter could not be found in the coordination space.")
 
+        # TODO: use the mapping parameter if component is scatterplot and the mapping is not None
+        
         coordination_scopes = {
-            "dataset": dataset_scope,
+            ct.DATASET.value: dataset_scope,
         }
-        vcv = VitessceConfigView(component_str, coordination_scopes)
+        vcv = VitessceConfigView(component_str, coordination_scopes, x, y, w, h)
+        if mapping is not None:
+            [et_scope] = self.add_coordination(ct.EMBEDDING_TYPE)
+            et_scope.set_value(mapping)
+            vcv.use_coordination(et_scope)
         self.config["layout"].append(vcv)
         return vcv
     
@@ -322,7 +345,13 @@ class VitessceConfig:
         """
         return {
             **self.config,
-            "datasets": [ d.to_dict() for d in self.config["datasets"] ]
+            "datasets": [ d.to_dict() for d in self.config["datasets"] ],
+            "coordinationSpace": dict([
+                (c_type, dict([
+                    (c_scope_name, c_scope.c_value) for c_scope_name, c_scope in c_scopes.items() 
+                ])) for c_type, c_scopes in self.config["coordinationSpace"].items()
+            ]),
+            "layout": [ c.to_dict() for c in self.config["layout"] ]
         }
 
 

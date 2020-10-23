@@ -21,10 +21,7 @@ class TestConfig(unittest.TestCase):
             "name": "",
             "description": "",
             "datasets": [],
-            "coordinationSpace": {
-                "dataset": {},
-                "embeddingType": {},
-            },
+            "coordinationSpace": {},
             "layout": [],
             "initStrategy": "auto"
         })
@@ -54,7 +51,6 @@ class TestConfig(unittest.TestCase):
                 'dataset': {
                     'A': 'A'
                 },
-                'embeddingType': {}
             },
             "layout": [],
             "initStrategy": "auto"
@@ -106,7 +102,6 @@ class TestConfig(unittest.TestCase):
                 'dataset': {
                     'A': 'A'
                 },
-                'embeddingType': {}
             },
             "layout": [],
             "initStrategy": "auto"
@@ -139,7 +134,6 @@ class TestConfig(unittest.TestCase):
                 'dataset': {
                     'A': 'A'
                 },
-                'embeddingType': {}
             },
             "layout": [
                 {
@@ -202,6 +196,73 @@ class TestConfig(unittest.TestCase):
             ],
             "initStrategy": "auto"
         })
+    
+    def test_config_add_scatterplot_view_with_embedding_coordinations(self):
+        vc = VitessceConfig()
+        my_dataset = vc.add_dataset(name='My Dataset')
+
+        my_view = vc.add_view(my_dataset, cm.SCATTERPLOT)
+
+        et_scope, ez_scope, ex_scope, ey_scope = vc.add_coordination(ct.EMBEDDING_TYPE, ct.EMBEDDING_ZOOM, ct.EMBEDDING_TARGET_X, ct.EMBEDDING_TARGET_Y)
+        my_view.use_coordination(et_scope, ez_scope, ex_scope, ey_scope)
+
+        et_scope.set_value("X_pca")
+        ez_scope.set_value(2)
+        ex_scope.set_value(10)
+        ey_scope.set_value(11)
+
+        vc_dict = vc.to_dict()
+        vc_json = json.dumps(vc_dict)
+
+        self.assertEqual(len(vc_dict["datasets"]), 1)
+        self.assertEqual(len(vc_dict["layout"]), 1)
+
+        self.assertEqual(vc_dict, {
+            "version": "1.0.0",
+            "name": "",
+            "description": "",
+            "datasets": [
+                {
+                    'uid': 'A',
+                    'name': 'My Dataset',
+                    'files': []
+                }
+            ],
+            'coordinationSpace': {
+                'dataset': {
+                    'A': 'A'
+                },
+                'embeddingType': {
+                    'A': 'X_pca'
+                },
+                'embeddingZoom': {
+                    'A': 2
+                },
+                'embeddingTargetX': {
+                    'A': 10
+                },
+                'embeddingTargetY': {
+                    'A': 11
+                },
+            },
+            "layout": [
+                {
+                    'component': 'scatterplot',
+                    'coordinationScopes': {
+                        'dataset': 'A',
+                        'embeddingType': 'A',
+                        'embeddingZoom': 'A',
+                        'embeddingTargetX': 'A',
+                        'embeddingTargetY': 'A',
+                    },
+                    'h': 1,
+                    'w': 1,
+                    'x': 0,
+                    'y': 0
+                }
+            ],
+            "initStrategy": "auto"
+        })
 
     def test_load_config(self):
         vc = VitessceConfig(config={
@@ -225,7 +286,6 @@ class TestConfig(unittest.TestCase):
                 'dataset': {
                     'A': 'A'
                 },
-                'embeddingType': {}
             },
             "layout": [],
             "initStrategy": "auto"
@@ -264,7 +324,6 @@ class TestConfig(unittest.TestCase):
                     'A': 'A',
                     'B': 'B'
                 },
-                'embeddingType': {}
             },
             "layout": [],
             "initStrategy": "auto"

@@ -179,10 +179,7 @@ class VitessceConfig:
             "name": name,
             "description": description,
             "datasets": [],
-            "coordinationSpace": {
-                "dataset": {},
-                "embeddingType": {},
-            },
+            "coordinationSpace": {},
             "layout": [],
             "initStrategy": "auto"
         }
@@ -286,18 +283,19 @@ class VitessceConfig:
             scope_name
             for scope_name, dataset_scope in self.config["coordinationSpace"]["dataset"].items()
             if dataset_scope.c_value == dataset.dataset["uid"]
-        ]
+        ] if "dataset" in self.config["coordinationSpace"].keys() else []
         if len(dataset_matches) == 1:
             dataset_scope = dataset_matches[0]
         else:
             raise ValueError("The dataset parameter could not be found in the coordination space.")
 
-        # TODO: use the mapping parameter if component is scatterplot and the mapping is not None
-        
+        # Set up the view's dataset coordination scope based on the dataset parameter.
         coordination_scopes = {
             ct.DATASET.value: dataset_scope,
         }
         vcv = VitessceConfigView(component_str, coordination_scopes, x, y, w, h)
+        
+        # Use the mapping parameter if component is scatterplot and the mapping is not None
         if mapping is not None:
             [et_scope] = self.add_coordination(ct.EMBEDDING_TYPE)
             et_scope.set_value(mapping)
@@ -327,7 +325,8 @@ class VitessceConfig:
                 c_type_str = c_type.value
             else:
                 c_type_str = c_type
-            scope = VitessceConfigCoordinationScope(c_type_str, _get_next_scope(list(self.config["coordinationSpace"][c_type_str].keys())))
+            prev_scopes = list(self.config["coordinationSpace"][c_type_str].keys()) if c_type_str in self.config["coordinationSpace"].keys() else []
+            scope = VitessceConfigCoordinationScope(c_type_str, _get_next_scope(prev_scopes))
             if scope.c_type not in self.config["coordinationSpace"]:
                 self.config["coordinationSpace"][scope.c_type] = {}
             self.config["coordinationSpace"][scope.c_type][scope.c_scope] = scope

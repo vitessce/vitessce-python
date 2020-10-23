@@ -73,14 +73,16 @@ class VitessceConfigDataset:
         Parameters
         ----------
         url : str
-
+            The URL for the file, pointing to either a local or remote location.
         data_type : str or DataType Enum
-
+            The type of data stored in the file. Must be compatible with the specified file type.
         file_type : str or FileType Enum
+            The file type. Must be compatible with the specified data type.
 
         Returns
         -------
-
+        VitessceConfigDataset
+            This dataset instance, to allow function chaining.
         """
 
         assert type(data_type) == str or type(data_type) == dt
@@ -133,7 +135,7 @@ class VitessceConfigView:
         Returns
         -------
         VitessceConfigView
-            The view instance, to allow chaining.
+            This view instance, to allow function chaining.
         """
         for c_scope in c_scopes:
             assert type(c_scope) == VitessceConfigCoordinationScope
@@ -153,6 +155,19 @@ class VitessceConfigCoordinationScope:
         self.c_value = None
     
     def set_value(self, v):
+        """
+        Set the value of the coordination scope.
+
+        Parameters
+        ----------
+        v : any
+            The value to be set. Can be any value that is serializable to JSON.
+
+        Returns
+        -------
+        VitessceConfigCoordinationScope
+            This scope instance, to allow function chaining.
+        """
         self.c_value = v
         return self
 
@@ -173,6 +188,11 @@ class VitessceConfig:
             A name for the view config. Optional.
         description : str
             A description for the view config. Optional.
+
+        Examples
+        --------
+        >>> vc = VitessceConfig(name='My Example')
+        >>> vc = VitessceConfig(config=existing_config)
         """
         self.config = {
             "version": "1.0.0",
@@ -281,13 +301,13 @@ class VitessceConfig:
         # Find the coordination scope name associated with the dataset
         dataset_matches = [
             scope_name
-            for scope_name, dataset_scope in self.config["coordinationSpace"]["dataset"].items()
+            for scope_name, dataset_scope in self.config["coordinationSpace"][ct.DATASET.value].items()
             if dataset_scope.c_value == dataset.dataset["uid"]
-        ] if "dataset" in self.config["coordinationSpace"].keys() else []
+        ] if ct.DATASET.value in self.config["coordinationSpace"].keys() else []
         if len(dataset_matches) == 1:
             dataset_scope = dataset_matches[0]
         else:
-            raise ValueError("The dataset parameter could not be found in the coordination space.")
+            raise ValueError("No coordination scope matching the dataset parameter could be found in the coordination space.")
 
         # Set up the view's dataset coordination scope based on the dataset parameter.
         coordination_scopes = {
@@ -340,7 +360,7 @@ class VitessceConfig:
         Returns
         -------
         dict
-            The view config as a dict. Useful if serialization to JSON is required.
+            The view config as a dict. Useful for serializing to JSON.
         """
         return {
             **self.config,

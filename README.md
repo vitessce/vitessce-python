@@ -43,6 +43,11 @@ This takes a minute or so to get started, but then automatically rebuilds Jupyte
 
 Note on first `jupyter lab --watch`, you may need to touch a file to get Jupyter Lab to open.
 
+## Testing
+
+```sh
+python -m unittest
+```
 
 ## Resources
 

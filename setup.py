@@ -80,14 +80,14 @@ class NPM(Command):
         pass
 
     def get_npm_name(self):
-        npm_name = 'npm';
+        npm_name = 'npm'
         if platform.system() == 'Windows':
-            npm_name = 'npm.cmd';
+            npm_name = 'npm.cmd'
 
-        return npm_name;
+        return npm_name
 
     def has_npm(self):
-        npm_name = self.get_npm_name();
+        npm_name = self.get_npm_name()
         try:
             check_call([npm_name, '--version'])
             return True
@@ -105,13 +105,13 @@ class NPM(Command):
         env = os.environ.copy()
         env['PATH'] = npm_path
 
-        if self.should_run_npm_install() and False:
+        if self.should_run_npm_install():
             log.info("Installing build dependencies with npm.  This may take a while...")
-            npm_name = self.get_npm_name();
+            npm_name = self.get_npm_name()
             check_call([npm_name, 'install'], cwd=node_root, stdout=sys.stdout, stderr=sys.stderr)
             os.utime(self.node_modules, None)
         
-        npm_name = self.get_npm_name();
+        npm_name = self.get_npm_name()
         check_call([npm_name, 'run', 'build'], cwd=node_root, stdout=sys.stdout, stderr=sys.stderr)
 
         for t in self.targets:

@@ -1,6 +1,8 @@
 from ._version import version_info, __version__
 
-from .widget import *
+from .widget import VitessceWidget
+from .config import VitessceConfig
+from .constants import CoordinationType, Component, DataType, FileType
 
 def _jupyter_nbextension_paths():
     """Called by Jupyter Notebook Server to detect if it is a valid nbextension and

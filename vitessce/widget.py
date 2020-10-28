@@ -16,7 +16,9 @@ from .data import create_config_and_routes
 
 @widgets.register
 class VitessceWidget(widgets.DOMWidget):
-    """An example widget."""
+    """
+    A class to represent a Jupyter widget for Vitessce.
+    """
 
     # Name of the widget view class in front-end
     _view_name = Unicode('VitessceView').tag(sync=True)
@@ -44,6 +46,23 @@ class VitessceWidget(widgets.DOMWidget):
     theme = Unicode('dark').tag(sync=True)
     
     def __init__(self, **kwargs):
+        """
+        Construct a new Vitessce widget.
+
+        :param config: A view config instance.
+        :type config: VitessceConfig
+        :param str theme: The theme name, either "light" or "dark". Optional. By default, "dark".
+        :param int height: The height of the widget, in pixels. Optional. By default, 600.
+
+        .. code-block:: python
+            :emphasize-lines: 4
+
+            from vitessce import VitessceConfig, VitessceWidget
+
+            vc = VitessceConfig.from_object(my_scanpy_object)
+            vw = VitessceWidget(vc)
+            vw
+        """
         
         routes = []
         if 'config' not in kwargs and 'data' in kwargs:

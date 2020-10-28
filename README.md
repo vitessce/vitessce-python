@@ -49,6 +49,12 @@ Note on first `jupyter lab --watch`, you may need to touch a file to get Jupyter
 python -m unittest
 ```
 
+## Documentation
+
+```sh
+make html
+```
+
 ## Resources
 
 - [ipywidget docs: Building a Custom Widget](https://ipywidgets.readthedocs.io/en/stable/examples/Widget%20Custom.html)

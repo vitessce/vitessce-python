@@ -90,9 +90,10 @@ class VitessceConfigDataset:
         :rtype: VitessceConfigDataset
 
         .. code-block:: python
-            :emphasize-lines: 5-9
+            :emphasize-lines: 6-10
 
             from vitessce import VitessceConfig, DataType as dt, FileType as ft
+
             vc = VitessceConfig(name='My Config')
             my_dataset = (
                 vc.add_dataset(name='My Dataset')
@@ -173,9 +174,10 @@ def hconcat(*views):
     :rtype: VitessceConfigViewHConcat
 
     .. code-block:: python
-        :emphasize-lines: 7
+        :emphasize-lines: 8
         
         from vitessce import VitessceConfig, Component as cm, hconcat, vconcat
+
         vc = VitessceConfig()
         my_dataset = vc.add_dataset(name='My Dataset')
         v1 = vc.add_view(my_dataset, cm.SPATIAL)
@@ -212,9 +214,10 @@ def vconcat(*views):
     :rtype: VitessceConfigViewVConcat
 
     .. code-block:: python
-        :emphasize-lines: 7
+        :emphasize-lines: 8
         
         from vitessce import VitessceConfig, Component as cm, hconcat, vconcat
+
         vc = VitessceConfig()
         my_dataset = vc.add_dataset(name='My Dataset')
         v1 = vc.add_view(my_dataset, cm.SPATIAL)
@@ -259,9 +262,10 @@ class VitessceConfigView:
         :rtype: VitessceConfigView
 
         .. code-block:: python
-            :emphasize-lines: 11-12
+            :emphasize-lines: 12-13
 
             from vitessce import VitessceConfig, Component as cm, CoordinationType as ct
+
             vc = VitessceConfig()
             my_dataset = vc.add_dataset(name='My Dataset')
             v1 = vc.add_view(my_dataset, cm.SPATIAL)
@@ -323,9 +327,10 @@ class VitessceConfigCoordinationScope:
         :rtype: VitessceConfigCoordinationScope
 
         .. code-block:: python
-            :emphasize-lines: 13-15
+            :emphasize-lines: 14-16
 
             from vitessce import VitessceConfig, Component as cm, CoordinationType as ct
+
             vc = VitessceConfig()
             my_dataset = vc.add_dataset(name='My Dataset')
             v1 = vc.add_view(my_dataset, cm.SPATIAL)
@@ -357,9 +362,10 @@ class VitessceConfig:
         :param str description: A description for the view config. Optional.
 
         .. code-block:: python
-            :emphasize-lines: 2
+            :emphasize-lines: 3
             
             from vitessce import VitessceConfig
+
             vc = VitessceConfig(name='My Config')
         """
         self.config = {
@@ -393,9 +399,10 @@ class VitessceConfig:
         :rtype: VitessceConfigDataset
         
         .. code-block:: python
-            :emphasize-lines: 4
+            :emphasize-lines: 5
 
             from vitessce import VitessceConfig, DataType as dt, FileType as ft
+
             vc = VitessceConfig(name='My Config')
             my_dataset = (
                 vc.add_dataset(name='My Dataset')
@@ -433,9 +440,10 @@ class VitessceConfig:
         :rtype: VitessceConfigView
 
         .. code-block:: python
-            :emphasize-lines: 4-5
+            :emphasize-lines: 5-6
 
             from vitessce import VitessceConfig, Component as cm
+
             vc = VitessceConfig()
             my_dataset = vc.add_dataset(name='My Dataset')
             v1 = vc.add_view(my_dataset, cm.SPATIAL)
@@ -482,13 +490,14 @@ class VitessceConfig:
         :param \*c_types: A variable number of coordination types.
         :type \*c_types: str or vitessce.constants.CoordinationType
         
-        :returns: The instances for the new scope objects corresponding to each coordination type. These can be linked to views via the .use_coordination function on the VitessceConfigView class.
+        :returns: The instances for the new scope objects corresponding to each coordination type. These can be linked to views via the ``VitessceConfigView.use_coordination()`` method.
         :rtype: list[VitessceConfigCoordinationScope]
 
         .. code-block:: python
-            :emphasize-lines: 6-10
+            :emphasize-lines: 7-11
 
             from vitessce import VitessceConfig, Component as cm, CoordinationType as ct
+
             vc = VitessceConfig()
             my_dataset = vc.add_dataset(name='My Dataset')
             v1 = vc.add_view(my_dataset, cm.SPATIAL)
@@ -530,9 +539,10 @@ class VitessceConfig:
         :rtype: VitessceConfig
         
         .. code-block:: python
-            :emphasize-lines: 7
+            :emphasize-lines: 8
             
             from vitessce import VitessceConfig, Component as cm, hconcat, vconcat
+
             vc = VitessceConfig()
             my_dataset = vc.add_dataset(name='My Dataset')
             v1 = vc.add_view(my_dataset, cm.SPATIAL)
@@ -541,9 +551,10 @@ class VitessceConfig:
             vc.layout(hconcat(v1, vconcat(v2, v3)))
         
         .. code-block:: python
-            :emphasize-lines: 7
+            :emphasize-lines: 8
             
             from vitessce import VitessceConfig, Component as cm
+
             vc = VitessceConfig()
             my_dataset = vc.add_dataset(name='My Dataset')
             v1 = vc.add_view(my_dataset, cm.SPATIAL)
@@ -621,9 +632,10 @@ class VitessceConfig:
         :rtype: VitessceConfig
 
         .. code-block:: python
-            :emphasize-lines: 2
+            :emphasize-lines: 3
             
             from vitessce import VitessceConfig
+
             vc = VitessceConfig.from_dict(my_existing_config)
         """
         # TODO: Validate the incoming config.
@@ -658,9 +670,10 @@ class VitessceConfig:
         :rtype: VitessceConfig
 
         .. code-block:: python
-            :emphasize-lines: 2
+            :emphasize-lines: 3
             
             from vitessce import VitessceConfig
+            
             vc = VitessceConfig.from_object(my_scanpy_object)
         """
         vc = VitessceConfig(name=name, description=description)

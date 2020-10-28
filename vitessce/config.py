@@ -65,6 +65,7 @@ class VitessceConfigDataset:
             "name": name or "",
             "files": files or [],
         }
+        self.objs = []
     
     def add_file(self, url, data_type, file_type):
         """
@@ -102,11 +103,33 @@ class VitessceConfigDataset:
 
         self.dataset["files"].append(VitessceConfigDatasetFile(url=url, data_type=data_type_str, file_type=file_type_str))
         return self
+    
+    def add_object(self, obj):
+        """
+        Add a data object to this dataset instance.
 
-    def to_dict(self):
+        Parameters
+        ----------
+        obj : anndata.AnnData or loom.Loom or zarr.Store
+            A data object that can be served locally or uploaded to a remote storage provider.
+        
+        Returns
+        -------
+        VitessceConfigDataset
+            This dataset instance, to allow function chaining.
+        """
+        self.objs.append(obj)
+        return self
+
+    def to_dict(self, on_obj):
+        obj_file_defs = []
+        for obj in self.objs:
+            if on_obj is not None:
+                obj_file_defs += on_obj(obj)
+                
         return {
             **self.dataset,
-            "files": [ f.to_dict() for f in self.dataset["files"] ],
+            "files": [ f.to_dict() for f in self.dataset["files"] ] + obj_file_defs,
         }
 
 class VitessceConfigView:
@@ -255,6 +278,18 @@ class VitessceConfig:
         -------
         VitessceConfigDataset
             The instance for the new dataset.
+        
+        Examples
+        --------
+        >>> vc = VitessceConfig(name='My Example')
+        >>> my_dataset = (
+        ...     vc.add_dataset(name='My Dataset')
+        ...     .add_file(
+        ...         url="http://example.com/cells.json",
+        ...         data_type=DataType.CELLS,
+        ...         file_type=FileType.CELLS_JSON,
+        ...     )
+        ... )
         """
         uid = uid if uid is not None else _get_next_scope([ d.dataset['uid'] for d in self.config["datasets"] ])
         assert type(uid) == str
@@ -353,9 +388,14 @@ class VitessceConfig:
             result.append(scope)
         return result
         
-    def to_dict(self):
+    def to_dict(self, on_obj=None):
         """
         Convert the view config instance to a dict object.
+
+        Parameters
+        ----------
+        on_obj : function or None
+            This callback is required only if datasets within the view config contain objects (rather than files). This function must take the data object as a parameter, and return a list of valid file definitions (URL, data type, file type).
 
         Returns
         -------
@@ -364,7 +404,7 @@ class VitessceConfig:
         """
         return {
             **self.config,
-            "datasets": [ d.to_dict() for d in self.config["datasets"] ],
+            "datasets": [ d.to_dict(on_obj) for d in self.config["datasets"] ],
             "coordinationSpace": dict([
                 (c_type, dict([
                     (c_scope_name, c_scope.c_value) for c_scope_name, c_scope in c_scopes.items() 

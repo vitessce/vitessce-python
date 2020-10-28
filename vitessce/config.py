@@ -253,8 +253,10 @@ class VitessceConfig:
 
         Examples
         --------
-        >>> vc = VitessceConfig(name='My Example')
-        >>> vc = VitessceConfig(config=existing_config)
+        .. code-block:: python
+        
+            vc = VitessceConfig(name='My Example')
+            vc = VitessceConfig(config=my_existing_config)
         """
         self.config = {
             "version": "1.0.0",
@@ -320,15 +322,17 @@ class VitessceConfig:
         
         Examples
         --------
-        >>> vc = VitessceConfig(name='My Example')
-        >>> my_dataset = (
-        ...     vc.add_dataset(name='My Dataset')
-        ...     .add_file(
-        ...         url="http://example.com/cells.json",
-        ...         data_type=DataType.CELLS,
-        ...         file_type=FileType.CELLS_JSON,
-        ...     )
-        ... )
+        .. code-block:: python
+
+            vc = VitessceConfig(name='My Example')
+            my_dataset = (
+                vc.add_dataset(name='My Dataset')
+                .add_file(
+                    url="http://example.com/cells.json",
+                    data_type=DataType.CELLS,
+                    file_type=FileType.CELLS_JSON,
+                )
+            )
         """
         uid = uid if uid is not None else _get_next_scope([ d.dataset['uid'] for d in self.config["datasets"] ])
         assert type(uid) == str

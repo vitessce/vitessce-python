@@ -23,10 +23,11 @@ install:
 script:
   - python -m unittest
 before_deploy:
-  - pip install pdoc3
-  - pdoc --html --config show_source_code=False --config sort_identifiers=False --config git_link_template="'https://github.com/keller-mark/vitessce-jupyter/blob/{commit}/{path}#L{start_line}-L{end_line}'" --force --output-dir docs
+  - pip install sphinx
+  - pip install sphinx-rtd-theme
+  - make html
 deploy:
   - provider: pages
     skip-cleanup: true
     github-token: $github_token
-    local-dir: docs
+    local-dir: docs-dist/html

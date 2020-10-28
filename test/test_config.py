@@ -7,6 +7,8 @@ from vitessce import (
     Component as cm,
     DataType as dt,
     FileType as ft,
+    hconcat,
+    vconcat,
 )
 
 class TestConfig(unittest.TestCase):
@@ -33,9 +35,6 @@ class TestConfig(unittest.TestCase):
         vc_dict = vc.to_dict()
         vc_json = json.dumps(vc_dict)
 
-        self.assertEqual(len(vc_dict["datasets"]), 1)
-        self.assertEqual(len(vc_dict["coordinationSpace"]["dataset"]), 1)
-
         self.assertEqual(vc_dict, {
             "version": "1.0.0",
             "name": "",
@@ -56,7 +55,7 @@ class TestConfig(unittest.TestCase):
             "initStrategy": "auto"
         })
     
-    def test_config_add_dataset_add_files_chained(self):
+    def test_config_add_dataset_add_files(self):
         vc = VitessceConfig()
         my_dataset = (vc.add_dataset(name='My Chained Dataset')
             .add_file(
@@ -72,9 +71,6 @@ class TestConfig(unittest.TestCase):
 
         vc_dict = vc.to_dict()
         vc_json = json.dumps(vc_dict)
-
-        self.assertEqual(len(vc_dict["datasets"]), 1)
-        self.assertEqual(len(vc_dict["coordinationSpace"]["dataset"]), 1)
 
         self.assertEqual(vc_dict, {
             "version": "1.0.0",
@@ -116,9 +112,6 @@ class TestConfig(unittest.TestCase):
         vc_dict = vc.to_dict()
         vc_json = json.dumps(vc_dict)
 
-        self.assertEqual(len(vc_dict["datasets"]), 1)
-        self.assertEqual(len(vc_dict["layout"]), 1)
-
         self.assertEqual(vc_dict, {
             "version": "1.0.0",
             "name": "",
@@ -158,9 +151,6 @@ class TestConfig(unittest.TestCase):
 
         vc_dict = vc.to_dict()
         vc_json = json.dumps(vc_dict)
-
-        self.assertEqual(len(vc_dict["datasets"]), 1)
-        self.assertEqual(len(vc_dict["layout"]), 1)
 
         self.assertEqual(vc_dict, {
             "version": "1.0.0",
@@ -214,9 +204,6 @@ class TestConfig(unittest.TestCase):
         vc_dict = vc.to_dict()
         vc_json = json.dumps(vc_dict)
 
-        self.assertEqual(len(vc_dict["datasets"]), 1)
-        self.assertEqual(len(vc_dict["layout"]), 1)
-
         self.assertEqual(vc_dict, {
             "version": "1.0.0",
             "name": "",
@@ -264,6 +251,251 @@ class TestConfig(unittest.TestCase):
             "initStrategy": "auto"
         })
 
+    def test_config_add_dataset_add_objects(self):
+        vc = VitessceConfig()
+
+        class MockAnnData:
+            def __init__(self, name):
+                self.name = name
+        
+        def serve_obj(obj):
+            if type(obj) == MockAnnData:
+                if obj.name == "Experiment A":
+                    return [
+                        {
+                            "url": "http://localhost:8000/cells",
+                            "type": "cells",
+                            "fileType": "cells.json"
+                        },
+                        {
+                            "url": "http://localhost:8000/molecules",
+                            "type": "molecules",
+                            "fileType": "molecules.json"
+                        }
+                    ]
+                elif obj.name == "Experiment B":
+                    return [
+                        {
+                            "url": "http://localhost:8000/cell-sets",
+                            "type": "cell-sets",
+                            "fileType": "cell-sets.json"
+                        }
+                    ]
+            return None
+
+        my_dataset = (vc.add_dataset(name='My Object Dataset')
+            .add_object(
+                obj=MockAnnData("Experiment A")
+            ).add_object(
+                obj=MockAnnData("Experiment B")
+            )
+        )
+
+        vc_dict = vc.to_dict(on_obj=serve_obj)
+        vc_json = json.dumps(vc_dict)
+
+        self.assertEqual(vc_dict, {
+            "version": "1.0.0",
+            "name": "",
+            "description": "",
+            "datasets": [
+                {
+                    'uid': 'A',
+                    'name': 'My Object Dataset',
+                    'files': [
+                        {
+                            "url": "http://localhost:8000/cells",
+                            "type": "cells",
+                            "fileType": "cells.json"
+                        },
+                        {
+                            "url": "http://localhost:8000/molecules",
+                            "type": "molecules",
+                            "fileType": "molecules.json"
+                        },
+                        {
+                            "url": "http://localhost:8000/cell-sets",
+                            "type": "cell-sets",
+                            "fileType": "cell-sets.json"
+                        }
+                    ]
+                },
+            ],
+            'coordinationSpace': {
+                'dataset': {
+                    'A': 'A'
+                },
+            },
+            "layout": [],
+            "initStrategy": "auto"
+        })
+    
+    def test_config_set_layout_single_view(self):
+        vc = VitessceConfig()
+        my_dataset = vc.add_dataset(name='My Dataset')
+        my_view = vc.add_view(my_dataset, cm.SPATIAL)
+        vc.layout(my_view)
+
+        vc_dict = vc.to_dict()
+        vc_json = json.dumps(vc_dict)
+
+        self.assertEqual(vc_dict, {
+            "version": "1.0.0",
+            "name": "",
+            "description": "",
+            "datasets": [
+                {
+                    'uid': 'A',
+                    'name': 'My Dataset',
+                    'files': []
+                }
+            ],
+            'coordinationSpace': {
+                'dataset': {
+                    'A': 'A'
+                },
+            },
+            "layout": [
+                {
+                    'component': 'spatial',
+                    'coordinationScopes': {
+                        'dataset': 'A',
+                    },
+                    'x': 0,
+                    'y': 0,
+                    'h': 12,
+                    'w': 12,
+                }
+            ],
+            "initStrategy": "auto"
+        })
+
+    def test_config_set_layout_multi_view(self):
+        vc = VitessceConfig()
+        my_dataset = vc.add_dataset(name='My Dataset')
+        v1 = vc.add_view(my_dataset, cm.SPATIAL)
+        v2 = vc.add_view(my_dataset, cm.SPATIAL)
+        v3 = vc.add_view(my_dataset, cm.SPATIAL)
+
+        vc.layout(hconcat(v1, vconcat(v2, v3)))
+
+        vc_dict = vc.to_dict()
+        vc_json = json.dumps(vc_dict)
+
+        self.assertEqual(vc_dict, {
+            "version": "1.0.0",
+            "name": "",
+            "description": "",
+            "datasets": [
+                {
+                    'uid': 'A',
+                    'name': 'My Dataset',
+                    'files': []
+                }
+            ],
+            'coordinationSpace': {
+                'dataset': {
+                    'A': 'A'
+                },
+            },
+            "layout": [
+                {
+                    'component': 'spatial',
+                    'coordinationScopes': {
+                        'dataset': 'A',
+                    },
+                    'x': 0,
+                    'y': 0,
+                    'h': 12,
+                    'w': 6,
+                },
+                {
+                    'component': 'spatial',
+                    'coordinationScopes': {
+                        'dataset': 'A',
+                    },
+                    'x': 6,
+                    'y': 0,
+                    'h': 6,
+                    'w': 6,
+                },
+                {
+                    'component': 'spatial',
+                    'coordinationScopes': {
+                        'dataset': 'A',
+                    },
+                    'x': 6,
+                    'y': 6,
+                    'h': 6,
+                    'w': 6,
+                }
+            ],
+            "initStrategy": "auto"
+        })
+    
+    def test_config_set_layout_multi_view_magic(self):
+        vc = VitessceConfig()
+        my_dataset = vc.add_dataset(name='My Dataset')
+        v1 = vc.add_view(my_dataset, cm.SPATIAL)
+        v2 = vc.add_view(my_dataset, cm.SPATIAL)
+        v3 = vc.add_view(my_dataset, cm.SPATIAL)
+
+        vc.layout(v1 | (v2 / v3))
+
+        vc_dict = vc.to_dict()
+        vc_json = json.dumps(vc_dict)
+
+        self.assertEqual(vc_dict, {
+            "version": "1.0.0",
+            "name": "",
+            "description": "",
+            "datasets": [
+                {
+                    'uid': 'A',
+                    'name': 'My Dataset',
+                    'files': []
+                }
+            ],
+            'coordinationSpace': {
+                'dataset': {
+                    'A': 'A'
+                },
+            },
+            "layout": [
+                {
+                    'component': 'spatial',
+                    'coordinationScopes': {
+                        'dataset': 'A',
+                    },
+                    'x': 0,
+                    'y': 0,
+                    'h': 12,
+                    'w': 6,
+                },
+                {
+                    'component': 'spatial',
+                    'coordinationScopes': {
+                        'dataset': 'A',
+                    },
+                    'x': 6,
+                    'y': 0,
+                    'h': 6,
+                    'w': 6,
+                },
+                {
+                    'component': 'spatial',
+                    'coordinationScopes': {
+                        'dataset': 'A',
+                    },
+                    'x': 6,
+                    'y': 6,
+                    'h': 6,
+                    'w': 6,
+                }
+            ],
+            "initStrategy": "auto"
+        })
+
     def test_load_config(self):
         vc = VitessceConfig(config={
             "version": "1.0.0",
@@ -296,7 +528,6 @@ class TestConfig(unittest.TestCase):
         vc_dict = vc.to_dict()
         vc_json = json.dumps(vc_dict)
 
-        self.assertEqual(len(vc_dict["datasets"]), 2)
         self.assertEqual(vc_dict, {
             "version": "1.0.0",
             "name": "Test name",

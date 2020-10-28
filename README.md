@@ -57,3 +57,5 @@ python -m unittest
 - [ipywidget example (with React): ipymaterialui](https://github.com/maartenbreddels/ipymaterialui)
 - [ipywidget example (with React): higlass-python](https://github.com/higlass/higlass-python)
 - [ipywidget cookiecutter](https://github.com/jupyter-widgets/widget-cookiecutter)
+- [Sphinx: Getting Started](https://www.sphinx-doc.org/en/master/usage/quickstart.html)
+- [Read the Docs Sphinx Theme](https://github.com/readthedocs/sphinx_rtd_theme)

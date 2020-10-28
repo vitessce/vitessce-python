@@ -132,6 +132,32 @@ class VitessceConfigDataset:
             "files": [ f.to_dict() for f in self.dataset["files"] ] + obj_file_defs,
         }
 
+class VitessceConfigViewHConcat:
+    def __init__(self, views):
+        self.views = views
+    
+    def __or__(self, other):
+        return hconcat(self, other)
+    
+    def __truediv__(self, other):
+        return vconcat(self, other)
+
+def hconcat(*views):
+    return VitessceConfigViewHConcat(views)
+
+class VitessceConfigViewVConcat:
+    def __init__(self, views):
+        self.views = views
+    
+    def __or__(self, other):
+        return hconcat(self, other)
+    
+    def __truediv__(self, other):
+        return vconcat(self, other)
+
+def vconcat(*views):
+    return VitessceConfigViewVConcat(views)
+
 class VitessceConfigView:
     """
     A class to represent a view (i.e. visualization component) in the Vitessce view config layout.
@@ -165,8 +191,21 @@ class VitessceConfigView:
             self.view["coordinationScopes"][c_scope.c_type] = c_scope.c_scope
         return self
     
+    def _set_layout(self, x, y, w, h):
+        self.view["x"] = x
+        self.view["y"] = y
+        self.view["w"] = w
+        self.view["h"] = h
+    
     def to_dict(self):
         return self.view
+
+    def __or__(self, other):
+        return hconcat(self, other)
+    
+    def __truediv__(self, other):
+        return vconcat(self, other)
+
 
 class VitessceConfigCoordinationScope:
     """
@@ -387,6 +426,53 @@ class VitessceConfig:
             self.config["coordinationSpace"][scope.c_type][scope.c_scope] = scope
             result.append(scope)
         return result
+    
+    def layout(self, view_concat):
+        """
+        Create a multi-view layout based on (potentially recursive) view concatenations.
+
+        Parameters
+        ----------
+        views : VitessceConfigViewHConcat or VitessceConfigViewVConcat or VitessceConfigView
+            Views arranged by concatenating vertically or horizontally. Alternatively, a single view can be passed.
+
+        Returns
+        -------
+        self
+            This view config instance.
+        """
+
+        def layout_aux(obj, x_min, x_max, y_min, y_max):
+            w = x_max - x_min
+            h = y_max - y_min
+            if type(obj) == VitessceConfigView:
+                obj._set_layout(x_min, y_min, w, h)
+            elif type(obj) == VitessceConfigViewHConcat:
+                views = obj.views
+                num_views = len(views)
+                for i in range(num_views):
+                    layout_aux(
+                        views[i],
+                        x_min+(w/num_views)*i,
+                        x_min+(w/num_views)*(i+1),
+                        y_min,
+                        y_max
+                    )
+            elif type(obj) == VitessceConfigViewVConcat:
+                views = obj.views
+                num_views = len(views)
+                for i in range(num_views):
+                    layout_aux(
+                        views[i],
+                        x_min,
+                        x_max,
+                        y_min+(h/num_views)*i,
+                        y_min+(h/num_views)*(i+1),
+                    )
+
+        # Recursively set the values (x,y,w,h) for each view.
+        layout_aux(view_concat, 0, 12, 0, 12)
+        return self
         
     def to_dict(self, on_obj=None):
         """
@@ -410,8 +496,16 @@ class VitessceConfig:
                     (c_scope_name, c_scope.c_value) for c_scope_name, c_scope in c_scopes.items() 
                 ])) for c_type, c_scopes in self.config["coordinationSpace"].items()
             ]),
+            # TODO: compute the x,y,w,h values if not explicitly defined
             "layout": [ c.to_dict() for c in self.config["layout"] ]
         }
 
+    @staticmethod
+    def from_object(obj, name=None, description=None):
+        vc = VitessceConfig(name=name, description=description)
+        dataset = vc.add_dataset(name="From object")
+        dataset = dataset.add_object(obj)
+        # TODO: infer views and coordinations
+        return vc
 
 

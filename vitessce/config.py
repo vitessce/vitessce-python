@@ -191,7 +191,7 @@ class VitessceConfigView:
             self.view["coordinationScopes"][c_scope.c_type] = c_scope.c_scope
         return self
     
-    def _set_layout(self, x, y, w, h):
+    def _set_xywh(self, x, y, w, h):
         self.view["x"] = x
         self.view["y"] = y
         self.view["w"] = w
@@ -442,16 +442,16 @@ class VitessceConfig:
             This view config instance.
         """
 
-        def layout_aux(obj, x_min, x_max, y_min, y_max):
+        def _layout(obj, x_min, x_max, y_min, y_max):
             w = x_max - x_min
             h = y_max - y_min
             if type(obj) == VitessceConfigView:
-                obj._set_layout(x_min, y_min, w, h)
+                obj._set_xywh(x_min, y_min, w, h)
             elif type(obj) == VitessceConfigViewHConcat:
                 views = obj.views
                 num_views = len(views)
                 for i in range(num_views):
-                    layout_aux(
+                    _layout(
                         views[i],
                         x_min+(w/num_views)*i,
                         x_min+(w/num_views)*(i+1),
@@ -462,7 +462,7 @@ class VitessceConfig:
                 views = obj.views
                 num_views = len(views)
                 for i in range(num_views):
-                    layout_aux(
+                    _layout(
                         views[i],
                         x_min,
                         x_max,
@@ -471,7 +471,11 @@ class VitessceConfig:
                     )
 
         # Recursively set the values (x,y,w,h) for each view.
-        layout_aux(view_concat, 0, 12, 0, 12)
+        _layout(view_concat, 0, 12, 0, 12)
+
+        # TODO: decide how to handle views that were omitted from the `view_concat` parameter
+        # TODO: decide how to handle .add_view() being called after .layout() has been called
+
         return self
         
     def to_dict(self, on_obj=None):

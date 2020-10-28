@@ -497,7 +497,7 @@ class TestConfig(unittest.TestCase):
         })
 
     def test_load_config(self):
-        vc = VitessceConfig(config={
+        vc = VitessceConfig.from_dict({
             "version": "1.0.0",
             "name": "Test name",
             "description": "Test description",

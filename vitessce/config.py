@@ -641,8 +641,8 @@ class VitessceConfig:
                 )
                     
         # TODO: Add each coordination scope from the incoming config.
-
         # TODO: Add the components (layout) from the incoming config.
+        return vc
 
 
     @staticmethod

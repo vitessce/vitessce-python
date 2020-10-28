@@ -5,6 +5,7 @@ build/
 docs-dist/
 *.py[cod]
 node_modules/
+docs/
 
 # Compiled javascript
 vitessce/static/

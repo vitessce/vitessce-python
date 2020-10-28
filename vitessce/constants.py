@@ -46,17 +46,23 @@ class CoordinationType(DocEnum):
     GENOMIC_TARGET_Y = "genomicTargetY"
 
 class Component(DocEnum):
-    SCATTERPLOT = "scatterplot"
-    SPATIAL = "spatial"
-    DESCRIPTION = "description"
-    STATUS = "status"
-    CELL_SETS = "cellSets"
-    HEATMAP = "heatmap"
-    LAYER_CONTROLLER = "layerController"
-    HIGLASS = "higlass"
-    CELL_SET_SIZES = "cellSetSizes"
+    """
+    An enum type representing a view type in the visualization layout.
+    """
+    SCATTERPLOT = "scatterplot", "The scatterplot component can be used for visualization of 2-dimensional embeddings."
+    SPATIAL = "spatial", "The spatial component can be used for visualization of cells, molecules, or images in spatial coordinates."
+    DESCRIPTION = "description", "The description component can display short informational text about a dataset."
+    STATUS = "status", "The status component can display contextual information such as hover states or error messages."
+    CELL_SETS = "cellSets", "The cell sets component can be used to view and manipulate hierarchical (or flat) sets of cells, including sets representing cell type clusters."
+    HEATMAP = "heatmap", "The heatmap component can be used to view a cell by gene expression matrix."
+    LAYER_CONTROLLER = "layerController", "The layer controller can be used to manipulate channel settings of the images rendered by the spatial component."
+    HIGLASS = "higlass", "The higlass component can be used to visualize genome browser tracks and genome-wide interaction heatmaps."
+    CELL_SET_SIZES = "cellSetSizes", "The cell set sizes component can display the quantities of cells in selected cell sets."
 
 class DataType(DocEnum):
+    """
+    An enum type representing the type of data contained in a file.
+    """
     CELLS = "cells"
     CELL_SETS = "cell-sets"
     EXPRESSION_MATRIX = "expression-matrix"
@@ -65,6 +71,9 @@ class DataType(DocEnum):
     RASTER = "raster"
 
 class FileType(DocEnum):
+    """
+    An enum type representing the file format or schema to which a file conforms.
+    """
     EXPRESSION_MATRIX_ZARR = "expression-matrix.zarr"
     CLUSTERS_JSON = "clusters.json"
     GENES_JSON = "genes.json"

@@ -138,9 +138,9 @@ class VitessceConfigDataset:
 
     def to_dict(self, on_obj):
         obj_file_defs = []
-        for obj in self.objs:
+        for obj_i, obj in enumerate(self.objs):
             if on_obj is not None:
-                obj_file_defs += on_obj(obj)
+                obj_file_defs += on_obj(obj, obj_i, self.dataset["uid"])
                 
         return {
             **self.dataset,

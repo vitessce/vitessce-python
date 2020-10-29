@@ -1,6 +1,7 @@
 # Widget dependencies
 import ipywidgets as widgets
 from traitlets import Unicode, Dict, Int
+import time
 
 # Server dependencies
 import asyncio
@@ -8,11 +9,21 @@ from hypercorn.config import Config
 from hypercorn.asyncio import serve
 
 from starlette.applications import Starlette
+from threading import Thread
 
 # Config creation dependencies
-from .data import create_config_and_routes
+from .routes import create_obj_routes, create_exception_handlers, create_dummy_routes
+from .config import VitessceConfig
 
 # See js/lib/widget.js for the frontend counterpart to this file.
+
+def f(app):
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    loop.run_until_complete(serve(app, Config()))
+    loop.close()
+    
 
 @widgets.register
 class VitessceWidget(widgets.DOMWidget):
@@ -44,8 +55,8 @@ class VitessceWidget(widgets.DOMWidget):
     config = Dict({}).tag(sync=True)
     height = Int(600).tag(sync=True)
     theme = Unicode('dark').tag(sync=True)
-    
-    def __init__(self, **kwargs):
+
+    def __init__(self, config, height=600, theme='dark'):
         """
         Construct a new Vitessce widget.
 
@@ -63,32 +74,27 @@ class VitessceWidget(widgets.DOMWidget):
             vw = VitessceWidget(vc)
             vw
         """
+
+        assert type(config) == VitessceConfig
         
         routes = []
-        if 'config' not in kwargs and 'data' in kwargs:
-            kwargs['config'], routes = create_config_and_routes(kwargs['data'])
+        def on_obj(*obj_args):
+            obj_file_defs, obj_routes = create_obj_routes(*obj_args)
+            for obj_route in obj_routes:
+                routes.append(obj_route)
+            return obj_file_defs
+        config_dict = config.to_dict(on_obj=on_obj)
 
-        super(VitessceWidget, self).__init__(**kwargs)
+        super(VitessceWidget, self).__init__(config=config_dict, height=height, theme=theme)
         
         if len(routes) > 0:
+            #routes = create_dummy_routes() # DUMMY ROUTES
             app = Starlette(debug=True, routes=routes)
+
+            t = Thread(target=f, args=(app,))
+            t.start()
+            time.sleep(1)
             
-            # We cannot use asyncio.run() directly
-            # since Jupyter runs in its own asyncio loop.
-            # Reference: https://stackoverflow.com/a/61331974
-            try:
-                loop = asyncio.get_running_loop()
-            except RuntimeError:
-                loop = None
-            
-            if loop and loop.is_running():
-                # As expected, there is already an event loop running:
-                # the Jupyter event loop.
-                task = loop.create_task(serve(app, Config()))
-                task.add_done_callback(lambda t: print("Task done"))
-            else:
-                print('Error: did not find the expected notebook asyncio loop')
-    
     def _get_coordination_value(self, coordination_type, coordination_scope):
         obj = self.config['coordinationSpace'][coordination_type]
         obj_scopes = list(obj.keys())

@@ -112,7 +112,7 @@ def create_obj_routes(obj, obj_i, dataset_uid):
 				},
 				{
 					"type": "cell-sets",
-					"fileType": "cells-sets.json",
+					"fileType": "cell-sets.json",
 					"url": f"http://localhost:8000/{dataset_uid}/{obj_i}/cell-sets"
 				}
 			]

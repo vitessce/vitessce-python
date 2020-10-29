@@ -17,11 +17,14 @@ from .config import VitessceConfig
 
 # See js/lib/widget.js for the frontend counterpart to this file.
 
-def f(app):
+def run_server_loop(app, port):
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
 
-    loop.run_until_complete(serve(app, Config()))
+    config = Config()
+    config.bind = [f"localhost:{port}"]  # As an example configuration setting
+
+    loop.run_until_complete(serve(app, config))
     loop.close()
     
 
@@ -56,14 +59,15 @@ class VitessceWidget(widgets.DOMWidget):
     height = Int(600).tag(sync=True)
     theme = Unicode('dark').tag(sync=True)
 
-    def __init__(self, config, height=600, theme='dark'):
+    def __init__(self, config, height=600, theme='dark', port=8000):
         """
         Construct a new Vitessce widget.
 
         :param config: A view config instance.
         :type config: VitessceConfig
-        :param str theme: The theme name, either "light" or "dark". Optional. By default, "dark".
-        :param int height: The height of the widget, in pixels. Optional. By default, 600.
+        :param str theme: The theme name, either "light" or "dark". By default, "dark".
+        :param int height: The height of the widget, in pixels. By default, 600.
+        :param int port: The port to use when serving data objects on localhost. By default, 8000.
 
         .. code-block:: python
             :emphasize-lines: 4
@@ -88,10 +92,9 @@ class VitessceWidget(widgets.DOMWidget):
         super(VitessceWidget, self).__init__(config=config_dict, height=height, theme=theme)
         
         if len(routes) > 0:
-            #routes = create_dummy_routes() # DUMMY ROUTES
             app = Starlette(debug=True, routes=routes)
-
-            t = Thread(target=f, args=(app,))
+            
+            t = Thread(target=run_server_loop, args=(app, port))
             t.start()
             time.sleep(1)
             

@@ -258,7 +258,7 @@ class TestConfig(unittest.TestCase):
             def __init__(self, name):
                 self.name = name
         
-        def serve_obj(obj):
+        def serve_obj(obj, obj_i, dataset_uid):
             if type(obj) == MockAnnData:
                 if obj.name == "Experiment A":
                     return [

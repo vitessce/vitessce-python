@@ -59,7 +59,9 @@ class VitessceWidget(widgets.DOMWidget):
     height = Int(600).tag(sync=True)
     theme = Unicode('dark').tag(sync=True)
 
-    def __init__(self, config, height=600, theme='dark', port=8000):
+    next_port = 8000
+
+    def __init__(self, config, height=600, theme='dark', port=None):
         """
         Construct a new Vitessce widget.
 
@@ -79,11 +81,17 @@ class VitessceWidget(widgets.DOMWidget):
             vw
         """
 
+        if port is None:
+            use_port = VitessceWidget.next_port
+            VitessceWidget.next_port += 1
+        else:
+            use_port = port
+
         assert type(config) == VitessceConfig
         
         routes = []
         def on_obj(*obj_args):
-            obj_file_defs, obj_routes = create_obj_routes(*obj_args)
+            obj_file_defs, obj_routes = create_obj_routes(*obj_args, use_port)
             for obj_route in obj_routes:
                 routes.append(obj_route)
             return obj_file_defs
@@ -94,7 +102,7 @@ class VitessceWidget(widgets.DOMWidget):
         if len(routes) > 0:
             app = Starlette(debug=True, routes=routes)
             
-            t = Thread(target=run_server_loop, args=(app, port))
+            t = Thread(target=run_server_loop, args=(app, use_port))
             t.start()
             time.sleep(1)
             

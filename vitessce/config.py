@@ -128,7 +128,7 @@ class VitessceConfigDataset:
         Add a data object to this dataset instance.
 
         :param obj: A data object that can be served locally or uploaded to a remote storage provider.
-        :type obj: anndata.AnnData or loom.Loom or zarr.Store
+        :type obj: anndata.AnnData or loompy.LoomConnection or zarr.Store
 
         :returns: Self, to allow function chaining.
         :rtype: VitessceConfigDataset
@@ -664,7 +664,7 @@ class VitessceConfig:
         Particularly helpful when using the ``VitessceWidget`` Jupyter widget.
 
         :param obj: A single-cell dataset in the format of a commonly-used single-cell or imaging data analysis package.
-        :type obj: anndata.AnnData or loompy.Loom or zarr.Store
+        :type obj: anndata.AnnData or loompy.LoomConnection or zarr.Store
         
         :returns: The config instance.
         :rtype: VitessceConfig

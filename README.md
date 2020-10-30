@@ -14,6 +14,7 @@ To install use pip:
 
 To install for jupyterlab
 
+    $ jupyter labextension install @jupyter-widgets/jupyterlab-manager
     $ jupyter labextension install vitessce
 
 
@@ -33,6 +34,7 @@ For a development installation (requires npm),
     $ jupyter nbextension install --py --symlink --sys-prefix vitessce
     $ jupyter nbextension enable --py --sys-prefix vitessce
     $ cd js
+    $ jupyter labextension install @jupyter-widgets/jupyterlab-manager
     $ jupyter labextension install
 
 When actively developing your extension, build Jupyter Lab with the command:
@@ -43,17 +45,20 @@ This takes a minute or so to get started, but then automatically rebuilds Jupyte
 
 Note on first `jupyter lab --watch`, you may need to touch a file to get Jupyter Lab to open.
 
+
 ## Testing
 
 ```sh
 python -m unittest
 ```
 
+
 ## Documentation
 
 ```sh
 make html
 ```
+
 
 ## Resources
 

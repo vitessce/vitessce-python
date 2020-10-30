@@ -75,7 +75,7 @@ def create_response_json(data_json):
 	return response_func
 
 
-def create_obj_routes(obj, obj_i, dataset_uid):
+def create_obj_routes(obj, obj_i, dataset_uid, port):
 	"""
 	For a particular data object, simultaneously set up:
 	
@@ -83,7 +83,7 @@ def create_obj_routes(obj, obj_i, dataset_uid):
 	* the corresponding view config dataset file definitions
 
 	:param obj: An object representing a single-cell data analysis result or microscopy image.
-	:type obj: anndata.AnnData or loompy.Loom or zarr.Store
+	:type obj: anndata.AnnData or loompy.LoomConnection or zarr.Store
 	
 	:returns: A list of view config file definitions and a list of server routes.
 	:rtype: tuple[list[dict], list[starlette.routing.Route]]
@@ -92,7 +92,6 @@ def create_obj_routes(obj, obj_i, dataset_uid):
 	obj_routes = []
 
 	dtype = type(obj)
-	print(f"Creating server route for object with type {dtype}")
 	
 	# Check if dtype is AnnData
 	try:
@@ -108,12 +107,12 @@ def create_obj_routes(obj, obj_i, dataset_uid):
 				{
 					"type": "cells",
 					"fileType": "cells.json",
-					"url": f"http://localhost:8000/{dataset_uid}/{obj_i}/cells"
+					"url": f"http://localhost:{port}/{dataset_uid}/{obj_i}/cells"
 				},
 				{
 					"type": "cell-sets",
 					"fileType": "cell-sets.json",
-					"url": f"http://localhost:8000/{dataset_uid}/{obj_i}/cell-sets"
+					"url": f"http://localhost:{port}/{dataset_uid}/{obj_i}/cell-sets"
 				}
 			]
 	except ImportError:

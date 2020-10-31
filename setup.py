@@ -146,6 +146,7 @@ setup_args = dict(
         'ipywidgets>=7.0.0',
         'hypercorn>=0.10.2',
         'ujson>=4.0.1',
+        'aiofiles>=0.6.0',
         'starlette>=0.13.8',
     ],
     packages=find_packages(),

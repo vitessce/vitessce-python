@@ -1,3 +1,9 @@
+import inspect
+import os
+import sys
+
+import vitessce
+
 import sphinx_rtd_theme
 
 # Configuration file for the Sphinx documentation builder.
@@ -31,6 +37,7 @@ author = 'Gehlenborg Lab'
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx.ext.linkcode',
     'sphinx_rtd_theme'
 ]
 
@@ -56,3 +63,24 @@ html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 
 autoclass_content = 'both'
+
+def linkcode_resolve(domain, info):
+    def find_source():
+        # try to find the file and line number, based on code from numpy:
+        # https://github.com/numpy/numpy/blob/master/doc/source/conf.py#L286
+        obj = sys.modules[info['module']]
+        for part in info['fullname'].split('.'):
+            obj = getattr(obj, part)
+        fn = inspect.getsourcefile(obj)
+        fn = os.path.relpath(fn, start=os.path.dirname(vitessce.__file__))
+        source, lineno = inspect.getsourcelines(obj)
+        return fn, lineno, lineno + len(source) - 1
+
+    if domain != 'py' or not info['module']:
+        return None
+    try:
+        filename = 'vitessce/%s#L%d-L%d' % find_source()
+    except Exception as e:
+        print(str(e))
+        filename = info['module'].replace('.', '/') + '.py'
+    return "https://github.com/keller-mark/vitessce-jupyter/blob/master/%s" % filename

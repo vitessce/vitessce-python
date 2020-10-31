@@ -1,5 +1,5 @@
-Dataset Object Wrappers
-##########
+Data Object Wrappers
+####################
 
 Dataset wrapper classes
 provide functionality for adding in-memory or local data objects
@@ -9,10 +9,11 @@ We provide default wrapper class implementations for data formats
 used by popular single-cell and imaging packages.
 
 To write your own custom wrapper class, create a subclass
-of the ``AbstractWrapper`` class.
+of the ``AbstractWrapper`` class, implementing the
+getter functions for the data types that can be derived from your object.
 
 vitessce.wrappers
-***************
+*****************
 
 .. automodule:: vitessce.wrappers
  :members:

@@ -24,6 +24,7 @@ script:
   - cd test
   - bash download.sh
   - python -m unittest
+  - cd -
 before_deploy:
   - make html
   - touch docs-dist/html/.nojekyll

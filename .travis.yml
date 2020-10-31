@@ -21,6 +21,8 @@ install:
   # Install the local vitessce package
   - pip install -e .
 script:
+  - cd test
+  - bash download.sh
   - python -m unittest
 before_deploy:
   - pip install sphinx

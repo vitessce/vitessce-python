@@ -9,6 +9,7 @@ dependencies:
  - anndata>=0.7.4
  - scanpy>=1.6.0
  - jupyterlab>=1.0.10
+ - zarr>=2.5.0
  - pip
  - pip:
    - loompy>=3.0.6

@@ -78,8 +78,6 @@ class FileType(DocEnum):
     An enum type representing the file format or schema to which a file conforms.
     """
     EXPRESSION_MATRIX_ZARR = "expression-matrix.zarr", "The Zarr-based expression matrix file type."
-    CLUSTERS_JSON = "clusters.json", "The JSON-based expression matrix file type. Deprecated."
-    GENES_JSON = "genes.json", "The JSON-based expression matrix file type. Deprecated."
     CELLS_JSON = "cells.json", "The JSON-based cells file type."
     MOLECULES_JSON = "molecules.json", "The JSON-based molecules file type."
     NEIGHBORHOODS_JSON = "neighborhoods.json", "The JSON-based neighborhoods file type."

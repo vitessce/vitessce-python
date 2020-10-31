@@ -12,7 +12,7 @@ from starlette.applications import Starlette
 from threading import Thread
 
 # Config creation dependencies
-from .routes import create_obj_routes, create_exception_handlers, create_dummy_routes
+from .routes import create_obj_routes
 from .config import VitessceConfig
 
 # See js/lib/widget.js for the frontend counterpart to this file.
@@ -90,8 +90,8 @@ class VitessceWidget(widgets.DOMWidget):
         assert type(config) == VitessceConfig
         
         routes = []
-        def on_obj(*obj_args):
-            obj_file_defs, obj_routes = create_obj_routes(*obj_args, use_port)
+        def on_obj(obj, dataset_uid, obj_i):
+            obj_file_defs, obj_routes = create_obj_routes(obj, use_port, dataset_uid, obj_i)
             for obj_route in obj_routes:
                 routes.append(obj_route)
             return obj_file_defs

@@ -140,7 +140,7 @@ class VitessceConfigDataset:
         obj_file_defs = []
         for obj_i, obj in enumerate(self.objs):
             if on_obj is not None:
-                obj_file_defs += on_obj(obj, obj_i, self.dataset["uid"])
+                obj_file_defs += on_obj(obj, self.dataset["uid"], obj_i)
                 
         return {
             **self.dataset,

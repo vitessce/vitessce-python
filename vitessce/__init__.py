@@ -3,6 +3,13 @@ from ._version import version_info, __version__
 from .widget import VitessceWidget
 from .config import VitessceConfig, hconcat, vconcat
 from .constants import CoordinationType, Component, DataType, FileType
+from .wrappers import (
+    AbstractWrapper,
+    OmeTiffWrapper,
+    ZarrDirectoryStoreWrapper,
+    AnnDataWrapper,
+    LoomWrapper,
+)
 
 def _jupyter_nbextension_paths():
     """Called by Jupyter Notebook Server to detect if it is a valid nbextension and

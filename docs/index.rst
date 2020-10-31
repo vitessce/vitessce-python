@@ -12,6 +12,7 @@ Welcome to vitessce's documentation!
    getting_started
    config_api
    widget_api
+   wrappers
 
 
 

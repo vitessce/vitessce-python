@@ -15,9 +15,9 @@ install:
   # Useful for debugging any issues with conda
   - conda info -a
   # Create conda environment
-  - conda create --name vitessce-jupyter python=3.7
+  - conda env create -f environment.yml
   # Activate the conda environment
-  - source activate vitessce-jupyter
+  - source activate vitessce-jupyter-dev
   # Install the local vitessce package
   - pip install -e .
 script:
@@ -25,8 +25,6 @@ script:
   - bash download.sh
   - python -m unittest
 before_deploy:
-  - pip install sphinx
-  - pip install sphinx-rtd-theme
   - make html
   - touch docs-dist/html/.nojekyll
 deploy:

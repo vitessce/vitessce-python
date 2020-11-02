@@ -9,6 +9,8 @@ from hypercorn.config import Config
 from hypercorn.asyncio import serve
 
 from starlette.applications import Starlette
+from starlette.middleware import Middleware
+from starlette.middleware.cors import CORSMiddleware
 from threading import Thread
 
 # Config creation dependencies
@@ -100,7 +102,10 @@ class VitessceWidget(widgets.DOMWidget):
         super(VitessceWidget, self).__init__(config=config_dict, height=height, theme=theme)
         
         if len(routes) > 0:
-            app = Starlette(debug=True, routes=routes)
+            middleware = [
+                Middleware(CORSMiddleware, allow_origins=['*'])
+            ]
+            app = Starlette(debug=True, routes=routes, middleware=middleware)
             
             t = Thread(target=run_server_loop, args=(app, use_port))
             t.start()

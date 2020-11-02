@@ -6,8 +6,6 @@ from starlette.staticfiles import StaticFiles
 
 from .constants import DataType as dt, FileType as ft
 
-HEADERS = {'Access-Control-Allow-Origin': '*'}
-
 class AbstractWrapper:
     """
     An abstract class that can be extended when
@@ -106,7 +104,7 @@ class AbstractWrapper:
         :rtype: function
         """
         async def response_func(req):
-            return UJSONResponse(data_json, headers=HEADERS)
+            return UJSONResponse(data_json)
         return response_func
 
     def _get_data(self, data_type, port, dataset_uid, obj_i):
@@ -205,10 +203,31 @@ class ZarrDirectoryStoreWrapper(AbstractWrapper):
                     "type": "zarr",
                     "url": img_url,
                     "metadata": {
-                        "dimensions": [],
+                        "dimensions": [
+                            {
+                                "field": "channel",
+                                "type": "nominal",
+                                "values": [
+                                    "DAPI - Hoechst (nuclei)",
+                                    "FITC - Laminin (basement membrane)",
+                                    "Cy3 - Synaptopodin (glomerular)",
+                                    "Cy5 - THP (thick limb)"
+                                ]
+                            },
+                            {
+                                "field": "y",
+                                "type": "quantitative",
+                                "values": None
+                            },
+                            {
+                                "field": "x",
+                                "type": "quantitative",
+                                "values": None
+                            }
+                        ],
                         "isPyramid": True,
                         "transform": {
-                            "scale": 10,
+                            "scale": 1,
                             "translate": {
                                 "x": 0,
                                 "y": 0,

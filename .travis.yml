@@ -33,3 +33,6 @@ deploy:
     skip-cleanup: true
     github-token: $github_token
     local-dir: docs-dist/html
+  - provider: pypi
+    username: "__token__"
+    password: $pypi_token

@@ -21,7 +21,7 @@ install:
   # Install the local vitessce package
   - pip install -e .
 script:
-  - cd test
+  - cd tests
   - bash download.sh
   - python -m unittest
   - cd -

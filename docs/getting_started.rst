@@ -38,7 +38,7 @@ The simplest way to instantiate a Vitessce widget is to create a view config bas
 
   from vitessce import VitessceConfig, VitessceWidget
 
-  vc = VitessceConfig.from_object(my_scanpy_object)
+  vc = VitessceConfig.from_object(my_adata)
   vw = VitessceWidget(vc)
   vw
 

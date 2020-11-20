@@ -8,6 +8,10 @@ from .constants import (
     FileType as ft
 )
 
+from .wrappers import (
+    AnnDataWrapper,
+)
+
 def _get_next_scope(prev_scopes):
     chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
     next_char_indices = [0]
@@ -658,7 +662,7 @@ class VitessceConfig:
 
 
     @staticmethod
-    def from_object(obj, name=None, description=None):
+    def from_object(obj, name=None, description=None, **wrapper_kwargs):
         """
         Helper function to automatically construct a Vitessce view config object from a single-cell dataset object.
         Particularly helpful when using the ``VitessceWidget`` Jupyter widget.
@@ -677,9 +681,23 @@ class VitessceConfig:
             vc = VitessceConfig.from_object(my_scanpy_object)
         """
         vc = VitessceConfig(name=name, description=description)
-        dataset = vc.add_dataset(name="From object")
-        dataset = dataset.add_object(obj)
-        # TODO: infer views and coordinations
+        dataset = vc.add_dataset()
+        try:
+            import anndata
+            if type(obj) == anndata.AnnData:
+                dataset.add_object(AnnDataWrapper(obj, **wrapper_kwargs))
+        
+                scatterplot = vc.add_view(dataset, cm.SCATTERPLOT, mapping="X_umap")
+                cell_sets = vc.add_view(dataset, cm.CELL_SETS)
+                genes = vc.add_view(dataset, cm.GENES)
+                heatmap = vc.add_view(dataset, cm.HEATMAP)
+                vc.layout((scatterplot | (cell_sets / genes)) / heatmap)
+        
+        except ImportError:
+            pass
+
+        # TODO: infer views and coordinations for other object types
+
         return vc
 
 

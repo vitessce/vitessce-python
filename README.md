@@ -47,6 +47,7 @@ Note on first `jupyter lab --watch`, you may need to touch a file to get Jupyter
 ## Testing
 
 ```sh
+cd tests
 python -m unittest
 ```
 

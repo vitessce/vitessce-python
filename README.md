@@ -17,6 +17,7 @@ To install for jupyterlab
     $ jupyter labextension install @jupyter-widgets/jupyterlab-manager
     $ jupyter labextension install vitessce-jupyter
 
+In Jupyter Lab, extensions may need to be enabled in the sidebar.
 
 ## Getting started
 

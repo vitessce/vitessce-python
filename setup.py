@@ -134,6 +134,9 @@ setup_args = dict(
     description='Jupyter widget facilitating interactive visualization of spatial single-cell data with Vitessce',
     long_description=LONG_DESCRIPTION,
     include_package_data=True,
+    exclude_package_data={
+        "": ["js/node_modules"]
+    },
     data_files=[
         ('share/jupyter/nbextensions/vitessce-jupyter', [
             'vitessce/static/extension.js',
@@ -159,7 +162,7 @@ setup_args = dict(
     },
     author='Mark Keller',
     author_email='',
-    url='https://github.com/keller-mark/vitessce-jupyter',
+    url='https://github.com/vitessce/vitessce-jupyter',
     keywords=[
         'ipython',
         'jupyter',

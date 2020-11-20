@@ -32,3 +32,8 @@ deploy:
   username: "__token__"
   password:
     secure: Xing+GHVFzp9TnjLYUpb5rzl/0dSH4ZVFIUQXWVZEzeylOkh0z2/B6wKJ2uHH9CxXY+j3tP2oUYWIIR0LBb2CW8eWJCi3/enI+VmQKZ7i+5g35/VOb8iBvQZi5tW8iOPSj64wcSF5I334JHMfaiFTpgLKsz4vHttM9RPYtxTwgG18OIqau0R1ErXhm/CLKqhmAE4wyD06MU20vqxi3QC7OJ8FCYAfcA7XzI5jhSmz+khUqcIIJ/gI3TNPDNYxvpgjmOfPIette38jOZDwHO8IMf8J1kCF1jcihIlgJckalYMtA+31e1JY5sulG+ISGtuOHk4zA4KppERX0GBjoxXMXv4CQQyj7eMPFUtucu1FFoJHn0mjX9EUaTLidLbY9qKdGTobo7/csfvWqEVcwfGknojTCBF/FgFaJrYSbM1F3kbGqECW3PivTnhdfE9Jyu0L8X59bFImmmnxtL0lr2fIDX1e6VYmovh9Y1xT/28ZBvdzOD3LS8hBSlEThKsgwtnGrIR1cXSpu6S6mG5IIbQdG+TsvA9TRFFOTsidn0rjO2cTY4kwiQUO32LPx5QJwi11zx49zVOArNJygtu/nTrIS0UrXtMsueDPQr/rNDGd/2v8UrsdEvCJRl+mAQvy6tvO6EYH89A6cP7bFQZP2Dktap+PIrKHfO46JIYvH1FzYA=
+- provider: npm
+  skip-cleanup: true
+  email: $NPM_EMAIL
+  api_key: $NPM_TOKEN
+  src: js

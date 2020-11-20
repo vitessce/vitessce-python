@@ -6,7 +6,7 @@
   "main": "dist/index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/keller-mark/vitessce-jupyter.git"
+    "url": "https://github.com/vitessce/vitessce-jupyter.git"
   },
   "keywords": [
     "jupyter",

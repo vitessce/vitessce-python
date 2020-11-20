@@ -15,7 +15,7 @@ To install use pip:
 To install for jupyterlab
 
     $ jupyter labextension install @jupyter-widgets/jupyterlab-manager
-    $ jupyter labextension install vitessce
+    $ jupyter labextension install vitessce-jupyter
 
 
 ## Getting started
@@ -28,7 +28,7 @@ These contain demos of different use cases and integrations with single-cell dat
 
 For a development installation (requires npm),
 
-    $ git clone https://github.com/keller-mark/vitessce-jupyter.git
+    $ git clone https://github.com/vitessce/vitessce-jupyter.git
     $ cd vitessce-jupyter
     $ pip install -e .
     $ jupyter nbextension install --py --symlink --sys-prefix vitessce

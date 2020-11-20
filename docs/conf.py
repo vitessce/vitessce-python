@@ -83,4 +83,4 @@ def linkcode_resolve(domain, info):
     except Exception as e:
         print(str(e))
         filename = info['module'].replace('.', '/') + '.py'
-    return "https://github.com/keller-mark/vitessce-jupyter/blob/master/%s" % filename
+    return "https://github.com/vitessce/vitessce-jupyter/blob/master/%s" % filename

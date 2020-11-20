@@ -36,4 +36,4 @@ deploy:
   skip-cleanup: true
   email: $NPM_EMAIL
   api_key: $NPM_TOKEN
-  src: js
+  src: ./js

@@ -19,15 +19,14 @@ and enable the Jupyter extension:
     :emphasize-lines: 1
 
     pip install vitessce
-    pip install jupyter
     jupyter nbextension enable --py --sys-prefix vitessce
 
-If you use `JupyterLab <https://jupyterlab.readthedocs.io/en/stable/>`_ you also have to run
+To use the widget in `JupyterLab <https://jupyterlab.readthedocs.io/en/stable/>`_ also run the following:
 
 .. code-block:: bash
 
     jupyter labextension install @jupyter-widgets/jupyterlab-manager
-    jupyter labextension install vitessce
+    jupyter labextension install vitessce-jupyter
 
 
 Simplest Widget Use Case
@@ -44,3 +43,21 @@ The simplest way to instantiate a Vitessce widget is to create a view config bas
   vw
 
 To customize the view config passed into the widget (or to define a view config manually), please see the documentation for the ``VitessceConfig`` API.
+
+Full AnnData Example
+--------------------
+
+Download an AnnData ``.h5ad`` file:
+
+.. code-block:: bash
+
+  mkdir -p data
+  curl -L -o data/habib17.processed.h5ad https://covid19.cog.sanger.ac.uk/habib17.processed.h5ad
+
+Then open Jupyter Lab:
+
+.. code-block:: bash
+  
+  jupyter lab
+
+And copy the Python code from the `Embedding Notebook Demo <https://github.com/vitessce/vitessce-jupyter/blob/master/notebooks/widget-embedding.ipynb>`_.

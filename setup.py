@@ -144,7 +144,7 @@ setup_args = dict(
     ],
     install_requires=[
         'ipywidgets>=7.0.0',
-        'hypercorn>=0.10.2',
+        'hypercorn>=0.11.0',
         'ujson>=4.0.1',
         'aiofiles>=0.6.0',
         'starlette==0.14.0',

@@ -9,3 +9,9 @@ Package Install
 ```bash
 npm install --save vitessce-jupyter
 ```
+
+To deploy as a package to NPM (required for use with Jupyter Lab):
+
+```sh
+npm publish
+```

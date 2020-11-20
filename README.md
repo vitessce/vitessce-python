@@ -2,22 +2,19 @@
 
 Jupyter widget facilitating interactive visualization of spatial single-cell data with Vitessce
 
-🚧 work in progress 👷
-
 
 ## Installation
 
-To install use pip:
+To install with pip:
 
     $ pip install vitessce
     $ jupyter nbextension enable --py --sys-prefix vitessce
 
-To install for jupyterlab
+To enable the widget for Jupyter Lab run the following additional lines:
 
     $ jupyter labextension install @jupyter-widgets/jupyterlab-manager
     $ jupyter labextension install vitessce-jupyter
 
-In Jupyter Lab, extensions may need to be enabled in the sidebar.
 
 ## Getting started
 

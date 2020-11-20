@@ -24,9 +24,11 @@ def run_server_loop(app, port):
     asyncio.set_event_loop(loop)
 
     config = Config()
-    config.bind = [f"localhost:{port}"]  # As an example configuration setting
+    config.bind = [f"localhost:{port}"]
 
-    loop.run_until_complete(serve(app, config))
+    # As of Hypercorn 0.11.0, need to explicitly set signal handlers to a no-op
+    # (otherwise it will try to set signal handlers assuming it is on the main thread which throws an error)
+    loop.run_until_complete(serve(app, config, shutdown_trigger=lambda: asyncio.Future()))
     loop.close()
     
 

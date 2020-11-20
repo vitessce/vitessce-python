@@ -1,4 +1,5 @@
 import os
+import tempfile
 
 from starlette.responses import JSONResponse, UJSONResponse
 from starlette.routing import Route, Mount
@@ -271,8 +272,11 @@ class ZarrDirectoryStoreWrapper(AbstractWrapper):
 
 
 class AnnDataWrapper(AbstractWrapper):
-    def __init__(self, adata):
+    def __init__(self, adata, use_highly_variable_genes=True):
         self.adata = adata
+        self.tempdir = tempfile.mkdtemp()
+
+        self.use_highly_variable_genes = use_highly_variable_genes
 
     def _create_cells_json(self):
         adata = self.adata
@@ -324,6 +328,60 @@ class AnnDataWrapper(AbstractWrapper):
             })
 
         return cell_sets_json
+    
+    def _create_exp_matrix_zarr(self):
+        
+        try:
+            import zarr
+            from numcodecs import Zlib
+            from scipy.sparse import csr_matrix
+
+            adata = self.adata
+            gexp_arr = adata.X
+
+            cell_list = adata.obs.index.values.tolist()
+            gene_list = adata.var.index.values.tolist()
+
+            if type(gexp_arr) == csr_matrix:
+                # Convert from SciPy sparse format to NumPy dense format
+                gexp_arr = gexp_arr.toarray()
+            
+            if self.use_highly_variable_genes and 'highly_variable' in adata.var.columns.values.tolist():
+                # Restrict the gene expression matrix to only the genes marked as highly variable
+                gene_list = adata.var.index[adata.var['highly_variable']].values.tolist()
+                gexp_arr = gexp_arr[:,adata.var['highly_variable'].values]
+
+            
+            # Re-scale the gene expression values between 0 and 255
+            gexp_arr_min = gexp_arr.min()
+            gexp_arr_max = gexp_arr.max()
+            gexp_arr_range = gexp_arr_max - gexp_arr_min
+            gexp_arr_ratio = 255 / gexp_arr_range
+
+            gexp_norm_arr = (gexp_arr - gexp_arr_min) * gexp_arr_ratio
+
+            zarr_tempdir = self.tempdir
+            zarr_filepath = os.path.join(zarr_tempdir, 'matrix.zarr')
+        
+            z = zarr.open(
+                zarr_filepath,
+                mode='w',
+                shape=gexp_norm_arr.shape,
+                dtype='uint8',
+                compressor=Zlib(level=1)
+            )
+
+            z[:] = gexp_norm_arr
+            # observations: cells (rows)
+            z.attrs["rows"] = cell_list
+            # variables: genes (columns)
+            z.attrs["cols"] = gene_list
+        except ImportError:
+            zarr_tempdir = None
+            zarr_filepath = None
+        
+        return zarr_tempdir, zarr_filepath
+
 
     def get_cells(self, port, dataset_uid, obj_i):
         obj_routes = []
@@ -372,6 +430,29 @@ class AnnDataWrapper(AbstractWrapper):
             pass
 
         return obj_file_defs, obj_routes
+    
+    def get_expression_matrix(self, port, dataset_uid, obj_i):
+        obj_routes = []
+        obj_file_defs = []
+
+        zarr_tempdir, zarr_filepath = self._create_exp_matrix_zarr()
+
+        if zarr_tempdir is not None:
+            obj_routes = [
+                Mount(self._get_route(dataset_uid, obj_i, "expression"),
+                    app=StaticFiles(directory=os.path.dirname(zarr_filepath), html=False, check_dir=False)),
+            ]
+
+            obj_file_defs = [
+                {
+                    "type": dt.EXPRESSION_MATRIX.value,
+                    "fileType": ft.EXPRESSION_MATRIX_ZARR.value,
+                    "url": self._get_url(port, dataset_uid, obj_i, "expression/matrix.zarr")
+                }
+            ]
+
+        return obj_file_defs, obj_routes
+        
 
 
 class LoomWrapper(AbstractWrapper):

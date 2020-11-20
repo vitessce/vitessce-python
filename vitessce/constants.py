@@ -61,6 +61,7 @@ class Component(DocEnum):
     LAYER_CONTROLLER = "layerController", "The layer controller can be used to manipulate channel settings of the images rendered by the spatial component."
     HIGLASS = "higlass", "The higlass component can be used to visualize genome browser tracks and genome-wide interaction heatmaps."
     CELL_SET_SIZES = "cellSetSizes", "The cell set sizes component can display the quantities of cells in selected cell sets."
+    GENES = "genes", "The gene list selector."
 
 class DataType(DocEnum):
     """

@@ -147,7 +147,7 @@ setup_args = dict(
         'hypercorn>=0.10.2',
         'ujson>=4.0.1',
         'aiofiles>=0.6.0',
-        'starlette>=0.13.8',
+        'starlette==0.14.0',
     ],
     packages=find_packages(),
     zip_safe=False,

@@ -1,5 +1,10 @@
 import os
+from os.path import join
 import tempfile
+
+import zarr
+from numcodecs import Zlib
+from scipy.sparse import csr_matrix
 
 from starlette.responses import JSONResponse, UJSONResponse
 from starlette.routing import Route, Mount
@@ -96,6 +101,20 @@ class AbstractWrapper:
         """
         raise NotImplementedError()
 
+    def get_genomic_profiles(self, port, dataset_uid, obj_i):
+        """
+        Get the file definitions and server routes
+        corresponding to the ``genomic-profiles`` data type.
+
+        :param int port: The web server port, meant to be used in the localhost URLs in the file definitions.
+        :param str dataset_uid: The unique identifier for the dataset parent of this data object.
+        :param int obj_i: The index of this data object child within its dataset parent.
+
+        :returns: The file definitions and server routes.
+        :rtype: tuple[list[dict], list[starlette.routing.Route]]
+        """
+        raise NotImplementedError()
+
     def _create_response_json(self, data_json):
         """
         Helper function that can be used for creating JSON responses.
@@ -121,6 +140,8 @@ class AbstractWrapper:
             return self.get_neighborhoods(port, dataset_uid, obj_i)
         elif data_type == dt.EXPRESSION_MATRIX:
             return self.get_expression_matrix(port, dataset_uid, obj_i)
+        elif data_type == dt.GENOMIC_PROFILES:
+            return self.get_genomic_profiles(port, dataset_uid, obj_i)
 
     def _get_url(self, port, dataset_uid, obj_i, suffix):
         return f"http://localhost:{port}/{dataset_uid}/{obj_i}/{suffix}"
@@ -162,7 +183,7 @@ class OmeTiffWrapper(AbstractWrapper):
 
     def get_raster(self, port, dataset_uid, obj_i):
         img_dir_path, img_url = self.img_path, self._get_url(port, dataset_uid, obj_i, "raster_img")
-        offsets_dir_path, offsets_url = (None, None) if self.offsets_path is None else (self._get_offsets_dir(), self._get_url(port, dataset_uid, obj_i, os.path.join("raster_offsets", self._get_offsets_filename())))
+        offsets_dir_path, offsets_url = (None, None) if self.offsets_path is None else (self._get_offsets_dir(), self._get_url(port, dataset_uid, obj_i, join("raster_offsets", self._get_offsets_filename())))
 
         raster_json = self._create_raster_json(img_url, offsets_url)
 
@@ -243,30 +264,27 @@ class ZarrDirectoryStoreWrapper(AbstractWrapper):
     def get_raster(self, port, dataset_uid, obj_i):
         obj_routes = []
         obj_file_defs = []
-        try:
-            import zarr
-            if type(self.z) == zarr.hierarchy.Group:
-                img_dir_path = self.z.store.path
 
-                raster_json = self._create_raster_json(
-                    self._get_url(port, dataset_uid, obj_i, "raster_img"),
-                )
+        if type(self.z) == zarr.hierarchy.Group:
+            img_dir_path = self.z.store.path
 
-                obj_routes = [
-                    Mount(self._get_route(dataset_uid, obj_i, "raster_img"),
-                          app=StaticFiles(directory=img_dir_path, html=False)),
-                    Route(self._get_route(dataset_uid, obj_i, "raster"),
-                          self._create_response_json(raster_json))
-                ]
-                obj_file_defs = [
-                    {
-                        "type": dt.RASTER.value,
-                        "fileType": ft.RASTER_JSON.value,
-                        "url": self._get_url(port, dataset_uid, obj_i, "raster")
-                    }
-                ]
-        except ImportError:
-            pass
+            raster_json = self._create_raster_json(
+                self._get_url(port, dataset_uid, obj_i, "raster_img"),
+            )
+
+            obj_routes = [
+                Mount(self._get_route(dataset_uid, obj_i, "raster_img"),
+                        app=StaticFiles(directory=img_dir_path, html=False)),
+                Route(self._get_route(dataset_uid, obj_i, "raster"),
+                        self._create_response_json(raster_json))
+            ]
+            obj_file_defs = [
+                {
+                    "type": dt.RASTER.value,
+                    "fileType": ft.RASTER_JSON.value,
+                    "url": self._get_url(port, dataset_uid, obj_i, "raster")
+                }
+            ]
 
         return obj_file_defs, obj_routes
 
@@ -329,105 +347,85 @@ class AnnDataWrapper(AbstractWrapper):
 
         return cell_sets_json
     
-    def _create_exp_matrix_zarr(self):
+    def _create_exp_matrix_zarr(self, zarr_filepath):
+        adata = self.adata
+        gexp_arr = adata.X
+
+        cell_list = adata.obs.index.values.tolist()
+        gene_list = adata.var.index.values.tolist()
+
+        if type(gexp_arr) == csr_matrix:
+            # Convert from SciPy sparse format to NumPy dense format
+            gexp_arr = gexp_arr.toarray()
         
-        try:
-            import zarr
-            from numcodecs import Zlib
-            from scipy.sparse import csr_matrix
+        if self.use_highly_variable_genes and 'highly_variable' in adata.var.columns.values.tolist():
+            # Restrict the gene expression matrix to only the genes marked as highly variable
+            gene_list = adata.var.index[adata.var['highly_variable']].values.tolist()
+            gexp_arr = gexp_arr[:,adata.var['highly_variable'].values]
 
-            adata = self.adata
-            gexp_arr = adata.X
-
-            cell_list = adata.obs.index.values.tolist()
-            gene_list = adata.var.index.values.tolist()
-
-            if type(gexp_arr) == csr_matrix:
-                # Convert from SciPy sparse format to NumPy dense format
-                gexp_arr = gexp_arr.toarray()
-            
-            if self.use_highly_variable_genes and 'highly_variable' in adata.var.columns.values.tolist():
-                # Restrict the gene expression matrix to only the genes marked as highly variable
-                gene_list = adata.var.index[adata.var['highly_variable']].values.tolist()
-                gexp_arr = gexp_arr[:,adata.var['highly_variable'].values]
-
-            
-            # Re-scale the gene expression values between 0 and 255
-            gexp_arr_min = gexp_arr.min()
-            gexp_arr_max = gexp_arr.max()
-            gexp_arr_range = gexp_arr_max - gexp_arr_min
-            gexp_arr_ratio = 255 / gexp_arr_range
-
-            gexp_norm_arr = (gexp_arr - gexp_arr_min) * gexp_arr_ratio
-
-            zarr_tempdir = self.tempdir
-            zarr_filepath = os.path.join(zarr_tempdir, 'matrix.zarr')
         
-            z = zarr.open(
-                zarr_filepath,
-                mode='w',
-                shape=gexp_norm_arr.shape,
-                dtype='uint8',
-                compressor=Zlib(level=1)
-            )
+        # Re-scale the gene expression values between 0 and 255
+        gexp_arr_min = gexp_arr.min()
+        gexp_arr_max = gexp_arr.max()
+        gexp_arr_range = gexp_arr_max - gexp_arr_min
+        gexp_arr_ratio = 255 / gexp_arr_range
 
-            z[:] = gexp_norm_arr
-            # observations: cells (rows)
-            z.attrs["rows"] = cell_list
-            # variables: genes (columns)
-            z.attrs["cols"] = gene_list
-        except ImportError:
-            zarr_tempdir = None
-            zarr_filepath = None
+        gexp_norm_arr = (gexp_arr - gexp_arr_min) * gexp_arr_ratio
+    
+        z = zarr.open(
+            zarr_filepath,
+            mode='w',
+            shape=gexp_norm_arr.shape,
+            dtype='uint8',
+            compressor=Zlib(level=1)
+        )
+
+        z[:] = gexp_norm_arr
+        # observations: cells (rows)
+        z.attrs["rows"] = cell_list
+        # variables: genes (columns)
+        z.attrs["cols"] = gene_list
         
-        return zarr_tempdir, zarr_filepath
-
+        return
 
     def get_cells(self, port, dataset_uid, obj_i):
         obj_routes = []
         obj_file_defs = []
-        try:
-            import anndata
-            if type(self.adata) == anndata.AnnData:
-                cells_json = self._create_cells_json()
 
-                obj_routes = [
-                    Route(self._get_route(dataset_uid, obj_i, "cells"),
-                          self._create_response_json(cells_json)),
-                ]
-                obj_file_defs = [
-                    {
-                        "type": dt.CELLS.value,
-                        "fileType": ft.CELLS_JSON.value,
-                        "url": self._get_url(port, dataset_uid, obj_i, "cells")
-                    }
-                ]
-        except ImportError:
-            pass
+        cells_json = self._create_cells_json()
+
+        obj_routes = [
+            Route(self._get_route(dataset_uid, obj_i, "cells"),
+                    self._create_response_json(cells_json)),
+        ]
+        obj_file_defs = [
+            {
+                "type": dt.CELLS.value,
+                "fileType": ft.CELLS_JSON.value,
+                "url": self._get_url(port, dataset_uid, obj_i, "cells")
+            }
+        ]
 
         return obj_file_defs, obj_routes
 
     def get_cell_sets(self, port, dataset_uid, obj_i):
         obj_routes = []
         obj_file_defs = []
-        try:
-            import anndata
-            if type(self.adata) == anndata.AnnData:
-                cell_sets_json = self._create_cell_sets_json()
 
-                obj_routes = [
-                    Route(self._get_route(dataset_uid, obj_i, "cell-sets"),
-                          self._create_response_json(cell_sets_json)),
-                ]
-                obj_file_defs = [
-                    {
-                        "type": dt.CELL_SETS.value,
-                        "fileType": ft.CELL_SETS_JSON.value,
-                        "url": self._get_url(port, dataset_uid, obj_i, "cell-sets")
-                    }
-                ]
-        except ImportError:
-            pass
+            
+        cell_sets_json = self._create_cell_sets_json()
+
+        obj_routes = [
+            Route(self._get_route(dataset_uid, obj_i, "cell-sets"),
+                    self._create_response_json(cell_sets_json)),
+        ]
+        obj_file_defs = [
+            {
+                "type": dt.CELL_SETS.value,
+                "fileType": ft.CELL_SETS_JSON.value,
+                "url": self._get_url(port, dataset_uid, obj_i, "cell-sets")
+            }
+        ]
 
         return obj_file_defs, obj_routes
     
@@ -435,7 +433,10 @@ class AnnDataWrapper(AbstractWrapper):
         obj_routes = []
         obj_file_defs = []
 
-        zarr_tempdir, zarr_filepath = self._create_exp_matrix_zarr()
+        zarr_tempdir = self.tempdir
+        zarr_filepath = join(zarr_tempdir, 'matrix.zarr')
+
+        self._create_exp_matrix_zarr(zarr_filepath)
 
         if zarr_tempdir is not None:
             obj_routes = [
@@ -473,4 +474,179 @@ class LoomWrapper(AbstractWrapper):
         except ImportError:
             pass
         """
+        return obj_file_defs, obj_routes
+
+class SnapToolsWrapper(AbstractWrapper):
+
+    # The Snap file is difficult to work with.
+    # For now we can use the processed cell-by-bin MTX file
+    # However, the HuBMAP pipeline currently computes this with resolution 5000
+    # https://github.com/hubmapconsortium/sc-atac-seq-pipeline/blob/develop/bin/snapAnalysis.R#L93
+    def __init__(self, in_f, in_df, starting_resolution=200):
+        self.in_f = in_f # h5py (snaptools.snap)
+        self.in_df = in_df # pandas dataframe (umap_coords_clusters.csv)
+
+        self.tempdir = tempfile.mkdtemp()
+
+        self.starting_resolution = starting_resolution
+
+    def _create_genomic_multivec_zarr(self, zarr_filepath):
+        in_f = self.in_f
+        in_df = self.in_df
+        starting_resolution = self.starting_resolution
+
+        am_group = in_f['AM'] # cell x bin accessibility matrix
+        bd_group = in_f['BD'] # barcodes
+        barcodes = bd_group['name']
+
+        bin_sizes = am_group['binSizeList']
+        
+        bin_size = int(bin_sizes[0])
+
+        bin_chroms = am_group[str(bin_size)]['binChrom']
+        bin_starts = am_group[str(bin_size)]['binStart']
+        bin_values = am_group[str(bin_size)]['count']
+        bin_barcode_idx = am_group[str(bin_size)]['idx']
+
+
+        out_f = zarr.open(zarr_filepath, mode='w')
+
+        # Create level zero groups
+        chromosomes_group = out_f.create_group("chromosomes")
+
+        # Prepare to fill in chroms dataset
+        chromosomes = np.unique(bin_chroms).tolist()
+        num_chromosomes = len(chromosomes)
+
+        chroms_length_arr = np.array([ 0 for x in chromosomes ], dtype="i8")
+        for i, chrom_name in enumerate(chromosomes):
+            chrom_indices = (bin_chroms == chrom_name)
+            chrom_bin_starts = bin_starts[chrom_indices]
+            chrom_bin_start_max = np.amax(chrom_bin_starts)
+            chrom_end = chrom_bin_start_max + bin_size
+        
+            chroms_length_arr[i] = chrom_end
+
+        chroms_cumsum_arr = np.concatenate((np.array([0]), np.cumsum(chroms_length_arr)))
+
+        chromosomes_set = set(chromosomes)
+        chrom_name_to_length = dict(zip(chromosomes, chroms_length_arr))
+        chrom_name_to_cumsum = dict(zip(chromosomes, chroms_cumsum_arr))
+
+        
+        # Prepare to fill in resolutions dataset
+        resolutions = [ starting_resolution*(2**x) for x in range(16)]
+        
+        # Create each chromosome dataset.
+        for chr_name, chr_len in chrom_name_to_length.items():
+            chr_group = chromosomes_group.create_group(chr_name)
+            # Create each resolution group.
+            for resolution in resolutions:
+                chr_shape = (num_samples, math.ceil(chr_len / resolution))
+                chr_group.create_dataset(str(resolution), shape=chr_shape, dtype="f4", fill_value=np.nan, compressor=compressor)
+        
+        # Fill in data for each cluster.
+        in_df["cluster"] = in_df["cluster"].astype(str)
+        cluster_ids = in_df["cluster"].unique().tolist()
+        cluster_ids.sort(key=int)
+
+        cluster_profiles = {}
+        for cluster_id in cluster_ids:
+            cluster_df = in_df.loc[in_df["cluster"] == cluster_id]
+            cluster_cell_ids = cluster_df.index.values.tolist()
+            cluster_num_cells = len(chrom_num_bins)
+
+            for chrom_name in chromosomes:
+                chrom_len = chrom_name_to_length[chrom_name]
+                chrom_num_bins = int(chrom_len / bin_size)
+                chrom_indices = (bin_chroms == chrom_name)
+
+                cluster_cell_by_bin = np.zeros((cluster_num_cells, chrom_num_bins))
+                
+                for cell_id in cluster_cell_ids:
+                    cell_indices = (barcodes == cell_id)
+
+
+
+
+
+        for bw_index, bw_file in tqdm(list(enumerate(input_bigwig_files)), desc='bigwigs'):
+            if bbi.is_bigwig(bw_file):
+                chromsizes = bbi.chromsizes(bw_file)
+                matching_chromosomes = set(chromsizes.keys()).intersection(chromosomes_set)
+
+                # Fill in data for each resolution of a bigwig file.
+                for resolution in resolutions:
+                    # Fill in data for each chromosome of a resolution of a bigwig file.
+                    for chr_name in matching_chromosomes:
+                        chr_len = chrom_name_to_length[chr_name]
+                        chr_shape = (num_samples, math.ceil(chr_len / resolution))
+                        arr = bbi.fetch(bw_file, chr_name, 0, chr_len, chr_shape[1], summary="sum")
+                        chromosomes_group[chr_name][str(resolution)][bw_index,:] = arr
+            else:
+                print(f"{bw_file} not is_bigwig")
+        
+        max_mem = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        print(max_mem)
+        
+        # Append metadata to the top resolution row_infos attribute.
+        row_infos = []
+        for metadata_index, metadata_file in enumerate(input_metadata_files):
+            with open(metadata_file) as mf:
+                metadata_json = json.load(mf)
+            row_info = metadata_json_to_row_info(metadata_json)
+            row_infos.append(row_info)
+        
+        # f.attrs should contain all tileset_info properties
+        # For zarr, more attributes are used here to allow "serverless"
+        f.attrs['row_infos'] = row_infos
+        f.attrs['resolutions'] = sorted(resolutions, reverse=True)
+        f.attrs['shape'] = [ num_samples, 256 ]
+        f.attrs['name'] = name
+        f.attrs['coordSystem'] = name_to_coordsystem(name)
+        
+        # https://github.com/zarr-developers/zarr-specs/issues/50
+        f.attrs['multiscales'] = [
+            {
+                "version": "0.1",
+                "name": chr_name,
+                "datasets": [
+                    { "path": f"chromosomes/{chr_name}/{resolution}" }
+                    for resolution in sorted(resolutions, reverse=True)
+                ],
+                "type": "zarr-multivec",
+                "metadata": {
+                    "chromoffset": int(chrom_name_to_cumsum[chr_name]),
+                    "chromsize": int(chr_len),
+                }
+            }
+            for (chr_name, chr_len) in list(zip(chromosomes, chroms_length_arr))
+        ]
+
+
+        return
+
+    def get_genomic_profiles(self, port, dataset_uid, obj_i):
+        obj_routes = []
+        obj_file_defs = []
+        
+        zarr_tempdir = self.tempdir
+        zarr_filepath = join(zarr_tempdir, 'profiles.zarr')
+
+        self._create_genomic_multivec_zarr(zarr_filepath)
+
+        if zarr_tempdir is not None:
+            obj_routes = [
+                Mount(self._get_route(dataset_uid, obj_i, "genomic"),
+                    app=StaticFiles(directory=os.path.dirname(zarr_filepath), html=False, check_dir=False)),
+            ]
+
+            obj_file_defs = [
+                {
+                    "type": dt.GENOMIC_PROFILES.value,
+                    "fileType": ft.GENOMIC_PROFILES_ZARR.value,
+                    "url": self._get_url(port, dataset_uid, obj_i, "genomic/profiles.zarr")
+                }
+            ]
+
         return obj_file_defs, obj_routes

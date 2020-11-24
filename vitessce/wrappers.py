@@ -1,10 +1,13 @@
 import os
 from os.path import join
 import tempfile
+import math
 
+import numpy as np
 import zarr
 from numcodecs import Zlib
 from scipy.sparse import csr_matrix
+from scipy.sparse import coo_matrix
 
 from starlette.responses import JSONResponse, UJSONResponse
 from starlette.routing import Route, Mount
@@ -482,32 +485,40 @@ class SnapToolsWrapper(AbstractWrapper):
     # For now we can use the processed cell-by-bin MTX file
     # However, the HuBMAP pipeline currently computes this with resolution 5000
     # https://github.com/hubmapconsortium/sc-atac-seq-pipeline/blob/develop/bin/snapAnalysis.R#L93
-    def __init__(self, in_f, in_df, starting_resolution=200):
-        self.in_f = in_f # h5py (snaptools.snap)
-        self.in_df = in_df # pandas dataframe (umap_coords_clusters.csv)
+
+    def __init__(self, in_mtx, in_barcodes_df, in_bins_df, in_clusters_df, starting_resolution=5000):
+        self.in_mtx = in_mtx # scipy.sparse.coo.coo_matrix (filtered_cell_by_bin.mtx)
+        self.in_barcodes_df = in_barcodes_df # pandas dataframe (barcodes.txt)
+        self.in_bins_df = in_bins_df # pandas dataframe (bins.txt)
+        self.in_clusters_df = in_clusters_df # pandas dataframe (umap_coords_clusters.csv)
 
         self.tempdir = tempfile.mkdtemp()
 
         self.starting_resolution = starting_resolution
 
+        # Convert to dense if sparse
+        if type(in_mtx) == coo_matrix:
+            self.in_mtx = in_mtx.toarray()
+
+
     def _create_genomic_multivec_zarr(self, zarr_filepath):
-        in_f = self.in_f
-        in_df = self.in_df
+        in_mtx = self.in_mtx
+        in_clusters_df = self.in_clusters_df
+        in_barcodes_df = self.in_barcodes_df
+        in_bins_df = self.in_bins_df
+
         starting_resolution = self.starting_resolution
 
-        am_group = in_f['AM'] # cell x bin accessibility matrix
-        bd_group = in_f['BD'] # barcodes
-        barcodes = bd_group['name']
-
-        bin_sizes = am_group['binSizeList']
+        def convert_bin_name_to_chr_name(bin_name):
+            return bin_name[:bin_name.index(':')]
+        def convert_bin_name_to_chr_start(bin_name):
+            return int(bin_name[bin_name.index(':')+1:bin_name.index('-')])
+        def convert_bin_name_to_chr_end(bin_name):
+            return int(bin_name[bin_name.index('-')+1:])
         
-        bin_size = int(bin_sizes[0])
-
-        bin_chroms = am_group[str(bin_size)]['binChrom']
-        bin_starts = am_group[str(bin_size)]['binStart']
-        bin_values = am_group[str(bin_size)]['count']
-        bin_barcode_idx = am_group[str(bin_size)]['idx']
-
+        in_bins_df["chr_name"] = in_bins_df[0].apply(convert_bin_name_to_chr_name).astype(str)
+        in_bins_df["chr_start"] = in_bins_df[0].apply(convert_bin_name_to_chr_start).astype(int)
+        in_bins_df["chr_end"] = in_bins_df[0].apply(convert_bin_name_to_chr_end).astype(int)
 
         out_f = zarr.open(zarr_filepath, mode='w')
 
@@ -515,18 +526,13 @@ class SnapToolsWrapper(AbstractWrapper):
         chromosomes_group = out_f.create_group("chromosomes")
 
         # Prepare to fill in chroms dataset
-        chromosomes = np.unique(bin_chroms).tolist()
+        chromosomes = in_bins_df["chr_name"].unique().tolist()
         num_chromosomes = len(chromosomes)
 
-        chroms_length_arr = np.array([ 0 for x in chromosomes ], dtype="i8")
-        for i, chrom_name in enumerate(chromosomes):
-            chrom_indices = (bin_chroms == chrom_name)
-            chrom_bin_starts = bin_starts[chrom_indices]
-            chrom_bin_start_max = np.amax(chrom_bin_starts)
-            chrom_end = chrom_bin_start_max + bin_size
-        
-            chroms_length_arr[i] = chrom_end
+        in_chrom_ends_df = in_bins_df.drop_duplicates(subset=['chr_name'], keep='last')
+        in_chrom_ends_df = in_chrom_ends_df.set_index("chr_name")
 
+        chroms_length_arr = np.array([ in_chrom_ends_df.at[x, "chr_end"] for x in chromosomes ], dtype="i8")
         chroms_cumsum_arr = np.concatenate((np.array([0]), np.cumsum(chroms_length_arr)))
 
         chromosomes_set = set(chromosomes)
@@ -546,45 +552,37 @@ class SnapToolsWrapper(AbstractWrapper):
                 chr_group.create_dataset(str(resolution), shape=chr_shape, dtype="f4", fill_value=np.nan, compressor=compressor)
         
         # Fill in data for each cluster.
-        in_df["cluster"] = in_df["cluster"].astype(str)
-        cluster_ids = in_df["cluster"].unique().tolist()
+        in_clusters_df["cluster"] = in_clusters_df["cluster"].astype(str)
+        cluster_ids = in_clusters_df["cluster"].unique().tolist()
         cluster_ids.sort(key=int)
 
         cluster_profiles = {}
-        for cluster_id in cluster_ids:
-            cluster_df = in_df.loc[in_df["cluster"] == cluster_id]
+        for cluster_index, cluster_id in enumerate(cluster_ids):
+            cluster_df = in_clusters_df.loc[in_clusters_df["cluster"] == cluster_id]
             cluster_cell_ids = cluster_df.index.values.tolist()
             cluster_num_cells = len(chrom_num_bins)
+            cluster_cell_indices = in_barcodes_df.loc[in_barcodes_df[0].isin(cluster_cell_ids)].index.values
+
 
             for chrom_name in chromosomes:
                 chrom_len = chrom_name_to_length[chrom_name]
-                chrom_num_bins = int(chrom_len / bin_size)
-                chrom_indices = (bin_chroms == chrom_name)
-
-                cluster_cell_by_bin = np.zeros((cluster_num_cells, chrom_num_bins))
+                chrom_num_bins = math.ceil(chrom_len / bin_size)
+                chrom_indices = in_bins_df.loc[in_bins_df["chr_name"] == chrom_name].index.values
                 
-                for cell_id in cluster_cell_ids:
-                    cell_indices = (barcodes == cell_id)
+                cluster_cell_by_bin_mtx = in_mtx[cluster_cell_indices, chrom_indices]
+
+                cluster_profiles[cluster_id] = cluster_cell_by_bin_mtx
 
 
-
-
-
-        for bw_index, bw_file in tqdm(list(enumerate(input_bigwig_files)), desc='bigwigs'):
-            if bbi.is_bigwig(bw_file):
-                chromsizes = bbi.chromsizes(bw_file)
-                matching_chromosomes = set(chromsizes.keys()).intersection(chromosomes_set)
-
-                # Fill in data for each resolution of a bigwig file.
-                for resolution in resolutions:
-                    # Fill in data for each chromosome of a resolution of a bigwig file.
-                    for chr_name in matching_chromosomes:
-                        chr_len = chrom_name_to_length[chr_name]
-                        chr_shape = (num_samples, math.ceil(chr_len / resolution))
-                        arr = bbi.fetch(bw_file, chr_name, 0, chr_len, chr_shape[1], summary="sum")
-                        chromosomes_group[chr_name][str(resolution)][bw_index,:] = arr
-            else:
-                print(f"{bw_file} not is_bigwig")
+            # Fill in data for each resolution of a bigwig file.
+            for resolution in resolutions:
+                # Fill in data for each chromosome of a resolution of a bigwig file.
+                for chr_name in matching_chromosomes:
+                    chr_len = chrom_name_to_length[chr_name]
+                    chr_shape = (num_samples, math.ceil(chr_len / resolution))
+                    # Group every `resolution` values together and take sum.
+                    arr = np.reshape(values, (-1, resolution)).sum(axis=-1)
+                    chromosomes_group[chr_name][str(resolution)][cluster_index,:] = arr
         
         max_mem = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
         print(max_mem)

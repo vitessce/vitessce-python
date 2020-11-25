@@ -214,7 +214,7 @@ class OmeTiffWrapper(AbstractWrapper):
         return obj_file_defs, obj_routes
 
 
-class ZarrDirectoryStoreWrapper(AbstractWrapper):
+class OmeZarrWrapper(AbstractWrapper):
 
     def __init__(self, z, name=""):
         self.z = z
@@ -468,16 +468,10 @@ class LoomWrapper(AbstractWrapper):
     def get_cells(self, port, dataset_uid, obj_i):
         obj_routes = []
         obj_file_defs = []
-        """
-        try:
-            import loompy
-            if type(self.loom) == loompy.LoomConnection:
-                pass
-                # TODO: append routes
-                # TODO: add file definitions
-        except ImportError:
-            pass
-        """
+
+        # TODO: append routes
+        # TODO: add file definitions
+ 
         return obj_file_defs, obj_routes
 
 class SnapToolsWrapper(AbstractWrapper):
@@ -618,12 +612,8 @@ class SnapToolsWrapper(AbstractWrapper):
                 chrom_len = chrom_name_to_length[chrom_name]
                 chrom_bins_tf = (in_bins_df["chr_name"] == chrom_name).values
 
-                print(cluster_id, chrom_name)
                 cluster_cell_by_bin_mtx = in_mtx[np.ix_(cluster_cells_tf, chrom_bins_tf)]
                 cluster_profiles[chrom_name] = cluster_cell_by_bin_mtx.sum(axis=0)
-
-                print(cluster_profiles[chrom_name].shape)
-
 
             # Fill in data for each resolution of a bigwig file.
             for resolution, resolution_exp in zip(resolutions, resolution_exps):
@@ -702,5 +692,57 @@ class SnapToolsWrapper(AbstractWrapper):
                     "url": self._get_url(port, dataset_uid, obj_i, "genomic/profiles.zarr")
                 }
             ]
+
+        return obj_file_defs, obj_routes
+    
+
+    def _create_cell_sets_json(self):
+        in_clusters_df = self.in_clusters_df
+        cell_sets_json = {
+            "datatype": "cell",
+            "version": "0.1.2",
+            "tree": [{
+                "name": "Clusters",
+                "children": []
+            }]
+        }
+
+        cell_ids = in_clusters_df.index.values.tolist()
+        in_clusters_df['cluster'] = in_clusters_df['cluster'].astype(str)
+        cluster_ids = in_clusters_df['cluster'].unique().tolist()
+        cell_cluster_ids = in_clusters_df['cluster'].values.tolist()
+
+        cell_cluster_tuples = list(zip(cell_ids, cell_cluster_ids))
+
+        for cluster_id in cluster_ids:
+            cell_sets_json["tree"][0]["children"].append({
+                "name": str(cluster_id),
+                "set": [
+                    str(cell_id)
+                    for cell_id, cell_cluster_id in cell_cluster_tuples
+                    if cell_cluster_id == cluster_id
+                ]
+            })
+
+        return cell_sets_json
+
+    
+    def get_cell_sets(self, port, dataset_uid, obj_i):
+        obj_routes = []
+        obj_file_defs = []
+
+        cell_sets_json = self._create_cell_sets_json()
+
+        obj_routes = [
+            Route(self._get_route(dataset_uid, obj_i, "cell-sets"),
+                    self._create_response_json(cell_sets_json)),
+        ]
+        obj_file_defs = [
+            {
+                "type": dt.CELL_SETS.value,
+                "fileType": ft.CELL_SETS_JSON.value,
+                "url": self._get_url(port, dataset_uid, obj_i, "cell-sets")
+            }
+        ]
 
         return obj_file_defs, obj_routes

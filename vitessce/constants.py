@@ -73,6 +73,7 @@ class DataType(DocEnum):
     MOLECULES = "molecules", "The molecules data type."
     NEIGHBORHOODS = "neighborhoods", "The spatial cell neighborhoods data type."
     RASTER = "raster", "The raster (i.e. imaging) data type."
+    GENOMIC_PROFILES = "genomic-profiles", "The genomic profiles data type, used by HiGlass 1D quantitative tracks."
 
 class FileType(DocEnum):
     """
@@ -84,3 +85,4 @@ class FileType(DocEnum):
     NEIGHBORHOODS_JSON = "neighborhoods.json", "The JSON-based neighborhoods file type."
     RASTER_JSON = "raster.json", "The JSON-based raster manifest file type."
     CELL_SETS_JSON = "cell-sets.json", "The JSON-based cell sets file type."
+    GENOMIC_PROFILES_ZARR = "genomic-profiles.zarr", "The Zarr-based genomic profile (multivec) file type."

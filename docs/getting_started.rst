@@ -29,6 +29,16 @@ To use the widget in `JupyterLab <https://jupyterlab.readthedocs.io/en/stable/>`
     jupyter labextension install vitessce-jupyter
 
 
+Optional Dependencies
+---------------------
+
+The following dependencies are optional, and 
+
+* ``anndata`` - Required for AnnData support with the ``AnnDataWrapper`` class.
+* ``h5py`` - Required for SnapTools support with the ``SnapToolsWrapper`` class.
+* ``loompy`` - Required for Loom support with the ``LoomWrapper`` class.
+
+
 Simplest Widget Use Case
 ------------------------
 

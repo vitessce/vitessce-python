@@ -4,6 +4,7 @@ import tempfile
 import math
 
 import numpy as np
+import pandas as pd
 import zarr
 from numcodecs import Zlib
 from scipy.sparse import csr_matrix
@@ -540,6 +541,50 @@ class SnapToolsWrapper(AbstractWrapper):
         chrom_name_to_length = dict(zip(chromosomes, chroms_length_arr))
         chrom_name_to_cumsum = dict(zip(chromosomes, chroms_cumsum_arr))
 
+        # The bins dataframe frustratingly does not contain every bin.
+        # We need to figure out which bins are missing.
+        in_bins_gt_df = pd.DataFrame()
+        for chr_name, chr_len in chrom_name_to_length.items():
+            chr_bins_gt_df = pd.DataFrame()
+            if chr_len == starting_resolution:
+                chr_bins_gt_df["chr_start"] = np.array([0])
+            else:
+                chr_bins_gt_df["chr_start"] = np.linspace(0, chr_len, num=int(chr_len/starting_resolution + 1))
+            chr_bins_gt_df["chr_end"] = chr_bins_gt_df["chr_start"] + starting_resolution
+            chr_bins_gt_df["chr_start"] = chr_bins_gt_df["chr_start"] + 1
+            chr_bins_gt_df["chr_start"] = chr_bins_gt_df["chr_start"].astype(int)
+            chr_bins_gt_df["chr_end"] = chr_bins_gt_df["chr_end"].astype(int)
+            chr_bins_gt_df["chr_name"] = chr_name
+            chr_bins_gt_df[0] = chr_bins_gt_df.apply(lambda r: f"{r['chr_name']}:{r['chr_start']}-{r['chr_end']}", axis='columns')
+            in_bins_gt_df = in_bins_gt_df.append(chr_bins_gt_df, ignore_index=True)
+        
+        # We will add a new column i, which should match the _old_ index, so that we will be able join with the data matrix on the original indices.
+        # For the new (missing) rows, we will add values for the i column that are greater than any of the original indices, to prevent any joining with the incoming data matrix.
+        in_bins_df["i"] = in_bins_df.index.values
+        in_bins_gt_df["i"] = in_bins_gt_df.index.values + (np.amax(in_bins_df.index.values) + 1)
+        
+        in_bins_gt_df = in_bins_gt_df.set_index(0)
+        in_bins_df = in_bins_df.set_index(0)
+        
+        in_bins_join_df = in_bins_df.join(in_bins_gt_df, how='right', lsuffix="", rsuffix="_gt")
+        in_bins_join_df["i"] = in_bins_join_df.apply(lambda r: r['i'] if pd.notna(r['i']) else r['i_gt'], axis='columns').astype(int)
+
+        # Clean up the joined data frame.
+        in_bins_join_df = in_bins_join_df.drop(columns=['chr_name', 'chr_start', 'chr_end', 'i_gt'])
+        in_bins_join_df = in_bins_join_df.rename(columns={'chr_name_gt': 'chr_name', 'chr_start_gt': 'chr_start', 'chr_end_gt': 'chr_end'})
+
+        in_mtx_df = pd.DataFrame(data=in_mtx.T)
+        
+        in_bins_i_df = in_bins_join_df.drop(columns=['chr_name', 'chr_start', 'chr_end'])
+        in_mtx_join_df = in_bins_i_df.join(in_mtx_df, how='left', on='i')
+        in_mtx_join_df = in_mtx_join_df.fillna(value=0.0)
+
+        in_mtx_join_df = in_mtx_join_df.drop(columns=['i'])
+        in_mtx = in_mtx_join_df.values.T
+
+        # Use the new (full) bins dataframe now that in_mtx contains the full set of bins.
+        in_bins_df = in_bins_join_df
+
         
         # Prepare to fill in resolutions dataset
         resolutions = [ starting_resolution*(2**x) for x in range(16) ]
@@ -557,7 +602,7 @@ class SnapToolsWrapper(AbstractWrapper):
             chr_group = chromosomes_group.create_group(chr_name)
             # Create each resolution group.
             for resolution in resolutions:
-                chr_shape = (num_clusters, math.ceil(chr_len / resolution))
+                chr_shape = (num_clusters, int(chr_len / resolution + 1))
                 chr_group.create_dataset(str(resolution), shape=chr_shape, dtype="f4", fill_value=np.nan, compressor=compressor)
         
         row_infos = []
@@ -585,19 +630,21 @@ class SnapToolsWrapper(AbstractWrapper):
                 # Fill in data for each chromosome of a resolution of a bigwig file.
                 for chr_name in chromosomes:
                     chr_len = chrom_name_to_length[chr_name]
-                    chr_shape = (num_clusters, math.ceil(chr_len / resolution))
+                    arr_len = int(chr_len / resolution + 1)
+                    chr_shape = (num_clusters, arr_len)
+
+                    
                     # Group every `resolution` values together and take sum.
                     values = cluster_profiles[chr_name]
-                    values_len = math.ceil(chr_len / starting_resolution)
-                    if values_len > values.shape[0]:
-                        padding_len = values_len - values.shape[0]
-                        values = np.concatenate((values, np.zeros((padding_len,))))
-
                     padding_len = resolution_exp - (values.shape[0] % resolution_exp)
                     if values.shape[0] % resolution_exp > 0:
                         values = np.concatenate((values, np.zeros((padding_len,))))
                     num_tiles = chr_shape[1]
                     arr = np.reshape(values, (-1, resolution_exp)).sum(axis=-1)
+
+                    padding_len = arr_len - arr.shape[0]
+                    if padding_len > 0:
+                        arr = np.concatenate((arr, np.zeros((padding_len,))))
                     chromosomes_group[chr_name][str(resolution)][cluster_index,:] = arr
             
             row_infos.append({

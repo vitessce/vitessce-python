@@ -521,6 +521,7 @@ class SnapToolsWrapper(AbstractWrapper):
         in_bins_df["chr_end"] = in_bins_df[0].apply(convert_bin_name_to_chr_end).astype(int)
 
         out_f = zarr.open(zarr_filepath, mode='w')
+        compressor = Zlib(level=1)
 
         # Create level zero groups
         chromosomes_group = out_f.create_group("chromosomes")
@@ -541,70 +542,78 @@ class SnapToolsWrapper(AbstractWrapper):
 
         
         # Prepare to fill in resolutions dataset
-        resolutions = [ starting_resolution*(2**x) for x in range(16)]
+        resolutions = [ starting_resolution*(2**x) for x in range(16) ]
+        resolution_exps = [ (2**x) for x in range(16) ]
+
+        # Fill in data for each cluster.
+        in_clusters_df["cluster"] = in_clusters_df["cluster"].astype(str)
+        cluster_ids = in_clusters_df["cluster"].unique().tolist()
+        cluster_ids.sort(key=int)
+
+        num_clusters = len(cluster_ids)
         
         # Create each chromosome dataset.
         for chr_name, chr_len in chrom_name_to_length.items():
             chr_group = chromosomes_group.create_group(chr_name)
             # Create each resolution group.
             for resolution in resolutions:
-                chr_shape = (num_samples, math.ceil(chr_len / resolution))
+                chr_shape = (num_clusters, math.ceil(chr_len / resolution))
                 chr_group.create_dataset(str(resolution), shape=chr_shape, dtype="f4", fill_value=np.nan, compressor=compressor)
         
-        # Fill in data for each cluster.
-        in_clusters_df["cluster"] = in_clusters_df["cluster"].astype(str)
-        cluster_ids = in_clusters_df["cluster"].unique().tolist()
-        cluster_ids.sort(key=int)
-
-        cluster_profiles = {}
+        row_infos = []
         for cluster_index, cluster_id in enumerate(cluster_ids):
             cluster_df = in_clusters_df.loc[in_clusters_df["cluster"] == cluster_id]
             cluster_cell_ids = cluster_df.index.values.tolist()
-            cluster_num_cells = len(chrom_num_bins)
-            cluster_cell_indices = in_barcodes_df.loc[in_barcodes_df[0].isin(cluster_cell_ids)].index.values
+            cluster_num_cells = len(cluster_cell_ids)
+            cluster_cells_tf = (in_barcodes_df[0].isin(cluster_cell_ids)).values
 
+            cluster_profiles = {}
 
             for chrom_name in chromosomes:
                 chrom_len = chrom_name_to_length[chrom_name]
-                chrom_num_bins = math.ceil(chrom_len / bin_size)
-                chrom_indices = in_bins_df.loc[in_bins_df["chr_name"] == chrom_name].index.values
-                
-                cluster_cell_by_bin_mtx = in_mtx[cluster_cell_indices, chrom_indices]
+                chrom_bins_tf = (in_bins_df["chr_name"] == chrom_name).values
 
-                cluster_profiles[cluster_id] = cluster_cell_by_bin_mtx
+                print(cluster_id, chrom_name)
+                cluster_cell_by_bin_mtx = in_mtx[np.ix_(cluster_cells_tf, chrom_bins_tf)]
+                cluster_profiles[chrom_name] = cluster_cell_by_bin_mtx.sum(axis=0)
+
+                print(cluster_profiles[chrom_name].shape)
 
 
             # Fill in data for each resolution of a bigwig file.
-            for resolution in resolutions:
+            for resolution, resolution_exp in zip(resolutions, resolution_exps):
                 # Fill in data for each chromosome of a resolution of a bigwig file.
-                for chr_name in matching_chromosomes:
+                for chr_name in chromosomes:
                     chr_len = chrom_name_to_length[chr_name]
-                    chr_shape = (num_samples, math.ceil(chr_len / resolution))
+                    chr_shape = (num_clusters, math.ceil(chr_len / resolution))
                     # Group every `resolution` values together and take sum.
-                    arr = np.reshape(values, (-1, resolution)).sum(axis=-1)
+                    values = cluster_profiles[chr_name]
+                    values_len = math.ceil(chr_len / starting_resolution)
+                    if values_len > values.shape[0]:
+                        padding_len = values_len - values.shape[0]
+                        values = np.concatenate((values, np.zeros((padding_len,))))
+
+                    padding_len = resolution_exp - (values.shape[0] % resolution_exp)
+                    if values.shape[0] % resolution_exp > 0:
+                        values = np.concatenate((values, np.zeros((padding_len,))))
+                    num_tiles = chr_shape[1]
+                    arr = np.reshape(values, (-1, resolution_exp)).sum(axis=-1)
                     chromosomes_group[chr_name][str(resolution)][cluster_index,:] = arr
-        
-        max_mem = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        print(max_mem)
-        
-        # Append metadata to the top resolution row_infos attribute.
-        row_infos = []
-        for metadata_index, metadata_file in enumerate(input_metadata_files):
-            with open(metadata_file) as mf:
-                metadata_json = json.load(mf)
-            row_info = metadata_json_to_row_info(metadata_json)
-            row_infos.append(row_info)
-        
-        # f.attrs should contain all tileset_info properties
+            
+            row_infos.append({
+                "cluster": cluster_id,
+            })
+       
+        # out_f.attrs should contain all tileset_info properties
         # For zarr, more attributes are used here to allow "serverless"
-        f.attrs['row_infos'] = row_infos
-        f.attrs['resolutions'] = sorted(resolutions, reverse=True)
-        f.attrs['shape'] = [ num_samples, 256 ]
-        f.attrs['name'] = name
-        f.attrs['coordSystem'] = name_to_coordsystem(name)
+        out_f.attrs['row_infos'] = row_infos
+        out_f.attrs['resolutions'] = sorted(resolutions, reverse=True)
+        out_f.attrs['shape'] = [ num_clusters, 256 ]
+        out_f.attrs['name'] = "SnapTools"
+        out_f.attrs['coordSystem'] = "hg38"
         
         # https://github.com/zarr-developers/zarr-specs/issues/50
-        f.attrs['multiscales'] = [
+        out_f.attrs['multiscales'] = [
             {
                 "version": "0.1",
                 "name": chr_name,

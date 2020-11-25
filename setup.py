@@ -148,6 +148,9 @@ setup_args = dict(
         'ujson>=4.0.1',
         'aiofiles>=0.6.0',
         'starlette==0.14.0',
+        'zarr>=2.5.0',
+        'numcodecs>=0.5.7',
+        'scipy>=1.2.1'
     ],
     packages=find_packages(),
     zip_safe=False,

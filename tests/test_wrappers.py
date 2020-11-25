@@ -1,13 +1,18 @@
 import unittest
+from os.path import join
 
 import zarr
 from anndata import read_h5ad
+from scipy.io import mmread
+import pandas as pd
+import numpy as np
 
 from vitessce import (
     OmeTiffWrapper,
     ZarrDirectoryStoreWrapper,
     AnnDataWrapper,
     LoomWrapper,
+    SnapToolsWrapper,
 )
 
 class TestWrappers(unittest.TestCase):
@@ -65,7 +70,7 @@ class TestWrappers(unittest.TestCase):
         ])
     
     def test_anndata(self):
-        adata = read_h5ad('data/habib17.processed.h5ad')
+        adata = read_h5ad(join('data', 'habib17.processed.h5ad'))
         w = AnnDataWrapper(adata)
 
         cells_json = w._create_cells_json()
@@ -77,3 +82,19 @@ class TestWrappers(unittest.TestCase):
         obj_file_defs, obj_routes = w.get_cell_sets(8000, 'A', 0)
         self.assertEqual(obj_file_defs, [{'type': 'cell-sets', 'fileType': 'cell-sets.json', 'url': 'http://localhost:8000/A/0/cell-sets'}])
 
+    def test_snaptools(self):
+        mtx = mmread(join('data', 'filtered_cell_by_bin.mtx'))
+        barcodes_df = pd.read_csv(join('data', 'barcodes.txt'), header=None)
+        bins_df = pd.read_csv(join('data', 'bins.txt'), header=None)
+        clusters_df = pd.read_csv(join('data', 'umap_coords_clusters.csv'), index_col=0)
+
+        print(bins_df.head())
+
+        zarr_filepath = join('data', 'test_snaptools.zarr')
+
+        w = SnapToolsWrapper(mtx, barcodes_df, bins_df, clusters_df)
+        w._create_genomic_multivec_zarr(zarr_filepath)
+
+        z = zarr.open(zarr_filepath, mode='r')
+        print(z)
+        

@@ -9,6 +9,7 @@ from .wrappers import (
     ZarrDirectoryStoreWrapper,
     AnnDataWrapper,
     LoomWrapper,
+    SnapToolsWrapper,
 )
 
 def _jupyter_nbextension_paths():

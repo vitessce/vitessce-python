@@ -7,7 +7,7 @@ from scipy.io import mmread
 import pandas as pd
 import numpy as np
 
-from .create_test_data import (
+from create_test_data import (
     create_test_anndata_file,
     create_test_loom_file,
     create_test_ometiff_file,
@@ -30,7 +30,7 @@ class TestWrappers(unittest.TestCase):
         create_test_loom_file(join('data', 'test.loom'))
         create_test_ometiff_file(join('data', 'test.ome.tif'))
         create_test_omezarr_store(join('data', 'test.ome.zarr'))
-        create_test_snaptools_files
+        create_test_snaptools_files(
             join('data', 'test.snap.mtx'),
             join('data', 'test.snap.bins.txt'),
             join('data', 'test.snap.barcodes.txt'),
@@ -115,9 +115,8 @@ class TestWrappers(unittest.TestCase):
 
         z = zarr.open(zarr_filepath, mode='r')
 
-        self.assertEqual(z['chromosomes/1/5000'][0,:].sum(), 8232.0)
-        self.assertEqual(z['chromosomes/1/10000'][0,:].sum(), 8232.0)
-        self.assertEqual(z['chromosomes/1/5000'][:,2].sum(), 9.0)
-        self.assertEqual(z['chromosomes/2/5000'][:,2].sum(), 1.0)
-        print(z)
+        self.assertEqual(z['chromosomes/1/5000'][0,:].sum(), 17.0)
+        self.assertEqual(z['chromosomes/1/10000'][0,:].sum(), 17.0)
+        self.assertEqual(z['chromosomes/1/5000'][:,2].sum(), 7.0)
+        self.assertEqual(z['chromosomes/2/5000'][:,2].sum(), 4.0)
         

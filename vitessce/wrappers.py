@@ -306,7 +306,7 @@ class AnnDataWrapper(AbstractWrapper):
                 for cell_id, cell_cluster_id in cell_cluster_tuples
                 if cell_cluster_id == cluster_id
             ]
-            cell_sets.add_set(str(cluster_id), ['Clusters'], cell_set)
+            cell_sets.add_node(str(cluster_id), ['Clusters'], cell_set)
 
         return cell_sets.json
     

@@ -69,3 +69,11 @@ class CellSets:
     if len(found_nodes_not_none) == 1:
       return found_nodes_not_none[0]
     return None
+
+class Molecules():
+
+  def __init__(self):
+    self.json = {}
+
+  def add_molecule(self, name, coords):
+    self.json[name] = coords

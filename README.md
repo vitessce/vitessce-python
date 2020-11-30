@@ -29,6 +29,7 @@ For a development installation (requires npm),
     $ git clone https://github.com/vitessce/vitessce-python.git
     $ cd vitessce-python
     $ conda env create -f environment.yml
+    $ conda activate vitessce-jupyter-dev
     $ pip install -e .
     $ jupyter nbextension install --py --symlink --sys-prefix vitessce
     $ jupyter nbextension enable --py --sys-prefix vitessce

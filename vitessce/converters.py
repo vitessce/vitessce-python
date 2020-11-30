@@ -146,7 +146,7 @@ class Molecules():
 
   def add_molecule(self, name, coords):
     """
-    Add a moleuls to a parent node.
+    Add a molecules to a parent node.
 
     :param str name: Name for the new molecules
     :param list coords: A list of lists like [[1, 2], [3, 4], ...] or [[1, 2, 3], [3, 4, 5], ...] which denote where in xy space the spot data should be placed for the desired name.

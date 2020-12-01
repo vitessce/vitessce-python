@@ -5,10 +5,10 @@ from vitessce import (
     Cells,
 )
 
-class TestConverters(unittest.TestCase):
+class TestEntities(unittest.TestCase):
 
     def test_cells(self):
-      
+
       cell_ids = ['cell_1', 'cell_2', 'cell_3']
 
       cells = Cells(cell_ids=cell_ids)

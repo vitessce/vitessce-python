@@ -6,7 +6,7 @@ from starlette.routing import Route, Mount
 from starlette.staticfiles import StaticFiles
 
 from .constants import DataType as dt, FileType as ft
-from .converters import Cells, CellSets
+from .entities import Cells, CellSets
 
 class AbstractWrapper:
     """

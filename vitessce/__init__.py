@@ -10,7 +10,7 @@ from .wrappers import (
     AnnDataWrapper,
     LoomWrapper,
 )
-from .converters import (
+from .entities import (
     CellSets,
     Cells,
     Molecules,

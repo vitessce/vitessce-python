@@ -1,4 +1,4 @@
-class AgumentLengthDoesNotMatchCellIdsException(Exception):
+class ArgumentLengthDoesNotMatchCellIdsException(Exception):
   pass
 
 class NodeNotFoundException(Exception):
@@ -29,7 +29,7 @@ class Cells:
     :param list coords: A list of lists like [[1, 2], [3, 4], ...] in the order of cell_ids for each cell to be mapped to a scatterplot coorindate.
     """
     if len(coords) != len(self._cell_ids):
-      raise AgumentLengthDoesNotMatchCellIdsException('Coordinates length does not match Cell IDs Length')
+      raise ArgumentLengthDoesNotMatchCellIdsException('Coordinates length does not match Cell IDs Length')
     if type(name) != str:
       raise TypeError('name argument needs to be a string for adding a scatterplot mapping')
     for idx, id in enumerate(self._cell_ids):
@@ -45,7 +45,7 @@ class Cells:
     :param list centroids: A list of lists like [[1, 2], [3, 4], ...] in the order of cell_ids for each cell to be mapped to a centroid coorindate.
     """
     if len(centroids) != len(self._cell_ids):
-      raise AgumentLengthDoesNotMatchCellIdsException('Centroid length does not match Cell IDs Length')
+      raise ArgumentLengthDoesNotMatchCellIdsException('Centroid length does not match Cell IDs Length')
     if type(centroids) != list or any([len(centroid) != 2 or type(centroid) != list for centroid in centroids]):
         raise TypeError('Centroids should be a list of two element lists')
     for idx, id in enumerate(self._cell_ids):
@@ -59,7 +59,7 @@ class Cells:
     :param list polygon_outline: A list of lists of lists like [[[1, 2], [3, 4], [5, 6]], [[7, 8], [9, 10], [11, 12]]...] in the order of cell_ids for each cell to be mapped to its segmentation.
     """
     if len(polygon_outline) != len(self._cell_ids):
-      raise AgumentLengthDoesNotMatchCellIdsException('Segmentations length does not match Cell IDs Length')
+      raise ArgumentLengthDoesNotMatchCellIdsException('Segmentations length does not match Cell IDs Length')
     for idx, id in enumerate(self._cell_ids):
       if type(polygon_outline[idx]) != list or any([len(coord) != 2 or type(coord) != list for coord in polygon_outline[idx]]):
         raise TypeError(f'Polygon outline for {id} should be a list of two element lists i.e xy coordinates')

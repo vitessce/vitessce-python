@@ -6,6 +6,7 @@ from starlette.routing import Route, Mount
 from starlette.staticfiles import StaticFiles
 
 from .constants import DataType as dt, FileType as ft
+from .entities import Cells, CellSets
 
 class AbstractWrapper:
     """
@@ -283,33 +284,15 @@ class AnnDataWrapper(AbstractWrapper):
         available_embeddings = list(adata.obsm.keys())
 
         cell_ids = adata.obs.index.tolist()
-        cell_mappings = []
+        cells = Cells(cell_ids=cell_ids)
         for e in available_embeddings:
             mapping = adata.obsm[e][:, 0:2].tolist()
-            cell_mappings.append(list(zip(
-                [e for i in range(len(mapping))],
-                mapping
-            )))
-        cell_mappings_zip = list(zip(*cell_mappings))
-        cells_json = dict(zip(
-            cell_ids,
-            [
-                {'mappings': dict(cell_mapping), 'genes': {}}
-                for cell_mapping in cell_mappings_zip
-            ]
-        ))
-        return cells_json
+            cells.add_mapping(e, mapping)
+        return cells.json
 
     def _create_cell_sets_json(self):
         adata = self.adata
-        cell_sets_json = {
-            "datatype": "cell",
-            "version": "0.1.2",
-            "tree": [{
-                "name": "Clusters",
-                "children": []
-            }]
-        }
+        cell_sets = CellSets(first_node_name = 'Clusters')
 
         cell_ids = adata.obs.index.tolist()
         cluster_ids = adata.obs['CellType'].unique().tolist()
@@ -318,16 +301,14 @@ class AnnDataWrapper(AbstractWrapper):
         cell_cluster_tuples = list(zip(cell_ids, cell_cluster_ids))
 
         for cluster_id in cluster_ids:
-            cell_sets_json["tree"][0]["children"].append({
-                "name": str(cluster_id),
-                "set": [
-                    str(cell_id)
-                    for cell_id, cell_cluster_id in cell_cluster_tuples
-                    if cell_cluster_id == cluster_id
-                ]
-            })
+            cell_set = [
+                str(cell_id)
+                for cell_id, cell_cluster_id in cell_cluster_tuples
+                if cell_cluster_id == cluster_id
+            ]
+            cell_sets.add_node(str(cluster_id), ['Clusters'], cell_set)
 
-        return cell_sets_json
+        return cell_sets.json
     
     def _create_exp_matrix_zarr(self):
         

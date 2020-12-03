@@ -9,6 +9,9 @@ from .constants import DataType as dt, FileType as ft
 from .entities import Cells, CellSets
 
 class AbstractWrapper:
+
+    _base_url = ""
+
     """
     An abstract class that can be extended when
     implementing custom dataset object wrapper classes. 
@@ -124,6 +127,9 @@ class AbstractWrapper:
             return self.get_expression_matrix(port, dataset_uid, obj_i)
 
     def _get_url(self, port, dataset_uid, obj_i, suffix):
+        # A base URL is defined for this so this is used outside of Jupyter notebook.
+        if self._base_url:
+            return f"{self._base_url}/{dataset_uid}/{obj_i}/{suffix}"
         return f"http://localhost:{port}/{dataset_uid}/{obj_i}/{suffix}"
 
     def _get_route(self, dataset_uid, obj_i, suffix):
@@ -132,10 +138,11 @@ class AbstractWrapper:
 
 class OmeTiffWrapper(AbstractWrapper):
 
-    def __init__(self, img_path, offsets_path=None, name=""):
+    def __init__(self, img_path, offsets_path=None, name="", base_url=""):
         self.img_path = img_path
         self.offsets_path = offsets_path
         self.name = name
+        self._base_url = base_url
 
     def _create_raster_json(self, img_url, offsets_url):
         raster_json = {
@@ -192,7 +199,8 @@ class OmeTiffWrapper(AbstractWrapper):
 
 class ZarrDirectoryStoreWrapper(AbstractWrapper):
 
-    def __init__(self, z, name=""):
+    def __init__(self, z, name="", base_url=""):
+        self._base_url = base_url
         self.z = z
         self.name = name
 
@@ -273,10 +281,10 @@ class ZarrDirectoryStoreWrapper(AbstractWrapper):
 
 
 class AnnDataWrapper(AbstractWrapper):
-    def __init__(self, adata, use_highly_variable_genes=True):
+    def __init__(self, adata, use_highly_variable_genes=True, base_url=""):
         self.adata = adata
         self.tempdir = tempfile.mkdtemp()
-
+        self._base_url = base_url
         self.use_highly_variable_genes = use_highly_variable_genes
 
     def _create_cells_json(self):
@@ -438,8 +446,9 @@ class AnnDataWrapper(AbstractWrapper):
 
 class LoomWrapper(AbstractWrapper):
 
-    def __init__(self, loom):
+    def __init__(self, loom, base_url=""):
         self.loom = loom
+        self._base_url = base_url
 
     def get_cells(self, port, dataset_uid, obj_i):
         obj_routes = []

@@ -64,6 +64,26 @@ class TestWrappers(unittest.TestCase):
             }
         ])
     
+    def test_base_url(self):
+        z = zarr.open('data/test.ome.zarr')
+        w = ZarrDirectoryStoreWrapper(z, base_url="https://example.com")
+
+        raster_json = w._create_raster_json(
+            "https://example.com/raster_img"
+        )
+        
+        # TODO
+        # self.assertEqual(raster_json, {})
+
+        obj_file_defs, obj_routes = w.get_raster(8000, 'A', 0)
+        self.assertEqual(obj_file_defs, [
+            {
+                'fileType': 'raster.json',
+                'type': 'raster',
+                'url': 'https://example.com/A/0/raster'
+            }
+        ])
+    
     def test_anndata(self):
         adata = read_h5ad('data/habib17.processed.h5ad')
         w = AnnDataWrapper(adata)

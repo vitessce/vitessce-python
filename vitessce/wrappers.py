@@ -144,7 +144,7 @@ class OmeTiffWrapper(AbstractWrapper):
         self.name = name
         self._base_url = base_url
 
-    def _create_raster_json(self, img_url, offsets_url):
+    def create_raster_json(self, img_url, offsets_url):
         raster_json = {
             "schemaVersion": "0.0.2",
             "images": [
@@ -172,7 +172,7 @@ class OmeTiffWrapper(AbstractWrapper):
         img_dir_path, img_url = self.img_path, self._get_url(port, dataset_uid, obj_i, "raster_img")
         offsets_dir_path, offsets_url = (None, None) if self.offsets_path is None else (self._get_offsets_dir(), self._get_url(port, dataset_uid, obj_i, os.path.join("raster_offsets", self._get_offsets_filename())))
 
-        raster_json = self._create_raster_json(img_url, offsets_url)
+        raster_json = self.create_raster_json(img_url, offsets_url)
 
         obj_routes = [
             Mount(self._get_route(dataset_uid, obj_i, "raster_img"),
@@ -204,7 +204,7 @@ class ZarrDirectoryStoreWrapper(AbstractWrapper):
         self.z = z
         self.name = name
 
-    def _create_raster_json(self, img_url):
+    def create_raster_json(self, img_url):
         raster_json = {
             "schemaVersion": "0.0.2",
             "images": [
@@ -257,7 +257,7 @@ class ZarrDirectoryStoreWrapper(AbstractWrapper):
             if type(self.z) == zarr.hierarchy.Group:
                 img_dir_path = self.z.store.path
 
-                raster_json = self._create_raster_json(
+                raster_json = self.create_raster_json(
                     self._get_url(port, dataset_uid, obj_i, "raster_img"),
                 )
 
@@ -287,7 +287,7 @@ class AnnDataWrapper(AbstractWrapper):
         self._base_url = base_url
         self.use_highly_variable_genes = use_highly_variable_genes
 
-    def _create_cells_json(self):
+    def create_cells_json(self):
         adata = self.adata
         available_embeddings = list(adata.obsm.keys())
 
@@ -298,7 +298,7 @@ class AnnDataWrapper(AbstractWrapper):
             cells.add_mapping(e, mapping)
         return cells.json
 
-    def _create_cell_sets_json(self):
+    def create_cell_sets_json(self):
         adata = self.adata
         cell_sets = CellSets(first_node_name = 'Clusters')
 
@@ -318,7 +318,7 @@ class AnnDataWrapper(AbstractWrapper):
 
         return cell_sets.json
     
-    def _create_exp_matrix_zarr(self):
+    def create_exp_matrix_zarr(self):
         
         try:
             import zarr
@@ -378,7 +378,7 @@ class AnnDataWrapper(AbstractWrapper):
         try:
             import anndata
             if type(self.adata) == anndata.AnnData:
-                cells_json = self._create_cells_json()
+                cells_json = self.create_cells_json()
 
                 obj_routes = [
                     Route(self._get_route(dataset_uid, obj_i, "cells"),
@@ -402,7 +402,7 @@ class AnnDataWrapper(AbstractWrapper):
         try:
             import anndata
             if type(self.adata) == anndata.AnnData:
-                cell_sets_json = self._create_cell_sets_json()
+                cell_sets_json = self.create_cell_sets_json()
 
                 obj_routes = [
                     Route(self._get_route(dataset_uid, obj_i, "cell-sets"),
@@ -424,7 +424,7 @@ class AnnDataWrapper(AbstractWrapper):
         obj_routes = []
         obj_file_defs = []
 
-        zarr_tempdir, zarr_filepath = self._create_exp_matrix_zarr()
+        zarr_tempdir, zarr_filepath = self.create_exp_matrix_zarr()
 
         if zarr_tempdir is not None:
             obj_routes = [

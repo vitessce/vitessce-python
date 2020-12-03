@@ -318,7 +318,7 @@ class AnnDataWrapper(AbstractWrapper):
 
         return cell_sets.json
     
-    def create_exp_matrix_zarr(self):
+    def create_exp_matrix_zarr(self, filepath=""):
         
         try:
             import zarr
@@ -348,9 +348,11 @@ class AnnDataWrapper(AbstractWrapper):
             gexp_arr_ratio = 255 / gexp_arr_range
 
             gexp_norm_arr = (gexp_arr - gexp_arr_min) * gexp_arr_ratio
-
-            zarr_tempdir = self.tempdir
-            zarr_filepath = os.path.join(zarr_tempdir, 'matrix.zarr')
+            if filepath:
+                zarr_filepath = os.path.join(filepath, 'matrix.zarr')
+            else:
+                zarr_tempdir = self.tempdir
+                zarr_filepath = os.path.join(zarr_tempdir, 'matrix.zarr')
         
             z = zarr.open(
                 zarr_filepath,

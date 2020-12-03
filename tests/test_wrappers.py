@@ -15,7 +15,7 @@ class TestWrappers(unittest.TestCase):
     def test_ome_tiff(self):
         w = OmeTiffWrapper("data/test.ome.tif", offsets_path="data/offsets.json", name="Test")
 
-        raster_json = w._create_raster_json(
+        raster_json = w.create_raster_json(
             "http://localhost:8000/raster_img",
             "http://localhost:8000/raster_offsets/offsets.json"
         )
@@ -48,7 +48,7 @@ class TestWrappers(unittest.TestCase):
         z = zarr.open('data/test.ome.zarr')
         w = ZarrDirectoryStoreWrapper(z)
 
-        raster_json = w._create_raster_json(
+        raster_json = w.create_raster_json(
             "http://localhost:8000/raster_img"
         )
         
@@ -68,7 +68,7 @@ class TestWrappers(unittest.TestCase):
         z = zarr.open('data/test.ome.zarr')
         w = ZarrDirectoryStoreWrapper(z, base_url="https://example.com")
 
-        raster_json = w._create_raster_json(
+        raster_json = w.create_raster_json(
             "https://example.com/raster_img"
         )
         
@@ -88,8 +88,8 @@ class TestWrappers(unittest.TestCase):
         adata = read_h5ad('data/habib17.processed.h5ad')
         w = AnnDataWrapper(adata)
 
-        cells_json = w._create_cells_json()
-        cell_sets_json = w._create_cell_sets_json()
+        cells_json = w.create_cells_json()
+        cell_sets_json = w.create_cell_sets_json()
 
         obj_file_defs, obj_routes = w.get_cells(8000, 'A', 0)
         self.assertEqual(obj_file_defs, [{'type': 'cells', 'fileType': 'cells.json', 'url': 'http://localhost:8000/A/0/cells'}])

@@ -497,6 +497,8 @@ class SnapToolsWrapper(AbstractWrapper):
 
 
     def _create_genomic_multivec_zarr(self, zarr_filepath):
+        import dask.dataframe as dd
+
         in_mtx = self.in_mtx
         in_clusters_df = self.in_clusters_df
         in_barcodes_df = self.in_barcodes_df
@@ -567,14 +569,10 @@ class SnapToolsWrapper(AbstractWrapper):
             chr_bins_gt_df[0] = chr_bins_gt_df.apply(lambda r: f"{r['chr_name']}:{r['chr_start']}-{r['chr_end']}", axis='columns')
             in_bins_gt_df = in_bins_gt_df.append(chr_bins_gt_df, ignore_index=True)
         
-        print("570")
-
         # We will add a new column i, which should match the _old_ index, so that we will be able join with the data matrix on the original indices.
         # For the new (missing) rows, we will add values for the i column that are greater than any of the original indices, to prevent any joining with the incoming data matrix.
         in_bins_df["i"] = in_bins_df.index.values
         in_bins_gt_df["i"] = in_bins_gt_df.index.values + (np.amax(in_bins_df.index.values) + 1)
-
-        print("575")
         
         in_bins_gt_df = in_bins_gt_df.set_index(0)
         in_bins_df = in_bins_df.set_index(0)
@@ -582,33 +580,31 @@ class SnapToolsWrapper(AbstractWrapper):
         in_bins_join_df = in_bins_df.join(in_bins_gt_df, how='right', lsuffix="", rsuffix="_gt")
         in_bins_join_df["i"] = in_bins_join_df.apply(lambda r: r['i'] if pd.notna(r['i']) else r['i_gt'], axis='columns').astype(int)
 
-        print("583")
+        del in_bins_df
+        del in_bins_gt_df
 
         # Clean up the joined data frame.
         in_bins_join_df = in_bins_join_df.drop(columns=['chr_name', 'chr_start', 'chr_end', 'i_gt'])
         in_bins_join_df = in_bins_join_df.rename(columns={'chr_name_gt': 'chr_name', 'chr_start_gt': 'chr_start', 'chr_end_gt': 'chr_end'})
 
-        print("591")
-
         in_mtx_df = pd.DataFrame(data=in_mtx.T)
-
-        print("595")
         
         in_bins_i_df = in_bins_join_df.drop(columns=['chr_name', 'chr_start', 'chr_end'])
-        in_mtx_join_df = in_bins_i_df.join(in_mtx_df, how='left', on='i')
+
+        # TODO: use dask for all the thinsg
+        in_bins_i_df = dd.from_pandas(in_bins_i_df, npartitions=20)
+        in_mtx_df = dd.from_pandas(in_mtx_df, npartitions=20)
+
+        in_mtx_join_df = in_bins_i_df.merge(in_mtx_df, how='left', on='i', right_index=True)
         in_mtx_join_df = in_mtx_join_df.fillna(value=0.0)
 
-        print("601")
+        del in_bins_i_df
+        del in_mtx_df
 
         in_mtx_join_df = in_mtx_join_df.drop(columns=['i'])
-        in_mtx = in_mtx_join_df.values.T
+        in_mtx = np.asarray(in_mtx_join_df.values.T)
+        del in_mtx_join_df
 
-        print("606")
-
-        # Use the new (full) bins dataframe now that in_mtx contains the full set of bins.
-        in_bins_df = in_bins_join_df
-
-        
         # Prepare to fill in resolutions dataset
         resolutions = [ starting_resolution*(2**x) for x in range(16) ]
         resolution_exps = [ (2**x) for x in range(16) ]
@@ -619,8 +615,6 @@ class SnapToolsWrapper(AbstractWrapper):
         cluster_ids.sort(key=int)
 
         num_clusters = len(cluster_ids)
-
-        print("617")
         
         # Create each chromosome dataset.
         for chr_name, chr_len in chrom_name_to_length.items():
@@ -641,7 +635,7 @@ class SnapToolsWrapper(AbstractWrapper):
 
             for chrom_name in chromosomes:
                 chrom_len = chrom_name_to_length[chrom_name]
-                chrom_bins_tf = (in_bins_df["chr_name"] == chrom_name).values
+                chrom_bins_tf = (in_bins_join_df["chr_name"] == chrom_name).values
 
                 cluster_cell_by_bin_mtx = in_mtx[np.ix_(cluster_cells_tf, chrom_bins_tf)]
                 cluster_profiles[chrom_name] = cluster_cell_by_bin_mtx.sum(axis=0)
@@ -708,9 +702,9 @@ class SnapToolsWrapper(AbstractWrapper):
         zarr_tempdir = self.tempdir
         zarr_filepath = join(zarr_tempdir, 'profiles.zarr')
 
-        print("starting _create_genomic_multivec_zarr")
-        self._create_genomic_multivec_zarr(zarr_filepath)
-        print("done _create_genomic_multivec_zarr")
+        #print("starting _create_genomic_multivec_zarr")
+        #self._create_genomic_multivec_zarr(zarr_filepath)
+        #print("done _create_genomic_multivec_zarr")
 
         if zarr_tempdir is not None:
             obj_routes = [

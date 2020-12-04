@@ -35,7 +35,7 @@ Optional Dependencies
 The following dependencies are optional, and 
 
 * ``anndata`` - Required for AnnData support with the ``AnnDataWrapper`` class.
-* ``h5py`` - Required for SnapTools support with the ``SnapToolsWrapper`` class.
+* ``dask`` - Required for SnapTools support with the ``SnapToolsWrapper`` class.
 * ``loompy`` - Required for Loom support with the ``LoomWrapper`` class.
 
 

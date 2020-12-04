@@ -296,6 +296,15 @@ class VitessceConfigView:
         self.view["w"] = w
         self.view["h"] = h
     
+    def set_props(self, **kwargs):
+        if "props" in self.view.keys():
+            self.view["props"] = {
+                **self.view["props"],
+                **kwargs
+            }
+        else:
+            self.view["props"] = kwargs
+    
     def to_dict(self):
         return self.view
 

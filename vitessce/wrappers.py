@@ -505,15 +505,30 @@ class SnapToolsWrapper(AbstractWrapper):
         starting_resolution = self.starting_resolution
 
         def convert_bin_name_to_chr_name(bin_name):
-            return bin_name[:bin_name.index(':')]
+            try:
+                return bin_name[:bin_name.index(':')]
+            except ValueError:
+                return np.nan
         def convert_bin_name_to_chr_start(bin_name):
-            return int(bin_name[bin_name.index(':')+1:bin_name.index('-')])
+            try:
+                return int(bin_name[bin_name.index(':')+1:bin_name.index('-')])
+            except ValueError:
+                return np.nan
         def convert_bin_name_to_chr_end(bin_name):
-            return int(bin_name[bin_name.index('-')+1:])
+            try:
+                return int(bin_name[bin_name.index('-')+1:])
+            except ValueError:
+                return np.nan
         
-        in_bins_df["chr_name"] = in_bins_df[0].apply(convert_bin_name_to_chr_name).astype(str)
-        in_bins_df["chr_start"] = in_bins_df[0].apply(convert_bin_name_to_chr_start).astype(int)
-        in_bins_df["chr_end"] = in_bins_df[0].apply(convert_bin_name_to_chr_end).astype(int)
+        in_bins_df["chr_name"] = in_bins_df[0].apply(convert_bin_name_to_chr_name)
+        in_bins_df["chr_start"] = in_bins_df[0].apply(convert_bin_name_to_chr_start)
+        in_bins_df["chr_end"] = in_bins_df[0].apply(convert_bin_name_to_chr_end)
+
+        in_bins_df = in_bins_df.dropna(subset=["chr_name", "chr_start", "chr_end"])
+
+        in_bins_df["chr_name"] = in_bins_df["chr_name"].astype(str)
+        in_bins_df["chr_start"] = in_bins_df["chr_start"].astype(int)
+        in_bins_df["chr_end"] = in_bins_df["chr_end"].astype(int)
 
         out_f = zarr.open(zarr_filepath, mode='w')
         compressor = Zlib(level=1)
@@ -552,10 +567,14 @@ class SnapToolsWrapper(AbstractWrapper):
             chr_bins_gt_df[0] = chr_bins_gt_df.apply(lambda r: f"{r['chr_name']}:{r['chr_start']}-{r['chr_end']}", axis='columns')
             in_bins_gt_df = in_bins_gt_df.append(chr_bins_gt_df, ignore_index=True)
         
+        print("570")
+
         # We will add a new column i, which should match the _old_ index, so that we will be able join with the data matrix on the original indices.
         # For the new (missing) rows, we will add values for the i column that are greater than any of the original indices, to prevent any joining with the incoming data matrix.
         in_bins_df["i"] = in_bins_df.index.values
         in_bins_gt_df["i"] = in_bins_gt_df.index.values + (np.amax(in_bins_df.index.values) + 1)
+
+        print("575")
         
         in_bins_gt_df = in_bins_gt_df.set_index(0)
         in_bins_df = in_bins_df.set_index(0)
@@ -563,18 +582,28 @@ class SnapToolsWrapper(AbstractWrapper):
         in_bins_join_df = in_bins_df.join(in_bins_gt_df, how='right', lsuffix="", rsuffix="_gt")
         in_bins_join_df["i"] = in_bins_join_df.apply(lambda r: r['i'] if pd.notna(r['i']) else r['i_gt'], axis='columns').astype(int)
 
+        print("583")
+
         # Clean up the joined data frame.
         in_bins_join_df = in_bins_join_df.drop(columns=['chr_name', 'chr_start', 'chr_end', 'i_gt'])
         in_bins_join_df = in_bins_join_df.rename(columns={'chr_name_gt': 'chr_name', 'chr_start_gt': 'chr_start', 'chr_end_gt': 'chr_end'})
 
+        print("591")
+
         in_mtx_df = pd.DataFrame(data=in_mtx.T)
+
+        print("595")
         
         in_bins_i_df = in_bins_join_df.drop(columns=['chr_name', 'chr_start', 'chr_end'])
         in_mtx_join_df = in_bins_i_df.join(in_mtx_df, how='left', on='i')
         in_mtx_join_df = in_mtx_join_df.fillna(value=0.0)
 
+        print("601")
+
         in_mtx_join_df = in_mtx_join_df.drop(columns=['i'])
         in_mtx = in_mtx_join_df.values.T
+
+        print("606")
 
         # Use the new (full) bins dataframe now that in_mtx contains the full set of bins.
         in_bins_df = in_bins_join_df
@@ -590,6 +619,8 @@ class SnapToolsWrapper(AbstractWrapper):
         cluster_ids.sort(key=int)
 
         num_clusters = len(cluster_ids)
+
+        print("617")
         
         # Create each chromosome dataset.
         for chr_name, chr_len in chrom_name_to_length.items():
@@ -677,7 +708,9 @@ class SnapToolsWrapper(AbstractWrapper):
         zarr_tempdir = self.tempdir
         zarr_filepath = join(zarr_tempdir, 'profiles.zarr')
 
+        print("starting _create_genomic_multivec_zarr")
         self._create_genomic_multivec_zarr(zarr_filepath)
+        print("done _create_genomic_multivec_zarr")
 
         if zarr_tempdir is not None:
             obj_routes = [

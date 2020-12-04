@@ -9,14 +9,19 @@ from .constants import DataType as dt, FileType as ft
 from .entities import Cells, CellSets
 
 class AbstractWrapper:
-
-    def __init__(self, **kwargs):
-        self._base_url = kwargs['base_url'] if 'base_url' in kwargs else None
-
     """
     An abstract class that can be extended when
     implementing custom dataset object wrapper classes. 
     """
+
+    def __init__(self, **kwargs):
+        """
+        Abstract constructor to be inherited by dataset wrapper classes.
+
+        :param str base_url: An optional base URL to use in dataset file definitions.
+        """
+        self._base_url = kwargs['base_url'] if 'base_url' in kwargs else None
+
     def get_cells(self, port, dataset_uid, obj_i):
         """
         Get the file definitions and server routes

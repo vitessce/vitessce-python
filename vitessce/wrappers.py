@@ -597,8 +597,8 @@ class SnapToolsWrapper(AbstractWrapper):
         in_bins_i_df = in_bins_join_df.drop(columns=['chr_name', 'chr_start', 'chr_end'])
 
         # TODO: use dask for all the things
-        #in_bins_i_df = dd.from_pandas(in_bins_i_df, npartitions=20)
-        #in_mtx_df = dd.from_pandas(in_mtx_df, npartitions=20)
+        in_bins_i_df = dd.from_pandas(in_bins_i_df, npartitions=20)
+        in_mtx_df = dd.from_pandas(in_mtx_df, npartitions=20)
 
         in_mtx_join_df = in_bins_i_df.join(in_mtx_df, how='left', on='i')
         in_mtx_join_df = in_mtx_join_df.fillna(value=0.0)

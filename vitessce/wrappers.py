@@ -5,10 +5,12 @@ import math
 
 import numpy as np
 import pandas as pd
+import negspy.coordinates as nc
 import zarr
 from numcodecs import Zlib
 from scipy.sparse import csr_matrix
 from scipy.sparse import coo_matrix
+
 
 from starlette.responses import JSONResponse, UJSONResponse
 from starlette.routing import Route, Mount
@@ -498,6 +500,7 @@ class SnapToolsWrapper(AbstractWrapper):
 
     def _create_genomic_multivec_zarr(self, zarr_filepath):
         import dask.dataframe as dd
+        import dask.array as da
 
         in_mtx = self.in_mtx
         in_clusters_df = self.in_clusters_df
@@ -591,18 +594,21 @@ class SnapToolsWrapper(AbstractWrapper):
         
         in_bins_i_df = in_bins_join_df.drop(columns=['chr_name', 'chr_start', 'chr_end'])
 
-        # TODO: use dask for all the thinsg
-        in_bins_i_df = dd.from_pandas(in_bins_i_df, npartitions=20)
-        in_mtx_df = dd.from_pandas(in_mtx_df, npartitions=20)
+        # TODO: use dask for all the things
+        #in_bins_i_df = dd.from_pandas(in_bins_i_df, npartitions=20)
+        #in_mtx_df = dd.from_pandas(in_mtx_df, npartitions=20)
 
-        in_mtx_join_df = in_bins_i_df.merge(in_mtx_df, how='left', on='i', right_index=True)
+        in_mtx_join_df = in_bins_i_df.join(in_mtx_df, how='left', on='i')
         in_mtx_join_df = in_mtx_join_df.fillna(value=0.0)
 
         del in_bins_i_df
         del in_mtx_df
 
         in_mtx_join_df = in_mtx_join_df.drop(columns=['i'])
-        in_mtx = np.asarray(in_mtx_join_df.values.T)
+        if type(in_mtx_join_df.values) == da.Array:
+            in_mtx = in_mtx_join_df.values.compute().T
+        else:
+            in_mtx = in_mtx_join_df.values.T
         del in_mtx_join_df
 
         # Prepare to fill in resolutions dataset

@@ -10,6 +10,7 @@ dependencies:
  - zarr>=2.5.0
  - numcodecs>=0.7.2
  - scipy>=1.0.0
+ - dask>=2.30.0
  - pip
  - pip:
    - loompy>=3.0.6

@@ -150,7 +150,8 @@ setup_args = dict(
         'starlette==0.14.0',
         'zarr>=2.5.0',
         'numcodecs>=0.5.7',
-        'scipy>=1.2.1'
+        'scipy>=1.2.1',
+        'negspy>=0.2.24',
     ],
     packages=find_packages(),
     zip_safe=False,

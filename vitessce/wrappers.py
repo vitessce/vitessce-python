@@ -525,6 +525,8 @@ class SnapToolsWrapper(AbstractWrapper):
             except ValueError:
                 return np.nan
         
+        in_bins_df[0] = in_bins_df[0].apply(lambda x: "chr" + x)
+        
         in_bins_df["chr_name"] = in_bins_df[0].apply(convert_bin_name_to_chr_name)
         in_bins_df["chr_start"] = in_bins_df[0].apply(convert_bin_name_to_chr_start)
         in_bins_df["chr_end"] = in_bins_df[0].apply(convert_bin_name_to_chr_end)
@@ -542,28 +544,28 @@ class SnapToolsWrapper(AbstractWrapper):
         chromosomes_group = out_f.create_group("chromosomes")
 
         # Prepare to fill in chroms dataset
-        chromosomes = in_bins_df["chr_name"].unique().tolist()
+        # "SnapTools performs quantification using a specified aligner, and HuBMAP has standardized on BWA with the GRCh38 reference genome"
+        # Reference: https://github.com/hubmapconsortium/sc-atac-seq-pipeline/blob/bb023f95ca3330128bfef41cc719ffcb2ee6a190/README.md
+        chromosomes = nc.get_chromorder('hg38')
+        chromosomes = [ str(chr_name) for chr_name in chromosomes[:25] ] # TODO: should more than chr1-chrM be used?
         num_chromosomes = len(chromosomes)
-
-        in_chrom_ends_df = in_bins_df.drop_duplicates(subset=['chr_name'], keep='last')
-        in_chrom_ends_df = in_chrom_ends_df.set_index("chr_name")
-
-        chroms_length_arr = np.array([ in_chrom_ends_df.at[x, "chr_end"] for x in chromosomes ], dtype="i8")
+        chroms_length_arr = np.array([ nc.get_chrominfo('hg38').chrom_lengths[x] for x in chromosomes ], dtype="i8")
         chroms_cumsum_arr = np.concatenate((np.array([0]), np.cumsum(chroms_length_arr)))
 
         chromosomes_set = set(chromosomes)
         chrom_name_to_length = dict(zip(chromosomes, chroms_length_arr))
         chrom_name_to_cumsum = dict(zip(chromosomes, chroms_cumsum_arr))
 
+        genome_length = int(np.sum(np.array(list(chrom_name_to_length.values()))))
+
         # The bins dataframe frustratingly does not contain every bin.
         # We need to figure out which bins are missing.
         in_bins_gt_df = pd.DataFrame()
         for chr_name, chr_len in chrom_name_to_length.items():
             chr_bins_gt_df = pd.DataFrame()
-            if chr_len == starting_resolution:
-                chr_bins_gt_df["chr_start"] = np.array([0])
-            else:
-                chr_bins_gt_df["chr_start"] = np.linspace(0, chr_len, num=int(chr_len/starting_resolution + 1))
+
+            num_bins = math.ceil(chr_len/starting_resolution)
+            chr_bins_gt_df["chr_start"] = np.arange(0, num_bins) * starting_resolution
             chr_bins_gt_df["chr_end"] = chr_bins_gt_df["chr_start"] + starting_resolution
             chr_bins_gt_df["chr_start"] = chr_bins_gt_df["chr_start"] + 1
             chr_bins_gt_df["chr_start"] = chr_bins_gt_df["chr_start"].astype(int)
@@ -575,7 +577,7 @@ class SnapToolsWrapper(AbstractWrapper):
         # We will add a new column i, which should match the _old_ index, so that we will be able join with the data matrix on the original indices.
         # For the new (missing) rows, we will add values for the i column that are greater than any of the original indices, to prevent any joining with the incoming data matrix.
         in_bins_df["i"] = in_bins_df.index.values
-        in_bins_gt_df["i"] = in_bins_gt_df.index.values + (np.amax(in_bins_df.index.values) + 1)
+        in_bins_gt_df["i"] = in_bins_gt_df.index.values + (genome_length + 1)
         
         in_bins_gt_df = in_bins_gt_df.set_index(0)
         in_bins_df = in_bins_df.set_index(0)
@@ -627,7 +629,7 @@ class SnapToolsWrapper(AbstractWrapper):
             chr_group = chromosomes_group.create_group(chr_name)
             # Create each resolution group.
             for resolution in resolutions:
-                chr_shape = (num_clusters, int(chr_len / resolution + 1))
+                chr_shape = (num_clusters, math.ceil(chr_len / resolution))
                 chr_group.create_dataset(str(resolution), shape=chr_shape, dtype="f4", fill_value=np.nan, compressor=compressor)
         
         row_infos = []
@@ -651,7 +653,7 @@ class SnapToolsWrapper(AbstractWrapper):
                 # Fill in data for each chromosome of a resolution of a bigwig file.
                 for chr_name in chromosomes:
                     chr_len = chrom_name_to_length[chr_name]
-                    arr_len = int(chr_len / resolution + 1)
+                    arr_len = math.ceil(chr_len / resolution)
                     chr_shape = (num_clusters, arr_len)
 
                     

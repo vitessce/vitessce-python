@@ -7,12 +7,18 @@ from starlette.staticfiles import StaticFiles
 
 from .constants import DataType as dt, FileType as ft
 
+class JsonRoute(Route):
+    def __init__(self, path, endpoint, data_json):
+        super().__init__(path, endpoint)
+        self.data_json = data_json
+    
+
 class AbstractWrapper:
     """
     An abstract class that can be extended when
     implementing custom dataset object wrapper classes. 
     """
-    def get_cells(self, port, dataset_uid, obj_i):
+    def get_cells(self, base_url, dataset_uid, obj_i):
         """
         Get the file definitions and server routes
         corresponding to the ``cells`` data type.
@@ -26,7 +32,7 @@ class AbstractWrapper:
         """
         raise NotImplementedError()
 
-    def get_cell_sets(self, port, dataset_uid, obj_i):
+    def get_cell_sets(self, base_url, dataset_uid, obj_i):
         """
         Get the file definitions and server routes
         corresponding to the ``cell-sets`` data type.
@@ -40,7 +46,7 @@ class AbstractWrapper:
         """
         raise NotImplementedError()
 
-    def get_raster(self, port, dataset_uid, obj_i):
+    def get_raster(self, base_url, dataset_uid, obj_i):
         """
         Get the file definitions and server routes
         corresponding to the ``raster`` data type.
@@ -54,7 +60,7 @@ class AbstractWrapper:
         """
         raise NotImplementedError()
 
-    def get_molecules(self, port, dataset_uid, obj_i):
+    def get_molecules(self, base_url, dataset_uid, obj_i):
         """
         Get the file definitions and server routes
         corresponding to the ``molecules`` data type.
@@ -68,7 +74,7 @@ class AbstractWrapper:
         """
         raise NotImplementedError()
 
-    def get_neighborhoods(self, port, dataset_uid, obj_i):
+    def get_neighborhoods(self, base_url, dataset_uid, obj_i):
         """
         Get the file definitions and server routes
         corresponding to the ``neighborhoods`` data type.
@@ -82,7 +88,7 @@ class AbstractWrapper:
         """
         raise NotImplementedError()
 
-    def get_expression_matrix(self, port, dataset_uid, obj_i):
+    def get_expression_matrix(self, base_url, dataset_uid, obj_i):
         """
         Get the file definitions and server routes
         corresponding to the ``expression-matrix`` data type.
@@ -108,22 +114,22 @@ class AbstractWrapper:
             return UJSONResponse(data_json)
         return response_func
 
-    def _get_data(self, data_type, port, dataset_uid, obj_i):
+    def _get_data(self, data_type, base_url, dataset_uid, obj_i):
         if data_type == dt.CELLS:
-            return self.get_cells(port, dataset_uid, obj_i)
+            return self.get_cells(base_url, dataset_uid, obj_i)
         elif data_type == dt.CELL_SETS:
-            return self.get_cell_sets(port, dataset_uid, obj_i)
+            return self.get_cell_sets(base_url, dataset_uid, obj_i)
         elif data_type == dt.RASTER:
-            return self.get_raster(port, dataset_uid, obj_i)
+            return self.get_raster(base_url, dataset_uid, obj_i)
         elif data_type == dt.MOLECULES:
-            return self.get_molecules(port, dataset_uid, obj_i)
+            return self.get_molecules(base_url, dataset_uid, obj_i)
         elif data_type == dt.NEIGHBORHOODS:
-            return self.get_neighborhoods(port, dataset_uid, obj_i)
+            return self.get_neighborhoods(base_url, dataset_uid, obj_i)
         elif data_type == dt.EXPRESSION_MATRIX:
-            return self.get_expression_matrix(port, dataset_uid, obj_i)
+            return self.get_expression_matrix(base_url, dataset_uid, obj_i)
 
-    def _get_url(self, port, dataset_uid, obj_i, suffix):
-        return f"http://localhost:{port}/{dataset_uid}/{obj_i}/{suffix}"
+    def _get_url(self, base_url, dataset_uid, obj_i, suffix):
+        return base_url + self._get_route(dataset_uid, obj_i, suffix)
 
     def _get_route(self, dataset_uid, obj_i, suffix):
         return f"/{dataset_uid}/{obj_i}/{suffix}"
@@ -160,8 +166,8 @@ class OmeTiffWrapper(AbstractWrapper):
     def _get_offsets_filename(self):
         return os.path.basename(self.offsets_path)
 
-    def get_raster(self, port, dataset_uid, obj_i):
-        img_dir_path, img_url = self.img_path, self._get_url(port, dataset_uid, obj_i, "raster_img")
+    def get_raster(self, base_url, dataset_uid, obj_i):
+        img_dir_path, img_url = self.img_path, self._get_url(base_url, dataset_uid, obj_i, "raster_img")
         offsets_dir_path, offsets_url = (None, None) if self.offsets_path is None else (self._get_offsets_dir(), self._get_url(port, dataset_uid, obj_i, os.path.join("raster_offsets", self._get_offsets_filename())))
 
         raster_json = self._create_raster_json(img_url, offsets_url)
@@ -169,8 +175,8 @@ class OmeTiffWrapper(AbstractWrapper):
         obj_routes = [
             Mount(self._get_route(dataset_uid, obj_i, "raster_img"),
                   app=StaticFiles(directory=img_dir_path, html=False, check_dir=False)),
-            Route(self._get_route(dataset_uid, obj_i, "raster"),
-                  self._create_response_json(raster_json))
+            JsonRoute(self._get_route(dataset_uid, obj_i, "raster"),
+                  self._create_response_json(raster_json), raster_json)
         ]
         if self.offsets_path is not None:
             obj_routes.append(
@@ -182,7 +188,7 @@ class OmeTiffWrapper(AbstractWrapper):
             {
                 "type": dt.RASTER.value,
                 "fileType": ft.RASTER_JSON.value,
-                "url": self._get_url(port, dataset_uid, obj_i, "raster")
+                "url": self._get_url(base_url, dataset_uid, obj_i, "raster")
             }
         ]
 
@@ -240,7 +246,7 @@ class ZarrDirectoryStoreWrapper(AbstractWrapper):
         }
         return raster_json
 
-    def get_raster(self, port, dataset_uid, obj_i):
+    def get_raster(self, base_url, dataset_uid, obj_i):
         obj_routes = []
         obj_file_defs = []
         try:
@@ -249,20 +255,20 @@ class ZarrDirectoryStoreWrapper(AbstractWrapper):
                 img_dir_path = self.z.store.path
 
                 raster_json = self._create_raster_json(
-                    self._get_url(port, dataset_uid, obj_i, "raster_img"),
+                    self._get_url(base_url, dataset_uid, obj_i, "raster_img"),
                 )
 
                 obj_routes = [
                     Mount(self._get_route(dataset_uid, obj_i, "raster_img"),
                           app=StaticFiles(directory=img_dir_path, html=False)),
-                    Route(self._get_route(dataset_uid, obj_i, "raster"),
-                          self._create_response_json(raster_json))
+                    JsonRoute(self._get_route(dataset_uid, obj_i, "raster"),
+                          self._create_response_json(raster_json), raster_json)
                 ]
                 obj_file_defs = [
                     {
                         "type": dt.RASTER.value,
                         "fileType": ft.RASTER_JSON.value,
-                        "url": self._get_url(port, dataset_uid, obj_i, "raster")
+                        "url": self._get_url(base_url, dataset_uid, obj_i, "raster")
                     }
                 ]
         except ImportError:
@@ -383,7 +389,7 @@ class AnnDataWrapper(AbstractWrapper):
         return zarr_tempdir, zarr_filepath
 
 
-    def get_cells(self, port, dataset_uid, obj_i):
+    def get_cells(self, base_url, dataset_uid, obj_i):
         obj_routes = []
         obj_file_defs = []
         try:
@@ -392,14 +398,14 @@ class AnnDataWrapper(AbstractWrapper):
                 cells_json = self._create_cells_json()
 
                 obj_routes = [
-                    Route(self._get_route(dataset_uid, obj_i, "cells"),
-                          self._create_response_json(cells_json)),
+                    JsonRoute(self._get_route(dataset_uid, obj_i, "cells"),
+                          self._create_response_json(cells_json), cells_json),
                 ]
                 obj_file_defs = [
                     {
                         "type": dt.CELLS.value,
                         "fileType": ft.CELLS_JSON.value,
-                        "url": self._get_url(port, dataset_uid, obj_i, "cells")
+                        "url": self._get_url(base_url, dataset_uid, obj_i, "cells")
                     }
                 ]
         except ImportError:
@@ -407,7 +413,7 @@ class AnnDataWrapper(AbstractWrapper):
 
         return obj_file_defs, obj_routes
 
-    def get_cell_sets(self, port, dataset_uid, obj_i):
+    def get_cell_sets(self, base_url, dataset_uid, obj_i):
         obj_routes = []
         obj_file_defs = []
         try:
@@ -416,14 +422,14 @@ class AnnDataWrapper(AbstractWrapper):
                 cell_sets_json = self._create_cell_sets_json()
 
                 obj_routes = [
-                    Route(self._get_route(dataset_uid, obj_i, "cell-sets"),
-                          self._create_response_json(cell_sets_json)),
+                    JsonRoute(self._get_route(dataset_uid, obj_i, "cell-sets"),
+                          self._create_response_json(cell_sets_json), cell_sets_json),
                 ]
                 obj_file_defs = [
                     {
                         "type": dt.CELL_SETS.value,
                         "fileType": ft.CELL_SETS_JSON.value,
-                        "url": self._get_url(port, dataset_uid, obj_i, "cell-sets")
+                        "url": self._get_url(base_url, dataset_uid, obj_i, "cell-sets")
                     }
                 ]
         except ImportError:
@@ -431,7 +437,7 @@ class AnnDataWrapper(AbstractWrapper):
 
         return obj_file_defs, obj_routes
     
-    def get_expression_matrix(self, port, dataset_uid, obj_i):
+    def get_expression_matrix(self, base_url, dataset_uid, obj_i):
         obj_routes = []
         obj_file_defs = []
 
@@ -447,7 +453,7 @@ class AnnDataWrapper(AbstractWrapper):
                 {
                     "type": dt.EXPRESSION_MATRIX.value,
                     "fileType": ft.EXPRESSION_MATRIX_ZARR.value,
-                    "url": self._get_url(port, dataset_uid, obj_i, "expression/matrix.zarr")
+                    "url": self._get_url(base_url, dataset_uid, obj_i, "expression/matrix.zarr"),
                 }
             ]
 
@@ -460,7 +466,7 @@ class LoomWrapper(AbstractWrapper):
     def __init__(self, loom):
         self.loom = loom
 
-    def get_cells(self, port, dataset_uid, obj_i):
+    def get_cells(self, base_url, dataset_uid, obj_i):
         obj_routes = []
         obj_file_defs = []
         """

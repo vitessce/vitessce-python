@@ -90,12 +90,14 @@ class VitessceWidget(widgets.DOMWidget):
             VitessceWidget.next_port += 1
         else:
             use_port = port
+        
+        base_url = f"http://localhost:{use_port}"
 
         assert type(config) == VitessceConfig
         
         routes = []
         def on_obj(obj, dataset_uid, obj_i):
-            obj_file_defs, obj_routes = create_obj_routes(obj, use_port, dataset_uid, obj_i)
+            obj_file_defs, obj_routes = create_obj_routes(obj, base_url, dataset_uid, obj_i)
             for obj_route in obj_routes:
                 routes.append(obj_route)
             return obj_file_defs

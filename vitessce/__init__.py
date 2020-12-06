@@ -10,6 +10,7 @@ from .wrappers import (
     AnnDataWrapper,
     LoomWrapper,
 )
+from .export import upload_to_s3
 
 def _jupyter_nbextension_paths():
     """Called by Jupyter Notebook Server to detect if it is a valid nbextension and

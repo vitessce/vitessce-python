@@ -1,7 +1,7 @@
 
 from .constants import DataType as dt
 
-def create_obj_routes(obj, port, dataset_uid, obj_i):
+def create_obj_routes(obj, base_url, dataset_uid, obj_i):
 	"""
 	For a particular data object, simultaneously set up:
 	
@@ -19,7 +19,7 @@ def create_obj_routes(obj, port, dataset_uid, obj_i):
 
 	for data_type in dt:
 		try:
-			dt_obj_file_defs, dt_obj_routes = obj._get_data(data_type, port, dataset_uid, obj_i)
+			dt_obj_file_defs, dt_obj_routes = obj._get_data(data_type, base_url, dataset_uid, obj_i)
 			obj_file_defs += dt_obj_file_defs
 			obj_routes += dt_obj_routes
 		except NotImplementedError:

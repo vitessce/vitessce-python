@@ -10,6 +10,7 @@ dependencies:
  - scanpy>=1.6.0
  - jupyterlab>=1.0.10
  - zarr>=2.5.0
+ - boto3>=1.16.30
  - pip
  - pip:
    - loompy>=3.0.6

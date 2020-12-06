@@ -719,6 +719,7 @@ class SnapToolsWrapper(AbstractWrapper):
         cell_ids = in_clusters_df.index.values.tolist()
         in_clusters_df['cluster'] = in_clusters_df['cluster'].astype(str)
         cluster_ids = in_clusters_df['cluster'].unique().tolist()
+        cluster_ids.sort(key=int)
         cell_cluster_ids = in_clusters_df['cluster'].values.tolist()
 
         cell_cluster_tuples = list(zip(cell_ids, cell_cluster_ids))

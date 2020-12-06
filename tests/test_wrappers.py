@@ -130,4 +130,7 @@ class TestWrappers(unittest.TestCase):
         self.assertEqual(z['chromosomes/chr2/5000'][:,2].sum(), 4)
         self.assertEqual(z['chromosomes/chr2/5000'][:,3].sum(), 9)
         self.assertEqual(z['chromosomes/chr2/10000'][:,1].sum(), 13)
+        self.assertEqual(z['chromosomes/chr3/5000'][:,3].sum(), 9)
+        self.assertEqual(z['chromosomes/chr3/5000'][:].sum(), 9)
+        self.assertEqual(z['chromosomes/chr18/5000'][:].sum(), 8)
         

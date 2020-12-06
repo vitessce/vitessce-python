@@ -499,9 +499,6 @@ class SnapToolsWrapper(AbstractWrapper):
 
 
     def _create_genomic_multivec_zarr(self, zarr_filepath):
-        import dask.dataframe as dd
-        import dask.array as da
-
         in_mtx = self.in_mtx
         in_clusters_df = self.in_clusters_df
         in_barcodes_df = self.in_barcodes_df
@@ -556,63 +553,6 @@ class SnapToolsWrapper(AbstractWrapper):
         chrom_name_to_length = dict(zip(chromosomes, chroms_length_arr))
         chrom_name_to_cumsum = dict(zip(chromosomes, chroms_cumsum_arr))
 
-        genome_length = int(np.sum(np.array(list(chrom_name_to_length.values()))))
-
-        # The bins dataframe frustratingly does not contain every bin.
-        # We need to figure out which bins are missing.
-        in_bins_gt_df = pd.DataFrame()
-        for chr_name, chr_len in chrom_name_to_length.items():
-            chr_bins_gt_df = pd.DataFrame()
-
-            num_bins = math.ceil(chr_len/starting_resolution)
-            chr_bins_gt_df["chr_start"] = np.arange(0, num_bins) * starting_resolution
-            chr_bins_gt_df["chr_end"] = chr_bins_gt_df["chr_start"] + starting_resolution
-            chr_bins_gt_df["chr_start"] = chr_bins_gt_df["chr_start"] + 1
-            chr_bins_gt_df["chr_start"] = chr_bins_gt_df["chr_start"].astype(int)
-            chr_bins_gt_df["chr_end"] = chr_bins_gt_df["chr_end"].astype(int)
-            chr_bins_gt_df["chr_name"] = chr_name
-            chr_bins_gt_df[0] = chr_bins_gt_df.apply(lambda r: f"{r['chr_name']}:{r['chr_start']}-{r['chr_end']}", axis='columns')
-            in_bins_gt_df = in_bins_gt_df.append(chr_bins_gt_df, ignore_index=True)
-        
-        # We will add a new column i, which should match the _old_ index, so that we will be able join with the data matrix on the original indices.
-        # For the new (missing) rows, we will add values for the i column that are greater than any of the original indices, to prevent any joining with the incoming data matrix.
-        in_bins_df["i"] = in_bins_df.index.values
-        in_bins_gt_df["i"] = in_bins_gt_df.index.values + (genome_length + 1)
-        
-        in_bins_gt_df = in_bins_gt_df.set_index(0)
-        in_bins_df = in_bins_df.set_index(0)
-        
-        in_bins_join_df = in_bins_df.join(in_bins_gt_df, how='right', lsuffix="", rsuffix="_gt")
-        in_bins_join_df["i"] = in_bins_join_df.apply(lambda r: r['i'] if pd.notna(r['i']) else r['i_gt'], axis='columns').astype(int)
-
-        del in_bins_df
-        del in_bins_gt_df
-
-        # Clean up the joined data frame.
-        in_bins_join_df = in_bins_join_df.drop(columns=['chr_name', 'chr_start', 'chr_end', 'i_gt'])
-        in_bins_join_df = in_bins_join_df.rename(columns={'chr_name_gt': 'chr_name', 'chr_start_gt': 'chr_start', 'chr_end_gt': 'chr_end'})
-
-        in_mtx_df = pd.DataFrame(data=in_mtx.T)
-        
-        in_bins_i_df = in_bins_join_df.drop(columns=['chr_name', 'chr_start', 'chr_end'])
-
-        # TODO: use dask for all the things
-        in_bins_i_df = dd.from_pandas(in_bins_i_df, npartitions=20)
-        in_mtx_df = dd.from_pandas(in_mtx_df, npartitions=20)
-
-        in_mtx_join_df = in_bins_i_df.join(in_mtx_df, how='left', on='i')
-        in_mtx_join_df = in_mtx_join_df.fillna(value=0.0)
-
-        del in_bins_i_df
-        del in_mtx_df
-
-        in_mtx_join_df = in_mtx_join_df.drop(columns=['i'])
-        if type(in_mtx_join_df.values) == da.Array:
-            in_mtx = in_mtx_join_df.values.compute().T
-        else:
-            in_mtx = in_mtx_join_df.values.T
-        del in_mtx_join_df
-
         # Prepare to fill in resolutions dataset
         resolutions = [ starting_resolution*(2**x) for x in range(16) ]
         resolution_exps = [ (2**x) for x in range(16) ]
@@ -631,34 +571,71 @@ class SnapToolsWrapper(AbstractWrapper):
             for resolution in resolutions:
                 chr_shape = (num_clusters, math.ceil(chr_len / resolution))
                 chr_group.create_dataset(str(resolution), shape=chr_shape, dtype="f4", fill_value=np.nan, compressor=compressor)
+
+            # The bins dataframe frustratingly does not contain every bin.
+            # We need to figure out which bins are missing.
+
+            chr_bins_in_df = in_bins_df.loc[in_bins_df["chr_name"] == chr_name]
+            if chr_bins_in_df.shape[0] == 0:
+                continue
+
+            chr_bin_i_start = int(chr_bins_in_df.head(1).iloc[0].name)
+            chr_bin_i_end = int(chr_bins_in_df.tail(1).iloc[0].name) + 1
+            
+            chr_mtx = in_mtx[:,chr_bin_i_start:chr_bin_i_end]
+
+            chr_bins_gt_df = pd.DataFrame()
+            chr_bins_gt_df["chr_start"] = np.arange(0, math.ceil(chr_len/starting_resolution)) * starting_resolution
+            chr_bins_gt_df["chr_end"] = chr_bins_gt_df["chr_start"] + starting_resolution
+            chr_bins_gt_df["chr_start"] = chr_bins_gt_df["chr_start"] + 1
+            chr_bins_gt_df["chr_start"] = chr_bins_gt_df["chr_start"].astype(int)
+            chr_bins_gt_df["chr_end"] = chr_bins_gt_df["chr_end"].astype(int)
+            chr_bins_gt_df["chr_name"] = chr_name
+            chr_bins_gt_df[0] = chr_bins_gt_df.apply(lambda r: f"{r['chr_name']}:{r['chr_start']}-{r['chr_end']}", axis='columns')
+            
+            # We will add a new column i, which should match the _old_ index, so that we will be able join with the data matrix on the original indices.
+            # For the new (missing) rows, we will add values for the i column that are greater than any of the original indices, to prevent any joining with the incoming data matrix.
+            chr_bins_in_df = chr_bins_in_df.reset_index(drop=True)
+            chr_bins_in_df["i"] = chr_bins_in_df.index.values
+            chr_bins_gt_df["i"] = chr_bins_gt_df.index.values + (in_mtx.shape[1] + 1)
+            
+            chr_bins_gt_df = chr_bins_gt_df.set_index(0)
+            chr_bins_in_df = chr_bins_in_df.set_index(0)
+            
+            chr_bins_in_join_df = chr_bins_in_df.join(chr_bins_gt_df, how='right', lsuffix="", rsuffix="_gt")
+            chr_bins_in_join_df["i"] = chr_bins_in_join_df.apply(lambda r: r['i'] if pd.notna(r['i']) else r['i_gt'], axis='columns').astype(int)
+
+            # Clean up the joined data frame.
+            chr_bins_in_join_df = chr_bins_in_join_df.drop(columns=['chr_name', 'chr_start', 'chr_end', 'i_gt'])
+            chr_bins_in_join_df = chr_bins_in_join_df.rename(columns={'chr_name_gt': 'chr_name', 'chr_start_gt': 'chr_start', 'chr_end_gt': 'chr_end'})
+
+            chr_mtx_df = pd.DataFrame(data=chr_mtx.T)
+            
+            chr_bins_i_df = chr_bins_in_join_df.drop(columns=['chr_name', 'chr_start', 'chr_end'])
+
+            chr_mtx_join_df = chr_bins_i_df.join(chr_mtx_df, how='left', on='i')
+            chr_mtx_join_df = chr_mtx_join_df.fillna(value=0.0)
+
+            chr_mtx_join_df = chr_mtx_join_df.drop(columns=['i'])
+            chr_mtx = chr_mtx_join_df.values.T
         
-        row_infos = []
-        for cluster_index, cluster_id in enumerate(cluster_ids):
-            cluster_df = in_clusters_df.loc[in_clusters_df["cluster"] == cluster_id]
-            cluster_cell_ids = cluster_df.index.values.tolist()
-            cluster_num_cells = len(cluster_cell_ids)
-            cluster_cells_tf = (in_barcodes_df[0].isin(cluster_cell_ids)).values
+            for cluster_index, cluster_id in enumerate(cluster_ids):
+                cluster_df = in_clusters_df.loc[in_clusters_df["cluster"] == cluster_id]
+                cluster_cell_ids = cluster_df.index.values.tolist()
+                cluster_num_cells = len(cluster_cell_ids)
+                cluster_cells_tf = (in_barcodes_df[0].isin(cluster_cell_ids)).values
 
-            cluster_profiles = {}
+                cluster_cell_by_bin_mtx = chr_mtx[cluster_cells_tf,:]
+                cluster_profile = cluster_cell_by_bin_mtx.sum(axis=0)
 
-            for chrom_name in chromosomes:
-                chrom_len = chrom_name_to_length[chrom_name]
-                chrom_bins_tf = (in_bins_join_df["chr_name"] == chrom_name).values
+                # Fill in data for each resolution of a bigwig file.
+                for resolution, resolution_exp in zip(resolutions, resolution_exps):
 
-                cluster_cell_by_bin_mtx = in_mtx[np.ix_(cluster_cells_tf, chrom_bins_tf)]
-                cluster_profiles[chrom_name] = cluster_cell_by_bin_mtx.sum(axis=0)
-
-            # Fill in data for each resolution of a bigwig file.
-            for resolution, resolution_exp in zip(resolutions, resolution_exps):
-                # Fill in data for each chromosome of a resolution of a bigwig file.
-                for chr_name in chromosomes:
-                    chr_len = chrom_name_to_length[chr_name]
                     arr_len = math.ceil(chr_len / resolution)
                     chr_shape = (num_clusters, arr_len)
 
-                    
                     # Group every `resolution` values together and take sum.
-                    values = cluster_profiles[chr_name]
+                    values = cluster_profile
                     padding_len = resolution_exp - (values.shape[0] % resolution_exp)
                     if values.shape[0] % resolution_exp > 0:
                         values = np.concatenate((values, np.zeros((padding_len,))))
@@ -669,14 +646,13 @@ class SnapToolsWrapper(AbstractWrapper):
                     if padding_len > 0:
                         arr = np.concatenate((arr, np.zeros((padding_len,))))
                     chromosomes_group[chr_name][str(resolution)][cluster_index,:] = arr
-            
-            row_infos.append({
-                "cluster": cluster_id,
-            })
        
         # out_f.attrs should contain all tileset_info properties
         # For zarr, more attributes are used here to allow "serverless"
-        out_f.attrs['row_infos'] = row_infos
+        out_f.attrs['row_infos'] = [
+            { "cluster": cluster_id }
+            for cluster_id in cluster_ids
+        ]
         out_f.attrs['resolutions'] = sorted(resolutions, reverse=True)
         out_f.attrs['shape'] = [ num_clusters, 256 ]
         out_f.attrs['name'] = "SnapTools"

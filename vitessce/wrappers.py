@@ -755,3 +755,44 @@ class SnapToolsWrapper(AbstractWrapper):
         ]
 
         return obj_file_defs, obj_routes
+    
+    def _create_cells_json(self):
+        in_clusters_df = self.in_clusters_df
+
+        cell_ids = in_clusters_df.index.tolist()
+        cell_mappings = []
+
+        mapping = in_clusters_df[["umap.1", "umap.2"]].values.tolist()
+        cell_mappings.append(list(zip(
+            ["UMAP" for i in range(len(mapping))],
+            mapping
+        )))
+        cell_mappings_zip = list(zip(*cell_mappings))
+        cells_json = dict(zip(
+            cell_ids,
+            [
+                {'mappings': dict(cell_mapping), 'genes': {}}
+                for cell_mapping in cell_mappings_zip
+            ]
+        ))
+        return cells_json
+    
+    def get_cells(self, port, dataset_uid, obj_i):
+        obj_routes = []
+        obj_file_defs = []
+
+        cells_json = self._create_cells_json()
+
+        obj_routes = [
+            Route(self._get_route(dataset_uid, obj_i, "cells"),
+                    self._create_response_json(cells_json)),
+        ]
+        obj_file_defs = [
+            {
+                "type": dt.CELLS.value,
+                "fileType": ft.CELLS_JSON.value,
+                "url": self._get_url(port, dataset_uid, obj_i, "cells")
+            }
+        ]
+
+        return obj_file_defs, obj_routes

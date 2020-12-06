@@ -676,7 +676,6 @@ class SnapToolsWrapper(AbstractWrapper):
             for (chr_name, chr_len) in list(zip(chromosomes, chroms_length_arr))
         ]
 
-
         return
 
     def get_genomic_profiles(self, port, dataset_uid, obj_i):
@@ -686,9 +685,8 @@ class SnapToolsWrapper(AbstractWrapper):
         zarr_tempdir = self.tempdir
         zarr_filepath = join(zarr_tempdir, 'profiles.zarr')
 
-        #print("starting _create_genomic_multivec_zarr")
-        #self._create_genomic_multivec_zarr(zarr_filepath)
-        #print("done _create_genomic_multivec_zarr")
+        print("Please wait, the following conversion is slow")
+        self._create_genomic_multivec_zarr(zarr_filepath)
 
         if zarr_tempdir is not None:
             obj_routes = [

@@ -11,6 +11,11 @@ from .wrappers import (
     LoomWrapper,
     SnapToolsWrapper,
 )
+from .entities import (
+    CellSets,
+    Cells,
+    Molecules,
+)
 
 def _jupyter_nbextension_paths():
     """Called by Jupyter Notebook Server to detect if it is a valid nbextension and

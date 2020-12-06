@@ -1,6 +1,6 @@
-# vitessce-jupyter
+# vitessce-python
 
-Jupyter widget facilitating interactive visualization of spatial single-cell data with Vitessce
+Python API and Jupyter widget facilitating interactive visualization of spatial single-cell data with Vitessce.
 
 
 ## Installation
@@ -26,8 +26,10 @@ These contain demos of different use cases and integrations with single-cell dat
 
 For a development installation (requires npm),
 
-    $ git clone https://github.com/vitessce/vitessce-jupyter.git
-    $ cd vitessce-jupyter
+    $ git clone https://github.com/vitessce/vitessce-python.git
+    $ cd vitessce-python
+    $ conda env create -f environment.yml
+    $ conda activate vitessce-jupyter-dev
     $ pip install -e .
     $ jupyter nbextension install --py --symlink --sys-prefix vitessce
     $ jupyter nbextension enable --py --sys-prefix vitessce

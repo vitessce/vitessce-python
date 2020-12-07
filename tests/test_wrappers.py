@@ -154,7 +154,7 @@ class TestWrappers(unittest.TestCase):
         self.assertEqual(z['chromosomes/chr3/5000'][:].sum(), 9)
         self.assertEqual(z['chromosomes/chr18/5000'][:].sum(), 8)
 
-        cells_json = w._create_cells_json()
+        cells_json = w.create_cells_json()
         self.assertEqual(len(cells_json), 6)
         self.assertEqual(cells_json['AAACATCGAGTACAAGACAGCAGA'], {'mappings': {'UMAP': [4.43, 1.64]}, 'genes': {}})
         

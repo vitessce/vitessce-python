@@ -91,7 +91,7 @@ class TestWrappers(unittest.TestCase):
     
     def test_base_url(self):
         z = zarr.open('data/test.ome.zarr')
-        w = ZarrDirectoryStoreWrapper(z, base_url="https://example.com")
+        w = OmeZarrWrapper(z, base_url="https://example.com")
 
         raster_json = w.create_raster_json(
             "https://example.com/raster_img"

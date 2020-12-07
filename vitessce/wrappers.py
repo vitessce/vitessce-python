@@ -457,7 +457,7 @@ class LoomWrapper(AbstractWrapper):
  
         return obj_file_defs, obj_routes
 
-class SnapToolsWrapper(AbstractWrapper):
+class SnapWrapper(AbstractWrapper):
 
     # The Snap file is difficult to work with.
     # For now we can use the processed cell-by-bin MTX file

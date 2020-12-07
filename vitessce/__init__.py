@@ -9,7 +9,7 @@ from .wrappers import (
     OmeZarrWrapper,
     AnnDataWrapper,
     LoomWrapper,
-    SnapToolsWrapper,
+    SnapWrapper,
 )
 from .entities import (
     CellSets,

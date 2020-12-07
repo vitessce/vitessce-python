@@ -20,7 +20,7 @@ from vitessce import (
     OmeZarrWrapper,
     AnnDataWrapper,
     LoomWrapper,
-    SnapToolsWrapper,
+    SnapWrapper,
 )
 
 class TestWrappers(unittest.TestCase):
@@ -110,7 +110,7 @@ class TestWrappers(unittest.TestCase):
 
         zarr_filepath = join('data', 'test_out.snap.multivec.zarr')
 
-        w = SnapToolsWrapper(mtx, barcodes_df, bins_df, clusters_df)
+        w = SnapWrapper(mtx, barcodes_df, bins_df, clusters_df)
         w._create_genomic_multivec_zarr(zarr_filepath)
 
         z = zarr.open(zarr_filepath, mode='r')

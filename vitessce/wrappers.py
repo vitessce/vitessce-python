@@ -733,7 +733,7 @@ class SnapWrapper(AbstractWrapper):
         return obj_file_defs, obj_routes
     
 
-    def _create_cell_sets_json(self):
+    def create_cell_sets_json(self):
         in_clusters_df = self.in_clusters_df
         cell_sets_json = {
             "datatype": "cell",
@@ -769,7 +769,7 @@ class SnapWrapper(AbstractWrapper):
         obj_routes = []
         obj_file_defs = []
 
-        cell_sets_json = self._create_cell_sets_json()
+        cell_sets_json = self.create_cell_sets_json()
 
         obj_routes = [
             Route(self._get_route(dataset_uid, obj_i, "cell-sets"),
@@ -785,7 +785,7 @@ class SnapWrapper(AbstractWrapper):
 
         return obj_file_defs, obj_routes
     
-    def _create_cells_json(self):
+    def create_cells_json(self):
         in_clusters_df = self.in_clusters_df
 
         cell_ids = in_clusters_df.index.tolist()
@@ -810,7 +810,7 @@ class SnapWrapper(AbstractWrapper):
         obj_routes = []
         obj_file_defs = []
 
-        cells_json = self._create_cells_json()
+        cells_json = self.create_cells_json()
 
         obj_routes = [
             Route(self._get_route(dataset_uid, obj_i, "cells"),

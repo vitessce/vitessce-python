@@ -462,6 +462,7 @@ class SnapToolsWrapper(AbstractWrapper):
     # The Snap file is difficult to work with.
     # For now we can use the processed cell-by-bin MTX file
     # However, the HuBMAP pipeline currently computes this with resolution 5000
+    # TODO: Make a PR to sc-atac-seq-pipeline to output this at a higher resolution (e.g. 200)
     # https://github.com/hubmapconsortium/sc-atac-seq-pipeline/blob/develop/bin/snapAnalysis.R#L93
 
     def __init__(self, in_mtx, in_barcodes_df, in_bins_df, in_clusters_df, starting_resolution=5000):
@@ -474,7 +475,7 @@ class SnapToolsWrapper(AbstractWrapper):
 
         self.starting_resolution = starting_resolution
 
-        # Convert to dense if sparse
+        # Convert to dense matrix if sparse.
         if type(in_mtx) == coo_matrix:
             self.in_mtx = in_mtx.toarray()
 
@@ -487,6 +488,7 @@ class SnapToolsWrapper(AbstractWrapper):
 
         starting_resolution = self.starting_resolution
 
+        # The bin datafram consists of one column like chrName:binStart-binEnd
         def convert_bin_name_to_chr_name(bin_name):
             try:
                 return bin_name[:bin_name.index(':')]
@@ -503,25 +505,31 @@ class SnapToolsWrapper(AbstractWrapper):
             except ValueError:
                 return np.nan
         
+        # The genome assembly is GRCh38 but the chromosome names in the bin names do not start with the "chr" prefix.
+        # This is incompatible with the chromosome names from `negspy`, so we need to append the prefix.
         in_bins_df[0] = in_bins_df[0].apply(lambda x: "chr" + x)
         
         in_bins_df["chr_name"] = in_bins_df[0].apply(convert_bin_name_to_chr_name)
         in_bins_df["chr_start"] = in_bins_df[0].apply(convert_bin_name_to_chr_start)
         in_bins_df["chr_end"] = in_bins_df[0].apply(convert_bin_name_to_chr_end)
 
+        # Drop any rows that had incorrect bin strings (missing a chromosome name, bin start, or bin end value).
         in_bins_df = in_bins_df.dropna(subset=["chr_name", "chr_start", "chr_end"])
 
+        # Ensure that the columns have the expect types.
         in_bins_df["chr_name"] = in_bins_df["chr_name"].astype(str)
         in_bins_df["chr_start"] = in_bins_df["chr_start"].astype(int)
         in_bins_df["chr_end"] = in_bins_df["chr_end"].astype(int)
 
+        # Create the Zarr store for the outputs.
         out_f = zarr.open(zarr_filepath, mode='w')
         compressor = Zlib(level=1)
 
-        # Create level zero groups
+        # Create the chromosomes group in the output store.
         chromosomes_group = out_f.create_group("chromosomes")
 
-        # Prepare to fill in chroms dataset
+        # Prepare to fill in the chromosomes datasets.
+        
         # "SnapTools performs quantification using a specified aligner, and HuBMAP has standardized on BWA with the GRCh38 reference genome"
         # Reference: https://github.com/hubmapconsortium/sc-atac-seq-pipeline/blob/bb023f95ca3330128bfef41cc719ffcb2ee6a190/README.md
         chromosomes = nc.get_chromorder('hg38')
@@ -534,7 +542,7 @@ class SnapToolsWrapper(AbstractWrapper):
         chrom_name_to_length = dict(zip(chromosomes, chroms_length_arr))
         chrom_name_to_cumsum = dict(zip(chromosomes, chroms_cumsum_arr))
 
-        # Prepare to fill in resolutions dataset
+        # Prepare to fill in resolutions datasets.
         resolutions = [ starting_resolution*(2**x) for x in range(16) ]
         resolution_exps = [ (2**x) for x in range(16) ]
 
@@ -556,15 +564,23 @@ class SnapToolsWrapper(AbstractWrapper):
             # The bins dataframe frustratingly does not contain every bin.
             # We need to figure out which bins are missing.
 
+            # We want to check for missing bins in each chromosome separately,
+            # otherwise too much memory is used during the join step.
             chr_bins_in_df = in_bins_df.loc[in_bins_df["chr_name"] == chr_name]
             if chr_bins_in_df.shape[0] == 0:
+                # No processing or output is necessary if there is no data for this chromosome.
+                # Continue on through all resolutions of this chromosome to the next chromosome.
                 continue
-
+            
+            # Determine the indices of the matrix at which the bins for this chromosome start and end.
             chr_bin_i_start = int(chr_bins_in_df.head(1).iloc[0].name)
             chr_bin_i_end = int(chr_bins_in_df.tail(1).iloc[0].name) + 1
             
+            # Extract the part of the matrix corresponding to the current chromosome.
             chr_mtx = in_mtx[:,chr_bin_i_start:chr_bin_i_end]
 
+            # Create a list of the "ground truth" bins (all bins from position 0 to the end of the chromosome).
+            # We will join the input bins onto this dataframe to determine which bins are missing.
             chr_bins_gt_df = pd.DataFrame()
             chr_bins_gt_df["chr_start"] = np.arange(0, math.ceil(chr_len/starting_resolution)) * starting_resolution
             chr_bins_gt_df["chr_end"] = chr_bins_gt_df["chr_start"] + starting_resolution
@@ -574,62 +590,78 @@ class SnapToolsWrapper(AbstractWrapper):
             chr_bins_gt_df["chr_name"] = chr_name
             chr_bins_gt_df[0] = chr_bins_gt_df.apply(lambda r: f"{r['chr_name']}:{r['chr_start']}-{r['chr_end']}", axis='columns')
             
-            # We will add a new column i, which should match the _old_ index, so that we will be able join with the data matrix on the original indices.
-            # For the new (missing) rows, we will add values for the i column that are greater than any of the original indices, to prevent any joining with the incoming data matrix.
+            # We will add a new column "i", which should match the _old_ index, so that we will be able join with the data matrix on the original indices.
+            # For the new rows, we will add values for the "i" column that are greater than any of the original indices,
+            # to prevent any joining with the incoming data matrix onto these bins for which the data is missing.
             chr_bins_in_df = chr_bins_in_df.reset_index(drop=True)
             chr_bins_in_df["i"] = chr_bins_in_df.index.values
             chr_bins_gt_df["i"] = chr_bins_gt_df.index.values + (in_mtx.shape[1] + 1)
             
+            # Set the full bin string column as the index of both data frames.
             chr_bins_gt_df = chr_bins_gt_df.set_index(0)
             chr_bins_in_df = chr_bins_in_df.set_index(0)
             
+            # Join the input bin subset dataframe right onto the full bin ground truth dataframe.
             chr_bins_in_join_df = chr_bins_in_df.join(chr_bins_gt_df, how='right', lsuffix="", rsuffix="_gt")
+            # The bins which were not present in the input will have NaN values in the "i" column.
+            # For these rows, we replace the NaN values with the much higher "i_gt" values which will not match to any index of the data matrix.
             chr_bins_in_join_df["i"] = chr_bins_in_join_df.apply(lambda r: r['i'] if pd.notna(r['i']) else r['i_gt'], axis='columns').astype(int)
 
-            # Clean up the joined data frame.
+            # Clean up the joined data frame by removing unnecessary columns.
             chr_bins_in_join_df = chr_bins_in_join_df.drop(columns=['chr_name', 'chr_start', 'chr_end', 'i_gt'])
             chr_bins_in_join_df = chr_bins_in_join_df.rename(columns={'chr_name_gt': 'chr_name', 'chr_start_gt': 'chr_start', 'chr_end_gt': 'chr_end'})
-
+            
+            # Create a dataframe from the data matrix, so that we can join to the joined bins dataframe.
             chr_mtx_df = pd.DataFrame(data=chr_mtx.T)
             
             chr_bins_i_df = chr_bins_in_join_df.drop(columns=['chr_name', 'chr_start', 'chr_end'])
 
+            # Join the data matrix dataframe and the bins dataframe.
+            # Bins that are missing from the data matrix will have "i" values higher than any of the data matrix dataframe row indices,
+            # and therefore the data values for these bins in the resulting joined dataframe will all be NaN.
             chr_mtx_join_df = chr_bins_i_df.join(chr_mtx_df, how='left', on='i')
+            # We fill in these NaN values with 0.
             chr_mtx_join_df = chr_mtx_join_df.fillna(value=0.0)
-
+            
+            # Drop the "i" column, since it is not necessary now that we have done the join.
             chr_mtx_join_df = chr_mtx_join_df.drop(columns=['i'])
+            # Obtain the new full data matrix, which contains values for all bins of the chromosome.
             chr_mtx = chr_mtx_join_df.values.T
-        
+
+            # Fill in the Zarr store with data for each cluster.
             for cluster_index, cluster_id in enumerate(cluster_ids):
+                # Get the list of cells in the current cluster.
                 cluster_df = in_clusters_df.loc[in_clusters_df["cluster"] == cluster_id]
                 cluster_cell_ids = cluster_df.index.values.tolist()
                 cluster_num_cells = len(cluster_cell_ids)
                 cluster_cells_tf = (in_barcodes_df[0].isin(cluster_cell_ids)).values
 
+                # Get the rows of the data matrix corresponding to the cells in this cluster.
                 cluster_cell_by_bin_mtx = chr_mtx[cluster_cells_tf,:]
+                # Take the sum of this cluster along the cells axis.
                 cluster_profile = cluster_cell_by_bin_mtx.sum(axis=0)
 
-                # Fill in data for each resolution of a bigwig file.
+                # Fill in the data for this cluster and chromosome at each resolution.
                 for resolution, resolution_exp in zip(resolutions, resolution_exps):
-
                     arr_len = math.ceil(chr_len / resolution)
                     chr_shape = (num_clusters, arr_len)
 
-                    # Group every `resolution` values together and take sum.
+                    # Pad the array of values with zeros if necessary before reshaping.
                     values = cluster_profile
                     padding_len = resolution_exp - (values.shape[0] % resolution_exp)
                     if values.shape[0] % resolution_exp > 0:
                         values = np.concatenate((values, np.zeros((padding_len,))))
                     num_tiles = chr_shape[1]
+                    # Reshape to be able to sum every `resolution_exp` number of values.
                     arr = np.reshape(values, (-1, resolution_exp)).sum(axis=-1)
 
                     padding_len = arr_len - arr.shape[0]
                     if padding_len > 0:
                         arr = np.concatenate((arr, np.zeros((padding_len,))))
+                    # Set the array in the Zarr store.
                     chromosomes_group[chr_name][str(resolution)][cluster_index,:] = arr
        
-        # out_f.attrs should contain all tileset_info properties
-        # For zarr, more attributes are used here to allow "serverless"
+        # out_f.attrs should contain the properties required for HiGlass's "tileset_info" requests.
         out_f.attrs['row_infos'] = [
             { "cluster": cluster_id }
             for cluster_id in cluster_ids

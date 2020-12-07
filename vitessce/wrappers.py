@@ -168,7 +168,7 @@ class OmeTiffWrapper(AbstractWrapper):
 
     def get_raster(self, base_url, dataset_uid, obj_i):
         img_dir_path, img_url = self.img_path, self._get_url(base_url, dataset_uid, obj_i, "raster_img")
-        offsets_dir_path, offsets_url = (None, None) if self.offsets_path is None else (self._get_offsets_dir(), self._get_url(port, dataset_uid, obj_i, os.path.join("raster_offsets", self._get_offsets_filename())))
+        offsets_dir_path, offsets_url = (None, None) if self.offsets_path is None else (self._get_offsets_dir(), self._get_url(base_url, dataset_uid, obj_i, os.path.join("raster_offsets", self._get_offsets_filename())))
 
         raster_json = self._create_raster_json(img_url, offsets_url)
 

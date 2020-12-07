@@ -34,7 +34,7 @@ class TestWrappers(unittest.TestCase):
             'schemaVersion': '0.0.2'
         })
 
-        obj_file_defs, obj_routes = w.get_raster(8000, 'A', 0)
+        obj_file_defs, obj_routes = w.get_raster("http://localhost:8000", 'A', 0)
 
         self.assertEqual(obj_file_defs, [
             {
@@ -55,7 +55,7 @@ class TestWrappers(unittest.TestCase):
         # TODO
         # self.assertEqual(raster_json, {})
 
-        obj_file_defs, obj_routes = w.get_raster(8000, 'A', 0)
+        obj_file_defs, obj_routes = w.get_raster("http://localhost:8000", 'A', 0)
         self.assertEqual(obj_file_defs, [
             {
                 'fileType': 'raster.json',
@@ -71,9 +71,9 @@ class TestWrappers(unittest.TestCase):
         cells_json = w._create_cells_json()
         cell_sets_json = w._create_cell_sets_json()
 
-        obj_file_defs, obj_routes = w.get_cells(8000, 'A', 0)
+        obj_file_defs, obj_routes = w.get_cells("http://localhost:8000", 'A', 0)
         self.assertEqual(obj_file_defs, [{'type': 'cells', 'fileType': 'cells.json', 'url': 'http://localhost:8000/A/0/cells'}])
 
-        obj_file_defs, obj_routes = w.get_cell_sets(8000, 'A', 0)
+        obj_file_defs, obj_routes = w.get_cell_sets("http://localhost:8000", 'A', 0)
         self.assertEqual(obj_file_defs, [{'type': 'cell-sets', 'fileType': 'cell-sets.json', 'url': 'http://localhost:8000/A/0/cell-sets'}])
 

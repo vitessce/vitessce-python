@@ -13,6 +13,15 @@ class AbstractWrapper:
     An abstract class that can be extended when
     implementing custom dataset object wrapper classes. 
     """
+
+    def __init__(self, **kwargs):
+        """
+        Abstract constructor to be inherited by dataset wrapper classes.
+
+        :param str base_url: An optional base URL to use in dataset file definitions.
+        """
+        self._base_url = kwargs['base_url'] if 'base_url' in kwargs else None
+
     def get_cells(self, port, dataset_uid, obj_i):
         """
         Get the file definitions and server routes
@@ -124,6 +133,9 @@ class AbstractWrapper:
             return self.get_expression_matrix(port, dataset_uid, obj_i)
 
     def _get_url(self, port, dataset_uid, obj_i, suffix):
+        # A base URL is defined for this so this is used outside of Jupyter notebook.
+        if self._base_url is not None:
+            return f"{self._base_url}/{dataset_uid}/{obj_i}/{suffix}"
         return f"http://localhost:{port}/{dataset_uid}/{obj_i}/{suffix}"
 
     def _get_route(self, dataset_uid, obj_i, suffix):
@@ -132,12 +144,13 @@ class AbstractWrapper:
 
 class OmeTiffWrapper(AbstractWrapper):
 
-    def __init__(self, img_path, offsets_path=None, name=""):
+    def __init__(self, img_path, offsets_path=None, name="", **kwargs):
+        super().__init__(**kwargs)
         self.img_path = img_path
         self.offsets_path = offsets_path
         self.name = name
 
-    def _create_raster_json(self, img_url, offsets_url):
+    def create_raster_json(self, img_url, offsets_url):
         raster_json = {
             "schemaVersion": "0.0.2",
             "images": [
@@ -165,7 +178,7 @@ class OmeTiffWrapper(AbstractWrapper):
         img_dir_path, img_url = self.img_path, self._get_url(port, dataset_uid, obj_i, "raster_img")
         offsets_dir_path, offsets_url = (None, None) if self.offsets_path is None else (self._get_offsets_dir(), self._get_url(port, dataset_uid, obj_i, os.path.join("raster_offsets", self._get_offsets_filename())))
 
-        raster_json = self._create_raster_json(img_url, offsets_url)
+        raster_json = self.create_raster_json(img_url, offsets_url)
 
         obj_routes = [
             Mount(self._get_route(dataset_uid, obj_i, "raster_img"),
@@ -192,11 +205,12 @@ class OmeTiffWrapper(AbstractWrapper):
 
 class ZarrDirectoryStoreWrapper(AbstractWrapper):
 
-    def __init__(self, z, name=""):
+    def __init__(self, z, name="", **kwargs):
+        super().__init__(**kwargs)
         self.z = z
         self.name = name
 
-    def _create_raster_json(self, img_url):
+    def create_raster_json(self, img_url):
         raster_json = {
             "schemaVersion": "0.0.2",
             "images": [
@@ -249,7 +263,7 @@ class ZarrDirectoryStoreWrapper(AbstractWrapper):
             if type(self.z) == zarr.hierarchy.Group:
                 img_dir_path = self.z.store.path
 
-                raster_json = self._create_raster_json(
+                raster_json = self.create_raster_json(
                     self._get_url(port, dataset_uid, obj_i, "raster_img"),
                 )
 
@@ -273,13 +287,13 @@ class ZarrDirectoryStoreWrapper(AbstractWrapper):
 
 
 class AnnDataWrapper(AbstractWrapper):
-    def __init__(self, adata, use_highly_variable_genes=True):
+    def __init__(self, adata, use_highly_variable_genes=True, **kwargs):
+        super().__init__(**kwargs)
         self.adata = adata
         self.tempdir = tempfile.mkdtemp()
-
         self.use_highly_variable_genes = use_highly_variable_genes
 
-    def _create_cells_json(self):
+    def create_cells_json(self):
         adata = self.adata
         available_embeddings = list(adata.obsm.keys())
 
@@ -290,7 +304,7 @@ class AnnDataWrapper(AbstractWrapper):
             cells.add_mapping(e, mapping)
         return cells.json
 
-    def _create_cell_sets_json(self):
+    def create_cell_sets_json(self):
         adata = self.adata
         cell_sets = CellSets(first_node_name = 'Clusters')
 
@@ -310,7 +324,7 @@ class AnnDataWrapper(AbstractWrapper):
 
         return cell_sets.json
     
-    def _create_exp_matrix_zarr(self):
+    def create_exp_matrix_zarr(self, filepath=""):
         
         try:
             import zarr
@@ -340,9 +354,11 @@ class AnnDataWrapper(AbstractWrapper):
             gexp_arr_ratio = 255 / gexp_arr_range
 
             gexp_norm_arr = (gexp_arr - gexp_arr_min) * gexp_arr_ratio
-
-            zarr_tempdir = self.tempdir
-            zarr_filepath = os.path.join(zarr_tempdir, 'matrix.zarr')
+            if filepath:
+                zarr_filepath = os.path.join(filepath, 'matrix.zarr')
+            else:
+                zarr_tempdir = self.tempdir
+                zarr_filepath = os.path.join(zarr_tempdir, 'matrix.zarr')
         
             z = zarr.open(
                 zarr_filepath,
@@ -370,7 +386,7 @@ class AnnDataWrapper(AbstractWrapper):
         try:
             import anndata
             if type(self.adata) == anndata.AnnData:
-                cells_json = self._create_cells_json()
+                cells_json = self.create_cells_json()
 
                 obj_routes = [
                     Route(self._get_route(dataset_uid, obj_i, "cells"),
@@ -394,7 +410,7 @@ class AnnDataWrapper(AbstractWrapper):
         try:
             import anndata
             if type(self.adata) == anndata.AnnData:
-                cell_sets_json = self._create_cell_sets_json()
+                cell_sets_json = self.create_cell_sets_json()
 
                 obj_routes = [
                     Route(self._get_route(dataset_uid, obj_i, "cell-sets"),
@@ -416,7 +432,7 @@ class AnnDataWrapper(AbstractWrapper):
         obj_routes = []
         obj_file_defs = []
 
-        zarr_tempdir, zarr_filepath = self._create_exp_matrix_zarr()
+        zarr_tempdir, zarr_filepath = self.create_exp_matrix_zarr()
 
         if zarr_tempdir is not None:
             obj_routes = [
@@ -438,7 +454,8 @@ class AnnDataWrapper(AbstractWrapper):
 
 class LoomWrapper(AbstractWrapper):
 
-    def __init__(self, loom):
+    def __init__(self, loom, **kwargs):
+        super().__init__(**kwargs)
         self.loom = loom
 
     def get_cells(self, port, dataset_uid, obj_i):

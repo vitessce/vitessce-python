@@ -40,7 +40,7 @@ class TestWrappers(unittest.TestCase):
     def test_ome_tiff(self):
         w = OmeTiffWrapper("data/test.ome.tif", offsets_path="data/offsets.json", name="Test")
 
-        raster_json = w._create_raster_json(
+        raster_json = w.create_raster_json(
             "http://localhost:8000/raster_img",
             "http://localhost:8000/raster_offsets/offsets.json"
         )
@@ -73,7 +73,7 @@ class TestWrappers(unittest.TestCase):
         z = zarr.open('data/test.ome.zarr')
         w = OmeZarrWrapper(z)
 
-        raster_json = w._create_raster_json(
+        raster_json = w.create_raster_json(
             "http://localhost:8000/raster_img"
         )
         
@@ -89,12 +89,32 @@ class TestWrappers(unittest.TestCase):
             }
         ])
     
+    def test_base_url(self):
+        z = zarr.open('data/test.ome.zarr')
+        w = ZarrDirectoryStoreWrapper(z, base_url="https://example.com")
+
+        raster_json = w.create_raster_json(
+            "https://example.com/raster_img"
+        )
+        
+        # TODO
+        # self.assertEqual(raster_json, {})
+
+        obj_file_defs, obj_routes = w.get_raster(8000, 'A', 0)
+        self.assertEqual(obj_file_defs, [
+            {
+                'fileType': 'raster.json',
+                'type': 'raster',
+                'url': 'https://example.com/A/0/raster'
+            }
+        ])
+    
     def test_anndata(self):
         adata = read_h5ad(join('data', 'test.h5ad'))
         w = AnnDataWrapper(adata)
 
-        cells_json = w._create_cells_json()
-        cell_sets_json = w._create_cell_sets_json()
+        cells_json = w.create_cells_json()
+        cell_sets_json = w.create_cell_sets_json()
 
         obj_file_defs, obj_routes = w.get_cells(8000, 'A', 0)
         self.assertEqual(obj_file_defs, [{'type': 'cells', 'fileType': 'cells.json', 'url': 'http://localhost:8000/A/0/cells'}])
@@ -111,7 +131,7 @@ class TestWrappers(unittest.TestCase):
         zarr_filepath = join('data', 'test_out.snap.multivec.zarr')
 
         w = SnapWrapper(mtx, barcodes_df, bins_df, clusters_df)
-        w._create_genomic_multivec_zarr(zarr_filepath)
+        w.create_genomic_multivec_zarr(zarr_filepath)
 
         z = zarr.open(zarr_filepath, mode='r')
 

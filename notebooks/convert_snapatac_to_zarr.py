@@ -1,4 +1,4 @@
-from vitessce import SnapToolsWrapper
+from vitessce import SnapWrapper
 from os.path import join
 from scipy.io import mmread
 import pandas as pd
@@ -12,7 +12,7 @@ if __name__ == "__main__":
 
     zarr_filepath = join('data', 'snapatac', 'out.snap.multivec.zarr')
 
-    w = SnapToolsWrapper(mtx, barcodes_df, bins_df, clusters_df)
-    w._create_genomic_multivec_zarr(zarr_filepath)
+    w = SnapWrapper(mtx, barcodes_df, bins_df, clusters_df)
+    w.create_genomic_multivec_zarr(zarr_filepath)
 
     print("Done")

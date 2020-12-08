@@ -11,6 +11,7 @@ from .constants import (
 from .wrappers import (
     AnnDataWrapper,
 )
+from .widget import VitessceWidget
 
 def _get_next_scope(prev_scopes):
     chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
@@ -699,5 +700,26 @@ class VitessceConfig:
         # TODO: infer views and coordinations for other object types
 
         return vc
+    
+    def widget(self, **kwargs):
+        """
+        Convenience function for instantiating a VitessceWidget object based on this config.
+        
+        :returns: The Jupyter widget.
+        :rtype: VitessceConfig
+
+        .. code-block:: python
+            :emphasize-lines: 6-7
+
+            from vitessce import VitessceConfig, Component as cm, CoordinationType as ct
+
+            vc = VitessceConfig()
+            my_dataset = vc.add_dataset(name='My Dataset')
+            v1 = vc.add_view(my_dataset, cm.SPATIAL)
+            vc.layout(v1)
+            vw = vc.widget()
+            vw
+        """
+        return VitessceWidget(self, **kwargs)
 
 

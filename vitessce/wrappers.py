@@ -736,14 +736,7 @@ class SnapWrapper(AbstractWrapper):
 
     def create_cell_sets_json(self):
         in_clusters_df = self.in_clusters_df
-        cell_sets_json = {
-            "datatype": "cell",
-            "version": "0.1.2",
-            "tree": [{
-                "name": "Clusters",
-                "children": []
-            }]
-        }
+        cell_sets = CellSets(first_node_name = 'Clusters')
 
         cell_ids = in_clusters_df.index.values.tolist()
         in_clusters_df['cluster'] = in_clusters_df['cluster'].astype(str)
@@ -754,17 +747,14 @@ class SnapWrapper(AbstractWrapper):
         cell_cluster_tuples = list(zip(cell_ids, cell_cluster_ids))
 
         for cluster_id in cluster_ids:
-            cell_sets_json["tree"][0]["children"].append({
-                "name": str(cluster_id),
-                "set": [
-                    str(cell_id)
-                    for cell_id, cell_cluster_id in cell_cluster_tuples
-                    if cell_cluster_id == cluster_id
-                ]
-            })
+            cell_set = [
+                str(cell_id)
+                for cell_id, cell_cluster_id in cell_cluster_tuples
+                if cell_cluster_id == cluster_id
+            ]
+            cell_sets.add_node(str(cluster_id), ['Clusters'], cell_set)
 
-        return cell_sets_json
-
+        return cell_sets.json
     
     def get_cell_sets(self, port, dataset_uid, obj_i):
         obj_routes = []
@@ -790,22 +780,10 @@ class SnapWrapper(AbstractWrapper):
         in_clusters_df = self.in_clusters_df
 
         cell_ids = in_clusters_df.index.tolist()
-        cell_mappings = []
-
+        cells = Cells(cell_ids=cell_ids)
         mapping = in_clusters_df[["umap.1", "umap.2"]].values.tolist()
-        cell_mappings.append(list(zip(
-            ["UMAP" for i in range(len(mapping))],
-            mapping
-        )))
-        cell_mappings_zip = list(zip(*cell_mappings))
-        cells_json = dict(zip(
-            cell_ids,
-            [
-                {'mappings': dict(cell_mapping), 'genes': {}}
-                for cell_mapping in cell_mappings_zip
-            ]
-        ))
-        return cells_json
+        cells.add_mapping("UMAP", mapping)
+        return cells.json
     
     def get_cells(self, port, dataset_uid, obj_i):
         obj_routes = []

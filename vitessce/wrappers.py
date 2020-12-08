@@ -530,7 +530,7 @@ class SnapWrapper(AbstractWrapper):
         in_bins_df["chr_end"] = in_bins_df[0].apply(convert_bin_name_to_chr_end)
 
         # Drop any rows that had incorrect bin strings (missing a chromosome name, bin start, or bin end value).
-        in_bins_df = in_bins_df.dropna(subset=["chr_name", "chr_start", "chr_end"])
+        in_bins_df = in_bins_df.dropna(subset=["chr_name", "chr_start", "chr_end"]).copy()
 
         # Ensure that the columns have the expect types.
         in_bins_df["chr_name"] = in_bins_df["chr_name"].astype(str)
@@ -539,7 +539,7 @@ class SnapWrapper(AbstractWrapper):
 
         # Create the Zarr store for the outputs.
         out_f = zarr.open(zarr_filepath, mode='w')
-        compressor = Zlib(level=1)
+        compressor = 'default'
 
         # Create the chromosomes group in the output store.
         chromosomes_group = out_f.create_group("chromosomes")

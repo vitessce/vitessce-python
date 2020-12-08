@@ -480,7 +480,8 @@ class SnapWrapper(AbstractWrapper):
     # TODO: Make a PR to sc-atac-seq-pipeline to output this at a higher resolution (e.g. 200)
     # https://github.com/hubmapconsortium/sc-atac-seq-pipeline/blob/develop/bin/snapAnalysis.R#L93
 
-    def __init__(self, in_mtx, in_barcodes_df, in_bins_df, in_clusters_df, starting_resolution=5000):
+    def __init__(self, in_mtx, in_barcodes_df, in_bins_df, in_clusters_df, starting_resolution=5000, **kwargs):
+        super().__init__(**kwargs)
         self.in_mtx = in_mtx # scipy.sparse.coo.coo_matrix (filtered_cell_by_bin.mtx)
         self.in_barcodes_df = in_barcodes_df # pandas dataframe (barcodes.txt)
         self.in_bins_df = in_bins_df # pandas dataframe (bins.txt)

@@ -156,5 +156,5 @@ class TestWrappers(unittest.TestCase):
 
         cells_json = w.create_cells_json()
         self.assertEqual(len(cells_json), 6)
-        self.assertEqual(cells_json['AAACATCGAGTACAAGACAGCAGA'], {'mappings': {'UMAP': [4.43, 1.64]}, 'genes': {}})
+        self.assertEqual(cells_json['AAACATCGAGTACAAGACAGCAGA'], { 'mappings': { 'UMAP': [4.43, 1.64] } })
         

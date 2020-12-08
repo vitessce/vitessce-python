@@ -287,11 +287,12 @@ class ZarrDirectoryStoreWrapper(AbstractWrapper):
 
 
 class AnnDataWrapper(AbstractWrapper):
-    def __init__(self, adata, use_highly_variable_genes=True, **kwargs):
+    def __init__(self, adata, use_highly_variable_genes=True, clusters_key="leiden", **kwargs):
         super().__init__(**kwargs)
         self.adata = adata
         self.tempdir = tempfile.mkdtemp()
         self.use_highly_variable_genes = use_highly_variable_genes
+        self.clusters_key = clusters_key
 
     def create_cells_json(self):
         adata = self.adata
@@ -306,11 +307,13 @@ class AnnDataWrapper(AbstractWrapper):
 
     def create_cell_sets_json(self):
         adata = self.adata
-        cell_sets = CellSets(first_node_name = 'Clusters')
+
+        clusters_key = self.clusters_key
+        cell_sets = CellSets(first_node_name = clusters_key)
 
         cell_ids = adata.obs.index.tolist()
-        cluster_ids = adata.obs['CellType'].unique().tolist()
-        cell_cluster_ids = adata.obs['CellType'].values.tolist()
+        cluster_ids = adata.obs[clusters_key].unique().tolist()
+        cell_cluster_ids = adata.obs[clusters_key].values.tolist()
 
         cell_cluster_tuples = list(zip(cell_ids, cell_cluster_ids))
 
@@ -320,7 +323,7 @@ class AnnDataWrapper(AbstractWrapper):
                 for cell_id, cell_cluster_id in cell_cluster_tuples
                 if cell_cluster_id == cluster_id
             ]
-            cell_sets.add_node(str(cluster_id), ['Clusters'], cell_set)
+            cell_sets.add_node(str(cluster_id), [clusters_key], cell_set)
 
         return cell_sets.json
     

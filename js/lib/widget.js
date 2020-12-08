@@ -1,5 +1,5 @@
 import { DOMWidgetView, DOMWidgetModel } from '@jupyter-widgets/base';
-import React from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import ReactDOM from 'react-dom';
 import extend from 'lodash/extend';
 import { Vitessce } from 'vitessce';
@@ -8,44 +8,51 @@ import './widget.css';
 
 // See widget.py for the kernel counterpart to this file.
 
-class VitessceWidget extends React.Component {
+function VitessceWidget(props) {
+  const {
+    model
+  } = props;
 
-    constructor(props) {
-      super(props);
+  const config = model.get('config');
+  const height = model.get('height');
+  const theme = model.get('theme');
 
-      const { model } = props;
+  const divRef = useRef();
 
-      const initialConfig = model.get('config');
-      const initialHeight = model.get('height');
-      const initialTheme = model.get('theme');
-
-      this.state = {
-        config: initialConfig,
-        height: initialHeight,
-        theme: initialTheme,
-      };
-
-      this.onConfigChange = this.onConfigChange.bind(this);
+  useEffect(() => {
+    if(!divRef.current) {
+      return () => {};
     }
 
-    componentDidUpdate() {
-      console.log("componentDidUpdate")
+    function handleMouseEnter() {
+      const jpn = divRef.current.closest('.jp-Notebook');
+      if(jpn) {
+        jpn.style.overflow = "hidden";
+      }
     }
+    function handleMouseLeave() {
+      const jpn = divRef.current.closest('.jp-Notebook');
+      if(jpn) {
+        jpn.style.overflow = "auto";
+      }
+    }
+    divRef.current.addEventListener("mouseenter", handleMouseEnter);
+    divRef.current.addEventListener("mouseleave", handleMouseLeave);
 
-    onConfigChange(config) {
-      //this.setState({ config });
-      const { model } = this.props;
-      model.set('config', config);
-      model.save_changes();
-    }
+    return () => {
+      divRef.current.removeEventListener("mouseenter", handleMouseEnter);
+      divRef.current.removeEventListener("mouseleave", handleMouseLeave);
+    };
+  }, [divRef]);
 
-    render() {
-      const { onConfigChange } = this;
-      const { config, height, theme } = this.state;
-      return React.createElement('div', { },
-          React.createElement(Vitessce, { config, onConfigChange, height, theme })
-      );
-    }
+  const onConfigChange = useCallback((config) => {
+    model.set('config', config);
+    model.save_changes();
+  }, [model]);
+
+  return React.createElement('div', { className: 'vitessce-widget', ref: divRef, style: { height: `${height}px` } },
+    React.createElement(Vitessce, { config, onConfigChange, height, theme }),
+  );
 }
 
 // Custom Model. Custom widgets models must at least provide default values

@@ -166,6 +166,13 @@ class GenomicProfiles():
   def __init__(self, f, profile_ids, assembly='hg38', starting_resolution=5000, name="Genomic Profiles"):
     """
     Constructor method
+
+    :param f: The opened Zarr store object.
+    :type f: zarr.Group
+    :param list[str] profile_ids: A list of IDs for each profile.
+    :param str assembly: The genome assembly to use for chromosome lengths, passed to negspy. By default, 'hg38'.
+    :param int starting_resolution: The starting resolution. By default, 5000.
+    :param str name: The name for this set of profiles. By default, 'Genomic Profiles'.
     """
 
     self.f = f
@@ -227,7 +234,16 @@ class GenomicProfiles():
         }
         for (chr_name, chr_len) in list(zip(chromosomes, chroms_length_arr))
     ]
+  
   def add_profile(self, values, chr_name, profile_index):
+    """
+    Add a single genomic profile to the output store. This function will aggregate for each resolution.
+    
+    :param values: A profile array for one chromosome.
+    :type values: np.array
+    :param str chr_name: The name the chromosome corresponding to this array.
+    :param int profile_index: The index of this profile among the list of profiles.
+    """
     chromosomes_group = self.chromosomes_group
     num_profiles = self.num_profiles
     resolutions = self.resolutions

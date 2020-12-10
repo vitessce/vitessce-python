@@ -5,19 +5,17 @@ import math
 
 import numpy as np
 import pandas as pd
-import negspy.coordinates as nc
 import zarr
 from numcodecs import Zlib
 from scipy.sparse import csr_matrix
 from scipy.sparse import coo_matrix
-
 
 from starlette.responses import JSONResponse, UJSONResponse
 from starlette.routing import Route, Mount
 from starlette.staticfiles import StaticFiles
 
 from .constants import DataType as dt, FileType as ft
-from .entities import Cells, CellSets
+from .entities import Cells, CellSets, GenomicProfiles
 
 class AbstractWrapper:
     """
@@ -539,44 +537,19 @@ class SnapWrapper(AbstractWrapper):
 
         # Create the Zarr store for the outputs.
         out_f = zarr.open(zarr_filepath, mode='w')
-        compressor = 'default'
 
-        # Create the chromosomes group in the output store.
-        chromosomes_group = out_f.create_group("chromosomes")
-
-        # Prepare to fill in the chromosomes datasets.
-        
-        # "SnapTools performs quantification using a specified aligner, and HuBMAP has standardized on BWA with the GRCh38 reference genome"
-        # Reference: https://github.com/hubmapconsortium/sc-atac-seq-pipeline/blob/bb023f95ca3330128bfef41cc719ffcb2ee6a190/README.md
-        chromosomes = nc.get_chromorder('hg38')
-        chromosomes = [ str(chr_name) for chr_name in chromosomes[:25] ] # TODO: should more than chr1-chrM be used?
-        num_chromosomes = len(chromosomes)
-        chroms_length_arr = np.array([ nc.get_chrominfo('hg38').chrom_lengths[x] for x in chromosomes ], dtype="i8")
-        chroms_cumsum_arr = np.concatenate((np.array([0]), np.cumsum(chroms_length_arr)))
-
-        chromosomes_set = set(chromosomes)
-        chrom_name_to_length = dict(zip(chromosomes, chroms_length_arr))
-        chrom_name_to_cumsum = dict(zip(chromosomes, chroms_cumsum_arr))
-
-        # Prepare to fill in resolutions datasets.
-        resolutions = [ starting_resolution*(2**x) for x in range(16) ]
-        resolution_exps = [ (2**x) for x in range(16) ]
-
-        # Fill in data for each cluster.
+        # Get a list of clusters.
         in_clusters_df["cluster"] = in_clusters_df["cluster"].astype(str)
         cluster_ids = in_clusters_df["cluster"].unique().tolist()
         cluster_ids.sort(key=int)
-
-        num_clusters = len(cluster_ids)
         
+        # "SnapTools performs quantification using a specified aligner, and HuBMAP has standardized on BWA with the GRCh38 reference genome"
+        # Reference: https://github.com/hubmapconsortium/sc-atac-seq-pipeline/blob/bb023f95ca3330128bfef41cc719ffcb2ee6a190/README.md
+        genomic_profiles = GenomicProfiles(out_f, profile_ids=cluster_ids, assembly='hg38', starting_resolution=starting_resolution)
+        chrom_name_to_length = genomic_profiles.chrom_name_to_length
+
         # Create each chromosome dataset.
         for chr_name, chr_len in chrom_name_to_length.items():
-            chr_group = chromosomes_group.create_group(chr_name)
-            # Create each resolution group.
-            for resolution in resolutions:
-                chr_shape = (num_clusters, math.ceil(chr_len / resolution))
-                chr_group.create_dataset(str(resolution), shape=chr_shape, dtype="f4", fill_value=np.nan, compressor=compressor)
-
             # The bins dataframe frustratingly does not contain every bin.
             # We need to figure out which bins are missing.
 
@@ -657,54 +630,8 @@ class SnapWrapper(AbstractWrapper):
                 # Take the sum of this cluster along the cells axis.
                 cluster_profile = cluster_cell_by_bin_mtx.sum(axis=0)
 
-                # Fill in the data for this cluster and chromosome at each resolution.
-                for resolution, resolution_exp in zip(resolutions, resolution_exps):
-                    arr_len = math.ceil(chr_len / resolution)
-                    chr_shape = (num_clusters, arr_len)
-
-                    # Pad the array of values with zeros if necessary before reshaping.
-                    values = cluster_profile
-                    padding_len = resolution_exp - (values.shape[0] % resolution_exp)
-                    if values.shape[0] % resolution_exp > 0:
-                        values = np.concatenate((values, np.zeros((padding_len,))))
-                    num_tiles = chr_shape[1]
-                    # Reshape to be able to sum every `resolution_exp` number of values.
-                    arr = np.reshape(values, (-1, resolution_exp)).sum(axis=-1)
-
-                    padding_len = arr_len - arr.shape[0]
-                    if padding_len > 0:
-                        arr = np.concatenate((arr, np.zeros((padding_len,))))
-                    # Set the array in the Zarr store.
-                    chromosomes_group[chr_name][str(resolution)][cluster_index,:] = arr
-       
-        # out_f.attrs should contain the properties required for HiGlass's "tileset_info" requests.
-        out_f.attrs['row_infos'] = [
-            { "cluster": cluster_id }
-            for cluster_id in cluster_ids
-        ]
-        out_f.attrs['resolutions'] = sorted(resolutions, reverse=True)
-        out_f.attrs['shape'] = [ num_clusters, 256 ]
-        out_f.attrs['name'] = "SnapTools"
-        out_f.attrs['coordSystem'] = "hg38"
+                genomic_profiles.add_profile(cluster_profile, chr_name, cluster_index)
         
-        # https://github.com/zarr-developers/zarr-specs/issues/50
-        out_f.attrs['multiscales'] = [
-            {
-                "version": "0.1",
-                "name": chr_name,
-                "datasets": [
-                    { "path": f"chromosomes/{chr_name}/{resolution}" }
-                    for resolution in sorted(resolutions, reverse=True)
-                ],
-                "type": "zarr-multivec",
-                "metadata": {
-                    "chromoffset": int(chrom_name_to_cumsum[chr_name]),
-                    "chromsize": int(chr_len),
-                }
-            }
-            for (chr_name, chr_len) in list(zip(chromosomes, chroms_length_arr))
-        ]
-
         return
 
     def get_genomic_profiles(self, port, dataset_uid, obj_i):

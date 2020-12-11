@@ -9,6 +9,8 @@ import './widget.css';
 
 // See widget.py for the kernel counterpart to this file.
 
+const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
 function VitessceWidget(props) {
   const {
     model
@@ -16,7 +18,7 @@ function VitessceWidget(props) {
 
   const config = model.get('config');
   const height = model.get('height');
-  const theme = model.get('theme');
+  const theme = model.get('theme') === 'auto' ? (prefersDark ? 'dark' : 'light') : model.get('theme');
 
   const divRef = useRef();
 
@@ -81,7 +83,7 @@ export const VitessceModel = DOMWidgetModel.extend({
         _view_module_version : packageJson.version,
         config : {},
         height: 600,
-        theme: 'dark',
+        theme: 'auto',
     })
 });
 

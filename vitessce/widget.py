@@ -66,11 +66,11 @@ class VitessceWidget(widgets.DOMWidget):
     # It is synced back to Python from the frontend *any* time the model is touched.
     config = Dict({}).tag(sync=True)
     height = Int(600).tag(sync=True)
-    theme = Unicode('dark').tag(sync=True)
+    theme = Unicode('auto').tag(sync=True)
 
     next_port = 8000
 
-    def __init__(self, config, height=600, theme='dark', port=None):
+    def __init__(self, config, height=600, theme='auto', port=None):
         """
         Construct a new Vitessce widget.
 

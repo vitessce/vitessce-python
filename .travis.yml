@@ -15,7 +15,6 @@ install:
 - pip install -e .
 script:
 - cd tests
-- bash download.sh
 - python -m unittest
 - cd -
 before_deploy:

@@ -297,6 +297,15 @@ class VitessceConfigView:
         self.view["w"] = w
         self.view["h"] = h
     
+    def set_props(self, **kwargs):
+        if "props" in self.view.keys():
+            self.view["props"] = {
+                **self.view["props"],
+                **kwargs
+            }
+        else:
+            self.view["props"] = kwargs
+    
     def to_dict(self):
         return self.view
 
@@ -532,6 +541,30 @@ class VitessceConfig:
             self.config["coordinationSpace"][scope.c_type][scope.c_scope] = scope
             result.append(scope)
         return result
+    
+    def link_views(self, views, c_types, c_values = None):
+        """
+        A convenience function for setting up new coordination scopes across a set of views.
+        
+        :param views: views An array of view objects to link together.
+        :type views: list of VitessceConfigView
+        :param c_types: The coordination types on which to coordinate the views.
+        :type c_types: list of str or list of vitessce.constants.CoordinationType
+        :param list c_values: Initial values corresponding to each coordination type. Should have the same length as the c_types array. Optional.
+
+        :returns: Self, to allow chaining.
+        :rtype: VitessceConfig
+        """
+        c_scopes = self.add_coordination(*c_types)
+        for view in views:
+            for c_scope in c_scopes:
+                view.use_coordination(c_scope)
+
+        if c_values is not None and len(c_values) == len(c_types):
+            for i, c_scope in enumerate(c_scopes):
+                c_scope.set_value(c_values[i])
+
+        return self
     
     def layout(self, view_concat):
         """

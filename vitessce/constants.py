@@ -43,7 +43,8 @@ class CoordinationType(DocEnum):
     GENE_EXPRESSION_COLORMAP_RANGE = "geneExpressionColormapRange", "The range of gene expression values to map."
     CELL_COLOR_ENCODING = "cellColorEncoding", "The color encoding to use for cell entities."
     SPATIAL_LAYERS = "spatialLayers", "Layer definitions for the spatial view."
-    GENOMIC_ZOOM = "genomicZoom", "The zoom level of a higlass view."
+    GENOMIC_ZOOM_X = "genomicZoomX", "The zoom level of a higlass view, X dimension."
+    GENOMIC_ZOOM_Y = "genomicZoomY", "The zoom level of a higlass view, Y dimension."
     GENOMIC_TARGET_X = "genomicTargetX", "The x-coordinate of the center of a higlass view."
     GENOMIC_TARGET_Y = "genomicTargetY", "The y-coordinate of the center of a higlass view."
     ADDITIONAL_CELL_SETS = "additionalCellSets", "User-defined cell sets."
@@ -73,6 +74,7 @@ class DataType(DocEnum):
     MOLECULES = "molecules", "The molecules data type."
     NEIGHBORHOODS = "neighborhoods", "The spatial cell neighborhoods data type."
     RASTER = "raster", "The raster (i.e. imaging) data type."
+    GENOMIC_PROFILES = "genomic-profiles", "The genomic profiles data type, used by HiGlass 1D quantitative tracks."
 
 class FileType(DocEnum):
     """
@@ -84,3 +86,4 @@ class FileType(DocEnum):
     NEIGHBORHOODS_JSON = "neighborhoods.json", "The JSON-based neighborhoods file type."
     RASTER_JSON = "raster.json", "The JSON-based raster manifest file type."
     CELL_SETS_JSON = "cell-sets.json", "The JSON-based cell sets file type."
+    GENOMIC_PROFILES_ZARR = "genomic-profiles.zarr", "The Zarr-based genomic profile (multivec) file type."

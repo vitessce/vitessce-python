@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useCallback } from 'react';
 import ReactDOM from 'react-dom';
 import extend from 'lodash/extend';
 import { Vitessce } from 'vitessce';
+import packageJson from '../package.json';
 import 'vitessce/dist/es/production/static/css/index.css';
 import './widget.css';
 
@@ -76,8 +77,8 @@ export const VitessceModel = DOMWidgetModel.extend({
         _view_name : 'VitessceView',
         _model_module : 'vitessce-jupyter',
         _view_module : 'vitessce-jupyter',
-        _model_module_version : '0.1.0',
-        _view_module_version : '0.1.0',
+        _model_module_version : packageJson.version,
+        _view_module_version : packageJson.version,
         config : {},
         height: 600,
         theme: 'dark',

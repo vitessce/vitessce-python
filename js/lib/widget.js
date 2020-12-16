@@ -84,7 +84,7 @@ export const VitessceModel = DOMWidgetModel.extend({
         config : {},
         height: 600,
         theme: 'auto',
-    })
+    }),
 });
 
 export class VitessceView extends DOMWidgetView {
@@ -94,9 +94,18 @@ export class VitessceView extends DOMWidgetView {
             this._render(this.model, this),
             this.el,
         );
+        
+        setTimeout(() => {
+          window.dispatchEvent(new Event('resize'));
+        }, 500);
     }
 
     _render(model, view) {
         return React.createElement(VitessceWidget, { model, view });
+    }
+
+    remove() {
+      ReactDOM.unmountComponentAtNode(this.el);
+      return super.remove();
     }
 }

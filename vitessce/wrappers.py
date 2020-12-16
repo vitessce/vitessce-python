@@ -309,12 +309,12 @@ class OmeZarrWrapper(AbstractWrapper):
 
 
 class AnnDataWrapper(AbstractWrapper):
-    def __init__(self, adata, use_highly_variable_genes=True, clusters_key="leiden", **kwargs):
+    def __init__(self, adata, use_highly_variable_genes=True, cell_set_obs_cols=None, **kwargs):
         super().__init__(**kwargs)
         self.adata = adata
         self.tempdir = tempfile.mkdtemp()
         self.use_highly_variable_genes = use_highly_variable_genes
-        self.clusters_key = clusters_key
+        self.cell_set_obs_cols = cell_set_obs_cols
 
     def create_cells_json(self):
         adata = self.adata
@@ -330,24 +330,28 @@ class AnnDataWrapper(AbstractWrapper):
     def create_cell_sets_json(self):
         adata = self.adata
 
-        clusters_key = self.clusters_key
-        cell_sets = CellSets(first_node_name = clusters_key)
+        cell_set_obs_cols = self.cell_set_obs_cols
 
-        cell_ids = adata.obs.index.tolist()
-        cluster_ids = adata.obs[clusters_key].unique().tolist()
-        cell_cluster_ids = adata.obs[clusters_key].values.tolist()
+        cell_sets = CellSets()
 
-        cell_cluster_tuples = list(zip(cell_ids, cell_cluster_ids))
+        for clusters_key in cell_set_obs_cols:
+            cell_sets.add_level_zero_node(clusters_key)
 
-        for cluster_id in cluster_ids:
-            cell_set = [
-                str(cell_id)
-                for cell_id, cell_cluster_id in cell_cluster_tuples
-                if cell_cluster_id == cluster_id
-            ]
-            cell_sets.add_node(str(cluster_id), [clusters_key], cell_set)
+            cell_ids = adata.obs.index.tolist()
+            cluster_ids = adata.obs[clusters_key].unique().tolist()
+            cell_cluster_ids = adata.obs[clusters_key].values.tolist()
 
-        return cell_sets.json
+            cell_cluster_tuples = list(zip(cell_ids, cell_cluster_ids))
+
+            for cluster_id in cluster_ids:
+                cell_set = [
+                    str(cell_id)
+                    for cell_id, cell_cluster_id in cell_cluster_tuples
+                    if cell_cluster_id == cluster_id
+                ]
+                cell_sets.add_node(str(cluster_id), [clusters_key], cell_set)
+
+            return cell_sets.json
     
     def create_exp_matrix_zarr(self, zarr_filepath):
         adata = self.adata
@@ -666,7 +670,8 @@ class SnapWrapper(AbstractWrapper):
 
     def create_cell_sets_json(self):
         in_clusters_df = self.in_clusters_df
-        cell_sets = CellSets(first_node_name = 'Clusters')
+        cell_sets = CellSets()
+        cell_sets.add_level_zero_node('Clusters')
 
         cell_ids = in_clusters_df.index.values.tolist()
         in_clusters_df['cluster'] = in_clusters_df['cluster'].astype(str)

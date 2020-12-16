@@ -78,21 +78,27 @@ class CellSets:
   """
 
 
-  def __init__(self, first_node_name):
+  def __init__(self):
     """
-     Constructor method
-
-    :param str first_node_name: Name of the first node to be added to the tree.
+    Constructor method
     """
 
     self.json = {
         "datatype": "cell",
         "version": "0.1.2",
-        "tree": [{
-            "name": first_node_name,
-            "children": []
-        }]
+        "tree": []
     }
+  
+  def add_level_zero_node(self, name):
+    """
+    Add a new level zero node to the root of the tree.
+
+    :param str name: Name for the new node
+    """
+    self.json['tree'].append({
+        "name": name,
+        "children": []
+    })
 
   def add_node(self, name, parent_path, cell_set=None):
     """

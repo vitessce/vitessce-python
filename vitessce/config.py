@@ -250,10 +250,10 @@ class VitessceConfigView:
         self.view = {
             "component": component,
             "coordinationScopes": coordination_scopes,
-            "x": 0,
-            "y": 0,
-            "w": 1,
-            "h": 1
+            "x": x,
+            "y": y,
+            "w": w,
+            "h": h
         }
     
     def use_coordination(self, *c_scopes):
@@ -689,9 +689,23 @@ class VitessceConfig:
                     data_type=f["type"],
                     file_type=f["fileType"]
                 )
-                    
-        # TODO: Add each coordination scope from the incoming config.
-        # TODO: Add the components (layout) from the incoming config.
+        
+        for c_type in config['coordinationSpace'].keys():
+            if c_type != ct.DATASET.value:
+                c_obj = config['coordinationSpace'][c_type]
+                vc.config['coordinationSpace'][c_type] = {}
+                for c_scope_name, c_scope_value in c_obj.items():
+                    scope = VitessceConfigCoordinationScope(c_type, c_scope_name)
+                    scope.set_value(c_scope_value)
+                    vc.config['coordinationSpace'][c_type][c_scope_name] = scope
+        
+        for c in config['layout']:
+            c_coord_scopes = c['coordinationScopes'] if 'coordinationScopes' in c.keys() else {}
+            new_view = VitessceConfigView(c['component'], c_coord_scopes, c['x'], c['y'], c['w'], c['h'])
+            if 'props' in c.keys():
+                new_view.set_props(**c['props'])
+            vc.config['layout'].append(new_view)
+
         return vc
 
 

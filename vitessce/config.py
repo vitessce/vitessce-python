@@ -435,7 +435,7 @@ class VitessceConfig:
         d_scope.set_value(uid)
         return vcd
     
-    def add_view(self, dataset, component, x=None, y=None, w=None, h=None, mapping=None):
+    def add_view(self, dataset, component, x=0, y=0, w=1, h=1, mapping=None):
         """
         Add a view to the config.
 

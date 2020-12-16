@@ -518,8 +518,25 @@ class TestConfig(unittest.TestCase):
                 'dataset': {
                     'A': 'A'
                 },
+                'spatialZoom': {
+                    'ABC': 11
+                },
             },
-            "layout": [],
+            "layout": [
+                {
+                    "component": "spatial",
+                    "props": {
+                        "cellRadius": 50
+                    },
+                    "coordinationScopes": {
+                        "spatialZoom": 'ABC'
+                    },
+                    "x": 5,
+                    "y": 0,
+                    "w": 4,
+                    "h": 4
+                },
+            ],
             "initStrategy": "auto"
         })
 
@@ -555,8 +572,25 @@ class TestConfig(unittest.TestCase):
                     'A': 'A',
                     'B': 'B'
                 },
+                'spatialZoom': {
+                    'ABC': 11,
+                },
             },
-            "layout": [],
+            "layout": [
+                {
+                    "component": "spatial",
+                    "props": {
+                        "cellRadius": 50
+                    },
+                    "coordinationScopes": {
+                        "spatialZoom": 'ABC'
+                    },
+                    "x": 5,
+                    "y": 0,
+                    "w": 4,
+                    "h": 4
+                },
+            ],
             "initStrategy": "auto"
         })
 

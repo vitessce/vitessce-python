@@ -334,24 +334,26 @@ class AnnDataWrapper(AbstractWrapper):
 
         cell_sets = CellSets()
 
-        for clusters_key in cell_set_obs_cols:
-            cell_sets.add_level_zero_node(clusters_key)
+        if cell_set_obs_cols is not None:
 
-            cell_ids = adata.obs.index.tolist()
-            cluster_ids = adata.obs[clusters_key].unique().tolist()
-            cell_cluster_ids = adata.obs[clusters_key].values.tolist()
+            for clusters_key in cell_set_obs_cols:
+                cell_sets.add_level_zero_node(clusters_key)
 
-            cell_cluster_tuples = list(zip(cell_ids, cell_cluster_ids))
+                cell_ids = adata.obs.index.tolist()
+                cluster_ids = adata.obs[clusters_key].unique().tolist()
+                cell_cluster_ids = adata.obs[clusters_key].values.tolist()
 
-            for cluster_id in cluster_ids:
-                cell_set = [
-                    str(cell_id)
-                    for cell_id, cell_cluster_id in cell_cluster_tuples
-                    if cell_cluster_id == cluster_id
-                ]
-                cell_sets.add_node(str(cluster_id), [clusters_key], cell_set)
+                cell_cluster_tuples = list(zip(cell_ids, cell_cluster_ids))
 
-            return cell_sets.json
+                for cluster_id in cluster_ids:
+                    cell_set = [
+                        str(cell_id)
+                        for cell_id, cell_cluster_id in cell_cluster_tuples
+                        if cell_cluster_id == cluster_id
+                    ]
+                    cell_sets.add_node(str(cluster_id), [clusters_key], cell_set)
+
+                return cell_sets.json
     
     def create_exp_matrix_zarr(self, zarr_filepath):
         adata = self.adata

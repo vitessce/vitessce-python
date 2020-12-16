@@ -334,26 +334,27 @@ class AnnDataWrapper(AbstractWrapper):
 
         cell_sets = CellSets()
 
-        if cell_set_obs_cols is not None:
-
-            for clusters_key in cell_set_obs_cols:
-                cell_sets.add_level_zero_node(clusters_key)
+        if cell_set_obs_cols is not None and len(cell_set_obs_cols) > 0:
+            # Each `cell_set_obs_col` is a column name in the `adata.obs` dataframe,
+            # which we want to turn into a hierarchy of cell sets.
+            for cell_set_obs_col in cell_set_obs_cols:
+                cell_sets.add_level_zero_node(cell_set_obs_col)
 
                 cell_ids = adata.obs.index.tolist()
-                cluster_ids = adata.obs[clusters_key].unique().tolist()
-                cell_cluster_ids = adata.obs[clusters_key].values.tolist()
+                cluster_ids = adata.obs[cell_set_obs_col].unique().tolist()
+                cell_cluster_ids = adata.obs[cell_set_obs_col].values.tolist()
 
                 cell_cluster_tuples = list(zip(cell_ids, cell_cluster_ids))
 
-                for cluster_id in cluster_ids:
+                for cluster_id in sorted(cluster_ids):
                     cell_set = [
                         str(cell_id)
                         for cell_id, cell_cluster_id in cell_cluster_tuples
                         if cell_cluster_id == cluster_id
                     ]
-                    cell_sets.add_node(str(cluster_id), [clusters_key], cell_set)
-
-                return cell_sets.json
+                    cell_sets.add_node(str(cluster_id), [cell_set_obs_col], cell_set)
+            return cell_sets.json
+        return None
     
     def create_exp_matrix_zarr(self, zarr_filepath):
         adata = self.adata
@@ -423,17 +424,18 @@ class AnnDataWrapper(AbstractWrapper):
             
         cell_sets_json = self.create_cell_sets_json()
 
-        obj_routes = [
-            Route(self._get_route(dataset_uid, obj_i, "cell-sets"),
-                    self._create_response_json(cell_sets_json)),
-        ]
-        obj_file_defs = [
-            {
-                "type": dt.CELL_SETS.value,
-                "fileType": ft.CELL_SETS_JSON.value,
-                "url": self._get_url(port, dataset_uid, obj_i, "cell-sets")
-            }
-        ]
+        if cell_sets_json is not None:
+            obj_routes = [
+                Route(self._get_route(dataset_uid, obj_i, "cell-sets"),
+                        self._create_response_json(cell_sets_json)),
+            ]
+            obj_file_defs = [
+                {
+                    "type": dt.CELL_SETS.value,
+                    "fileType": ft.CELL_SETS_JSON.value,
+                    "url": self._get_url(port, dataset_uid, obj_i, "cell-sets")
+                }
+            ]
 
         return obj_file_defs, obj_routes
     

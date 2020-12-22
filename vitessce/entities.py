@@ -169,13 +169,13 @@ class GenomicProfiles():
   Generic class for representing genomic profiles.
   """
 
-  def __init__(self, f, profile_ids, assembly='hg38', starting_resolution=5000, name="Genomic Profiles"):
+  def __init__(self, f, profile_paths, assembly='hg38', starting_resolution=5000, name="Genomic Profiles"):
     """
     Constructor method
 
     :param f: The opened Zarr store object.
     :type f: zarr.Group
-    :param list[str] profile_ids: A list of IDs for each profile.
+    :param list[list[str]] profile_paths: A list of cell set paths, one path for each profile.
     :param str assembly: The genome assembly to use for chromosome lengths, passed to negspy. By default, 'hg38'.
     :param int starting_resolution: The starting resolution. By default, 5000.
     :param str name: The name for this set of profiles. By default, 'Genomic Profiles'.
@@ -183,7 +183,7 @@ class GenomicProfiles():
 
     self.f = f
 
-    num_profiles = len(profile_ids)
+    num_profiles = len(profile_paths)
 
     compressor = 'default'
 
@@ -209,8 +209,8 @@ class GenomicProfiles():
 
     # f.attrs should contain the properties required for HiGlass's "tileset_info" requests.
     f.attrs['row_infos'] = [
-        { "profile": profile_id }
-        for profile_id in profile_ids
+        { "path": profile_path }
+        for profile_path in profile_paths
     ]
     f.attrs['resolutions'] = sorted(resolutions, reverse=True)
     f.attrs['shape'] = [ num_profiles, 256 ]

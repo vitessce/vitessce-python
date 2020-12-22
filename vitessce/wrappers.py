@@ -553,10 +553,12 @@ class SnapWrapper(AbstractWrapper):
         in_clusters_df["cluster"] = in_clusters_df["cluster"].astype(str)
         cluster_ids = in_clusters_df["cluster"].unique().tolist()
         cluster_ids.sort(key=int)
+
+        cluster_paths = [ [ "Clusters", cluster_id ] for cluster_id in cluster_ids ]
         
         # "SnapTools performs quantification using a specified aligner, and HuBMAP has standardized on BWA with the GRCh38 reference genome"
         # Reference: https://github.com/hubmapconsortium/sc-atac-seq-pipeline/blob/bb023f95ca3330128bfef41cc719ffcb2ee6a190/README.md
-        genomic_profiles = GenomicProfiles(out_f, profile_ids=cluster_ids, assembly='hg38', starting_resolution=starting_resolution)
+        genomic_profiles = GenomicProfiles(out_f, profile_paths=cluster_paths, assembly='hg38', starting_resolution=starting_resolution)
         chrom_name_to_length = genomic_profiles.chrom_name_to_length
 
         # Create each chromosome dataset.

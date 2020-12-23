@@ -34,7 +34,8 @@ class AbstractWrapper:
     def get_cells(self, port, dataset_uid, obj_i):
         """
         Get the file definitions and server routes
-        corresponding to the ``cells`` data type.
+        corresponding to the :class:`~vitessce.constants.DataType.CELLS` data type.
+        Used internally by :class:`~vitessce.widget.VitessceWidget`.
 
         :param int port: The web server port, meant to be used in the localhost URLs in the file definitions.
         :param str dataset_uid: The unique identifier for the dataset parent of this data object.
@@ -48,7 +49,8 @@ class AbstractWrapper:
     def get_cell_sets(self, port, dataset_uid, obj_i):
         """
         Get the file definitions and server routes
-        corresponding to the ``cell-sets`` data type.
+        corresponding to the :class:`~vitessce.constants.DataType.CELL_SETS` data type.
+        Used internally by :class:`~vitessce.widget.VitessceWidget`.
 
         :param int port: The web server port, meant to be used in the localhost URLs in the file definitions.
         :param str dataset_uid: The unique identifier for the dataset parent of this data object.
@@ -62,7 +64,8 @@ class AbstractWrapper:
     def get_raster(self, port, dataset_uid, obj_i):
         """
         Get the file definitions and server routes
-        corresponding to the ``raster`` data type.
+        corresponding to the :class:`~vitessce.constants.DataType.RASTER` data type.
+        Used internally by :class:`~vitessce.widget.VitessceWidget`.
 
         :param int port: The web server port, meant to be used in the localhost URLs in the file definitions.
         :param str dataset_uid: The unique identifier for the dataset parent of this data object.
@@ -76,7 +79,7 @@ class AbstractWrapper:
     def get_molecules(self, port, dataset_uid, obj_i):
         """
         Get the file definitions and server routes
-        corresponding to the ``molecules`` data type.
+        corresponding to the :class:`~vitessce.constants.DataType.MOLECULES` data type.
 
         :param int port: The web server port, meant to be used in the localhost URLs in the file definitions.
         :param str dataset_uid: The unique identifier for the dataset parent of this data object.
@@ -90,7 +93,8 @@ class AbstractWrapper:
     def get_neighborhoods(self, port, dataset_uid, obj_i):
         """
         Get the file definitions and server routes
-        corresponding to the ``neighborhoods`` data type.
+        corresponding to the :class:`~vitessce.constants.DataType.NEIGHBORHOODS` data type.
+        Used internally by :class:`~vitessce.widget.VitessceWidget`.
 
         :param int port: The web server port, meant to be used in the localhost URLs in the file definitions.
         :param str dataset_uid: The unique identifier for the dataset parent of this data object.
@@ -104,7 +108,8 @@ class AbstractWrapper:
     def get_expression_matrix(self, port, dataset_uid, obj_i):
         """
         Get the file definitions and server routes
-        corresponding to the ``expression-matrix`` data type.
+        corresponding to the :class:`~vitessce.constants.DataType.EXPRESSION_MATRIX` data type.
+        Used internally by :class:`~vitessce.widget.VitessceWidget`.
 
         :param int port: The web server port, meant to be used in the localhost URLs in the file definitions.
         :param str dataset_uid: The unique identifier for the dataset parent of this data object.
@@ -118,7 +123,8 @@ class AbstractWrapper:
     def get_genomic_profiles(self, port, dataset_uid, obj_i):
         """
         Get the file definitions and server routes
-        corresponding to the ``genomic-profiles`` data type.
+        corresponding to the :class:`~vitessce.constants.DataType.GENOMIC_PROFILES` data type.
+        Used internally by :class:`~vitessce.widget.VitessceWidget`.
 
         :param int port: The web server port, meant to be used in the localhost URLs in the file definitions.
         :param str dataset_uid: The unique identifier for the dataset parent of this data object.
@@ -310,6 +316,15 @@ class OmeZarrWrapper(AbstractWrapper):
 
 class AnnDataWrapper(AbstractWrapper):
     def __init__(self, adata, use_highly_variable_genes=True, cell_set_obs_cols=None, **kwargs):
+        """
+        Wrap an AnnData object by creating an instance of the ``AnnDataWrapper`` class.
+
+        :param adata: An AnnData object containing single-cell experiment data.
+        :type adata: anndata.AnnData
+        :param bool use_highly_variable_genes: When creating outputs with genes, should only the genes marked as highly variable be used?
+        :param list[str] cell_set_obs_cols: A list of column names of the ``adata.obs`` dataframe that should be used for creating cell sets.
+        :param \*\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
+        """
         super().__init__(**kwargs)
         self.adata = adata
         self.tempdir = tempfile.mkdtemp()

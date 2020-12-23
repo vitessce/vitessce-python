@@ -10,8 +10,11 @@ dependencies:
  - zarr>=2.5.0
  - numcodecs>=0.7.2
  - scipy>=1.0.0
+ - nbsphinx>=0.7.1
+ - pandoc>=2.11.3
  - pip
  - pip:
    - loompy>=3.0.6
    - sphinx
    - sphinx-rtd-theme
+   - nbclean>=0.3.2

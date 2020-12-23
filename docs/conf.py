@@ -1,10 +1,13 @@
 import inspect
 import os
 import sys
+import glob
+from os.path import join
 
 import vitessce
 
 import sphinx_rtd_theme
+import nbclean
 
 # Configuration file for the Sphinx documentation builder.
 #
@@ -38,7 +41,9 @@ author = 'Gehlenborg Lab'
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.linkcode',
-    'sphinx_rtd_theme'
+    'sphinx.ext.intersphinx',
+    'sphinx_rtd_theme',
+    'nbsphinx'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -47,7 +52,12 @@ templates_path = ['_templates']
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = []
+exclude_patterns = [
+    'notebooks/README.md',
+    'notebooks/environment.yml',
+    'notebooks/example_configs.py',
+    'notebooks/data/**'
+]
 
 
 # -- Options for HTML output -------------------------------------------------
@@ -61,6 +71,10 @@ html_theme = 'sphinx_rtd_theme'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+html_css_files = [
+    'stylesheet.css',
+]
 
 autoclass_content = 'both'
 
@@ -84,3 +98,25 @@ def linkcode_resolve(domain, info):
         print(str(e))
         filename = info['module'].replace('.', '/') + '.py'
     return "https://github.com/vitessce/vitessce-jupyter/blob/master/%s" % filename
+
+
+# -- Options for intersphinx -------------------------------------------------
+
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3', None),
+    'anndata': ('https://anndata.readthedocs.io/en/latest', None),
+}
+
+# -- Options for nbsphinx -------------------------------------------------
+
+nbsphinx_execute = 'never'
+
+# -- Strip notebook output -------------------------------------------------
+
+
+for filename in glob.glob(join('notebooks', '*.ipynb'), recursive=True):
+    ntbk = nbclean.NotebookCleaner(filename)
+    ntbk.clear('stderr')
+    ntbk.clear('output')
+    ntbk.remove_cells(empty=True)
+    ntbk.save(filename)

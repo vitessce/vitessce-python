@@ -76,7 +76,7 @@ class VitessceWidget(widgets.DOMWidget):
 
         :param config: A view config instance.
         :type config: VitessceConfig
-        :param str theme: The theme name, either "light" or "dark". By default, "dark".
+        :param str theme: The theme name, either "light" or "dark". By default, "auto", which selects light or dark based on operating system preferences.
         :param int height: The height of the widget, in pixels. By default, 600.
         :param int port: The port to use when serving data objects on localhost. By default, 8000.
 
@@ -86,7 +86,7 @@ class VitessceWidget(widgets.DOMWidget):
             from vitessce import VitessceConfig, VitessceWidget
 
             vc = VitessceConfig.from_object(my_scanpy_object)
-            vw = VitessceWidget(vc)
+            vw = vc.widget()
             vw
         """
 

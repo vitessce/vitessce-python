@@ -1,0 +1,19 @@
+
+.wy-side-nav-search {
+    background-color: rgb(119, 134, 197);
+}
+
+.wy-side-nav-search::before {
+    content: " ";
+    background-image: url('logo.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    height: 120px;
+    width: 120px;
+    display: block;
+    position: relative;
+    z-index: 201;
+    text-align: center;
+    margin: 0 auto;
+}

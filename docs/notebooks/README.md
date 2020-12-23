@@ -1,6 +1,6 @@
 # Example Notebooks
 
-The notebooks contained in this directory demonstrate the Vitessce Jupyter widget functionality.
+The notebooks contained in this directory demonstrate the Vitessce Python package functionality.
 
 ## Setup
 
@@ -9,13 +9,14 @@ Some of the example notebooks rely on external single-cell data analysis package
 ```sh
 conda env create -f environment.yml
 conda activate vitessce-jupyter-examples
-pip install -e ..
-jupyter nbextension install --py --symlink --sys-prefix vitessce
-jupyter nbextension enable --py --sys-prefix vitessce
+pip install -e ../..
+jupyter labextension install @jupyterlab/celltags
+jupyter labextension install @jupyter-widgets/jupyterlab-manager
+jupyter labextension install ../../js
 ```
 
 ## Run
 
 ```sh
-jupyter notebook
+jupyter lab
 ```

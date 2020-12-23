@@ -1,4 +1,24 @@
 
+
+ @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+ body {
+    font-weight: 400;
+    font-family: Inter,'Helvetica Neue',Arial,sans-serif;
+ }
+
+.rst-content .toctree-wrapper>p.caption,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+legend {
+    font-weight: 600;
+    font-family: Inter,ff-tisa-web-pro,Georgia,Arial,sans-serif;
+}
+
 .wy-side-nav-search {
     background-color: rgb(119, 134, 197);
 }

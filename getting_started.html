@@ -13,6 +13,7 @@
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/stylesheet.css" type="text/css" />
 
   
   
@@ -29,13 +30,14 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Config API" href="config_api.html" />
+    <link rel="next" title="Widget examples" href="widget_examples.html" />
     <link rel="prev" title="Welcome to vitessce’s documentation!" href="index.html" /> 
 </head>
 
@@ -84,14 +86,14 @@
               <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Getting Started</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#optional-dependencies">Optional Dependencies</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#simplest-widget-use-case">Simplest Widget Use Case</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#full-anndata-example">Full AnnData Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#optional-dependencies">Optional dependencies</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="config_api.html">Config API</a></li>
-<li class="toctree-l1"><a class="reference internal" href="widget_api.html">Widget API</a></li>
-<li class="toctree-l1"><a class="reference internal" href="wrappers.html">Data Object Wrappers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="widget_examples.html">Widget examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_examples.html">Data preparation examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_config.html">View config API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_data.html">Data preparation APIs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="screenshots.html">Screenshots</a></li>
 </ul>
 
             
@@ -157,20 +159,56 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="getting-started">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="getting-started">
 <h1>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
-<p>The <code class="docutils literal notranslate"><span class="pre">vitessce</span></code> Python package has two main parts:</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">vitessce</span></code> Python package includes:</p>
 <ul class="simple">
-<li><p><a class="reference external" href="widget_api.html">Widget API</a>: use Vitessce directly from with Jupyter Notebook or Jupyter Lab</p></li>
-<li><p><a class="reference external" href="config_api.html">Config API</a>: create and edit Vitessce view configs using Python syntax</p></li>
+<li><p><strong>Vitessce as a Jupyter Widget</strong></p>
+<ul>
+<li><p>Use Vitessce directly within Jupyter Notebook or Jupyter Lab as an interactive widget</p></li>
 </ul>
-<img alt="_images/jupyter_screenshot.png" src="_images/jupyter_screenshot.png" />
+</li>
+<li><p><strong>View config API</strong></p>
+<ul>
+<li><p>Create and edit Vitessce configurations using Python object-oriented syntax</p></li>
+</ul>
+</li>
+<li><p><strong>Data preparation</strong></p>
+<ul>
+<li><p>Use our data conversion wrapper classes to process data stored in common single-cell file types including AnnData and SnapATAC.</p></li>
+</ul>
+</li>
+</ul>
 <div class="section" id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
 <p>To use Vitessce within a Jupyter notebook you need to install a few packages
 and enable the Jupyter extension:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="hll">pip install vitessce
-</span>jupyter nbextension <span class="nb">enable</span> --py --sys-prefix vitessce
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install vitessce
+jupyter nbextension <span class="nb">enable</span> --py --sys-prefix vitessce
 </pre></div>
 </div>
 <p>To use the widget in <a class="reference external" href="https://jupyterlab.readthedocs.io/en/stable/">JupyterLab</a> also run the following:</p>
@@ -180,37 +218,12 @@ jupyter labextension install vitessce-jupyter
 </div>
 </div>
 <div class="section" id="optional-dependencies">
-<h2>Optional Dependencies<a class="headerlink" href="#optional-dependencies" title="Permalink to this headline">¶</a></h2>
+<h2>Optional dependencies<a class="headerlink" href="#optional-dependencies" title="Permalink to this headline">¶</a></h2>
 <p>The following dependencies are optional, and only required when using certain data wrapper classes.</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">anndata</span></code> - Required for AnnData support with the <code class="docutils literal notranslate"><span class="pre">AnnDataWrapper</span></code> class.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">loompy</span></code> - Required for Loom support with the <code class="docutils literal notranslate"><span class="pre">LoomWrapper</span></code> class.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">anndata&gt;=0.7.4</span></code> - Required for AnnData support with the <a class="reference internal" href="api_data.html#vitessce.wrappers.AnnDataWrapper" title="vitessce.wrappers.AnnDataWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnnDataWrapper</span></code></a> class.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">loompy&gt;=3.0.6</span></code> - Required for Loom support with the <a class="reference internal" href="api_data.html#vitessce.wrappers.LoomWrapper" title="vitessce.wrappers.LoomWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">LoomWrapper</span></code></a> class.</p></li>
 </ul>
-</div>
-<div class="section" id="simplest-widget-use-case">
-<h2>Simplest Widget Use Case<a class="headerlink" href="#simplest-widget-use-case" title="Permalink to this headline">¶</a></h2>
-<p>The simplest way to instantiate a Vitessce widget is to create a view config based on a single-cell dataset object (from which data types and visualization types can be inferred automatically) and pass the view config instance as a parameter to the widget constructor:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">vitessce</span> <span class="kn">import</span> <span class="n">VitessceConfig</span><span class="p">,</span> <span class="n">VitessceWidget</span>
-
-<span class="n">vc</span> <span class="o">=</span> <span class="n">VitessceConfig</span><span class="o">.</span><span class="n">from_object</span><span class="p">(</span><span class="n">my_adata</span><span class="p">)</span>
-<span class="n">vw</span> <span class="o">=</span> <span class="n">VitessceWidget</span><span class="p">(</span><span class="n">vc</span><span class="p">)</span>
-<span class="n">vw</span>
-</pre></div>
-</div>
-<p>To customize the view config passed into the widget (or to define a view config manually), please see the documentation for the <code class="docutils literal notranslate"><span class="pre">VitessceConfig</span></code> API.</p>
-</div>
-<div class="section" id="full-anndata-example">
-<h2>Full AnnData Example<a class="headerlink" href="#full-anndata-example" title="Permalink to this headline">¶</a></h2>
-<p>Download an AnnData <code class="docutils literal notranslate"><span class="pre">.h5ad</span></code> file:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir -p data
-curl -L -o data/habib17.processed.h5ad https://covid19.cog.sanger.ac.uk/habib17.processed.h5ad
-</pre></div>
-</div>
-<p>Then open Jupyter Lab:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>jupyter lab
-</pre></div>
-</div>
-<p>And copy the Python code from the <a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/notebooks/widget-embedding.ipynb">Embedding Notebook Demo</a>.</p>
 </div>
 </div>
 
@@ -222,7 +235,7 @@ curl -L -o data/habib17.processed.h5ad https://covid19.cog.sanger.ac.uk/habib17.
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="config_api.html" class="btn btn-neutral float-right" title="Config API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="widget_examples.html" class="btn btn-neutral float-right" title="Widget examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="index.html" class="btn btn-neutral float-left" title="Welcome to vitessce’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

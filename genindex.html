@@ -13,6 +13,7 @@
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/stylesheet.css" type="text/css" />
 
   
   
@@ -29,6 +30,7 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -81,9 +83,11 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="config_api.html">Config API</a></li>
-<li class="toctree-l1"><a class="reference internal" href="widget_api.html">Widget API</a></li>
-<li class="toctree-l1"><a class="reference internal" href="wrappers.html">Data Object Wrappers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="widget_examples.html">Widget examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_examples.html">Data preparation examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_config.html">View config API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_data.html">Data preparation APIs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="screenshots.html">Screenshots</a></li>
 </ul>
 
             
@@ -167,28 +171,29 @@
  | <a href="#T"><strong>T</strong></a>
  | <a href="#U"><strong>U</strong></a>
  | <a href="#V"><strong>V</strong></a>
+ | <a href="#W"><strong>W</strong></a>
  
 </div>
 <h2 id="A">A</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="wrappers.html#vitessce.wrappers.AbstractWrapper">AbstractWrapper (class in vitessce.wrappers)</a>
+      <li><a href="api_data.html#vitessce.wrappers.AbstractWrapper">AbstractWrapper (class in vitessce.wrappers)</a>
 </li>
-      <li><a href="config_api.html#vitessce.config.VitessceConfig.add_coordination">add_coordination() (vitessce.config.VitessceConfig method)</a>
+      <li><a href="api_config.html#vitessce.config.VitessceConfig.add_coordination">add_coordination() (vitessce.config.VitessceConfig method)</a>
 </li>
-      <li><a href="config_api.html#vitessce.config.VitessceConfig.add_dataset">add_dataset() (vitessce.config.VitessceConfig method)</a>
+      <li><a href="api_config.html#vitessce.config.VitessceConfig.add_dataset">add_dataset() (vitessce.config.VitessceConfig method)</a>
 </li>
-      <li><a href="config_api.html#vitessce.config.VitessceConfigDataset.add_file">add_file() (vitessce.config.VitessceConfigDataset method)</a>
+      <li><a href="api_config.html#vitessce.config.VitessceConfigDataset.add_file">add_file() (vitessce.config.VitessceConfigDataset method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="config_api.html#vitessce.config.VitessceConfigDataset.add_object">add_object() (vitessce.config.VitessceConfigDataset method)</a>
+      <li><a href="api_config.html#vitessce.config.VitessceConfigDataset.add_object">add_object() (vitessce.config.VitessceConfigDataset method)</a>
 </li>
-      <li><a href="config_api.html#vitessce.config.VitessceConfig.add_view">add_view() (vitessce.config.VitessceConfig method)</a>
+      <li><a href="api_config.html#vitessce.config.VitessceConfig.add_view">add_view() (vitessce.config.VitessceConfig method)</a>
 </li>
-      <li><a href="config_api.html#vitessce.constants.CoordinationType.ADDITIONAL_CELL_SETS">ADDITIONAL_CELL_SETS (vitessce.constants.CoordinationType attribute)</a>
+      <li><a href="api_config.html#vitessce.constants.CoordinationType.ADDITIONAL_CELL_SETS">ADDITIONAL_CELL_SETS (vitessce.constants.CoordinationType attribute)</a>
 </li>
-      <li><a href="wrappers.html#vitessce.wrappers.AnnDataWrapper">AnnDataWrapper (class in vitessce.wrappers)</a>
+      <li><a href="api_data.html#vitessce.wrappers.AnnDataWrapper">AnnDataWrapper (class in vitessce.wrappers)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -196,37 +201,37 @@
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="config_api.html#vitessce.constants.CoordinationType.CELL_COLOR_ENCODING">CELL_COLOR_ENCODING (vitessce.constants.CoordinationType attribute)</a>
+      <li><a href="api_config.html#vitessce.constants.CoordinationType.CELL_COLOR_ENCODING">CELL_COLOR_ENCODING (vitessce.constants.CoordinationType attribute)</a>
 </li>
-      <li><a href="config_api.html#vitessce.constants.CoordinationType.CELL_FILTER">CELL_FILTER (vitessce.constants.CoordinationType attribute)</a>
+      <li><a href="api_config.html#vitessce.constants.CoordinationType.CELL_FILTER">CELL_FILTER (vitessce.constants.CoordinationType attribute)</a>
 </li>
-      <li><a href="config_api.html#vitessce.constants.CoordinationType.CELL_HIGHLIGHT">CELL_HIGHLIGHT (vitessce.constants.CoordinationType attribute)</a>
+      <li><a href="api_config.html#vitessce.constants.CoordinationType.CELL_HIGHLIGHT">CELL_HIGHLIGHT (vitessce.constants.CoordinationType attribute)</a>
 </li>
-      <li><a href="config_api.html#vitessce.constants.CoordinationType.CELL_SET_COLOR">CELL_SET_COLOR (vitessce.constants.CoordinationType attribute)</a>
+      <li><a href="api_config.html#vitessce.constants.CoordinationType.CELL_SET_COLOR">CELL_SET_COLOR (vitessce.constants.CoordinationType attribute)</a>
 </li>
-      <li><a href="config_api.html#vitessce.constants.CoordinationType.CELL_SET_HIGHLIGHT">CELL_SET_HIGHLIGHT (vitessce.constants.CoordinationType attribute)</a>
+      <li><a href="api_config.html#vitessce.constants.CoordinationType.CELL_SET_HIGHLIGHT">CELL_SET_HIGHLIGHT (vitessce.constants.CoordinationType attribute)</a>
 </li>
-      <li><a href="config_api.html#vitessce.constants.CoordinationType.CELL_SET_SELECTION">CELL_SET_SELECTION (vitessce.constants.CoordinationType attribute)</a>
+      <li><a href="api_config.html#vitessce.constants.CoordinationType.CELL_SET_SELECTION">CELL_SET_SELECTION (vitessce.constants.CoordinationType attribute)</a>
 </li>
-      <li><a href="config_api.html#vitessce.constants.Component.CELL_SET_SIZES">CELL_SET_SIZES (vitessce.constants.Component attribute)</a>
+      <li><a href="api_config.html#vitessce.constants.Component.CELL_SET_SIZES">CELL_SET_SIZES (vitessce.constants.Component attribute)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="config_api.html#vitessce.constants.Component.CELL_SETS">CELL_SETS (vitessce.constants.Component attribute)</a>
+      <li><a href="api_config.html#vitessce.constants.Component.CELL_SETS">CELL_SETS (vitessce.constants.Component attribute)</a>
 
       <ul>
-        <li><a href="config_api.html#vitessce.constants.DataType.CELL_SETS">(vitessce.constants.DataType attribute)</a>
+        <li><a href="api_config.html#vitessce.constants.DataType.CELL_SETS">(vitessce.constants.DataType attribute)</a>
 </li>
       </ul></li>
-      <li><a href="config_api.html#vitessce.constants.FileType.CELL_SETS_JSON">CELL_SETS_JSON (vitessce.constants.FileType attribute)</a>
+      <li><a href="api_config.html#vitessce.constants.FileType.CELL_SETS_JSON">CELL_SETS_JSON (vitessce.constants.FileType attribute)</a>
 </li>
-      <li><a href="config_api.html#vitessce.constants.DataType.CELLS">CELLS (vitessce.constants.DataType attribute)</a>
+      <li><a href="api_config.html#vitessce.constants.DataType.CELLS">CELLS (vitessce.constants.DataType attribute)</a>
 </li>
-      <li><a href="config_api.html#vitessce.constants.FileType.CELLS_JSON">CELLS_JSON (vitessce.constants.FileType attribute)</a>
+      <li><a href="api_config.html#vitessce.constants.FileType.CELLS_JSON">CELLS_JSON (vitessce.constants.FileType attribute)</a>
 </li>
-      <li><a href="config_api.html#vitessce.constants.Component">Component (class in vitessce.constants)</a>
+      <li><a href="api_config.html#vitessce.constants.Component">Component (class in vitessce.constants)</a>
 </li>
-      <li><a href="config_api.html#vitessce.constants.CoordinationType">CoordinationType (class in vitessce.constants)</a>
+      <li><a href="api_config.html#vitessce.constants.CoordinationType">CoordinationType (class in vitessce.constants)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -234,13 +239,13 @@
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="config_api.html#vitessce.constants.CoordinationType.DATASET">DATASET (vitessce.constants.CoordinationType attribute)</a>
+      <li><a href="api_config.html#vitessce.constants.CoordinationType.DATASET">DATASET (vitessce.constants.CoordinationType attribute)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="config_api.html#vitessce.constants.DataType">DataType (class in vitessce.constants)</a>
+      <li><a href="api_config.html#vitessce.constants.DataType">DataType (class in vitessce.constants)</a>
 </li>
-      <li><a href="config_api.html#vitessce.constants.Component.DESCRIPTION">DESCRIPTION (vitessce.constants.Component attribute)</a>
+      <li><a href="api_config.html#vitessce.constants.Component.DESCRIPTION">DESCRIPTION (vitessce.constants.Component attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -248,23 +253,23 @@
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="config_api.html#vitessce.constants.CoordinationType.EMBEDDING_ROTATION">EMBEDDING_ROTATION (vitessce.constants.CoordinationType attribute)</a>
+      <li><a href="api_config.html#vitessce.constants.CoordinationType.EMBEDDING_ROTATION">EMBEDDING_ROTATION (vitessce.constants.CoordinationType attribute)</a>
 </li>
-      <li><a href="config_api.html#vitessce.constants.CoordinationType.EMBEDDING_TARGET_X">EMBEDDING_TARGET_X (vitessce.constants.CoordinationType attribute)</a>
+      <li><a href="api_config.html#vitessce.constants.CoordinationType.EMBEDDING_TARGET_X">EMBEDDING_TARGET_X (vitessce.constants.CoordinationType attribute)</a>
 </li>
-      <li><a href="config_api.html#vitessce.constants.CoordinationType.EMBEDDING_TARGET_Y">EMBEDDING_TARGET_Y (vitessce.constants.CoordinationType attribute)</a>
+      <li><a href="api_config.html#vitessce.constants.CoordinationType.EMBEDDING_TARGET_Y">EMBEDDING_TARGET_Y (vitessce.constants.CoordinationType attribute)</a>
 </li>
-      <li><a href="config_api.html#vitessce.constants.CoordinationType.EMBEDDING_TARGET_Z">EMBEDDING_TARGET_Z (vitessce.constants.CoordinationType attribute)</a>
+      <li><a href="api_config.html#vitessce.constants.CoordinationType.EMBEDDING_TARGET_Z">EMBEDDING_TARGET_Z (vitessce.constants.CoordinationType attribute)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="config_api.html#vitessce.constants.CoordinationType.EMBEDDING_TYPE">EMBEDDING_TYPE (vitessce.constants.CoordinationType attribute)</a>
+      <li><a href="api_config.html#vitessce.constants.CoordinationType.EMBEDDING_TYPE">EMBEDDING_TYPE (vitessce.constants.CoordinationType attribute)</a>
 </li>
-      <li><a href="config_api.html#vitessce.constants.CoordinationType.EMBEDDING_ZOOM">EMBEDDING_ZOOM (vitessce.constants.CoordinationType attribute)</a>
+      <li><a href="api_config.html#vitessce.constants.CoordinationType.EMBEDDING_ZOOM">EMBEDDING_ZOOM (vitessce.constants.CoordinationType attribute)</a>
 </li>
-      <li><a href="config_api.html#vitessce.constants.DataType.EXPRESSION_MATRIX">EXPRESSION_MATRIX (vitessce.constants.DataType attribute)</a>
+      <li><a href="api_config.html#vitessce.constants.DataType.EXPRESSION_MATRIX">EXPRESSION_MATRIX (vitessce.constants.DataType attribute)</a>
 </li>
-      <li><a href="config_api.html#vitessce.constants.FileType.EXPRESSION_MATRIX_ZARR">EXPRESSION_MATRIX_ZARR (vitessce.constants.FileType attribute)</a>
+      <li><a href="api_config.html#vitessce.constants.FileType.EXPRESSION_MATRIX_ZARR">EXPRESSION_MATRIX_ZARR (vitessce.constants.FileType attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -272,13 +277,13 @@
 <h2 id="F">F</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="config_api.html#vitessce.constants.FileType">FileType (class in vitessce.constants)</a>
+      <li><a href="api_config.html#vitessce.constants.FileType">FileType (class in vitessce.constants)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="config_api.html#vitessce.config.VitessceConfig.from_dict">from_dict() (vitessce.config.VitessceConfig static method)</a>
+      <li><a href="api_config.html#vitessce.config.VitessceConfig.from_dict">from_dict() (vitessce.config.VitessceConfig static method)</a>
 </li>
-      <li><a href="config_api.html#vitessce.config.VitessceConfig.from_object">from_object() (vitessce.config.VitessceConfig static method)</a>
+      <li><a href="api_config.html#vitessce.config.VitessceConfig.from_object">from_object() (vitessce.config.VitessceConfig static method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -286,70 +291,74 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="config_api.html#vitessce.constants.CoordinationType.GENE_EXPRESSION_COLORMAP">GENE_EXPRESSION_COLORMAP (vitessce.constants.CoordinationType attribute)</a>
+      <li><a href="api_config.html#vitessce.constants.CoordinationType.GENE_EXPRESSION_COLORMAP">GENE_EXPRESSION_COLORMAP (vitessce.constants.CoordinationType attribute)</a>
 </li>
-      <li><a href="config_api.html#vitessce.constants.CoordinationType.GENE_EXPRESSION_COLORMAP_RANGE">GENE_EXPRESSION_COLORMAP_RANGE (vitessce.constants.CoordinationType attribute)</a>
+      <li><a href="api_config.html#vitessce.constants.CoordinationType.GENE_EXPRESSION_COLORMAP_RANGE">GENE_EXPRESSION_COLORMAP_RANGE (vitessce.constants.CoordinationType attribute)</a>
 </li>
-      <li><a href="config_api.html#vitessce.constants.CoordinationType.GENE_FILTER">GENE_FILTER (vitessce.constants.CoordinationType attribute)</a>
+      <li><a href="api_config.html#vitessce.constants.CoordinationType.GENE_FILTER">GENE_FILTER (vitessce.constants.CoordinationType attribute)</a>
 </li>
-      <li><a href="config_api.html#vitessce.constants.CoordinationType.GENE_HIGHLIGHT">GENE_HIGHLIGHT (vitessce.constants.CoordinationType attribute)</a>
+      <li><a href="api_config.html#vitessce.constants.CoordinationType.GENE_HIGHLIGHT">GENE_HIGHLIGHT (vitessce.constants.CoordinationType attribute)</a>
 </li>
-      <li><a href="config_api.html#vitessce.constants.Component.GENES">GENES (vitessce.constants.Component attribute)</a>
+      <li><a href="api_config.html#vitessce.constants.Component.GENES">GENES (vitessce.constants.Component attribute)</a>
 </li>
-      <li><a href="config_api.html#vitessce.constants.DataType.GENOMIC_PROFILES">GENOMIC_PROFILES (vitessce.constants.DataType attribute)</a>
-</li>
-      <li><a href="config_api.html#vitessce.constants.FileType.GENOMIC_PROFILES_ZARR">GENOMIC_PROFILES_ZARR (vitessce.constants.FileType attribute)</a>
-</li>
-      <li><a href="config_api.html#vitessce.constants.CoordinationType.GENOMIC_TARGET_X">GENOMIC_TARGET_X (vitessce.constants.CoordinationType attribute)</a>
-</li>
-      <li><a href="config_api.html#vitessce.constants.CoordinationType.GENOMIC_TARGET_Y">GENOMIC_TARGET_Y (vitessce.constants.CoordinationType attribute)</a>
-</li>
-      <li><a href="config_api.html#vitessce.constants.CoordinationType.GENOMIC_ZOOM_X">GENOMIC_ZOOM_X (vitessce.constants.CoordinationType attribute)</a>
-</li>
-      <li><a href="config_api.html#vitessce.constants.CoordinationType.GENOMIC_ZOOM_Y">GENOMIC_ZOOM_Y (vitessce.constants.CoordinationType attribute)</a>
-</li>
-      <li><a href="wrappers.html#vitessce.wrappers.AbstractWrapper.get_cell_sets">get_cell_sets() (vitessce.wrappers.AbstractWrapper method)</a>
+      <li><a href="api_config.html#vitessce.constants.Component.GENOMIC_PROFILES">GENOMIC_PROFILES (vitessce.constants.Component attribute)</a>
 
       <ul>
-        <li><a href="wrappers.html#vitessce.wrappers.AnnDataWrapper.get_cell_sets">(vitessce.wrappers.AnnDataWrapper method)</a>
+        <li><a href="api_config.html#vitessce.constants.DataType.GENOMIC_PROFILES">(vitessce.constants.DataType attribute)</a>
 </li>
-        <li><a href="wrappers.html#vitessce.wrappers.SnapWrapper.get_cell_sets">(vitessce.wrappers.SnapWrapper method)</a>
+      </ul></li>
+      <li><a href="api_config.html#vitessce.constants.FileType.GENOMIC_PROFILES_ZARR">GENOMIC_PROFILES_ZARR (vitessce.constants.FileType attribute)</a>
+</li>
+      <li><a href="api_config.html#vitessce.constants.CoordinationType.GENOMIC_TARGET_X">GENOMIC_TARGET_X (vitessce.constants.CoordinationType attribute)</a>
+</li>
+      <li><a href="api_config.html#vitessce.constants.CoordinationType.GENOMIC_TARGET_Y">GENOMIC_TARGET_Y (vitessce.constants.CoordinationType attribute)</a>
+</li>
+      <li><a href="api_config.html#vitessce.constants.CoordinationType.GENOMIC_ZOOM_X">GENOMIC_ZOOM_X (vitessce.constants.CoordinationType attribute)</a>
+</li>
+      <li><a href="api_config.html#vitessce.constants.CoordinationType.GENOMIC_ZOOM_Y">GENOMIC_ZOOM_Y (vitessce.constants.CoordinationType attribute)</a>
+</li>
+      <li><a href="api_data.html#vitessce.wrappers.AbstractWrapper.get_cell_sets">get_cell_sets() (vitessce.wrappers.AbstractWrapper method)</a>
+
+      <ul>
+        <li><a href="api_data.html#vitessce.wrappers.AnnDataWrapper.get_cell_sets">(vitessce.wrappers.AnnDataWrapper method)</a>
+</li>
+        <li><a href="api_data.html#vitessce.wrappers.SnapWrapper.get_cell_sets">(vitessce.wrappers.SnapWrapper method)</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="wrappers.html#vitessce.wrappers.AbstractWrapper.get_cells">get_cells() (vitessce.wrappers.AbstractWrapper method)</a>
+      <li><a href="api_data.html#vitessce.wrappers.AbstractWrapper.get_cells">get_cells() (vitessce.wrappers.AbstractWrapper method)</a>
 
       <ul>
-        <li><a href="wrappers.html#vitessce.wrappers.AnnDataWrapper.get_cells">(vitessce.wrappers.AnnDataWrapper method)</a>
+        <li><a href="api_data.html#vitessce.wrappers.AnnDataWrapper.get_cells">(vitessce.wrappers.AnnDataWrapper method)</a>
 </li>
-        <li><a href="wrappers.html#vitessce.wrappers.LoomWrapper.get_cells">(vitessce.wrappers.LoomWrapper method)</a>
+        <li><a href="api_data.html#vitessce.wrappers.LoomWrapper.get_cells">(vitessce.wrappers.LoomWrapper method)</a>
 </li>
-        <li><a href="wrappers.html#vitessce.wrappers.SnapWrapper.get_cells">(vitessce.wrappers.SnapWrapper method)</a>
+        <li><a href="api_data.html#vitessce.wrappers.SnapWrapper.get_cells">(vitessce.wrappers.SnapWrapper method)</a>
 </li>
       </ul></li>
-      <li><a href="wrappers.html#vitessce.wrappers.AbstractWrapper.get_expression_matrix">get_expression_matrix() (vitessce.wrappers.AbstractWrapper method)</a>
+      <li><a href="api_data.html#vitessce.wrappers.AbstractWrapper.get_expression_matrix">get_expression_matrix() (vitessce.wrappers.AbstractWrapper method)</a>
 
       <ul>
-        <li><a href="wrappers.html#vitessce.wrappers.AnnDataWrapper.get_expression_matrix">(vitessce.wrappers.AnnDataWrapper method)</a>
+        <li><a href="api_data.html#vitessce.wrappers.AnnDataWrapper.get_expression_matrix">(vitessce.wrappers.AnnDataWrapper method)</a>
 </li>
       </ul></li>
-      <li><a href="wrappers.html#vitessce.wrappers.AbstractWrapper.get_genomic_profiles">get_genomic_profiles() (vitessce.wrappers.AbstractWrapper method)</a>
+      <li><a href="api_data.html#vitessce.wrappers.AbstractWrapper.get_genomic_profiles">get_genomic_profiles() (vitessce.wrappers.AbstractWrapper method)</a>
 
       <ul>
-        <li><a href="wrappers.html#vitessce.wrappers.SnapWrapper.get_genomic_profiles">(vitessce.wrappers.SnapWrapper method)</a>
+        <li><a href="api_data.html#vitessce.wrappers.SnapWrapper.get_genomic_profiles">(vitessce.wrappers.SnapWrapper method)</a>
 </li>
       </ul></li>
-      <li><a href="wrappers.html#vitessce.wrappers.AbstractWrapper.get_molecules">get_molecules() (vitessce.wrappers.AbstractWrapper method)</a>
+      <li><a href="api_data.html#vitessce.wrappers.AbstractWrapper.get_molecules">get_molecules() (vitessce.wrappers.AbstractWrapper method)</a>
 </li>
-      <li><a href="wrappers.html#vitessce.wrappers.AbstractWrapper.get_neighborhoods">get_neighborhoods() (vitessce.wrappers.AbstractWrapper method)</a>
+      <li><a href="api_data.html#vitessce.wrappers.AbstractWrapper.get_neighborhoods">get_neighborhoods() (vitessce.wrappers.AbstractWrapper method)</a>
 </li>
-      <li><a href="wrappers.html#vitessce.wrappers.AbstractWrapper.get_raster">get_raster() (vitessce.wrappers.AbstractWrapper method)</a>
+      <li><a href="api_data.html#vitessce.wrappers.AbstractWrapper.get_raster">get_raster() (vitessce.wrappers.AbstractWrapper method)</a>
 
       <ul>
-        <li><a href="wrappers.html#vitessce.wrappers.OmeTiffWrapper.get_raster">(vitessce.wrappers.OmeTiffWrapper method)</a>
+        <li><a href="api_data.html#vitessce.wrappers.OmeTiffWrapper.get_raster">(vitessce.wrappers.OmeTiffWrapper method)</a>
 </li>
-        <li><a href="wrappers.html#vitessce.wrappers.OmeZarrWrapper.get_raster">(vitessce.wrappers.OmeZarrWrapper method)</a>
+        <li><a href="api_data.html#vitessce.wrappers.OmeZarrWrapper.get_raster">(vitessce.wrappers.OmeZarrWrapper method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -358,21 +367,19 @@
 <h2 id="H">H</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="config_api.html#vitessce.config.hconcat">hconcat() (in module vitessce.config)</a>
+      <li><a href="api_config.html#vitessce.config.hconcat">hconcat() (in module vitessce.config)</a>
 </li>
-      <li><a href="config_api.html#vitessce.constants.Component.HEATMAP">HEATMAP (vitessce.constants.Component attribute)</a>
+      <li><a href="api_config.html#vitessce.constants.Component.HEATMAP">HEATMAP (vitessce.constants.Component attribute)</a>
 </li>
-      <li><a href="config_api.html#vitessce.constants.CoordinationType.HEATMAP_TARGET_X">HEATMAP_TARGET_X (vitessce.constants.CoordinationType attribute)</a>
+      <li><a href="api_config.html#vitessce.constants.CoordinationType.HEATMAP_TARGET_X">HEATMAP_TARGET_X (vitessce.constants.CoordinationType attribute)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="config_api.html#vitessce.constants.CoordinationType.HEATMAP_TARGET_Y">HEATMAP_TARGET_Y (vitessce.constants.CoordinationType attribute)</a>
+      <li><a href="api_config.html#vitessce.constants.CoordinationType.HEATMAP_TARGET_Y">HEATMAP_TARGET_Y (vitessce.constants.CoordinationType attribute)</a>
 </li>
-      <li><a href="config_api.html#vitessce.constants.CoordinationType.HEATMAP_ZOOM_X">HEATMAP_ZOOM_X (vitessce.constants.CoordinationType attribute)</a>
+      <li><a href="api_config.html#vitessce.constants.CoordinationType.HEATMAP_ZOOM_X">HEATMAP_ZOOM_X (vitessce.constants.CoordinationType attribute)</a>
 </li>
-      <li><a href="config_api.html#vitessce.constants.CoordinationType.HEATMAP_ZOOM_Y">HEATMAP_ZOOM_Y (vitessce.constants.CoordinationType attribute)</a>
-</li>
-      <li><a href="config_api.html#vitessce.constants.Component.HIGLASS">HIGLASS (vitessce.constants.Component attribute)</a>
+      <li><a href="api_config.html#vitessce.constants.CoordinationType.HEATMAP_ZOOM_Y">HEATMAP_ZOOM_Y (vitessce.constants.CoordinationType attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -380,15 +387,15 @@
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="config_api.html#vitessce.constants.Component.LAYER_CONTROLLER">LAYER_CONTROLLER (vitessce.constants.Component attribute)</a>
+      <li><a href="api_config.html#vitessce.constants.Component.LAYER_CONTROLLER">LAYER_CONTROLLER (vitessce.constants.Component attribute)</a>
 </li>
-      <li><a href="config_api.html#vitessce.config.VitessceConfig.layout">layout() (vitessce.config.VitessceConfig method)</a>
+      <li><a href="api_config.html#vitessce.config.VitessceConfig.layout">layout() (vitessce.config.VitessceConfig method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="config_api.html#vitessce.config.VitessceConfig.link_views">link_views() (vitessce.config.VitessceConfig method)</a>
+      <li><a href="api_config.html#vitessce.config.VitessceConfig.link_views">link_views() (vitessce.config.VitessceConfig method)</a>
 </li>
-      <li><a href="wrappers.html#vitessce.wrappers.LoomWrapper">LoomWrapper (class in vitessce.wrappers)</a>
+      <li><a href="api_data.html#vitessce.wrappers.LoomWrapper">LoomWrapper (class in vitessce.wrappers)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -400,20 +407,18 @@
     module
 
       <ul>
-        <li><a href="config_api.html#module-vitessce.config">vitessce.config</a>
+        <li><a href="api_config.html#module-vitessce.config">vitessce.config</a>
 </li>
-        <li><a href="config_api.html#module-vitessce.constants">vitessce.constants</a>
+        <li><a href="api_config.html#module-vitessce.constants">vitessce.constants</a>
 </li>
-        <li><a href="widget_api.html#module-vitessce.widget">vitessce.widget</a>
-</li>
-        <li><a href="wrappers.html#module-vitessce.wrappers">vitessce.wrappers</a>
+        <li><a href="api_data.html#module-vitessce.wrappers">vitessce.wrappers</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="config_api.html#vitessce.constants.DataType.MOLECULES">MOLECULES (vitessce.constants.DataType attribute)</a>
+      <li><a href="api_config.html#vitessce.constants.DataType.MOLECULES">MOLECULES (vitessce.constants.DataType attribute)</a>
 </li>
-      <li><a href="config_api.html#vitessce.constants.FileType.MOLECULES_JSON">MOLECULES_JSON (vitessce.constants.FileType attribute)</a>
+      <li><a href="api_config.html#vitessce.constants.FileType.MOLECULES_JSON">MOLECULES_JSON (vitessce.constants.FileType attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -421,11 +426,11 @@
 <h2 id="N">N</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="config_api.html#vitessce.constants.DataType.NEIGHBORHOODS">NEIGHBORHOODS (vitessce.constants.DataType attribute)</a>
+      <li><a href="api_config.html#vitessce.constants.DataType.NEIGHBORHOODS">NEIGHBORHOODS (vitessce.constants.DataType attribute)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="config_api.html#vitessce.constants.FileType.NEIGHBORHOODS_JSON">NEIGHBORHOODS_JSON (vitessce.constants.FileType attribute)</a>
+      <li><a href="api_config.html#vitessce.constants.FileType.NEIGHBORHOODS_JSON">NEIGHBORHOODS_JSON (vitessce.constants.FileType attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -433,11 +438,11 @@
 <h2 id="O">O</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="wrappers.html#vitessce.wrappers.OmeTiffWrapper">OmeTiffWrapper (class in vitessce.wrappers)</a>
+      <li><a href="api_data.html#vitessce.wrappers.OmeTiffWrapper">OmeTiffWrapper (class in vitessce.wrappers)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="wrappers.html#vitessce.wrappers.OmeZarrWrapper">OmeZarrWrapper (class in vitessce.wrappers)</a>
+      <li><a href="api_data.html#vitessce.wrappers.OmeZarrWrapper">OmeZarrWrapper (class in vitessce.wrappers)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -445,11 +450,11 @@
 <h2 id="R">R</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="config_api.html#vitessce.constants.DataType.RASTER">RASTER (vitessce.constants.DataType attribute)</a>
+      <li><a href="api_config.html#vitessce.constants.DataType.RASTER">RASTER (vitessce.constants.DataType attribute)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="config_api.html#vitessce.constants.FileType.RASTER_JSON">RASTER_JSON (vitessce.constants.FileType attribute)</a>
+      <li><a href="api_config.html#vitessce.constants.FileType.RASTER_JSON">RASTER_JSON (vitessce.constants.FileType attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -457,29 +462,29 @@
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="config_api.html#vitessce.constants.Component.SCATTERPLOT">SCATTERPLOT (vitessce.constants.Component attribute)</a>
+      <li><a href="api_config.html#vitessce.constants.Component.SCATTERPLOT">SCATTERPLOT (vitessce.constants.Component attribute)</a>
 </li>
-      <li><a href="config_api.html#vitessce.config.VitessceConfigCoordinationScope.set_value">set_value() (vitessce.config.VitessceConfigCoordinationScope method)</a>
+      <li><a href="api_config.html#vitessce.config.VitessceConfigCoordinationScope.set_value">set_value() (vitessce.config.VitessceConfigCoordinationScope method)</a>
 </li>
-      <li><a href="wrappers.html#vitessce.wrappers.SnapWrapper">SnapWrapper (class in vitessce.wrappers)</a>
+      <li><a href="api_data.html#vitessce.wrappers.SnapWrapper">SnapWrapper (class in vitessce.wrappers)</a>
 </li>
-      <li><a href="config_api.html#vitessce.constants.Component.SPATIAL">SPATIAL (vitessce.constants.Component attribute)</a>
+      <li><a href="api_config.html#vitessce.constants.Component.SPATIAL">SPATIAL (vitessce.constants.Component attribute)</a>
 </li>
-      <li><a href="config_api.html#vitessce.constants.CoordinationType.SPATIAL_LAYERS">SPATIAL_LAYERS (vitessce.constants.CoordinationType attribute)</a>
+      <li><a href="api_config.html#vitessce.constants.CoordinationType.SPATIAL_LAYERS">SPATIAL_LAYERS (vitessce.constants.CoordinationType attribute)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="config_api.html#vitessce.constants.CoordinationType.SPATIAL_ROTATION">SPATIAL_ROTATION (vitessce.constants.CoordinationType attribute)</a>
+      <li><a href="api_config.html#vitessce.constants.CoordinationType.SPATIAL_ROTATION">SPATIAL_ROTATION (vitessce.constants.CoordinationType attribute)</a>
 </li>
-      <li><a href="config_api.html#vitessce.constants.CoordinationType.SPATIAL_TARGET_X">SPATIAL_TARGET_X (vitessce.constants.CoordinationType attribute)</a>
+      <li><a href="api_config.html#vitessce.constants.CoordinationType.SPATIAL_TARGET_X">SPATIAL_TARGET_X (vitessce.constants.CoordinationType attribute)</a>
 </li>
-      <li><a href="config_api.html#vitessce.constants.CoordinationType.SPATIAL_TARGET_Y">SPATIAL_TARGET_Y (vitessce.constants.CoordinationType attribute)</a>
+      <li><a href="api_config.html#vitessce.constants.CoordinationType.SPATIAL_TARGET_Y">SPATIAL_TARGET_Y (vitessce.constants.CoordinationType attribute)</a>
 </li>
-      <li><a href="config_api.html#vitessce.constants.CoordinationType.SPATIAL_TARGET_Z">SPATIAL_TARGET_Z (vitessce.constants.CoordinationType attribute)</a>
+      <li><a href="api_config.html#vitessce.constants.CoordinationType.SPATIAL_TARGET_Z">SPATIAL_TARGET_Z (vitessce.constants.CoordinationType attribute)</a>
 </li>
-      <li><a href="config_api.html#vitessce.constants.CoordinationType.SPATIAL_ZOOM">SPATIAL_ZOOM (vitessce.constants.CoordinationType attribute)</a>
+      <li><a href="api_config.html#vitessce.constants.CoordinationType.SPATIAL_ZOOM">SPATIAL_ZOOM (vitessce.constants.CoordinationType attribute)</a>
 </li>
-      <li><a href="config_api.html#vitessce.constants.Component.STATUS">STATUS (vitessce.constants.Component attribute)</a>
+      <li><a href="api_config.html#vitessce.constants.Component.STATUS">STATUS (vitessce.constants.Component attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -487,7 +492,7 @@
 <h2 id="T">T</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="config_api.html#vitessce.config.VitessceConfig.to_dict">to_dict() (vitessce.config.VitessceConfig method)</a>
+      <li><a href="api_config.html#vitessce.config.VitessceConfig.to_dict">to_dict() (vitessce.config.VitessceConfig method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -495,7 +500,7 @@
 <h2 id="U">U</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="config_api.html#vitessce.config.VitessceConfigView.use_coordination">use_coordination() (vitessce.config.VitessceConfigView method)</a>
+      <li><a href="api_config.html#vitessce.config.VitessceConfigView.use_coordination">use_coordination() (vitessce.config.VitessceConfigView method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -503,53 +508,52 @@
 <h2 id="V">V</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="config_api.html#vitessce.config.vconcat">vconcat() (in module vitessce.config)</a>
+      <li><a href="api_config.html#vitessce.config.vconcat">vconcat() (in module vitessce.config)</a>
 </li>
       <li>
     vitessce.config
 
       <ul>
-        <li><a href="config_api.html#module-vitessce.config">module</a>
+        <li><a href="api_config.html#module-vitessce.config">module</a>
 </li>
       </ul></li>
       <li>
     vitessce.constants
 
       <ul>
-        <li><a href="config_api.html#module-vitessce.constants">module</a>
-</li>
-      </ul></li>
-      <li>
-    vitessce.widget
-
-      <ul>
-        <li><a href="widget_api.html#module-vitessce.widget">module</a>
+        <li><a href="api_config.html#module-vitessce.constants">module</a>
 </li>
       </ul></li>
       <li>
     vitessce.wrappers
 
       <ul>
-        <li><a href="wrappers.html#module-vitessce.wrappers">module</a>
+        <li><a href="api_data.html#module-vitessce.wrappers">module</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="config_api.html#vitessce.config.VitessceConfig">VitessceConfig (class in vitessce.config)</a>
+      <li><a href="api_config.html#vitessce.config.VitessceConfig">VitessceConfig (class in vitessce.config)</a>
 </li>
-      <li><a href="config_api.html#vitessce.config.VitessceConfigCoordinationScope">VitessceConfigCoordinationScope (class in vitessce.config)</a>
+      <li><a href="api_config.html#vitessce.config.VitessceConfigCoordinationScope">VitessceConfigCoordinationScope (class in vitessce.config)</a>
 </li>
-      <li><a href="config_api.html#vitessce.config.VitessceConfigDataset">VitessceConfigDataset (class in vitessce.config)</a>
+      <li><a href="api_config.html#vitessce.config.VitessceConfigDataset">VitessceConfigDataset (class in vitessce.config)</a>
 </li>
-      <li><a href="config_api.html#vitessce.config.VitessceConfigDatasetFile">VitessceConfigDatasetFile (class in vitessce.config)</a>
+      <li><a href="api_config.html#vitessce.config.VitessceConfigDatasetFile">VitessceConfigDatasetFile (class in vitessce.config)</a>
 </li>
-      <li><a href="config_api.html#vitessce.config.VitessceConfigView">VitessceConfigView (class in vitessce.config)</a>
+      <li><a href="api_config.html#vitessce.config.VitessceConfigView">VitessceConfigView (class in vitessce.config)</a>
 </li>
-      <li><a href="config_api.html#vitessce.config.VitessceConfigViewHConcat">VitessceConfigViewHConcat (class in vitessce.config)</a>
+      <li><a href="api_config.html#vitessce.config.VitessceConfigViewHConcat">VitessceConfigViewHConcat (class in vitessce.config)</a>
 </li>
-      <li><a href="config_api.html#vitessce.config.VitessceConfigViewVConcat">VitessceConfigViewVConcat (class in vitessce.config)</a>
+      <li><a href="api_config.html#vitessce.config.VitessceConfigViewVConcat">VitessceConfigViewVConcat (class in vitessce.config)</a>
 </li>
-      <li><a href="widget_api.html#vitessce.widget.VitessceWidget">VitessceWidget (class in vitessce.widget)</a>
+  </ul></td>
+</tr></table>
+
+<h2 id="W">W</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api_config.html#vitessce.config.VitessceConfig.widget">widget() (vitessce.config.VitessceConfig method)</a>
 </li>
   </ul></td>
 </tr></table>

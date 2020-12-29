@@ -13,6 +13,7 @@
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/stylesheet.css" type="text/css" />
 
   
   
@@ -29,6 +30,7 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -82,9 +84,11 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="config_api.html">Config API</a></li>
-<li class="toctree-l1"><a class="reference internal" href="widget_api.html">Widget API</a></li>
-<li class="toctree-l1"><a class="reference internal" href="wrappers.html">Data Object Wrappers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="widget_examples.html">Widget examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_examples.html">Data preparation examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_config.html">View config API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_data.html">Data preparation APIs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="screenshots.html">Screenshots</a></li>
 </ul>
 
             
@@ -150,28 +154,64 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="welcome-to-vitessce-s-documentation">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="welcome-to-vitessce-s-documentation">
 <h1>Welcome to vitessce’s documentation!<a class="headerlink" href="#welcome-to-vitessce-s-documentation" title="Permalink to this headline">¶</a></h1>
+<p>Vitessce is a visual integration tool for exploration of spatial single-cell experiments.
+To learn more about the features of Vitessce, please visit our <a class="reference external" href="http://vitessce.io">core docs</a>.</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="getting_started.html#installation">Installation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="getting_started.html#optional-dependencies">Optional Dependencies</a></li>
-<li class="toctree-l2"><a class="reference internal" href="getting_started.html#simplest-widget-use-case">Simplest Widget Use Case</a></li>
-<li class="toctree-l2"><a class="reference internal" href="getting_started.html#full-anndata-example">Full AnnData Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#optional-dependencies">Optional dependencies</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="config_api.html">Config API</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="config_api.html#module-vitessce.config">vitessce.config</a></li>
-<li class="toctree-l2"><a class="reference internal" href="config_api.html#module-vitessce.constants">vitessce.constants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="widget_examples.html">Widget examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/widget_brain.html">Visualization of single-cell RNA seq data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/widget_genomic_profiles.html">Visualization of genomic profiles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/widget_pbmc.html">Visualization of 3k PBMC reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/widget_shortcut.html">The from_object shortcut</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/widget_from_dict.html">Using an existing view config dict</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="widget_api.html">Widget API</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="widget_api.html#module-vitessce.widget">vitessce.widget</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_examples.html">Data preparation examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/data_conversion.html">Convert data for long-term use</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="wrappers.html">Data Object Wrappers</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="wrappers.html#module-vitessce.wrappers">vitessce.wrappers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_config.html">View config API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api_config.html#module-vitessce.config">vitessce.config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_config.html#module-vitessce.constants">vitessce.constants</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api_data.html">Data preparation APIs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api_data.html#module-vitessce.wrappers">vitessce.wrappers</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="screenshots.html">Screenshots</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="screenshots.html#visualization-of-snatac-seq-data">Visualization of snATAC-seq data</a></li>
 </ul>
 </li>
 </ul>

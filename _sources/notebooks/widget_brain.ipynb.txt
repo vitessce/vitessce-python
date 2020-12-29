@@ -1,0 +1,235 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "nbsphinx": "hidden"
+   },
+   "source": [
+    "# Vitessce Widget Tutorial"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Visualization of single-cell RNA seq data"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## 1. Import dependencies\n",
+    "\n",
+    "We need to import the classes and functions that we will be using from the corresponding packages."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from os.path import join\n",
+    "from urllib.request import urlretrieve\n",
+    "from anndata import read_h5ad\n",
+    "import scanpy as sc\n",
+    "\n",
+    "from vitessce import (\n",
+    "    VitessceConfig,\n",
+    "    Component as cm,\n",
+    "    CoordinationType as ct,\n",
+    "    AnnDataWrapper,\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## 2. Download the data\n",
+    "\n",
+    "For this example, we need to download a dataset from the COVID-19 Cell Atlas https://www.covid19cellatlas.org/index.healthy.html#habib17."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "adata_filepath = join(\"data\", \"habib17.processed.h5ad\")\n",
+    "urlretrieve('https://covid19.cog.sanger.ac.uk/habib17.processed.h5ad', adata_filepath)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## 3. Load the data\n",
+    "\n",
+    "Note: this function may print a `FutureWarning`"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "adata = read_h5ad(adata_filepath)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## 3.1. Optionally, preprocess the dataset\n",
+    "\n",
+    "This dataset contains 25,587 genes. Here, we select the top 200 highly variable genes for visualization."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "sc.pp.highly_variable_genes(adata, n_top_genes=50)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## 4. Create the Vitessce widget configuration\n",
+    "\n",
+    "Vitessce needs to know which pieces of data we are interested in visualizing, the visualization types we would like to use, and how we want to coordinate (or link) the views."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### 4.1. Instantiate a `VitessceConfig` object\n",
+    "\n",
+    "Use the `VitessceConfig(name, description)` constructor to create an instance."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "vc = VitessceConfig(name='Habib et al', description='COVID-19 Healthy Donor Brain')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### 4.2. Add a dataset to the `VitessceConfig` instance\n",
+    "\n",
+    "In Vitessce, a dataset is a container for one file per data type. The `.add_dataset(name)` method on the `vc` instance sets up and returns a new dataset instance.\n",
+    "\n",
+    "Then, we can call the dataset's `.add_object(wrapper_object)` method to attach a \"data wrapper\" instance to our new dataset. For example, the `AnnDataWrapper` class knows how to convert AnnData objects to the corresponding Vitessce data types.\n",
+    "\n",
+    "Dataset wrapper classes may require additional parameters to resolve ambiguities. For instance, `AnnData` objects may store multiple clusterings or cell type annotation columns in the `adata.obs` dataframe. We can use the parameter `cell_set_obs_cols` to tell Vitessce which columns of the `obs` dataframe correspond to cell sets."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "dataset = vc.add_dataset(name='Brain').add_object(AnnDataWrapper(adata, cell_set_obs_cols=[\"CellType\"]))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### 4.3. Add visualizations to the `VitessceConfig` instance\n",
+    "\n",
+    "Now that we have added a dataset, we can configure visualizations. The `.add_view(dataset, component_type)` method adds a view (i.e. visualization or controller component) to the configuration.\n",
+    "\n",
+    "The `Component` enum class (which we have imported as `cm` here) can be used to fill in the `component_type` parameter.\n",
+    "\n",
+    "For convenience, the `SCATTERPLOT` component type takes the extra `mapping` keyword argument, which specifies which embedding should be used for mapping cells to (x,y) points on the plot."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "scatterplot = vc.add_view(dataset, cm.SCATTERPLOT, mapping=\"X_umap\")\n",
+    "cell_sets = vc.add_view(dataset, cm.CELL_SETS)\n",
+    "genes = vc.add_view(dataset, cm.GENES)\n",
+    "heatmap = vc.add_view(dataset, cm.HEATMAP)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### 4.4. Define the visualization layout\n",
+    "\n",
+    "The `vc.layout(view_concat)` method allows us to specify how our views will be arranged in the layout grid in the widget. The `|` and `/` characters are magic syntax for `hconcat(v1, v2)` and `vconcat(v1, v2)`, respectively."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "vc.layout((scatterplot | cell_sets) / (heatmap | genes));"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## 5. Create the widget\n",
+    "\n",
+    "The `vc.widget()` method returns the configured widget instance."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "vw = vc.widget()\n",
+    "vw"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.6"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}

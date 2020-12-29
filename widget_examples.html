@@ -1,0 +1,292 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Widget examples &mdash; vitessce  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/stylesheet.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Visualization of single-cell RNA seq data" href="notebooks/widget_brain.html" />
+    <link rel="prev" title="Getting Started" href="getting_started.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> vitessce
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Widget examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/widget_brain.html">Visualization of single-cell RNA seq data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/widget_genomic_profiles.html">Visualization of genomic profiles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/widget_pbmc.html">Visualization of 3k PBMC reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/widget_shortcut.html">The from_object shortcut</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/widget_from_dict.html">Using an existing view config dict</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="data_examples.html">Data preparation examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_config.html">View config API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_data.html">Data preparation APIs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="screenshots.html">Screenshots</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">vitessce</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Widget examples</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/widget_examples.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="widget-examples">
+<h1>Widget examples<a class="headerlink" href="#widget-examples" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/widget_brain.html">Visualization of single-cell RNA seq data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/widget_brain.html#1.-Import-dependencies">1. Import dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/widget_brain.html#2.-Download-the-data">2. Download the data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/widget_brain.html#3.-Load-the-data">3. Load the data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/widget_brain.html#3.1.-Optionally,-preprocess-the-dataset">3.1. Optionally, preprocess the dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/widget_brain.html#4.-Create-the-Vitessce-widget-configuration">4. Create the Vitessce widget configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/widget_brain.html#5.-Create-the-widget">5. Create the widget</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/widget_genomic_profiles.html">Visualization of genomic profiles</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/widget_genomic_profiles.html#1.-Import-dependencies">1. Import dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/widget_genomic_profiles.html#2.-Load-the-data">2. Load the data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/widget_genomic_profiles.html#3.-Wrap-the-data-into-a-Vitessce-compatible-wrapper-object">3. Wrap the data into a Vitessce-compatible wrapper object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/widget_genomic_profiles.html#4.-Make-a-Vitessce-configuration">4. Make a Vitessce configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/widget_genomic_profiles.html#5.-Create-the-widget">5. Create the widget</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/widget_pbmc.html">Visualization of 3k PBMC reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/widget_pbmc.html#1.-Import-dependencies">1. Import dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/widget_pbmc.html#2.-Download-the-dataset">2. Download the dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/widget_pbmc.html#3.-Load-the-dataset">3. Load the dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/widget_pbmc.html#3.1.-Optionally,-preprocess-the-dataset">3.1. Optionally, preprocess the dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/widget_pbmc.html#4.-Create-a-Vitessce-view-config">4. Create a Vitessce view config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/widget_pbmc.html#5.-Create-the-Vitessce-widget">5. Create the Vitessce widget</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/widget_shortcut.html">The from_object shortcut</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/widget_shortcut.html#1.-Import-dependencies">1. Import dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/widget_shortcut.html#2.-Download-the-data">2. Download the data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/widget_shortcut.html#3.-Load-the-data">3. Load the data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/widget_shortcut.html#3.1.-Optionally,-preprocess-the-data">3.1. Optionally, preprocess the data</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/widget_from_dict.html">Using an existing view config dict</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/widget_from_dict.html#1.-Import-dependencies">1. Import dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/widget_from_dict.html#2.-Import-config-of-interest-as-a-dict">2. Import config of interest as a dict</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/widget_from_dict.html#3.-Create-the-Vitessce-widget">3. Create the Vitessce widget</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="notebooks/widget_brain.html" class="btn btn-neutral float-right" title="Visualization of single-cell RNA seq data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="getting_started.html" class="btn btn-neutral float-left" title="Getting Started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Gehlenborg Lab
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

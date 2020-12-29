@@ -1,1 +1,2 @@
-include vitessce-jupyter.json
+include vitessce.json
+recursive-include vitessce/static *.js

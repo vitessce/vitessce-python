@@ -60,6 +60,12 @@ python -m unittest
 make html
 ```
 
+## Deployment
+
+To deploy a new version, increment the version of the Python package in [`vitessce/_version.py`](./vitessce/_version.py) and the JS package in [`js/package.json`](./js/package.json).
+
+Then, when you push or merge the code with the incremented versions to master, the GitHub Action `deploy.yml` workflow will build and push the packages to PyPI and NPM.
+
 
 ## Resources
 

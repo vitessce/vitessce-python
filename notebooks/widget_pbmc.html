@@ -433,11 +433,12 @@ div.rendered_html tbody tr:hover {
 <h2>1. Import dependencies<a class="headerlink" href="#1.-Import-dependencies" title="Permalink to this headline">¶</a></h2>
 <p>We need to import the classes and functions that we will be using from the corresponding packages.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">join</span>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">join</span>
 <span class="kn">from</span> <span class="nn">urllib.request</span> <span class="kn">import</span> <span class="n">urlretrieve</span>
 <span class="kn">from</span> <span class="nn">anndata</span> <span class="kn">import</span> <span class="n">read_h5ad</span>
 <span class="kn">import</span> <span class="nn">scanpy</span> <span class="k">as</span> <span class="nn">sc</span>
@@ -456,11 +457,12 @@ div.rendered_html tbody tr:hover {
 <h2>2. Download the dataset<a class="headerlink" href="#2.-Download-the-dataset" title="Permalink to this headline">¶</a></h2>
 <p>Download <code class="docutils literal notranslate"><span class="pre">pbmc3k_final.h5ad</span></code> from <a class="reference external" href="https://seurat.nygenome.org/pbmc3k_final.h5ad">https://seurat.nygenome.org/pbmc3k_final.h5ad</a></p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">adata_filepath</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="s2">&quot;pbmc3k_final.h5ad&quot;</span><span class="p">)</span>
+<span></span><span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">adata_filepath</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="s2">&quot;pbmc3k_final.h5ad&quot;</span><span class="p">)</span>
 <span class="n">urlretrieve</span><span class="p">(</span><span class="s1">&#39;https://seurat.nygenome.org/pbmc3k_final.h5ad&#39;</span><span class="p">,</span> <span class="n">adata_filepath</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -470,7 +472,7 @@ div.rendered_html tbody tr:hover {
 <h2>3. Load the dataset<a class="headerlink" href="#3.-Load-the-dataset" title="Permalink to this headline">¶</a></h2>
 <p>Load the dataset using AnnData’s <code class="docutils literal notranslate"><span class="pre">read_h5ad</span></code> function.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -483,7 +485,7 @@ div.rendered_html tbody tr:hover {
 <h2>3.1. Optionally, preprocess the dataset<a class="headerlink" href="#3.1.-Optionally,-preprocess-the-dataset" title="Permalink to this headline">¶</a></h2>
 <p>Before visualization, you may want to filter the list of genes.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -496,7 +498,7 @@ div.rendered_html tbody tr:hover {
 <h2>4. Create a Vitessce view config<a class="headerlink" href="#4.-Create-a-Vitessce-view-config" title="Permalink to this headline">¶</a></h2>
 <p>Define the data and views you would like to include in the widget.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -515,7 +517,7 @@ div.rendered_html tbody tr:hover {
 <div class="section" id="5.-Create-the-Vitessce-widget">
 <h2>5. Create the Vitessce widget<a class="headerlink" href="#5.-Create-the-Vitessce-widget" title="Permalink to this headline">¶</a></h2>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>

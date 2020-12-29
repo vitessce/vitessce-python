@@ -45,11 +45,13 @@ jobs:
           repo-token: ${{ secrets.GH_TOKEN }}
           site-directory: docs-dist/html
       - name: Deploy package to PyPI
+        continue-on-error: true
         uses: pypa/gh-action-pypi-publish@v1.4.1
         with:
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
       - name: Deploy package to NPM
+        continue-on-error: true
         working-directory: ./js
         run: npm publish
         env:

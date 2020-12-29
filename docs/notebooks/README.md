@@ -10,7 +10,6 @@ Some of the example notebooks rely on external single-cell data analysis package
 conda env create -f environment.yml
 conda activate vitessce-jupyter-examples
 pip install -e ../..
-jupyter labextension install @jupyterlab/celltags
 jupyter labextension install @jupyter-widgets/jupyterlab-manager
 jupyter labextension install ../../js
 ```

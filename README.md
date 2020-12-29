@@ -60,6 +60,7 @@ python -m unittest
 make html
 ```
 
+
 ## Deployment
 
 To deploy a new version, increment the version of the Python package in [`vitessce/_version.py`](./vitessce/_version.py) and the JS package in [`js/package.json`](./js/package.json).

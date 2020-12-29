@@ -21,7 +21,5 @@ jobs:
           conda info
           conda list
       - name: Run tests
-        run: |
-          cd tests
-          python -m unittest
-          cd -
+        working-directory: ./tests
+        run: python -m unittest

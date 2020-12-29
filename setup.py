@@ -163,7 +163,7 @@ setup_args = dict(
         'sdist': js_prerelease(sdist, strict=True),
         'jsdeps': NPM,
     },
-    author='Mark Keller',
+    author='Gehlenborg Lab',
     author_email='',
     url='https://github.com/vitessce/vitessce-python',
     keywords=[

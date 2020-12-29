@@ -2,7 +2,7 @@
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/vitessce/vitessce-python/master?filepath=docs/notebooks/widget_pbmc.ipynb)
 
-Python API and Jupyter widget facilitating interactive visualization of spatial single-cell data with Vitessce.
+Python API and Jupyter widget facilitating interactive visualization of spatial single-cell data with [Vitessce](https://github.com/vitessce/vitessce).
 
 
 ## Installation
@@ -20,7 +20,7 @@ To enable the widget for Jupyter Lab run the following additional lines:
 
 ## Getting started
 
-Explore our [example notebooks](./notebooks/).
+Explore our [example notebooks](./docs/notebooks/).
 These contain demos of different use cases and integrations with single-cell data analysis packages.
 
 

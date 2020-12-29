@@ -17,6 +17,7 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: 14
+          registry-url: https://registry.npmjs.org/
       - uses: conda-incubator/setup-miniconda@v2
         with:
           activate-environment: vitessce-jupyter-dev
@@ -54,6 +55,7 @@ jobs:
         continue-on-error: true
         working-directory: ./js
         run: npm publish
-        shell: bash
+        shell: /bin/bash -e {0}
         env:
+          NPM_CONFIG_USERCONFIG: /home/runner/work/_temp/.npmrc
           NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}

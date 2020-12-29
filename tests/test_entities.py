@@ -63,7 +63,8 @@ class TestEntities(unittest.TestCase):
 
     def test_cell_sets(self):
 
-      cell_sets = CellSets(first_node_name='Clusters')
+      cell_sets = CellSets()
+      cell_sets.add_level_zero_node('Clusters')
       
       cell_sets.add_node('Cluster 1', ['Clusters'])
       cell_sets.add_node('Cluster 2', ['Clusters'])
@@ -101,7 +102,7 @@ class TestEntities(unittest.TestCase):
 
     def test_cell_sets_node_not_found(self):
 
-      cell_sets = CellSets(first_node_name='Clusters')
+      cell_sets = CellSets()
       with self.assertRaises(Exception) as context:
         cell_sets.add_node('Cluster 1', ['Clusters Not Found'])
 

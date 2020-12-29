@@ -10,7 +10,9 @@ from .constants import (
 
 from .wrappers import (
     AnnDataWrapper,
+    SnapWrapper,
 )
+from .widget import VitessceWidget
 
 def _get_next_scope(prev_scopes):
     chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
@@ -249,10 +251,10 @@ class VitessceConfigView:
         self.view = {
             "component": component,
             "coordinationScopes": coordination_scopes,
-            "x": 0,
-            "y": 0,
-            "w": 1,
-            "h": 1
+            "x": x,
+            "y": y,
+            "w": w,
+            "h": h
         }
     
     def use_coordination(self, *c_scopes):
@@ -434,7 +436,7 @@ class VitessceConfig:
         d_scope.set_value(uid)
         return vcd
     
-    def add_view(self, dataset, component, x=None, y=None, w=None, h=None, mapping=None):
+    def add_view(self, dataset, component, x=0, y=0, w=1, h=1, mapping=None):
         """
         Add a view to the config.
 
@@ -688,14 +690,28 @@ class VitessceConfig:
                     data_type=f["type"],
                     file_type=f["fileType"]
                 )
-                    
-        # TODO: Add each coordination scope from the incoming config.
-        # TODO: Add the components (layout) from the incoming config.
+        
+        for c_type in config['coordinationSpace'].keys():
+            if c_type != ct.DATASET.value:
+                c_obj = config['coordinationSpace'][c_type]
+                vc.config['coordinationSpace'][c_type] = {}
+                for c_scope_name, c_scope_value in c_obj.items():
+                    scope = VitessceConfigCoordinationScope(c_type, c_scope_name)
+                    scope.set_value(c_scope_value)
+                    vc.config['coordinationSpace'][c_type][c_scope_name] = scope
+        
+        for c in config['layout']:
+            c_coord_scopes = c['coordinationScopes'] if 'coordinationScopes' in c.keys() else {}
+            new_view = VitessceConfigView(c['component'], c_coord_scopes, c['x'], c['y'], c['w'], c['h'])
+            if 'props' in c.keys():
+                new_view.set_props(**c['props'])
+            vc.config['layout'].append(new_view)
+
         return vc
 
 
     @staticmethod
-    def from_object(obj, name=None, description=None, **wrapper_kwargs):
+    def from_object(obj, name=None, description=None):
         """
         Helper function to automatically construct a Vitessce view config object from a single-cell dataset object.
         Particularly helpful when using the ``VitessceWidget`` Jupyter widget.
@@ -715,22 +731,51 @@ class VitessceConfig:
         """
         vc = VitessceConfig(name=name, description=description)
         dataset = vc.add_dataset()
-        try:
-            import anndata
-            if type(obj) == anndata.AnnData:
-                dataset.add_object(AnnDataWrapper(obj, **wrapper_kwargs))
-        
-                scatterplot = vc.add_view(dataset, cm.SCATTERPLOT, mapping="X_umap")
-                cell_sets = vc.add_view(dataset, cm.CELL_SETS)
-                genes = vc.add_view(dataset, cm.GENES)
-                heatmap = vc.add_view(dataset, cm.HEATMAP)
-                vc.layout((scatterplot | (cell_sets / genes)) / heatmap)
-        
-        except ImportError:
-            pass
 
-        # TODO: infer views and coordinations for other object types
+        if type(obj) == AnnDataWrapper:
+            dataset.add_object(obj)
+
+            # TODO: use the available embeddings to determine how many / which scatterplots to add.
+            scatterplot = vc.add_view(dataset, cm.SCATTERPLOT, mapping="X_umap")
+            cell_sets = vc.add_view(dataset, cm.CELL_SETS)
+            genes = vc.add_view(dataset, cm.GENES)
+            heatmap = vc.add_view(dataset, cm.HEATMAP)
+
+            vc.layout((scatterplot | (cell_sets / genes)) / heatmap)
+        
+        elif type(obj) == SnapWrapper:
+            dataset.add_object(obj)
+
+            genomic_profiles = vc.add_view(dataset, cm.GENOMIC_PROFILES)
+            scatter = vc.add_view(dataset, cm.SCATTERPLOT, mapping = "UMAP")
+            cell_sets = vc.add_view(dataset, cm.CELL_SETS)
+
+            vc.layout(genomic_profiles / (scatter | cell_sets))
+        
+        else:
+            print("Encountered an unknown object type. Unable to automatically generate a Vitessce view config.")
 
         return vc
+    
+    def widget(self, **kwargs):
+        """
+        Convenience function for instantiating a VitessceWidget object based on this config.
+        
+        :returns: The Jupyter widget.
+        :rtype: VitessceConfig
+
+        .. code-block:: python
+            :emphasize-lines: 6-7
+
+            from vitessce import VitessceConfig, Component as cm, CoordinationType as ct
+
+            vc = VitessceConfig()
+            my_dataset = vc.add_dataset(name='My Dataset')
+            v1 = vc.add_view(my_dataset, cm.SPATIAL)
+            vc.layout(v1)
+            vw = vc.widget()
+            vw
+        """
+        return VitessceWidget(self, **kwargs)
 
 

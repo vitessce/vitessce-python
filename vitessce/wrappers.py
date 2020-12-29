@@ -34,7 +34,8 @@ class AbstractWrapper:
     def get_cells(self, port, dataset_uid, obj_i):
         """
         Get the file definitions and server routes
-        corresponding to the ``cells`` data type.
+        corresponding to the :class:`~vitessce.constants.DataType.CELLS` data type.
+        Used internally by :class:`~vitessce.widget.VitessceWidget`.
 
         :param int port: The web server port, meant to be used in the localhost URLs in the file definitions.
         :param str dataset_uid: The unique identifier for the dataset parent of this data object.
@@ -48,7 +49,8 @@ class AbstractWrapper:
     def get_cell_sets(self, port, dataset_uid, obj_i):
         """
         Get the file definitions and server routes
-        corresponding to the ``cell-sets`` data type.
+        corresponding to the :class:`~vitessce.constants.DataType.CELL_SETS` data type.
+        Used internally by :class:`~vitessce.widget.VitessceWidget`.
 
         :param int port: The web server port, meant to be used in the localhost URLs in the file definitions.
         :param str dataset_uid: The unique identifier for the dataset parent of this data object.
@@ -62,7 +64,8 @@ class AbstractWrapper:
     def get_raster(self, port, dataset_uid, obj_i):
         """
         Get the file definitions and server routes
-        corresponding to the ``raster`` data type.
+        corresponding to the :class:`~vitessce.constants.DataType.RASTER` data type.
+        Used internally by :class:`~vitessce.widget.VitessceWidget`.
 
         :param int port: The web server port, meant to be used in the localhost URLs in the file definitions.
         :param str dataset_uid: The unique identifier for the dataset parent of this data object.
@@ -76,7 +79,7 @@ class AbstractWrapper:
     def get_molecules(self, port, dataset_uid, obj_i):
         """
         Get the file definitions and server routes
-        corresponding to the ``molecules`` data type.
+        corresponding to the :class:`~vitessce.constants.DataType.MOLECULES` data type.
 
         :param int port: The web server port, meant to be used in the localhost URLs in the file definitions.
         :param str dataset_uid: The unique identifier for the dataset parent of this data object.
@@ -90,7 +93,8 @@ class AbstractWrapper:
     def get_neighborhoods(self, port, dataset_uid, obj_i):
         """
         Get the file definitions and server routes
-        corresponding to the ``neighborhoods`` data type.
+        corresponding to the :class:`~vitessce.constants.DataType.NEIGHBORHOODS` data type.
+        Used internally by :class:`~vitessce.widget.VitessceWidget`.
 
         :param int port: The web server port, meant to be used in the localhost URLs in the file definitions.
         :param str dataset_uid: The unique identifier for the dataset parent of this data object.
@@ -104,7 +108,8 @@ class AbstractWrapper:
     def get_expression_matrix(self, port, dataset_uid, obj_i):
         """
         Get the file definitions and server routes
-        corresponding to the ``expression-matrix`` data type.
+        corresponding to the :class:`~vitessce.constants.DataType.EXPRESSION_MATRIX` data type.
+        Used internally by :class:`~vitessce.widget.VitessceWidget`.
 
         :param int port: The web server port, meant to be used in the localhost URLs in the file definitions.
         :param str dataset_uid: The unique identifier for the dataset parent of this data object.
@@ -118,7 +123,8 @@ class AbstractWrapper:
     def get_genomic_profiles(self, port, dataset_uid, obj_i):
         """
         Get the file definitions and server routes
-        corresponding to the ``genomic-profiles`` data type.
+        corresponding to the :class:`~vitessce.constants.DataType.GENOMIC_PROFILES` data type.
+        Used internally by :class:`~vitessce.widget.VitessceWidget`.
 
         :param int port: The web server port, meant to be used in the localhost URLs in the file definitions.
         :param str dataset_uid: The unique identifier for the dataset parent of this data object.
@@ -309,11 +315,21 @@ class OmeZarrWrapper(AbstractWrapper):
 
 
 class AnnDataWrapper(AbstractWrapper):
-    def __init__(self, adata, use_highly_variable_genes=True, **kwargs):
+    def __init__(self, adata, use_highly_variable_genes=True, cell_set_obs_cols=None, **kwargs):
+        """
+        Wrap an AnnData object by creating an instance of the ``AnnDataWrapper`` class.
+
+        :param adata: An AnnData object containing single-cell experiment data.
+        :type adata: anndata.AnnData
+        :param bool use_highly_variable_genes: When creating outputs with genes, should only the genes marked as highly variable be used?
+        :param list[str] cell_set_obs_cols: A list of column names of the ``adata.obs`` dataframe that should be used for creating cell sets.
+        :param \*\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
+        """
         super().__init__(**kwargs)
         self.adata = adata
         self.tempdir = tempfile.mkdtemp()
         self.use_highly_variable_genes = use_highly_variable_genes
+        self.cell_set_obs_cols = cell_set_obs_cols
 
     def create_cells_json(self):
         adata = self.adata
@@ -328,23 +344,32 @@ class AnnDataWrapper(AbstractWrapper):
 
     def create_cell_sets_json(self):
         adata = self.adata
-        cell_sets = CellSets(first_node_name = 'Clusters')
 
-        cell_ids = adata.obs.index.tolist()
-        cluster_ids = adata.obs['CellType'].unique().tolist()
-        cell_cluster_ids = adata.obs['CellType'].values.tolist()
+        cell_set_obs_cols = self.cell_set_obs_cols
 
-        cell_cluster_tuples = list(zip(cell_ids, cell_cluster_ids))
+        cell_sets = CellSets()
 
-        for cluster_id in cluster_ids:
-            cell_set = [
-                str(cell_id)
-                for cell_id, cell_cluster_id in cell_cluster_tuples
-                if cell_cluster_id == cluster_id
-            ]
-            cell_sets.add_node(str(cluster_id), ['Clusters'], cell_set)
+        if cell_set_obs_cols is not None and len(cell_set_obs_cols) > 0:
+            # Each `cell_set_obs_col` is a column name in the `adata.obs` dataframe,
+            # which we want to turn into a hierarchy of cell sets.
+            for cell_set_obs_col in cell_set_obs_cols:
+                cell_sets.add_level_zero_node(cell_set_obs_col)
 
-        return cell_sets.json
+                cell_ids = adata.obs.index.tolist()
+                cluster_ids = adata.obs[cell_set_obs_col].unique().tolist()
+                cell_cluster_ids = adata.obs[cell_set_obs_col].values.tolist()
+
+                cell_cluster_tuples = list(zip(cell_ids, cell_cluster_ids))
+
+                for cluster_id in sorted(cluster_ids):
+                    cell_set = [
+                        str(cell_id)
+                        for cell_id, cell_cluster_id in cell_cluster_tuples
+                        if cell_cluster_id == cluster_id
+                    ]
+                    cell_sets.add_node(str(cluster_id), [cell_set_obs_col], cell_set)
+            return cell_sets.json
+        return None
     
     def create_exp_matrix_zarr(self, zarr_filepath):
         adata = self.adata
@@ -414,17 +439,18 @@ class AnnDataWrapper(AbstractWrapper):
             
         cell_sets_json = self.create_cell_sets_json()
 
-        obj_routes = [
-            Route(self._get_route(dataset_uid, obj_i, "cell-sets"),
-                    self._create_response_json(cell_sets_json)),
-        ]
-        obj_file_defs = [
-            {
-                "type": dt.CELL_SETS.value,
-                "fileType": ft.CELL_SETS_JSON.value,
-                "url": self._get_url(port, dataset_uid, obj_i, "cell-sets")
-            }
-        ]
+        if cell_sets_json is not None:
+            obj_routes = [
+                Route(self._get_route(dataset_uid, obj_i, "cell-sets"),
+                        self._create_response_json(cell_sets_json)),
+            ]
+            obj_file_defs = [
+                {
+                    "type": dt.CELL_SETS.value,
+                    "fileType": ft.CELL_SETS_JSON.value,
+                    "url": self._get_url(port, dataset_uid, obj_i, "cell-sets")
+                }
+            ]
 
         return obj_file_defs, obj_routes
     
@@ -542,10 +568,12 @@ class SnapWrapper(AbstractWrapper):
         in_clusters_df["cluster"] = in_clusters_df["cluster"].astype(str)
         cluster_ids = in_clusters_df["cluster"].unique().tolist()
         cluster_ids.sort(key=int)
+
+        cluster_paths = [ [ "Clusters", cluster_id ] for cluster_id in cluster_ids ]
         
         # "SnapTools performs quantification using a specified aligner, and HuBMAP has standardized on BWA with the GRCh38 reference genome"
         # Reference: https://github.com/hubmapconsortium/sc-atac-seq-pipeline/blob/bb023f95ca3330128bfef41cc719ffcb2ee6a190/README.md
-        genomic_profiles = GenomicProfiles(out_f, profile_ids=cluster_ids, assembly='hg38', starting_resolution=starting_resolution)
+        genomic_profiles = GenomicProfiles(out_f, profile_paths=cluster_paths, assembly='hg38', starting_resolution=starting_resolution)
         chrom_name_to_length = genomic_profiles.chrom_name_to_length
 
         # Create each chromosome dataset.
@@ -663,7 +691,8 @@ class SnapWrapper(AbstractWrapper):
 
     def create_cell_sets_json(self):
         in_clusters_df = self.in_clusters_df
-        cell_sets = CellSets(first_node_name = 'Clusters')
+        cell_sets = CellSets()
+        cell_sets.add_level_zero_node('Clusters')
 
         cell_ids = in_clusters_df.index.values.tolist()
         in_clusters_df['cluster'] = in_clusters_df['cluster'].astype(str)

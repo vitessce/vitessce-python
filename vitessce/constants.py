@@ -60,7 +60,7 @@ class Component(DocEnum):
     CELL_SETS = "cellSets", "The cell sets component can be used to view and manipulate hierarchical (or flat) sets of cells, including sets representing cell type clusters."
     HEATMAP = "heatmap", "The heatmap component can be used to view a cell by gene expression matrix."
     LAYER_CONTROLLER = "layerController", "The layer controller can be used to manipulate channel settings of the images rendered by the spatial component."
-    HIGLASS = "higlass", "The higlass component can be used to visualize genome browser tracks and genome-wide interaction heatmaps."
+    GENOMIC_PROFILES = "genomicProfiles", "The higlass component can be used to visualize genome-wide ATAC-seq profiles."
     CELL_SET_SIZES = "cellSetSizes", "The cell set sizes component can display the quantities of cells in selected cell sets."
     GENES = "genes", "The gene list selector."
 

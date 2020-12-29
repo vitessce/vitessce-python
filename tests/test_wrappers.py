@@ -111,7 +111,7 @@ class TestWrappers(unittest.TestCase):
     
     def test_anndata(self):
         adata = read_h5ad(join('data', 'test.h5ad'))
-        w = AnnDataWrapper(adata)
+        w = AnnDataWrapper(adata, cell_set_obs_cols=['CellType'])
 
         cells_json = w.create_cells_json()
         cell_sets_json = w.create_cell_sets_json()

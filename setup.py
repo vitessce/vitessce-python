@@ -136,7 +136,7 @@ setup_args = dict(
     include_package_data=True,
     data_files=[
         # like `jupyter nbextension install --sys-prefix`
-        ('share/jupyter/nbextensions/vitessce', [
+        ('share/jupyter/nbextensions/vitessce-jupyter', [
             'vitessce/static/extension.js',
             'vitessce/static/index.js',
             'vitessce/static/index.js.map',

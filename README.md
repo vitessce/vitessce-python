@@ -1,5 +1,7 @@
 # vitessce-python
 
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/vitessce/vitessce-python/master?filepath=docs/notebooks/widget_pbmc.ipynb)
+
 Python API and Jupyter widget facilitating interactive visualization of spatial single-cell data with Vitessce.
 
 

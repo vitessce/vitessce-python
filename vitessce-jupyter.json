@@ -1,5 +1,5 @@
 {
   "load_extensions": {
-    "vitessce/extension": true
+    "vitessce-jupyter/extension": true
   }
 }

@@ -2,5 +2,5 @@
 
 jupyter nbextension install --py vitessce
 jupyter nbextension enable --py vitessce
-jupyter labextension install @jupyter-widgets/jupyterlab-manager vitessce-jupyter --no-build
-jupyter lab build --minimize=False
+jupyter labextension install @jupyter-widgets/jupyterlab-manager
+jupyter labextension install vitessce-jupyter

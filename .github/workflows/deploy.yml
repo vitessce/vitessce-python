@@ -28,8 +28,9 @@ jobs:
         working-directory: ./tests
         run: python -m unittest
       - name: Build a binary wheel and a source tarball
-        run: |
-          python -m build
+        run: >-
+          python -m
+          build
           --sdist
           --wheel
           --outdir dist/

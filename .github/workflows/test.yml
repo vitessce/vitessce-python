@@ -6,6 +6,9 @@ jobs:
   test:
     runs-on: ubuntu-18.04
     name: Build and test
+    defaults:
+      run:
+        shell: bash -l {0}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1

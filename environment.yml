@@ -12,6 +12,7 @@ dependencies:
  - scipy>=1.0.0
  - pip
  - pip:
+   - build==0.1.0
    - loompy>=3.0.6
    - sphinx
    - sphinx-rtd-theme

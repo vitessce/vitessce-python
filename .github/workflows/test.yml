@@ -23,6 +23,8 @@ jobs:
       - run: |
           conda info
           conda list
+      - name: Install vitessce
+        run: pip install -e .
       - name: Run tests
         working-directory: ./tests
         run: python -m unittest

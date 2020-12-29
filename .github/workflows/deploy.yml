@@ -54,5 +54,6 @@ jobs:
         continue-on-error: true
         working-directory: ./js
         run: npm publish
+        shell: bash
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}

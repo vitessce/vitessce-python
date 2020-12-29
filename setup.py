@@ -142,7 +142,7 @@ setup_args = dict(
             'vitessce/static/index.js.map',
         ]),
         # like `jupyter nbextension enable --sys-prefix`
-        ('etc/jupyter/nbconfig/notebook.d' ,['vitessce.json'])
+        ('etc/jupyter/nbconfig/notebook.d' ,['vitessce-jupyter.json'])
     ],
     install_requires=[
         'ipywidgets>=7.0.0',

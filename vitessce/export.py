@@ -86,10 +86,8 @@ def export_to_files(config, base_url, out_dir='.'):
         if type(route) == JsonRoute:
             data_json = route.data_json
             os.makedirs(os.path.dirname(out_path), exist_ok=True)
-            with open(out_path) as f:
-                f.write(json.dumps(data_json).encode())
-                f.write('\n'.encode())
-                f.flush()
+            with open(out_path, 'w') as f:
+                json.dump(data_json, f)
         elif type(route) == Mount:
             route_app = route.app
             if type(route_app) == StaticFiles:

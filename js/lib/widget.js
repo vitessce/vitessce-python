@@ -24,8 +24,7 @@ function prependBaseUrl(config, proxy) {
 
   if (jupyterLabConfigEl) {
     // This is jupyter lab
-    const jupyterConfig = JSON.parse(el.textContent || '');
-    baseUrl = jupyterConfig.baseUrl;
+    baseUrl = JSON.parse(jupyterLabConfigEl.textContent || '').baseUrl;
   } else {
     // This is jupyter notebook
     baseUrl = document.getElementsByTagName('body')[0].getAttribute('data-base-url');

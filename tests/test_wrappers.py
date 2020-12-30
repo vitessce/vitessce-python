@@ -91,7 +91,7 @@ class TestWrappers(unittest.TestCase):
     
     def test_base_url(self):
         z = zarr.open('data/test.ome.zarr')
-        w = OmeZarrWrapper(z, base_url="https://example.com")
+        w = OmeZarrWrapper(z)
 
         raster_json = w.create_raster_json(
             "https://example.com/raster_img"
@@ -100,7 +100,7 @@ class TestWrappers(unittest.TestCase):
         # TODO
         # self.assertEqual(raster_json, {})
 
-        obj_file_defs, obj_routes = w.get_raster(8000, 'A', 0)
+        obj_file_defs, obj_routes = w.get_raster("https://example.com", 'A', 0)
         self.assertEqual(obj_file_defs, [
             {
                 'fileType': 'raster.json',

@@ -11,12 +11,43 @@ import './widget.css';
 
 const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
 
+// The jupyter server may be running through a proxy,
+// which means that the client needs to prepend the part of the URL before /proxy/8000 such as
+// https://hub.gke2.mybinder.org/user/vitessce-vitessce-python-swi31vcv/proxy/8000/A/0/cells
+function prependBaseUrl(config, proxy) {
+  if(!proxy) {
+    return config;
+  }
+  const { origin } = new URL(window.location.href);
+  let baseUrl;
+  const jupyterLabConfigEl = document.getElementById('jupyter-config-data');
+
+  if (jupyterLabConfigEl) {
+    // This is jupyter lab
+    const jupyterConfig = JSON.parse(el.textContent || '');
+    baseUrl = jupyterConfig.baseUrl;
+  } else {
+    // This is jupyter notebook
+    baseUrl = document.getElementsByTagName('body')[0].getAttribute('data-base-url');
+  }
+  return {
+    ...config,
+    datasets: config.datasets.map(d => ({
+      ...d,
+      files: d.files.map(f => ({
+        ...f,
+        url: `${origin}${baseUrl}${f.url}`,
+      })),
+    })),
+  };
+}
+
 function VitessceWidget(props) {
   const {
     model
   } = props;
 
-  const config = model.get('config');
+  const config = prependBaseUrl(model.get('config'), model.get('proxy'));
   const height = model.get('height');
   const theme = model.get('theme') === 'auto' ? (prefersDark ? 'dark' : 'light') : model.get('theme');
 
@@ -84,6 +115,7 @@ export const VitessceModel = DOMWidgetModel.extend({
         config : {},
         height: 600,
         theme: 'auto',
+        proxy: false,
     }),
 });
 

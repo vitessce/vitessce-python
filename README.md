@@ -10,7 +10,8 @@ Python API and Jupyter widget facilitating interactive visualization of spatial 
 To install with pip:
 
     $ pip install vitessce
-    $ jupyter nbextension enable --py --sys-prefix vitessce
+    $ jupyter nbextension install --py vitessce
+    $ jupyter nbextension enable --py vitessce
 
 To enable the widget for Jupyter Lab run the following additional lines:
 
@@ -80,3 +81,4 @@ Then, when you push or merge the code with the incremented versions to master, t
 - [ipywidget cookiecutter](https://github.com/jupyter-widgets/widget-cookiecutter)
 - [Sphinx: Getting Started](https://www.sphinx-doc.org/en/master/usage/quickstart.html)
 - [Read the Docs Sphinx Theme](https://github.com/readthedocs/sphinx_rtd_theme)
+- [jupyter server proxy](https://jupyter-server-proxy.readthedocs.io/en/latest/arbitrary-ports-hosts.html)

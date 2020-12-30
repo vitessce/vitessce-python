@@ -10,6 +10,7 @@ dependencies:
  - zarr>=2.5.0
  - numcodecs>=0.7.2
  - scipy>=1.0.0
+ - jupyter-server-proxy>=1.5.2
  - pip
  - pip:
    - loompy

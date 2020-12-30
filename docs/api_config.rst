@@ -1,5 +1,5 @@
-Config API
-##########
+View config API
+###############
 
 The ``VitessceConfig`` class provides functionality for 
 creating view configs using a pythonic syntax, with

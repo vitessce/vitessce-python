@@ -1,6 +1,8 @@
 # vitessce-python
 
-Python API and Jupyter widget facilitating interactive visualization of spatial single-cell data with Vitessce.
+<!--[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/vitessce/vitessce-python/master?filepath=docs/notebooks/widget_pbmc.ipynb)-->
+
+Python API and Jupyter widget facilitating interactive visualization of spatial single-cell data with [Vitessce](https://github.com/vitessce/vitessce).
 
 
 ## Installation
@@ -18,7 +20,7 @@ To enable the widget for Jupyter Lab run the following additional lines:
 
 ## Getting started
 
-Explore our [example notebooks](./notebooks/).
+Explore our [example notebooks](./docs/notebooks/).
 These contain demos of different use cases and integrations with single-cell data analysis packages.
 
 
@@ -28,6 +30,8 @@ For a development installation (requires npm),
 
     $ git clone https://github.com/vitessce/vitessce-python.git
     $ cd vitessce-python
+    $ conda env create -f environment.yml
+    $ conda activate vitessce-jupyter-dev
     $ pip install -e .
     $ jupyter nbextension install --py --symlink --sys-prefix vitessce
     $ jupyter nbextension enable --py --sys-prefix vitessce
@@ -57,6 +61,13 @@ python -m unittest
 ```sh
 make html
 ```
+
+
+## Deployment
+
+To deploy a new version, increment the version of the Python package in [`vitessce/_version.py`](./vitessce/_version.py) and the JS package in [`js/package.json`](./js/package.json).
+
+Then, when you push or merge the code with the incremented versions to master, the GitHub Action `deploy.yml` workflow will build and push the packages to PyPI and NPM.
 
 
 ## Resources

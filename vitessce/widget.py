@@ -12,12 +12,14 @@ from starlette.applications import Starlette
 from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
 from threading import Thread
+import socket
 
 # Config creation dependencies
 from .routes import create_obj_routes
-from .config import VitessceConfig
 
 # See js/lib/widget.js for the frontend counterpart to this file.
+
+MAX_PORT_TRIES = 1000
 
 def run_server_loop(app, port):
     loop = asyncio.new_event_loop()
@@ -30,7 +32,10 @@ def run_server_loop(app, port):
     # (otherwise it will try to set signal handlers assuming it is on the main thread which throws an error)
     loop.run_until_complete(serve(app, config, shutdown_trigger=lambda: asyncio.Future()))
     loop.close()
-    
+
+def is_port_in_use(port):
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        return s.connect_ex(('localhost', port)) == 0
 
 @widgets.register
 class VitessceWidget(widgets.DOMWidget):
@@ -61,17 +66,17 @@ class VitessceWidget(widgets.DOMWidget):
     # It is synced back to Python from the frontend *any* time the model is touched.
     config = Dict({}).tag(sync=True)
     height = Int(600).tag(sync=True)
-    theme = Unicode('dark').tag(sync=True)
+    theme = Unicode('auto').tag(sync=True)
 
     next_port = 8000
 
-    def __init__(self, config, height=600, theme='dark', port=None):
+    def __init__(self, config, height=600, theme='auto', port=None):
         """
         Construct a new Vitessce widget.
 
         :param config: A view config instance.
         :type config: VitessceConfig
-        :param str theme: The theme name, either "light" or "dark". By default, "dark".
+        :param str theme: The theme name, either "light" or "dark". By default, "auto", which selects light or dark based on operating system preferences.
         :param int height: The height of the widget, in pixels. By default, 600.
         :param int port: The port to use when serving data objects on localhost. By default, 8000.
 
@@ -81,20 +86,23 @@ class VitessceWidget(widgets.DOMWidget):
             from vitessce import VitessceConfig, VitessceWidget
 
             vc = VitessceConfig.from_object(my_scanpy_object)
-            vw = VitessceWidget(vc)
+            vw = vc.widget()
             vw
         """
 
         if port is None:
             use_port = VitessceWidget.next_port
             VitessceWidget.next_port += 1
+            port_tries = 1
+            while is_port_in_use(use_port) and port_tries < MAX_PORT_TRIES:
+                use_port = VitessceWidget.next_port
+                VitessceWidget.next_port += 1
+                port_tries += 1
         else:
             use_port = port
         
         base_url = f"http://localhost:{use_port}"
 
-        assert type(config) == VitessceConfig
-        
         routes = []
         def on_obj(obj, dataset_uid, obj_i):
             obj_file_defs, obj_routes = create_obj_routes(obj, base_url, dataset_uid, obj_i)

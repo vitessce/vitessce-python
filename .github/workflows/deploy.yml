@@ -1,0 +1,61 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-18.04
+    name: Build, test, deploy
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 14
+          registry-url: https://registry.npmjs.org/
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          activate-environment: vitessce-jupyter-dev
+          environment-file: environment.yml
+          auto-activate-base: false
+      - name: Install vitessce
+        run: pip install -e .
+      - name: Run tests
+        working-directory: ./tests
+        run: python -m unittest
+      - name: Build a binary wheel and a source tarball
+        run: >-
+          python -m
+          build
+          --sdist
+          --wheel
+          --outdir dist/
+          .
+      - name: Build docs
+        run: |
+          make html
+          touch docs-dist/html/.nojekyll
+      - name: Deploy docs to gh-pages branch
+        uses: alex-page/blazing-fast-gh-pages-deploy@v1.1.0
+        with:
+          repo-token: ${{ secrets.GH_TOKEN }}
+          site-directory: docs-dist/html
+      - name: Deploy package to PyPI
+        continue-on-error: true
+        uses: pypa/gh-action-pypi-publish@v1.4.1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
+      - name: Deploy package to NPM
+        continue-on-error: true
+        working-directory: ./js
+        run: npm publish
+        shell: /bin/bash -e {0}
+        env:
+          NPM_CONFIG_USERCONFIG: /home/runner/work/_temp/.npmrc
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}

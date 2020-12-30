@@ -5,7 +5,9 @@ build/
 docs-dist/
 *.py[cod]
 node_modules/
-test/data/
+tests/data/
+./notebooks/
+docs/notebooks/data/
 
 # Compiled javascript
 vitessce/static/

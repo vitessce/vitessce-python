@@ -135,11 +135,13 @@ setup_args = dict(
     long_description=LONG_DESCRIPTION,
     include_package_data=True,
     data_files=[
+        # like `jupyter nbextension install --sys-prefix`
         ('share/jupyter/nbextensions/vitessce-jupyter', [
             'vitessce/static/extension.js',
             'vitessce/static/index.js',
             'vitessce/static/index.js.map',
-        ],),
+        ]),
+        # like `jupyter nbextension enable --sys-prefix`
         ('etc/jupyter/nbconfig/notebook.d' ,['vitessce-jupyter.json'])
     ],
     install_requires=[
@@ -148,6 +150,10 @@ setup_args = dict(
         'ujson>=4.0.1',
         'aiofiles>=0.6.0',
         'starlette==0.14.0',
+        'zarr>=2.5.0',
+        'numcodecs>=0.5.7',
+        'scipy>=1.2.1',
+        'negspy>=0.2.24',
     ],
     packages=find_packages(),
     zip_safe=False,
@@ -157,9 +163,9 @@ setup_args = dict(
         'sdist': js_prerelease(sdist, strict=True),
         'jsdeps': NPM,
     },
-    author='Mark Keller',
+    author='Gehlenborg Lab',
     author_email='',
-    url='https://github.com/vitessce/vitessce-jupyter',
+    url='https://github.com/vitessce/vitessce-python',
     keywords=[
         'ipython',
         'jupyter',

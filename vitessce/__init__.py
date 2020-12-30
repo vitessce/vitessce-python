@@ -6,9 +6,15 @@ from .constants import CoordinationType, Component, DataType, FileType
 from .wrappers import (
     AbstractWrapper,
     OmeTiffWrapper,
-    ZarrDirectoryStoreWrapper,
+    OmeZarrWrapper,
     AnnDataWrapper,
     LoomWrapper,
+    SnapWrapper,
+)
+from .entities import (
+    CellSets,
+    Cells,
+    Molecules,
 )
 from .export import upload_to_s3
 

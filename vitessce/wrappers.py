@@ -301,8 +301,8 @@ class OmeZarrWrapper(AbstractWrapper):
             obj_routes = [
                 Mount(self._get_route(dataset_uid, obj_i, "raster_img"),
                         app=StaticFiles(directory=img_dir_path, html=False)),
-                Route(self._get_route(dataset_uid, obj_i, "raster"),
-                        self._create_response_json(raster_json))
+                JsonRoute(self._get_route(dataset_uid, obj_i, "raster"),
+                        self._create_response_json(raster_json), raster_json)
             ]
             obj_file_defs = [
                 {
@@ -420,8 +420,8 @@ class AnnDataWrapper(AbstractWrapper):
         cells_json = self.create_cells_json()
 
         obj_routes = [
-            Route(self._get_route(dataset_uid, obj_i, "cells"),
-                    self._create_response_json(cells_json)),
+            JsonRoute(self._get_route(dataset_uid, obj_i, "cells"),
+                    self._create_response_json(cells_json), cells_json),
         ]
         obj_file_defs = [
             {
@@ -441,8 +441,8 @@ class AnnDataWrapper(AbstractWrapper):
 
         if cell_sets_json is not None:
             obj_routes = [
-                Route(self._get_route(dataset_uid, obj_i, "cell-sets"),
-                        self._create_response_json(cell_sets_json)),
+                JsonRoute(self._get_route(dataset_uid, obj_i, "cell-sets"),
+                        self._create_response_json(cell_sets_json), cell_sets_json),
             ]
             obj_file_defs = [
                 {
@@ -719,8 +719,8 @@ class SnapWrapper(AbstractWrapper):
         cell_sets_json = self.create_cell_sets_json()
 
         obj_routes = [
-            Route(self._get_route(dataset_uid, obj_i, "cell-sets"),
-                    self._create_response_json(cell_sets_json)),
+            JsonRoute(self._get_route(dataset_uid, obj_i, "cell-sets"),
+                    self._create_response_json(cell_sets_json), cell_sets_json),
         ]
         obj_file_defs = [
             {
@@ -748,8 +748,8 @@ class SnapWrapper(AbstractWrapper):
         cells_json = self.create_cells_json()
 
         obj_routes = [
-            Route(self._get_route(dataset_uid, obj_i, "cells"),
-                    self._create_response_json(cells_json)),
+            JsonRoute(self._get_route(dataset_uid, obj_i, "cells"),
+                    self._create_response_json(cells_json), cells_json),
         ]
         obj_file_defs = [
             {

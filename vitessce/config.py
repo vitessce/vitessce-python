@@ -13,6 +13,10 @@ from .wrappers import (
     SnapWrapper,
 )
 from .widget import VitessceWidget
+from .export import (
+    export_to_s3,
+    export_to_files,
+)
 
 def _get_next_scope(prev_scopes):
     chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
@@ -777,5 +781,33 @@ class VitessceConfig:
             vw
         """
         return VitessceWidget(self, **kwargs)
+        
+    def export(self, to, *args, **kwargs):
+        """
+        Export this config's data objects to the local file system or a cloud storage system and get the resulting view config.
+        
+        :param str to: The export destination. Valid values include "S3" and "files".
+        :param \*\*kwargs: Keyword arguments to pass to the export function.
+        :returns: The config as a dict, with URLs for the bucket filled in.
+        :rtype: dict
+        
+        .. code-block:: python
+            :emphasize-lines: 8
+        
+            from vitessce import VitessceConfig, Component as cm, CoordinationType as ct
+
+            vc = VitessceConfig()
+            my_dataset = vc.add_dataset(name='My Dataset')
+            v1 = vc.add_view(my_dataset, cm.SPATIAL)
+            vc.layout(v1)
+            
+            config_dict = vc.export(to="S3")
+        """
+        if to == "S3":
+            return export_to_s3(self, *args, **kwargs)
+        elif to == "files":
+            return export_to_files(self, *args, **kwargs)
+        else:
+            raise ValueError("Unknown export destination.")
 
 

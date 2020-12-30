@@ -2,7 +2,6 @@ import json
 import os
 from os.path import join
 import tempfile
-from urllib.parse import quote_plus
 
 from starlette.routing import Route, Mount
 from starlette.staticfiles import StaticFiles
@@ -56,4 +55,4 @@ def upload_to_s3(config, s3, bucket_name, prefix=''):
                         file_key = key + join(root, filename)[len(static_dir):]
                         bucket.upload_file(join(root, filename), file_key)
     
-    return f"http://vitessce.io/?url=data:," + quote_plus(json.dumps(config_dict))
+    return config_dict

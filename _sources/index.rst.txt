@@ -1,7 +1,9 @@
-.. vitessce documentation master file, created by
-   sphinx-quickstart on Wed Oct 28 11:53:46 2020.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+|Stars| |PyPI|
+
+.. |Stars| image:: https://img.shields.io/github/stars/vitessce/vitessce-python?logo=GitHub&color=green
+   :target: https://github.com/vitessce/vitessce-python
+.. |PyPI| image:: https://img.shields.io/pypi/v/vitessce.svg
+   :target: https://pypi.org/project/vitessce
 
 Welcome to vitessce's documentation!
 ====================================

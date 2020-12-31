@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Visualization of 3k PBMC reference &mdash; vitessce  documentation</title>
+  <title>Export data to AWS S3 &mdash; vitessce  documentation</title>
   
 
   
@@ -37,8 +37,8 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="The from_object shortcut" href="widget_shortcut.html" />
-    <link rel="prev" title="Visualization of genomic profiles" href="widget_genomic_profiles.html" /> 
+    <link rel="next" title="Export data to local files" href="data_export_files.html" />
+    <link rel="prev" title="Data preparation examples" href="../data_examples.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -85,23 +85,21 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../widget_examples.html">Widget examples</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="widget_brain.html">Visualization of single-cell RNA seq data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="widget_genomic_profiles.html">Visualization of genomic profiles</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Visualization of 3k PBMC reference</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="../widget_examples.html">Widget examples</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../data_examples.html">Data preparation examples</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Export data to AWS S3</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#1.-Import-dependencies">1. Import dependencies</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#2.-Download-the-dataset">2. Download the dataset</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#3.-Load-the-dataset">3. Load the dataset</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#3.1.-Optionally,-preprocess-the-dataset">3.1. Optionally, preprocess the dataset</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#4.-Create-a-Vitessce-view-config">4. Create a Vitessce view config</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#5.-Create-the-Vitessce-widget">5. Create the Vitessce widget</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#2.-Download-and-process-data">2. Download and process data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#3.-Create-the-Vitessce-configuration">3. Create the Vitessce configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#4.-Create-a-boto3-resource-with-S3-credentials">4. Create a <code class="docutils literal notranslate"><span class="pre">boto3</span></code> resource with S3 credentials</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#5.-Upload-files-to-S3">5. Upload files to S3</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#6.-View-on-vitessce.io">6. View on vitessce.io</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="widget_shortcut.html">The from_object shortcut</a></li>
-<li class="toctree-l2"><a class="reference internal" href="widget_from_dict.html">Using an existing view config dict</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data_export_files.html">Export data to local files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data_conversion.html">Convert data for long-term use</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../data_examples.html">Data preparation examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api_config.html">View config API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api_data.html">Data preparation APIs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../screenshots.html">Screenshots</a></li>
@@ -151,15 +149,15 @@
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
-          <li><a href="../widget_examples.html">Widget examples</a> &raquo;</li>
+          <li><a href="../data_examples.html">Data preparation examples</a> &raquo;</li>
         
-      <li>Visualization of 3k PBMC reference</li>
+      <li>Export data to AWS S3</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../_sources/notebooks/widget_pbmc.ipynb.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/notebooks/data_export_s3.ipynb.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -427,23 +425,27 @@ div.rendered_html tbody tr:hover {
     text-align: unset;
 }
 </style>
-<div class="section" id="Visualization-of-3k-PBMC-reference">
-<h1>Visualization of 3k PBMC reference<a class="headerlink" href="#Visualization-of-3k-PBMC-reference" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="Export-data-to-AWS-S3">
+<h1>Export data to AWS S3<a class="headerlink" href="#Export-data-to-AWS-S3" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="1.-Import-dependencies">
 <h2>1. Import dependencies<a class="headerlink" href="#1.-Import-dependencies" title="Permalink to this headline">¶</a></h2>
 <p>We need to import the classes and functions that we will be using from the corresponding packages.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">boto3</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">urllib.parse</span> <span class="kn">import</span> <span class="n">quote_plus</span>
 <span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">join</span>
 <span class="kn">from</span> <span class="nn">urllib.request</span> <span class="kn">import</span> <span class="n">urlretrieve</span>
 <span class="kn">from</span> <span class="nn">anndata</span> <span class="kn">import</span> <span class="n">read_h5ad</span>
 <span class="kn">import</span> <span class="nn">scanpy</span> <span class="k">as</span> <span class="nn">sc</span>
 
 <span class="kn">from</span> <span class="nn">vitessce</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">VitessceWidget</span><span class="p">,</span>
     <span class="n">VitessceConfig</span><span class="p">,</span>
     <span class="n">Component</span> <span class="k">as</span> <span class="n">cm</span><span class="p">,</span>
     <span class="n">CoordinationType</span> <span class="k">as</span> <span class="n">ct</span><span class="p">,</span>
@@ -453,77 +455,82 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 </div>
-<div class="section" id="2.-Download-the-dataset">
-<h2>2. Download the dataset<a class="headerlink" href="#2.-Download-the-dataset" title="Permalink to this headline">¶</a></h2>
-<p>Download <code class="docutils literal notranslate"><span class="pre">pbmc3k_final.h5ad</span></code> from <a class="reference external" href="https://seurat.nygenome.org/pbmc3k_final.h5ad">https://seurat.nygenome.org/pbmc3k_final.h5ad</a></p>
+<div class="section" id="2.-Download-and-process-data">
+<h2>2. Download and process data<a class="headerlink" href="#2.-Download-and-process-data" title="Permalink to this headline">¶</a></h2>
+<p>For this example, we need to download a dataset from the COVID-19 Cell Atlas <a class="reference external" href="https://www.covid19cellatlas.org/index.healthy.html#habib17">https://www.covid19cellatlas.org/index.healthy.html#habib17</a>.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">adata_filepath</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="s2">&quot;pbmc3k_final.h5ad&quot;</span><span class="p">)</span>
-<span class="n">urlretrieve</span><span class="p">(</span><span class="s1">&#39;https://seurat.nygenome.org/pbmc3k_final.h5ad&#39;</span><span class="p">,</span> <span class="n">adata_filepath</span><span class="p">)</span>
+<span class="n">adata_filepath</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="s2">&quot;habib17.processed.h5ad&quot;</span><span class="p">)</span>
+<span class="n">urlretrieve</span><span class="p">(</span><span class="s1">&#39;https://covid19.cog.sanger.ac.uk/habib17.processed.h5ad&#39;</span><span class="p">,</span> <span class="n">adata_filepath</span><span class="p">)</span>
+
+<span class="n">adata</span> <span class="o">=</span> <span class="n">read_h5ad</span><span class="p">(</span><span class="n">adata_filepath</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">highly_variable_genes</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">n_top_genes</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 </div>
-<div class="section" id="3.-Load-the-dataset">
-<h2>3. Load the dataset<a class="headerlink" href="#3.-Load-the-dataset" title="Permalink to this headline">¶</a></h2>
-<p>Load the dataset using AnnData’s <code class="docutils literal notranslate"><span class="pre">read_h5ad</span></code> function.</p>
+<div class="section" id="3.-Create-the-Vitessce-configuration">
+<h2>3. Create the Vitessce configuration<a class="headerlink" href="#3.-Create-the-Vitessce-configuration" title="Permalink to this headline">¶</a></h2>
+<p>Set up the configuration by adding the views and datasets of interest.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">adata</span> <span class="o">=</span> <span class="n">read_h5ad</span><span class="p">(</span><span class="n">adata_filepath</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div class="section" id="3.1.-Optionally,-preprocess-the-dataset">
-<h2>3.1. Optionally, preprocess the dataset<a class="headerlink" href="#3.1.-Optionally,-preprocess-the-dataset" title="Permalink to this headline">¶</a></h2>
-<p>Before visualization, you may want to filter the list of genes.</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">highly_variable_genes</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">n_top_genes</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div class="section" id="4.-Create-a-Vitessce-view-config">
-<h2>4. Create a Vitessce view config<a class="headerlink" href="#4.-Create-a-Vitessce-view-config" title="Permalink to this headline">¶</a></h2>
-<p>Define the data and views you would like to include in the widget.</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">vc</span> <span class="o">=</span> <span class="n">VitessceConfig</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;PBMC Reference&#39;</span><span class="p">)</span>
-<span class="n">dataset</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">add_dataset</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;PBMC 3k&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">add_object</span><span class="p">(</span><span class="n">AnnDataWrapper</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">cell_set_obs_cols</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;leiden&quot;</span><span class="p">]))</span>
-<span class="n">umap</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">cm</span><span class="o">.</span><span class="n">SCATTERPLOT</span><span class="p">,</span> <span class="n">mapping</span><span class="o">=</span><span class="s2">&quot;X_umap&quot;</span><span class="p">)</span>
-<span class="n">pca</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">cm</span><span class="o">.</span><span class="n">SCATTERPLOT</span><span class="p">,</span> <span class="n">mapping</span><span class="o">=</span><span class="s2">&quot;X_pca&quot;</span><span class="p">)</span>
+<span></span><span class="n">vc</span> <span class="o">=</span> <span class="n">VitessceConfig</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Habib et al&#39;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;COVID-19 Healthy Donor Brain&#39;</span><span class="p">)</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">add_dataset</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Brain&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">add_object</span><span class="p">(</span><span class="n">AnnDataWrapper</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">cell_set_obs_cols</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;CellType&quot;</span><span class="p">]))</span>
+<span class="n">scatterplot</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">cm</span><span class="o">.</span><span class="n">SCATTERPLOT</span><span class="p">,</span> <span class="n">mapping</span><span class="o">=</span><span class="s2">&quot;X_umap&quot;</span><span class="p">)</span>
 <span class="n">cell_sets</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">cm</span><span class="o">.</span><span class="n">CELL_SETS</span><span class="p">)</span>
 <span class="n">genes</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">cm</span><span class="o">.</span><span class="n">GENES</span><span class="p">)</span>
 <span class="n">heatmap</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">cm</span><span class="o">.</span><span class="n">HEATMAP</span><span class="p">)</span>
-<span class="n">vc</span><span class="o">.</span><span class="n">layout</span><span class="p">((</span><span class="n">umap</span> <span class="o">/</span> <span class="n">pca</span><span class="p">)</span> <span class="o">|</span> <span class="p">((</span><span class="n">cell_sets</span> <span class="o">|</span> <span class="n">genes</span><span class="p">)</span> <span class="o">/</span> <span class="n">heatmap</span><span class="p">));</span>
+<span class="n">vc</span><span class="o">.</span><span class="n">layout</span><span class="p">((</span><span class="n">scatterplot</span> <span class="o">|</span> <span class="p">(</span><span class="n">cell_sets</span> <span class="o">/</span> <span class="n">genes</span><span class="p">))</span> <span class="o">/</span> <span class="n">heatmap</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
 </div>
-<div class="section" id="5.-Create-the-Vitessce-widget">
-<h2>5. Create the Vitessce widget<a class="headerlink" href="#5.-Create-the-Vitessce-widget" title="Permalink to this headline">¶</a></h2>
-<p>A widget can be created with the <code class="docutils literal notranslate"><span class="pre">.widget()</span></code> method on the config instance. Here, the <code class="docutils literal notranslate"><span class="pre">proxy=True</span></code> parameter allows this widget to be used in a cloud notebook environment, such as Binder.</p>
+<div class="section" id="4.-Create-a-boto3-resource-with-S3-credentials">
+<h2>4. Create a <code class="docutils literal notranslate"><span class="pre">boto3</span></code> resource with S3 credentials<a class="headerlink" href="#4.-Create-a-boto3-resource-with-S3-credentials" title="Permalink to this headline">¶</a></h2>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">vw</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">widget</span><span class="p">(</span><span class="n">proxy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">vw</span>
+<span></span><span class="n">s3</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">resource</span><span class="p">(</span>
+    <span class="n">service_name</span><span class="o">=</span><span class="s1">&#39;s3&#39;</span><span class="p">,</span>
+    <span class="n">aws_access_key_id</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;VITESSCE_S3_ACCESS_KEY_ID&#39;</span><span class="p">],</span>
+    <span class="n">aws_secret_access_key</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;VITESSCE_S3_SECRET_ACCESS_KEY&#39;</span><span class="p">],</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="5.-Upload-files-to-S3">
+<h2>5. Upload files to S3<a class="headerlink" href="#5.-Upload-files-to-S3" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">.export(to='S3')</span></code> method on the view config instance will upload all data objects to the specified bucket. Then, the processed view config will be returned as a <code class="docutils literal notranslate"><span class="pre">dict</span></code>, with the file URLs filled in, pointing to the S3 bucket files. For more information about configuring the S3 bucket so that files are accessible over the internet, visit the “Hosting Data” page of our core documentation site.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">config_dict</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">to</span><span class="o">=</span><span class="s1">&#39;S3&#39;</span><span class="p">,</span> <span class="n">s3</span><span class="o">=</span><span class="n">s3</span><span class="p">,</span> <span class="n">bucket_name</span><span class="o">=</span><span class="s1">&#39;vitessce-export-examples&#39;</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;test&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="6.-View-on-vitessce.io">
+<h2>6. View on vitessce.io<a class="headerlink" href="#6.-View-on-vitessce.io" title="Permalink to this headline">¶</a></h2>
+<p>The returned view config dict can be converted to a URL, and can be used to share the interactive visualizations with colleagues.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">vitessce_url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;http://vitessce.io/?url=data:,&quot;</span> <span class="o">+</span> <span class="n">quote_plus</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">config_dict</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">vitessce_url</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -538,10 +545,10 @@ div.rendered_html tbody tr:hover {
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="widget_shortcut.html" class="btn btn-neutral float-right" title="The from_object shortcut" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="data_export_files.html" class="btn btn-neutral float-right" title="Export data to local files" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="widget_genomic_profiles.html" class="btn btn-neutral float-left" title="Visualization of genomic profiles" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="../data_examples.html" class="btn btn-neutral float-left" title="Data preparation examples" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

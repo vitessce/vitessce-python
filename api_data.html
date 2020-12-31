@@ -90,6 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="api_config.html">View config API</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Data preparation APIs</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#module-vitessce.wrappers">vitessce.wrappers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-vitessce.export">vitessce.export</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="screenshots.html">Screenshots</a></li>
@@ -196,25 +197,20 @@ getter functions for the data types that can be derived from your object.</p>
 <span id="vitessce-wrappers"></span><h2>vitessce.wrappers<a class="headerlink" href="#module-vitessce.wrappers" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="vitessce.wrappers.AbstractWrapper">
-<em class="property">class </em><code class="sig-prename descclassname">vitessce.wrappers.</code><code class="sig-name descname">AbstractWrapper</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L20-L173"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.AbstractWrapper" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">vitessce.wrappers.</code><code class="sig-name descname">AbstractWrapper</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L26-L174"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.AbstractWrapper" title="Permalink to this definition">¶</a></dt>
 <dd><p>An abstract class that can be extended when
 implementing custom dataset object wrapper classes.</p>
 <p>Abstract constructor to be inherited by dataset wrapper classes.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>base_url</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – An optional base URL to use in dataset file definitions.</p>
-</dd>
-</dl>
 <dl class="py method">
 <dt id="vitessce.wrappers.AbstractWrapper.get_cell_sets">
-<code class="sig-name descname">get_cell_sets</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">port</span></em>, <em class="sig-param"><span class="n">dataset_uid</span></em>, <em class="sig-param"><span class="n">obj_i</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L49-L62"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.AbstractWrapper.get_cell_sets" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_cell_sets</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">base_url</span></em>, <em class="sig-param"><span class="n">dataset_uid</span></em>, <em class="sig-param"><span class="n">obj_i</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L53-L66"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.AbstractWrapper.get_cell_sets" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the file definitions and server routes
 corresponding to the <a class="reference internal" href="api_config.html#vitessce.constants.DataType.CELL_SETS" title="vitessce.constants.DataType.CELL_SETS"><code class="xref py py-class docutils literal notranslate"><span class="pre">CELL_SETS</span></code></a> data type.
 Used internally by <code class="xref py py-class docutils literal notranslate"><span class="pre">VitessceWidget</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>port</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The web server port, meant to be used in the localhost URLs in the file definitions.</p></li>
+<li><p><strong>base_url</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The web server base url.</p></li>
 <li><p><strong>dataset_uid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The unique identifier for the dataset parent of this data object.</p></li>
 <li><p><strong>obj_i</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The index of this data object child within its dataset parent.</p></li>
 </ul>
@@ -230,14 +226,14 @@ Used internally by <code class="xref py py-class docutils literal notranslate"><
 
 <dl class="py method">
 <dt id="vitessce.wrappers.AbstractWrapper.get_cells">
-<code class="sig-name descname">get_cells</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">port</span></em>, <em class="sig-param"><span class="n">dataset_uid</span></em>, <em class="sig-param"><span class="n">obj_i</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L34-L47"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.AbstractWrapper.get_cells" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_cells</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">base_url</span></em>, <em class="sig-param"><span class="n">dataset_uid</span></em>, <em class="sig-param"><span class="n">obj_i</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L38-L51"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.AbstractWrapper.get_cells" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the file definitions and server routes
 corresponding to the <a class="reference internal" href="api_config.html#vitessce.constants.DataType.CELLS" title="vitessce.constants.DataType.CELLS"><code class="xref py py-class docutils literal notranslate"><span class="pre">CELLS</span></code></a> data type.
 Used internally by <code class="xref py py-class docutils literal notranslate"><span class="pre">VitessceWidget</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>port</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The web server port, meant to be used in the localhost URLs in the file definitions.</p></li>
+<li><p><strong>base_url</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The web server base url.</p></li>
 <li><p><strong>dataset_uid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The unique identifier for the dataset parent of this data object.</p></li>
 <li><p><strong>obj_i</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The index of this data object child within its dataset parent.</p></li>
 </ul>
@@ -253,14 +249,14 @@ Used internally by <code class="xref py py-class docutils literal notranslate"><
 
 <dl class="py method">
 <dt id="vitessce.wrappers.AbstractWrapper.get_expression_matrix">
-<code class="sig-name descname">get_expression_matrix</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">port</span></em>, <em class="sig-param"><span class="n">dataset_uid</span></em>, <em class="sig-param"><span class="n">obj_i</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L108-L121"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.AbstractWrapper.get_expression_matrix" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_expression_matrix</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">base_url</span></em>, <em class="sig-param"><span class="n">dataset_uid</span></em>, <em class="sig-param"><span class="n">obj_i</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L112-L125"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.AbstractWrapper.get_expression_matrix" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the file definitions and server routes
 corresponding to the <a class="reference internal" href="api_config.html#vitessce.constants.DataType.EXPRESSION_MATRIX" title="vitessce.constants.DataType.EXPRESSION_MATRIX"><code class="xref py py-class docutils literal notranslate"><span class="pre">EXPRESSION_MATRIX</span></code></a> data type.
 Used internally by <code class="xref py py-class docutils literal notranslate"><span class="pre">VitessceWidget</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>port</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The web server port, meant to be used in the localhost URLs in the file definitions.</p></li>
+<li><p><strong>base_url</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The web server base url.</p></li>
 <li><p><strong>dataset_uid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The unique identifier for the dataset parent of this data object.</p></li>
 <li><p><strong>obj_i</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The index of this data object child within its dataset parent.</p></li>
 </ul>
@@ -276,14 +272,14 @@ Used internally by <code class="xref py py-class docutils literal notranslate"><
 
 <dl class="py method">
 <dt id="vitessce.wrappers.AbstractWrapper.get_genomic_profiles">
-<code class="sig-name descname">get_genomic_profiles</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">port</span></em>, <em class="sig-param"><span class="n">dataset_uid</span></em>, <em class="sig-param"><span class="n">obj_i</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L123-L136"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.AbstractWrapper.get_genomic_profiles" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_genomic_profiles</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">base_url</span></em>, <em class="sig-param"><span class="n">dataset_uid</span></em>, <em class="sig-param"><span class="n">obj_i</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L127-L140"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.AbstractWrapper.get_genomic_profiles" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the file definitions and server routes
 corresponding to the <a class="reference internal" href="api_config.html#vitessce.constants.DataType.GENOMIC_PROFILES" title="vitessce.constants.DataType.GENOMIC_PROFILES"><code class="xref py py-class docutils literal notranslate"><span class="pre">GENOMIC_PROFILES</span></code></a> data type.
 Used internally by <code class="xref py py-class docutils literal notranslate"><span class="pre">VitessceWidget</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>port</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The web server port, meant to be used in the localhost URLs in the file definitions.</p></li>
+<li><p><strong>base_url</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The web server base url.</p></li>
 <li><p><strong>dataset_uid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The unique identifier for the dataset parent of this data object.</p></li>
 <li><p><strong>obj_i</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The index of this data object child within its dataset parent.</p></li>
 </ul>
@@ -299,13 +295,13 @@ Used internally by <code class="xref py py-class docutils literal notranslate"><
 
 <dl class="py method">
 <dt id="vitessce.wrappers.AbstractWrapper.get_molecules">
-<code class="sig-name descname">get_molecules</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">port</span></em>, <em class="sig-param"><span class="n">dataset_uid</span></em>, <em class="sig-param"><span class="n">obj_i</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L79-L91"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.AbstractWrapper.get_molecules" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_molecules</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">base_url</span></em>, <em class="sig-param"><span class="n">dataset_uid</span></em>, <em class="sig-param"><span class="n">obj_i</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L83-L95"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.AbstractWrapper.get_molecules" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the file definitions and server routes
 corresponding to the <a class="reference internal" href="api_config.html#vitessce.constants.DataType.MOLECULES" title="vitessce.constants.DataType.MOLECULES"><code class="xref py py-class docutils literal notranslate"><span class="pre">MOLECULES</span></code></a> data type.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>port</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The web server port, meant to be used in the localhost URLs in the file definitions.</p></li>
+<li><p><strong>base_url</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The web server base url.</p></li>
 <li><p><strong>dataset_uid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The unique identifier for the dataset parent of this data object.</p></li>
 <li><p><strong>obj_i</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The index of this data object child within its dataset parent.</p></li>
 </ul>
@@ -321,14 +317,14 @@ corresponding to the <a class="reference internal" href="api_config.html#vitessc
 
 <dl class="py method">
 <dt id="vitessce.wrappers.AbstractWrapper.get_neighborhoods">
-<code class="sig-name descname">get_neighborhoods</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">port</span></em>, <em class="sig-param"><span class="n">dataset_uid</span></em>, <em class="sig-param"><span class="n">obj_i</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L93-L106"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.AbstractWrapper.get_neighborhoods" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_neighborhoods</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">base_url</span></em>, <em class="sig-param"><span class="n">dataset_uid</span></em>, <em class="sig-param"><span class="n">obj_i</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L97-L110"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.AbstractWrapper.get_neighborhoods" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the file definitions and server routes
 corresponding to the <a class="reference internal" href="api_config.html#vitessce.constants.DataType.NEIGHBORHOODS" title="vitessce.constants.DataType.NEIGHBORHOODS"><code class="xref py py-class docutils literal notranslate"><span class="pre">NEIGHBORHOODS</span></code></a> data type.
 Used internally by <code class="xref py py-class docutils literal notranslate"><span class="pre">VitessceWidget</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>port</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The web server port, meant to be used in the localhost URLs in the file definitions.</p></li>
+<li><p><strong>base_url</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The web server base url.</p></li>
 <li><p><strong>dataset_uid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The unique identifier for the dataset parent of this data object.</p></li>
 <li><p><strong>obj_i</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The index of this data object child within its dataset parent.</p></li>
 </ul>
@@ -344,14 +340,14 @@ Used internally by <code class="xref py py-class docutils literal notranslate"><
 
 <dl class="py method">
 <dt id="vitessce.wrappers.AbstractWrapper.get_raster">
-<code class="sig-name descname">get_raster</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">port</span></em>, <em class="sig-param"><span class="n">dataset_uid</span></em>, <em class="sig-param"><span class="n">obj_i</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L64-L77"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.AbstractWrapper.get_raster" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_raster</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">base_url</span></em>, <em class="sig-param"><span class="n">dataset_uid</span></em>, <em class="sig-param"><span class="n">obj_i</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L68-L81"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.AbstractWrapper.get_raster" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the file definitions and server routes
 corresponding to the <a class="reference internal" href="api_config.html#vitessce.constants.DataType.RASTER" title="vitessce.constants.DataType.RASTER"><code class="xref py py-class docutils literal notranslate"><span class="pre">RASTER</span></code></a> data type.
 Used internally by <code class="xref py py-class docutils literal notranslate"><span class="pre">VitessceWidget</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>port</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The web server port, meant to be used in the localhost URLs in the file definitions.</p></li>
+<li><p><strong>base_url</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The web server base url.</p></li>
 <li><p><strong>dataset_uid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The unique identifier for the dataset parent of this data object.</p></li>
 <li><p><strong>obj_i</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The index of this data object child within its dataset parent.</p></li>
 </ul>
@@ -369,7 +365,7 @@ Used internally by <code class="xref py py-class docutils literal notranslate"><
 
 <dl class="py class">
 <dt id="vitessce.wrappers.AnnDataWrapper">
-<em class="property">class </em><code class="sig-prename descclassname">vitessce.wrappers.</code><code class="sig-name descname">AnnDataWrapper</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">adata</span></em>, <em class="sig-param"><span class="n">use_highly_variable_genes</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">cell_set_obs_cols</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L317-L480"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.AnnDataWrapper" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">vitessce.wrappers.</code><code class="sig-name descname">AnnDataWrapper</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">adata</span></em>, <em class="sig-param"><span class="n">use_highly_variable_genes</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">cell_set_obs_cols</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L318-L480"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.AnnDataWrapper" title="Permalink to this definition">¶</a></dt>
 <dd><p>Wrap an AnnData object by creating an instance of the <code class="docutils literal notranslate"><span class="pre">AnnDataWrapper</span></code> class.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -383,14 +379,14 @@ Used internally by <code class="xref py py-class docutils literal notranslate"><
 </dl>
 <dl class="py method">
 <dt id="vitessce.wrappers.AnnDataWrapper.get_cell_sets">
-<code class="sig-name descname">get_cell_sets</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">port</span></em>, <em class="sig-param"><span class="n">dataset_uid</span></em>, <em class="sig-param"><span class="n">obj_i</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L435-L455"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.AnnDataWrapper.get_cell_sets" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_cell_sets</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">base_url</span></em>, <em class="sig-param"><span class="n">dataset_uid</span></em>, <em class="sig-param"><span class="n">obj_i</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L436-L455"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.AnnDataWrapper.get_cell_sets" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the file definitions and server routes
 corresponding to the <a class="reference internal" href="api_config.html#vitessce.constants.DataType.CELL_SETS" title="vitessce.constants.DataType.CELL_SETS"><code class="xref py py-class docutils literal notranslate"><span class="pre">CELL_SETS</span></code></a> data type.
 Used internally by <code class="xref py py-class docutils literal notranslate"><span class="pre">VitessceWidget</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>port</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The web server port, meant to be used in the localhost URLs in the file definitions.</p></li>
+<li><p><strong>base_url</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The web server base url.</p></li>
 <li><p><strong>dataset_uid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The unique identifier for the dataset parent of this data object.</p></li>
 <li><p><strong>obj_i</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The index of this data object child within its dataset parent.</p></li>
 </ul>
@@ -406,14 +402,14 @@ Used internally by <code class="xref py py-class docutils literal notranslate"><
 
 <dl class="py method">
 <dt id="vitessce.wrappers.AnnDataWrapper.get_cells">
-<code class="sig-name descname">get_cells</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">port</span></em>, <em class="sig-param"><span class="n">dataset_uid</span></em>, <em class="sig-param"><span class="n">obj_i</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L415-L433"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.AnnDataWrapper.get_cells" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_cells</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">base_url</span></em>, <em class="sig-param"><span class="n">dataset_uid</span></em>, <em class="sig-param"><span class="n">obj_i</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L416-L434"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.AnnDataWrapper.get_cells" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the file definitions and server routes
 corresponding to the <a class="reference internal" href="api_config.html#vitessce.constants.DataType.CELLS" title="vitessce.constants.DataType.CELLS"><code class="xref py py-class docutils literal notranslate"><span class="pre">CELLS</span></code></a> data type.
 Used internally by <code class="xref py py-class docutils literal notranslate"><span class="pre">VitessceWidget</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>port</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The web server port, meant to be used in the localhost URLs in the file definitions.</p></li>
+<li><p><strong>base_url</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The web server base url.</p></li>
 <li><p><strong>dataset_uid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The unique identifier for the dataset parent of this data object.</p></li>
 <li><p><strong>obj_i</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The index of this data object child within its dataset parent.</p></li>
 </ul>
@@ -429,14 +425,14 @@ Used internally by <code class="xref py py-class docutils literal notranslate"><
 
 <dl class="py method">
 <dt id="vitessce.wrappers.AnnDataWrapper.get_expression_matrix">
-<code class="sig-name descname">get_expression_matrix</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">port</span></em>, <em class="sig-param"><span class="n">dataset_uid</span></em>, <em class="sig-param"><span class="n">obj_i</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L457-L480"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.AnnDataWrapper.get_expression_matrix" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_expression_matrix</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">base_url</span></em>, <em class="sig-param"><span class="n">dataset_uid</span></em>, <em class="sig-param"><span class="n">obj_i</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L457-L480"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.AnnDataWrapper.get_expression_matrix" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the file definitions and server routes
 corresponding to the <a class="reference internal" href="api_config.html#vitessce.constants.DataType.EXPRESSION_MATRIX" title="vitessce.constants.DataType.EXPRESSION_MATRIX"><code class="xref py py-class docutils literal notranslate"><span class="pre">EXPRESSION_MATRIX</span></code></a> data type.
 Used internally by <code class="xref py py-class docutils literal notranslate"><span class="pre">VitessceWidget</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>port</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The web server port, meant to be used in the localhost URLs in the file definitions.</p></li>
+<li><p><strong>base_url</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The web server base url.</p></li>
 <li><p><strong>dataset_uid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The unique identifier for the dataset parent of this data object.</p></li>
 <li><p><strong>obj_i</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The index of this data object child within its dataset parent.</p></li>
 </ul>
@@ -456,21 +452,16 @@ Used internally by <code class="xref py py-class docutils literal notranslate"><
 <dt id="vitessce.wrappers.LoomWrapper">
 <em class="property">class </em><code class="sig-prename descclassname">vitessce.wrappers.</code><code class="sig-name descname">LoomWrapper</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">loom</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L484-L497"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.LoomWrapper" title="Permalink to this definition">¶</a></dt>
 <dd><p>Abstract constructor to be inherited by dataset wrapper classes.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>base_url</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – An optional base URL to use in dataset file definitions.</p>
-</dd>
-</dl>
 <dl class="py method">
 <dt id="vitessce.wrappers.LoomWrapper.get_cells">
-<code class="sig-name descname">get_cells</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">port</span></em>, <em class="sig-param"><span class="n">dataset_uid</span></em>, <em class="sig-param"><span class="n">obj_i</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L490-L497"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.LoomWrapper.get_cells" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_cells</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">base_url</span></em>, <em class="sig-param"><span class="n">dataset_uid</span></em>, <em class="sig-param"><span class="n">obj_i</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L490-L497"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.LoomWrapper.get_cells" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the file definitions and server routes
 corresponding to the <a class="reference internal" href="api_config.html#vitessce.constants.DataType.CELLS" title="vitessce.constants.DataType.CELLS"><code class="xref py py-class docutils literal notranslate"><span class="pre">CELLS</span></code></a> data type.
 Used internally by <code class="xref py py-class docutils literal notranslate"><span class="pre">VitessceWidget</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>port</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The web server port, meant to be used in the localhost URLs in the file definitions.</p></li>
+<li><p><strong>base_url</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The web server base url.</p></li>
 <li><p><strong>dataset_uid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The unique identifier for the dataset parent of this data object.</p></li>
 <li><p><strong>obj_i</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The index of this data object child within its dataset parent.</p></li>
 </ul>
@@ -488,23 +479,18 @@ Used internally by <code class="xref py py-class docutils literal notranslate"><
 
 <dl class="py class">
 <dt id="vitessce.wrappers.OmeTiffWrapper">
-<em class="property">class </em><code class="sig-prename descclassname">vitessce.wrappers.</code><code class="sig-name descname">OmeTiffWrapper</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">img_path</span></em>, <em class="sig-param"><span class="n">offsets_path</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L176-L234"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.OmeTiffWrapper" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">vitessce.wrappers.</code><code class="sig-name descname">OmeTiffWrapper</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">img_path</span></em>, <em class="sig-param"><span class="n">offsets_path</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L177-L235"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.OmeTiffWrapper" title="Permalink to this definition">¶</a></dt>
 <dd><p>Abstract constructor to be inherited by dataset wrapper classes.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>base_url</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – An optional base URL to use in dataset file definitions.</p>
-</dd>
-</dl>
 <dl class="py method">
 <dt id="vitessce.wrappers.OmeTiffWrapper.get_raster">
-<code class="sig-name descname">get_raster</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">port</span></em>, <em class="sig-param"><span class="n">dataset_uid</span></em>, <em class="sig-param"><span class="n">obj_i</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L208-L234"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.OmeTiffWrapper.get_raster" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_raster</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">base_url</span></em>, <em class="sig-param"><span class="n">dataset_uid</span></em>, <em class="sig-param"><span class="n">obj_i</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L209-L235"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.OmeTiffWrapper.get_raster" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the file definitions and server routes
 corresponding to the <a class="reference internal" href="api_config.html#vitessce.constants.DataType.RASTER" title="vitessce.constants.DataType.RASTER"><code class="xref py py-class docutils literal notranslate"><span class="pre">RASTER</span></code></a> data type.
 Used internally by <code class="xref py py-class docutils literal notranslate"><span class="pre">VitessceWidget</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>port</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The web server port, meant to be used in the localhost URLs in the file definitions.</p></li>
+<li><p><strong>base_url</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The web server base url.</p></li>
 <li><p><strong>dataset_uid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The unique identifier for the dataset parent of this data object.</p></li>
 <li><p><strong>obj_i</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The index of this data object child within its dataset parent.</p></li>
 </ul>
@@ -522,23 +508,18 @@ Used internally by <code class="xref py py-class docutils literal notranslate"><
 
 <dl class="py class">
 <dt id="vitessce.wrappers.OmeZarrWrapper">
-<em class="property">class </em><code class="sig-prename descclassname">vitessce.wrappers.</code><code class="sig-name descname">OmeZarrWrapper</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">z</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L237-L314"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.OmeZarrWrapper" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">vitessce.wrappers.</code><code class="sig-name descname">OmeZarrWrapper</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">z</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L238-L315"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.OmeZarrWrapper" title="Permalink to this definition">¶</a></dt>
 <dd><p>Abstract constructor to be inherited by dataset wrapper classes.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>base_url</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – An optional base URL to use in dataset file definitions.</p>
-</dd>
-</dl>
 <dl class="py method">
 <dt id="vitessce.wrappers.OmeZarrWrapper.get_raster">
-<code class="sig-name descname">get_raster</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">port</span></em>, <em class="sig-param"><span class="n">dataset_uid</span></em>, <em class="sig-param"><span class="n">obj_i</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L289-L314"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.OmeZarrWrapper.get_raster" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_raster</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">base_url</span></em>, <em class="sig-param"><span class="n">dataset_uid</span></em>, <em class="sig-param"><span class="n">obj_i</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L290-L315"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.OmeZarrWrapper.get_raster" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the file definitions and server routes
 corresponding to the <a class="reference internal" href="api_config.html#vitessce.constants.DataType.RASTER" title="vitessce.constants.DataType.RASTER"><code class="xref py py-class docutils literal notranslate"><span class="pre">RASTER</span></code></a> data type.
 Used internally by <code class="xref py py-class docutils literal notranslate"><span class="pre">VitessceWidget</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>port</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The web server port, meant to be used in the localhost URLs in the file definitions.</p></li>
+<li><p><strong>base_url</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The web server base url.</p></li>
 <li><p><strong>dataset_uid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The unique identifier for the dataset parent of this data object.</p></li>
 <li><p><strong>obj_i</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The index of this data object child within its dataset parent.</p></li>
 </ul>
@@ -558,21 +539,16 @@ Used internally by <code class="xref py py-class docutils literal notranslate"><
 <dt id="vitessce.wrappers.SnapWrapper">
 <em class="property">class </em><code class="sig-prename descclassname">vitessce.wrappers.</code><code class="sig-name descname">SnapWrapper</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">in_mtx</span></em>, <em class="sig-param"><span class="n">in_barcodes_df</span></em>, <em class="sig-param"><span class="n">in_bins_df</span></em>, <em class="sig-param"><span class="n">in_clusters_df</span></em>, <em class="sig-param"><span class="n">starting_resolution</span><span class="o">=</span><span class="default_value">5000</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L499-L762"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.SnapWrapper" title="Permalink to this definition">¶</a></dt>
 <dd><p>Abstract constructor to be inherited by dataset wrapper classes.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>base_url</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – An optional base URL to use in dataset file definitions.</p>
-</dd>
-</dl>
 <dl class="py method">
 <dt id="vitessce.wrappers.SnapWrapper.get_cell_sets">
-<code class="sig-name descname">get_cell_sets</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">port</span></em>, <em class="sig-param"><span class="n">dataset_uid</span></em>, <em class="sig-param"><span class="n">obj_i</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L715-L733"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.SnapWrapper.get_cell_sets" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_cell_sets</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">base_url</span></em>, <em class="sig-param"><span class="n">dataset_uid</span></em>, <em class="sig-param"><span class="n">obj_i</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L715-L733"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.SnapWrapper.get_cell_sets" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the file definitions and server routes
 corresponding to the <a class="reference internal" href="api_config.html#vitessce.constants.DataType.CELL_SETS" title="vitessce.constants.DataType.CELL_SETS"><code class="xref py py-class docutils literal notranslate"><span class="pre">CELL_SETS</span></code></a> data type.
 Used internally by <code class="xref py py-class docutils literal notranslate"><span class="pre">VitessceWidget</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>port</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The web server port, meant to be used in the localhost URLs in the file definitions.</p></li>
+<li><p><strong>base_url</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The web server base url.</p></li>
 <li><p><strong>dataset_uid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The unique identifier for the dataset parent of this data object.</p></li>
 <li><p><strong>obj_i</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The index of this data object child within its dataset parent.</p></li>
 </ul>
@@ -588,14 +564,14 @@ Used internally by <code class="xref py py-class docutils literal notranslate"><
 
 <dl class="py method">
 <dt id="vitessce.wrappers.SnapWrapper.get_cells">
-<code class="sig-name descname">get_cells</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">port</span></em>, <em class="sig-param"><span class="n">dataset_uid</span></em>, <em class="sig-param"><span class="n">obj_i</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L744-L762"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.SnapWrapper.get_cells" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_cells</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">base_url</span></em>, <em class="sig-param"><span class="n">dataset_uid</span></em>, <em class="sig-param"><span class="n">obj_i</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L744-L762"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.SnapWrapper.get_cells" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the file definitions and server routes
 corresponding to the <a class="reference internal" href="api_config.html#vitessce.constants.DataType.CELLS" title="vitessce.constants.DataType.CELLS"><code class="xref py py-class docutils literal notranslate"><span class="pre">CELLS</span></code></a> data type.
 Used internally by <code class="xref py py-class docutils literal notranslate"><span class="pre">VitessceWidget</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>port</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The web server port, meant to be used in the localhost URLs in the file definitions.</p></li>
+<li><p><strong>base_url</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The web server base url.</p></li>
 <li><p><strong>dataset_uid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The unique identifier for the dataset parent of this data object.</p></li>
 <li><p><strong>obj_i</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The index of this data object child within its dataset parent.</p></li>
 </ul>
@@ -611,14 +587,14 @@ Used internally by <code class="xref py py-class docutils literal notranslate"><
 
 <dl class="py method">
 <dt id="vitessce.wrappers.SnapWrapper.get_genomic_profiles">
-<code class="sig-name descname">get_genomic_profiles</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">port</span></em>, <em class="sig-param"><span class="n">dataset_uid</span></em>, <em class="sig-param"><span class="n">obj_i</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L665-L689"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.SnapWrapper.get_genomic_profiles" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_genomic_profiles</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">base_url</span></em>, <em class="sig-param"><span class="n">dataset_uid</span></em>, <em class="sig-param"><span class="n">obj_i</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L665-L689"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.SnapWrapper.get_genomic_profiles" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the file definitions and server routes
 corresponding to the <a class="reference internal" href="api_config.html#vitessce.constants.DataType.GENOMIC_PROFILES" title="vitessce.constants.DataType.GENOMIC_PROFILES"><code class="xref py py-class docutils literal notranslate"><span class="pre">GENOMIC_PROFILES</span></code></a> data type.
 Used internally by <code class="xref py py-class docutils literal notranslate"><span class="pre">VitessceWidget</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>port</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The web server port, meant to be used in the localhost URLs in the file definitions.</p></li>
+<li><p><strong>base_url</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The web server base url.</p></li>
 <li><p><strong>dataset_uid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The unique identifier for the dataset parent of this data object.</p></li>
 <li><p><strong>obj_i</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The index of this data object child within its dataset parent.</p></li>
 </ul>
@@ -632,6 +608,50 @@ Used internally by <code class="xref py py-class docutils literal notranslate"><
 </dl>
 </dd></dl>
 
+</dd></dl>
+
+</div>
+<div class="section" id="module-vitessce.export">
+<span id="vitessce-export"></span><h2>vitessce.export<a class="headerlink" href="#module-vitessce.export" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="vitessce.export.export_to_files">
+<code class="sig-prename descclassname">vitessce.export.</code><code class="sig-name descname">export_to_files</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config</span></em>, <em class="sig-param"><span class="n">base_url</span></em>, <em class="sig-param"><span class="n">out_dir</span><span class="o">=</span><span class="default_value">'.'</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/export.py#L58-L97"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.export.export_to_files" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<a class="reference internal" href="api_config.html#vitessce.config.VitessceConfig" title="vitessce.config.VitessceConfig"><em>VitessceConfig</em></a>) – The Vitessce view config to export to files.</p></li>
+<li><p><strong>out_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The path to the output directory. By default, the current directory.</p></li>
+<li><p><strong>base_url</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The URL on which the files will be served.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The config as a dict, with urls filled in.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="vitessce.export.export_to_s3">
+<code class="sig-prename descclassname">vitessce.export.</code><code class="sig-name descname">export_to_s3</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config</span></em>, <em class="sig-param"><span class="n">s3</span></em>, <em class="sig-param"><span class="n">bucket_name</span></em>, <em class="sig-param"><span class="n">prefix</span><span class="o">=</span><span class="default_value">''</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/export.py#L13-L56"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.export.export_to_s3" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<a class="reference internal" href="api_config.html#vitessce.config.VitessceConfig" title="vitessce.config.VitessceConfig"><em>VitessceConfig</em></a>) – The Vitessce view config to export to S3.</p></li>
+<li><p><strong>s3</strong> (<em>boto3.resource</em>) – A boto3 S3 resource object with permission to upload to the specified bucket.</p></li>
+<li><p><strong>bucket_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The name of the bucket to which to upload.</p></li>
+<li><p><strong>prefix</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The prefix path for the bucket keys (think subdirectory).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The config as a dict, with S3 urls filled in.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a></p>
+</dd>
+</dl>
 </dd></dl>
 
 </div>

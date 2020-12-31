@@ -17,3 +17,9 @@ vitessce.wrappers
 
 .. automodule:: vitessce.wrappers
  :members:
+
+vitessce.export
+*****************
+
+.. automodule:: vitessce.export
+ :members:

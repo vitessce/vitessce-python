@@ -37,7 +37,7 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Convert data for long-term use" href="notebooks/data_conversion.html" />
+    <link rel="next" title="Export data to AWS S3" href="notebooks/data_export_s3.html" />
     <link rel="prev" title="Using an existing view config dict" href="notebooks/widget_from_dict.html" /> 
 </head>
 
@@ -87,6 +87,8 @@
 <li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="widget_examples.html">Widget examples</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Data preparation examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/data_export_s3.html">Export data to AWS S3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/data_export_files.html">Export data to local files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="notebooks/data_conversion.html">Convert data for long-term use</a></li>
 </ul>
 </li>
@@ -186,6 +188,24 @@
 <h1>Data preparation examples<a class="headerlink" href="#data-preparation-examples" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/data_export_s3.html">Export data to AWS S3</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/data_export_s3.html#1.-Import-dependencies">1. Import dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/data_export_s3.html#2.-Download-and-process-data">2. Download and process data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/data_export_s3.html#3.-Create-the-Vitessce-configuration">3. Create the Vitessce configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/data_export_s3.html#4.-Create-a-boto3-resource-with-S3-credentials">4. Create a <code class="docutils literal notranslate"><span class="pre">boto3</span></code> resource with S3 credentials</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/data_export_s3.html#5.-Upload-files-to-S3">5. Upload files to S3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/data_export_s3.html#6.-View-on-vitessce.io">6. View on vitessce.io</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/data_export_files.html">Export data to local files</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/data_export_files.html#1.-Import-dependencies">1. Import dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/data_export_files.html#2.-Download-and-process-data">2. Download and process data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/data_export_files.html#3.-Create-the-Vitessce-configuration">3. Create the Vitessce configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/data_export_files.html#4.-Export-files-to-a-local-directory">4. Export files to a local directory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/data_export_files.html#5.-Serve-the-files">5. Serve the files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/data_export_files.html#6.-View-on-vitessce.io">6. View on vitessce.io</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="notebooks/data_conversion.html">Convert data for long-term use</a></li>
 </ul>
 </div>
@@ -199,7 +219,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="notebooks/data_conversion.html" class="btn btn-neutral float-right" title="Convert data for long-term use" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="notebooks/data_export_s3.html" class="btn btn-neutral float-right" title="Export data to AWS S3" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="notebooks/widget_from_dict.html" class="btn btn-neutral float-left" title="Using an existing view config dict" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

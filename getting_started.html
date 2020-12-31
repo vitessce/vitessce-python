@@ -205,9 +205,12 @@
 </ul>
 <div class="section" id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
-<p>To use Vitessce within a Jupyter notebook you need to install a few packages
-and enable the Jupyter extension:</p>
+<p>Installation requires Python 3.8 or greater.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install vitessce
+</pre></div>
+</div>
+<p>To use the widget in <a class="reference external" href="https://jupyter.readthedocs.io/en/latest/install.html#jupyter-notebook-interface">Jupyer Notebook</a> also run the following:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>jupyter nbextension install --py --sys-prefix vitessce
 jupyter nbextension <span class="nb">enable</span> --py --sys-prefix vitessce
 </pre></div>
 </div>
@@ -219,10 +222,11 @@ jupyter labextension install vitessce-jupyter
 </div>
 <div class="section" id="optional-dependencies">
 <h2>Optional dependencies<a class="headerlink" href="#optional-dependencies" title="Permalink to this headline">¶</a></h2>
-<p>The following dependencies are optional, and only required when using certain data wrapper classes.</p>
+<p>The following dependencies are optional, and only required when using certain features.</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">anndata&gt;=0.7.4</span></code> - Required for AnnData support with the <a class="reference internal" href="api_data.html#vitessce.wrappers.AnnDataWrapper" title="vitessce.wrappers.AnnDataWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnnDataWrapper</span></code></a> class.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">loompy&gt;=3.0.6</span></code> - Required for Loom support with the <a class="reference internal" href="api_data.html#vitessce.wrappers.LoomWrapper" title="vitessce.wrappers.LoomWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">LoomWrapper</span></code></a> class.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">jupyter-server-proxy&gt;=1.5.2</span></code> - Required for using the widget through a proxy (e.g. a cloud notebook service like Binder). See widget parameter <code class="docutils literal notranslate"><span class="pre">proxy</span></code>.</p></li>
 </ul>
 </div>
 </div>

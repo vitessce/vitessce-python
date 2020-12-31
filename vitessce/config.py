@@ -765,8 +765,13 @@ class VitessceConfig:
         """
         Convenience function for instantiating a VitessceWidget object based on this config.
         
+        :param str theme: The theme name, either "light" or "dark". By default, "auto", which selects light or dark based on operating system preferences.
+        :param int height: The height of the widget, in pixels. By default, 600.
+        :param int port: The port to use when serving data objects on localhost. By default, 8000.
+        :param bool proxy: Is this widget being served through a proxy, for example with a cloud notebook (e.g. Binder)?
+        
         :returns: The Jupyter widget.
-        :rtype: VitessceConfig
+        :rtype: VitessceWidget
 
         .. code-block:: python
             :emphasize-lines: 6-7

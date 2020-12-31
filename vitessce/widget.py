@@ -1,6 +1,8 @@
+import importlib.util
+
 # Widget dependencies
 import ipywidgets as widgets
-from traitlets import Unicode, Dict, Int
+from traitlets import Unicode, Dict, Int, Bool
 import time
 
 # Server dependencies
@@ -67,10 +69,11 @@ class VitessceWidget(widgets.DOMWidget):
     config = Dict({}).tag(sync=True)
     height = Int(600).tag(sync=True)
     theme = Unicode('auto').tag(sync=True)
+    proxy = Bool(False).tag(sync=True)
 
     next_port = 8000
 
-    def __init__(self, config, height=600, theme='auto', port=None):
+    def __init__(self, config, height=600, theme='auto', port=None, proxy=False):
         """
         Construct a new Vitessce widget.
 
@@ -79,6 +82,7 @@ class VitessceWidget(widgets.DOMWidget):
         :param str theme: The theme name, either "light" or "dark". By default, "auto", which selects light or dark based on operating system preferences.
         :param int height: The height of the widget, in pixels. By default, 600.
         :param int port: The port to use when serving data objects on localhost. By default, 8000.
+        :param bool proxy: Is this widget being served through a proxy, for example with a cloud notebook (e.g. Binder)?
 
         .. code-block:: python
             :emphasize-lines: 4
@@ -101,15 +105,22 @@ class VitessceWidget(widgets.DOMWidget):
         else:
             use_port = port
         
+        if proxy:
+            if importlib.util.find_spec('jupyter_server_proxy') is None:
+                raise ValueError("To use the widget through a proxy, jupyter-server-proxy must be installed.")
+            base_url = f"proxy/{use_port}"
+        else:
+            base_url = f"http://localhost:{use_port}"
+
         routes = []
         def on_obj(obj, dataset_uid, obj_i):
-            obj_file_defs, obj_routes = create_obj_routes(obj, use_port, dataset_uid, obj_i)
+            obj_file_defs, obj_routes = create_obj_routes(obj, base_url, dataset_uid, obj_i)
             for obj_route in obj_routes:
                 routes.append(obj_route)
             return obj_file_defs
         config_dict = config.to_dict(on_obj=on_obj)
 
-        super(VitessceWidget, self).__init__(config=config_dict, height=height, theme=theme)
+        super(VitessceWidget, self).__init__(config=config_dict, height=height, theme=theme, proxy=proxy)
         
         if len(routes) > 0:
             middleware = [

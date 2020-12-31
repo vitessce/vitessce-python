@@ -17,6 +17,12 @@ from starlette.staticfiles import StaticFiles
 from .constants import DataType as dt, FileType as ft
 from .entities import Cells, CellSets, GenomicProfiles
 
+class JsonRoute(Route):
+    def __init__(self, path, endpoint, data_json):
+        super().__init__(path, endpoint)
+        self.data_json = data_json
+    
+
 class AbstractWrapper:
     """
     An abstract class that can be extended when
@@ -26,18 +32,16 @@ class AbstractWrapper:
     def __init__(self, **kwargs):
         """
         Abstract constructor to be inherited by dataset wrapper classes.
-
-        :param str base_url: An optional base URL to use in dataset file definitions.
         """
-        self._base_url = kwargs['base_url'] if 'base_url' in kwargs else None
+        pass
 
-    def get_cells(self, port, dataset_uid, obj_i):
+    def get_cells(self, base_url, dataset_uid, obj_i):
         """
         Get the file definitions and server routes
         corresponding to the :class:`~vitessce.constants.DataType.CELLS` data type.
         Used internally by :class:`~vitessce.widget.VitessceWidget`.
 
-        :param int port: The web server port, meant to be used in the localhost URLs in the file definitions.
+        :param str base_url: The web server base url.
         :param str dataset_uid: The unique identifier for the dataset parent of this data object.
         :param int obj_i: The index of this data object child within its dataset parent.
 
@@ -46,13 +50,13 @@ class AbstractWrapper:
         """
         raise NotImplementedError()
 
-    def get_cell_sets(self, port, dataset_uid, obj_i):
+    def get_cell_sets(self, base_url, dataset_uid, obj_i):
         """
         Get the file definitions and server routes
         corresponding to the :class:`~vitessce.constants.DataType.CELL_SETS` data type.
         Used internally by :class:`~vitessce.widget.VitessceWidget`.
 
-        :param int port: The web server port, meant to be used in the localhost URLs in the file definitions.
+        :param str base_url: The web server base url.
         :param str dataset_uid: The unique identifier for the dataset parent of this data object.
         :param int obj_i: The index of this data object child within its dataset parent.
 
@@ -61,13 +65,13 @@ class AbstractWrapper:
         """
         raise NotImplementedError()
 
-    def get_raster(self, port, dataset_uid, obj_i):
+    def get_raster(self, base_url, dataset_uid, obj_i):
         """
         Get the file definitions and server routes
         corresponding to the :class:`~vitessce.constants.DataType.RASTER` data type.
         Used internally by :class:`~vitessce.widget.VitessceWidget`.
 
-        :param int port: The web server port, meant to be used in the localhost URLs in the file definitions.
+        :param str base_url: The web server base url.
         :param str dataset_uid: The unique identifier for the dataset parent of this data object.
         :param int obj_i: The index of this data object child within its dataset parent.
 
@@ -76,12 +80,12 @@ class AbstractWrapper:
         """
         raise NotImplementedError()
 
-    def get_molecules(self, port, dataset_uid, obj_i):
+    def get_molecules(self, base_url, dataset_uid, obj_i):
         """
         Get the file definitions and server routes
         corresponding to the :class:`~vitessce.constants.DataType.MOLECULES` data type.
 
-        :param int port: The web server port, meant to be used in the localhost URLs in the file definitions.
+        :param str base_url: The web server base url.
         :param str dataset_uid: The unique identifier for the dataset parent of this data object.
         :param int obj_i: The index of this data object child within its dataset parent.
 
@@ -90,13 +94,13 @@ class AbstractWrapper:
         """
         raise NotImplementedError()
 
-    def get_neighborhoods(self, port, dataset_uid, obj_i):
+    def get_neighborhoods(self, base_url, dataset_uid, obj_i):
         """
         Get the file definitions and server routes
         corresponding to the :class:`~vitessce.constants.DataType.NEIGHBORHOODS` data type.
         Used internally by :class:`~vitessce.widget.VitessceWidget`.
 
-        :param int port: The web server port, meant to be used in the localhost URLs in the file definitions.
+        :param str base_url: The web server base url.
         :param str dataset_uid: The unique identifier for the dataset parent of this data object.
         :param int obj_i: The index of this data object child within its dataset parent.
 
@@ -105,13 +109,13 @@ class AbstractWrapper:
         """
         raise NotImplementedError()
 
-    def get_expression_matrix(self, port, dataset_uid, obj_i):
+    def get_expression_matrix(self, base_url, dataset_uid, obj_i):
         """
         Get the file definitions and server routes
         corresponding to the :class:`~vitessce.constants.DataType.EXPRESSION_MATRIX` data type.
         Used internally by :class:`~vitessce.widget.VitessceWidget`.
 
-        :param int port: The web server port, meant to be used in the localhost URLs in the file definitions.
+        :param str base_url: The web server base url.
         :param str dataset_uid: The unique identifier for the dataset parent of this data object.
         :param int obj_i: The index of this data object child within its dataset parent.
 
@@ -120,13 +124,13 @@ class AbstractWrapper:
         """
         raise NotImplementedError()
 
-    def get_genomic_profiles(self, port, dataset_uid, obj_i):
+    def get_genomic_profiles(self, base_url, dataset_uid, obj_i):
         """
         Get the file definitions and server routes
         corresponding to the :class:`~vitessce.constants.DataType.GENOMIC_PROFILES` data type.
         Used internally by :class:`~vitessce.widget.VitessceWidget`.
 
-        :param int port: The web server port, meant to be used in the localhost URLs in the file definitions.
+        :param str base_url: The web server base url.
         :param str dataset_uid: The unique identifier for the dataset parent of this data object.
         :param int obj_i: The index of this data object child within its dataset parent.
 
@@ -147,27 +151,24 @@ class AbstractWrapper:
             return UJSONResponse(data_json)
         return response_func
 
-    def _get_data(self, data_type, port, dataset_uid, obj_i):
+    def _get_data(self, data_type, base_url, dataset_uid, obj_i):
         if data_type == dt.CELLS:
-            return self.get_cells(port, dataset_uid, obj_i)
+            return self.get_cells(base_url, dataset_uid, obj_i)
         elif data_type == dt.CELL_SETS:
-            return self.get_cell_sets(port, dataset_uid, obj_i)
+            return self.get_cell_sets(base_url, dataset_uid, obj_i)
         elif data_type == dt.RASTER:
-            return self.get_raster(port, dataset_uid, obj_i)
+            return self.get_raster(base_url, dataset_uid, obj_i)
         elif data_type == dt.MOLECULES:
-            return self.get_molecules(port, dataset_uid, obj_i)
+            return self.get_molecules(base_url, dataset_uid, obj_i)
         elif data_type == dt.NEIGHBORHOODS:
-            return self.get_neighborhoods(port, dataset_uid, obj_i)
+            return self.get_neighborhoods(base_url, dataset_uid, obj_i)
         elif data_type == dt.EXPRESSION_MATRIX:
-            return self.get_expression_matrix(port, dataset_uid, obj_i)
+            return self.get_expression_matrix(base_url, dataset_uid, obj_i)
         elif data_type == dt.GENOMIC_PROFILES:
-            return self.get_genomic_profiles(port, dataset_uid, obj_i)
+            return self.get_genomic_profiles(base_url, dataset_uid, obj_i)
 
-    def _get_url(self, port, dataset_uid, obj_i, suffix):
-        # A base URL is defined for this so this is used outside of Jupyter notebook.
-        if self._base_url is not None:
-            return f"{self._base_url}/{dataset_uid}/{obj_i}/{suffix}"
-        return f"http://localhost:{port}/{dataset_uid}/{obj_i}/{suffix}"
+    def _get_url(self, base_url, dataset_uid, obj_i, suffix):
+        return base_url + self._get_route(dataset_uid, obj_i, suffix)
 
     def _get_route(self, dataset_uid, obj_i, suffix):
         return f"/{dataset_uid}/{obj_i}/{suffix}"
@@ -205,17 +206,17 @@ class OmeTiffWrapper(AbstractWrapper):
     def _get_offsets_filename(self):
         return os.path.basename(self.offsets_path)
 
-    def get_raster(self, port, dataset_uid, obj_i):
-        img_dir_path, img_url = self.img_path, self._get_url(port, dataset_uid, obj_i, "raster_img")
-        offsets_dir_path, offsets_url = (None, None) if self.offsets_path is None else (self._get_offsets_dir(), self._get_url(port, dataset_uid, obj_i, join("raster_offsets", self._get_offsets_filename())))
+    def get_raster(self, base_url, dataset_uid, obj_i):
+        img_dir_path, img_url = self.img_path, self._get_url(base_url, dataset_uid, obj_i, "raster_img")
+        offsets_dir_path, offsets_url = (None, None) if self.offsets_path is None else (self._get_offsets_dir(), self._get_url(base_url, dataset_uid, obj_i, os.path.join("raster_offsets", self._get_offsets_filename())))
 
         raster_json = self.create_raster_json(img_url, offsets_url)
 
         obj_routes = [
             Mount(self._get_route(dataset_uid, obj_i, "raster_img"),
                   app=StaticFiles(directory=img_dir_path, html=False, check_dir=False)),
-            Route(self._get_route(dataset_uid, obj_i, "raster"),
-                  self._create_response_json(raster_json))
+            JsonRoute(self._get_route(dataset_uid, obj_i, "raster"),
+                  self._create_response_json(raster_json), raster_json)
         ]
         if self.offsets_path is not None:
             obj_routes.append(
@@ -227,7 +228,7 @@ class OmeTiffWrapper(AbstractWrapper):
             {
                 "type": dt.RASTER.value,
                 "fileType": ft.RASTER_JSON.value,
-                "url": self._get_url(port, dataset_uid, obj_i, "raster")
+                "url": self._get_url(base_url, dataset_uid, obj_i, "raster")
             }
         ]
 
@@ -286,7 +287,7 @@ class OmeZarrWrapper(AbstractWrapper):
         }
         return raster_json
 
-    def get_raster(self, port, dataset_uid, obj_i):
+    def get_raster(self, base_url, dataset_uid, obj_i):
         obj_routes = []
         obj_file_defs = []
 
@@ -294,20 +295,20 @@ class OmeZarrWrapper(AbstractWrapper):
             img_dir_path = self.z.store.path
 
             raster_json = self.create_raster_json(
-                self._get_url(port, dataset_uid, obj_i, "raster_img"),
+                self._get_url(base_url, dataset_uid, obj_i, "raster_img"),
             )
 
             obj_routes = [
                 Mount(self._get_route(dataset_uid, obj_i, "raster_img"),
                         app=StaticFiles(directory=img_dir_path, html=False)),
-                Route(self._get_route(dataset_uid, obj_i, "raster"),
-                        self._create_response_json(raster_json))
+                JsonRoute(self._get_route(dataset_uid, obj_i, "raster"),
+                        self._create_response_json(raster_json), raster_json)
             ]
             obj_file_defs = [
                 {
                     "type": dt.RASTER.value,
                     "fileType": ft.RASTER_JSON.value,
-                    "url": self._get_url(port, dataset_uid, obj_i, "raster")
+                    "url": self._get_url(base_url, dataset_uid, obj_i, "raster")
                 }
             ]
 
@@ -412,49 +413,48 @@ class AnnDataWrapper(AbstractWrapper):
         
         return
 
-    def get_cells(self, port, dataset_uid, obj_i):
+    def get_cells(self, base_url, dataset_uid, obj_i):
         obj_routes = []
         obj_file_defs = []
 
         cells_json = self.create_cells_json()
 
         obj_routes = [
-            Route(self._get_route(dataset_uid, obj_i, "cells"),
-                    self._create_response_json(cells_json)),
+            JsonRoute(self._get_route(dataset_uid, obj_i, "cells"),
+                    self._create_response_json(cells_json), cells_json),
         ]
         obj_file_defs = [
             {
                 "type": dt.CELLS.value,
                 "fileType": ft.CELLS_JSON.value,
-                "url": self._get_url(port, dataset_uid, obj_i, "cells")
+                "url": self._get_url(base_url, dataset_uid, obj_i, "cells")
             }
         ]
 
         return obj_file_defs, obj_routes
 
-    def get_cell_sets(self, port, dataset_uid, obj_i):
+    def get_cell_sets(self, base_url, dataset_uid, obj_i):
         obj_routes = []
         obj_file_defs = []
-
-            
+  
         cell_sets_json = self.create_cell_sets_json()
 
         if cell_sets_json is not None:
             obj_routes = [
-                Route(self._get_route(dataset_uid, obj_i, "cell-sets"),
-                        self._create_response_json(cell_sets_json)),
+                JsonRoute(self._get_route(dataset_uid, obj_i, "cell-sets"),
+                        self._create_response_json(cell_sets_json), cell_sets_json),
             ]
             obj_file_defs = [
                 {
                     "type": dt.CELL_SETS.value,
                     "fileType": ft.CELL_SETS_JSON.value,
-                    "url": self._get_url(port, dataset_uid, obj_i, "cell-sets")
+                    "url": self._get_url(base_url, dataset_uid, obj_i, "cell-sets")
                 }
             ]
 
         return obj_file_defs, obj_routes
     
-    def get_expression_matrix(self, port, dataset_uid, obj_i):
+    def get_expression_matrix(self, base_url, dataset_uid, obj_i):
         obj_routes = []
         obj_file_defs = []
 
@@ -473,7 +473,7 @@ class AnnDataWrapper(AbstractWrapper):
                 {
                     "type": dt.EXPRESSION_MATRIX.value,
                     "fileType": ft.EXPRESSION_MATRIX_ZARR.value,
-                    "url": self._get_url(port, dataset_uid, obj_i, "expression/matrix.zarr")
+                    "url": self._get_url(base_url, dataset_uid, obj_i, "expression/matrix.zarr"),
                 }
             ]
 
@@ -487,7 +487,7 @@ class LoomWrapper(AbstractWrapper):
         super().__init__(**kwargs)
         self.loom = loom
 
-    def get_cells(self, port, dataset_uid, obj_i):
+    def get_cells(self, base_url, dataset_uid, obj_i):
         obj_routes = []
         obj_file_defs = []
 
@@ -662,7 +662,7 @@ class SnapWrapper(AbstractWrapper):
         
         return
 
-    def get_genomic_profiles(self, port, dataset_uid, obj_i):
+    def get_genomic_profiles(self, base_url, dataset_uid, obj_i):
         obj_routes = []
         obj_file_defs = []
         
@@ -682,7 +682,7 @@ class SnapWrapper(AbstractWrapper):
                 {
                     "type": dt.GENOMIC_PROFILES.value,
                     "fileType": ft.GENOMIC_PROFILES_ZARR.value,
-                    "url": self._get_url(port, dataset_uid, obj_i, "genomic/profiles.zarr")
+                    "url": self._get_url(base_url, dataset_uid, obj_i, "genomic/profiles.zarr")
                 }
             ]
 
@@ -712,21 +712,21 @@ class SnapWrapper(AbstractWrapper):
 
         return cell_sets.json
     
-    def get_cell_sets(self, port, dataset_uid, obj_i):
+    def get_cell_sets(self, base_url, dataset_uid, obj_i):
         obj_routes = []
         obj_file_defs = []
 
         cell_sets_json = self.create_cell_sets_json()
 
         obj_routes = [
-            Route(self._get_route(dataset_uid, obj_i, "cell-sets"),
-                    self._create_response_json(cell_sets_json)),
+            JsonRoute(self._get_route(dataset_uid, obj_i, "cell-sets"),
+                    self._create_response_json(cell_sets_json), cell_sets_json),
         ]
         obj_file_defs = [
             {
                 "type": dt.CELL_SETS.value,
                 "fileType": ft.CELL_SETS_JSON.value,
-                "url": self._get_url(port, dataset_uid, obj_i, "cell-sets")
+                "url": self._get_url(base_url, dataset_uid, obj_i, "cell-sets")
             }
         ]
 
@@ -741,21 +741,21 @@ class SnapWrapper(AbstractWrapper):
         cells.add_mapping("UMAP", mapping)
         return cells.json
     
-    def get_cells(self, port, dataset_uid, obj_i):
+    def get_cells(self, base_url, dataset_uid, obj_i):
         obj_routes = []
         obj_file_defs = []
 
         cells_json = self.create_cells_json()
 
         obj_routes = [
-            Route(self._get_route(dataset_uid, obj_i, "cells"),
-                    self._create_response_json(cells_json)),
+            JsonRoute(self._get_route(dataset_uid, obj_i, "cells"),
+                    self._create_response_json(cells_json), cells_json),
         ]
         obj_file_defs = [
             {
                 "type": dt.CELLS.value,
                 "fileType": ft.CELLS_JSON.value,
-                "url": self._get_url(port, dataset_uid, obj_i, "cells")
+                "url": self._get_url(base_url, dataset_uid, obj_i, "cells")
             }
         ]
 

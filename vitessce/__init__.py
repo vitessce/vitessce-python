@@ -16,6 +16,10 @@ from .entities import (
     Cells,
     Molecules,
 )
+from .export import (
+    export_to_s3,
+    export_to_files,
+)
 
 def _jupyter_nbextension_paths():
     """Called by Jupyter Notebook Server to detect if it is a valid nbextension and

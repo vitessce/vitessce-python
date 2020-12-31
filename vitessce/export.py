@@ -42,12 +42,7 @@ def export_to_s3(config, s3, bucket_name, prefix=''):
         
         if type(route) == JsonRoute:
             data_json = route.data_json
-            with tempfile.TemporaryFile() as f:
-                f.write(json.dumps(data_json).encode())
-                f.write('\n'.encode())
-                f.flush()
-                f.seek(0, 0)
-                bucket.put_object(Key=key, Body=f)
+            bucket.put_object(Key=key, Body=json.dumps(data_json).encode())
         elif type(route) == Mount:
             route_app = route.app
             if type(route_app) == StaticFiles:

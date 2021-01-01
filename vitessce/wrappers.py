@@ -563,7 +563,7 @@ class LoomWrapper(AbstractWrapper):
         cell_attr = self.cell_attr
         gene_attr = self.gene_attr
         
-        gexp_arr = ds[:,:]
+        gexp_arr = ds[:,:].T
 
         cell_list = ds.ca[cell_attr].tolist()
         gene_list = ds.ra[gene_attr].tolist()

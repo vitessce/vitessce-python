@@ -105,6 +105,7 @@ def linkcode_resolve(domain, info):
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None),
     'anndata': ('https://anndata.readthedocs.io/en/latest', None),
+    'loompy': ('http://linnarssonlab.org/loompy/', None),
 }
 
 # -- Options for nbsphinx -------------------------------------------------

@@ -173,41 +173,108 @@ class AbstractWrapper:
     def _get_route(self, dataset_uid, obj_i, suffix):
         return f"/{dataset_uid}/{obj_i}/{suffix}"
 
+class MultiImageWrapper(AbstractWrapper):
+    def __init__(self, image_wrappers, **kwargs):
+        super().__init__(**kwargs)
+        self.image_wrappers = image_wrappers
+
+    def create_raster_json(self, base_url, dataset_uid, obj_i):
+        raster_json = {
+            "schemaVersion": "0.0.2",
+            "images": [],
+        }
+        for image in self.image_wrappers:
+            img_url = image._get_url(base_url, dataset_uid, obj_i, "raster_img")
+            offsets_url = image._get_url(base_url, dataset_uid, obj_i, os.path.join("raster_offsets", image._get_offsets_filename()))
+
+            image_json = image.create_image_json(img_url, offsets_url)
+            raster_json['images'].append(image_json)
+        return raster_json
+    
+    def get_raster(self, base_url, dataset_uid, obj_i):
+        raster_json = {
+            "schemaVersion": "0.0.2",
+            "images": [],
+        }
+        obj_routes = []
+        for image in self.image_wrappers:
+            img_dir_path, img_url = image._get_image_dir(), image._get_url(base_url, dataset_uid, obj_i, os.path.join("raster_img", image._get_img_filename()))
+            offsets_dir_path, offsets_url = (None, None) if image.offsets_path is None else (image._get_offsets_dir(), image._get_url(base_url, dataset_uid, obj_i, os.path.join("raster_offsets", image._get_offsets_filename())))
+
+            image_json = image.create_image_json(img_url, offsets_url)
+            raster_json['images'].append(image_json)
+
+            obj_routes = obj_routes + [
+                Mount(image._get_route(dataset_uid, obj_i, "raster_img"),
+                    app=StaticFiles(directory=img_dir_path, html=False, check_dir=False)),
+                JsonRoute(image._get_route(dataset_uid, obj_i, "raster"),
+                    image._create_response_json(raster_json), raster_json)
+            ]
+            if image.offsets_path is not None:
+                obj_routes.append(
+                    Mount(image._get_route(dataset_uid, obj_i, "raster_offsets"),
+                        app=StaticFiles(directory=offsets_dir_path, html=False, check_dir=False))
+                )
+
+        obj_file_defs = [
+            {
+                "type": dt.RASTER.value,
+                "fileType": ft.RASTER_JSON.value,
+                "options": raster_json
+            }
+        ]
+        print(raster_json)
+        print('\n')
+        print(obj_file_defs)
+
+        return obj_file_defs, obj_routes
 
 class OmeTiffWrapper(AbstractWrapper):
 
-    def __init__(self, img_path, offsets_path=None, name="", **kwargs):
+    def __init__(self, img_path, offsets_path=None, name="", transformation_matrix=None, **kwargs):
         super().__init__(**kwargs)
         self.img_path = img_path
         self.offsets_path = offsets_path
         self.name = name
+        self.transformation_matrix = transformation_matrix
 
     def create_raster_json(self, img_url, offsets_url):
         raster_json = {
             "schemaVersion": "0.0.2",
-            "images": [
-                {
-                    "name": self.name,
-                    "type": "ome-tiff",
-                    "url": img_url,
-                    "metadata": {
-                        **({
-                            "omeTiffOffsetsUrl": offsets_url,
-                        } if offsets_url is not None else {})
-                    }
-                }
-            ],
+            "images": [self.create_image_json(img_url, offsets_url)],
         }
         return raster_json
+    
+    def create_image_json(self, img_url, offsets_url):
+        metadata = {}
+        image = {
+            "name": self.name,
+            "type": "ome-tiff",
+            "url": img_url,
+        }
+        if offsets_url is not None:
+            metadata["omeTiffOffsetsUrl"] = offsets_url
+        if self.transformation_matrix is not None:
+            metadata["transform"] = {}
+            metadata["matrix"] = self.transformation_matrix
+        if len(metadata.keys()) > 0:
+            image['metadata'] = metadata
+        return image
 
     def _get_offsets_dir(self):
         return os.path.dirname(self.offsets_path)
     
     def _get_offsets_filename(self):
         return os.path.basename(self.offsets_path)
+    
+    def _get_image_dir(self):
+        return os.path.dirname(self.img_path)
+    
+    def _get_img_filename(self):
+        return os.path.basename(self.img_path)
 
     def get_raster(self, base_url, dataset_uid, obj_i):
-        img_dir_path, img_url = self.img_path, self._get_url(base_url, dataset_uid, obj_i, "raster_img")
+        img_dir_path, img_url = self._get_image_dir(), self._get_url(base_url, dataset_uid, obj_i, os.path.join("raster_img", self._get_img_filename()))
         offsets_dir_path, offsets_url = (None, None) if self.offsets_path is None else (self._get_offsets_dir(), self._get_url(base_url, dataset_uid, obj_i, os.path.join("raster_offsets", self._get_offsets_filename())))
 
         raster_json = self.create_raster_json(img_url, offsets_url)

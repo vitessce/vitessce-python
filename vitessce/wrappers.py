@@ -9,6 +9,7 @@ import zarr
 from numcodecs import Zlib
 from scipy.sparse import csr_matrix
 from scipy.sparse import coo_matrix
+from generate_tiff_offsets import get_offsets
 
 from starlette.responses import JSONResponse, UJSONResponse
 from starlette.routing import Route, Mount
@@ -221,7 +222,6 @@ class OmeTiffWrapper(AbstractWrapper):
     Wrap an OME-TIFF File by creating an instance of the ``OmeTiffWrapper`` class.
 
     :param str img_path: A local filepath to an OME-TIFF file.
-    :param str offsets_path: A local filepath to an offsets-json file (optional).
     :param str img_url: A remote URL of an OME-TIFF file.
     :param str offsets_path: A remote URL of an offsets-json file (optional).
     :param str name: The display name for this OME-TIFF within Vitessce.
@@ -229,11 +229,10 @@ class OmeTiffWrapper(AbstractWrapper):
     :param \*\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
     """
 
-    def __init__(self, img_path="", offsets_path="", img_url="", offsets_url="", name="", transformation_matrix=None, **kwargs):
+    def __init__(self, img_path="", img_url="", offsets_url="", name="", transformation_matrix=None, **kwargs):
         super().__init__(**kwargs)
         self.img_path = img_path
         self.img_url = img_url
-        self.offsets_path = offsets_path
         self.offsets_url = offsets_url
         self.name = name
         self.transformation_matrix = transformation_matrix
@@ -255,17 +254,12 @@ class OmeTiffWrapper(AbstractWrapper):
         if offsets_url != "":
             metadata["omeTiffOffsetsUrl"] = offsets_url
         if self.transformation_matrix is not None:
-            metadata["transform"] = {}
-            metadata["transform"]["matrix"] = self.transformation_matrix
+            metadata["transform"] = {
+                "matrix": self.transformation_matrix
+            }
         if len(metadata.keys()) > 0:
-            image['metadata'] = metadata
+            image["metadata"] = metadata
         return image
-
-    def _get_offsets_dir(self):
-        return os.path.dirname(self.offsets_path)
-    
-    def _get_offsets_filename(self):
-        return os.path.basename(self.offsets_path)
     
     def _get_image_dir(self):
         return os.path.dirname(self.img_path)
@@ -278,26 +272,26 @@ class OmeTiffWrapper(AbstractWrapper):
             return self.img_url
         img_url = self._get_url(base_url, dataset_uid, obj_i, self._get_img_filename())
         return img_url
+
+    def get_offsets_path_name(self):
+        return f"{self._get_img_filename().split('.')[0]}.offsets.json"
     
     def get_offsets_url(self, base_url="", dataset_uid="", obj_i=""):
-        if self.offsets_url != "":
+        if self.offsets_url != "" or self.img_url != "":
             return self.offsets_url
-        offsets_filename = self._get_offsets_filename()
-        if offsets_filename != "":
-            offsets_url = self._get_url(base_url, dataset_uid, obj_i, os.path.join("raster_offsets", offsets_filename))
-            return offsets_url
-        return ""
+        offsets_url = self._get_url(base_url, dataset_uid, obj_i, self.get_offsets_path_name())
+        return offsets_url
     
     def get_routes(self, base_url="", dataset_uid="", obj_i=""):
-        offsets_dir_path = None if self.offsets_path is None else self._get_offsets_dir()
 
         obj_routes = [
             Route(self._get_route(dataset_uid, obj_i, self._get_img_filename()), lambda req: range_repsonse(req, self.img_path))
         ]
-        if self.offsets_path is not None:
+        if self.img_path != "":
+            offsets = get_offsets(self.img_path)
             obj_routes.append(
-                Mount(self._get_route(dataset_uid, obj_i, "raster_offsets"),
-                      app=StaticFiles(directory=offsets_dir_path, html=False, check_dir=False))
+                JsonRoute(self._get_route(dataset_uid, obj_i, self.get_offsets_path_name()),
+                        self._create_response_json(offsets), offsets),
             )
         return obj_routes
 

@@ -175,6 +175,12 @@ class AbstractWrapper:
         return f"/{dataset_uid}/{obj_i}/{suffix}"
 
 class MultiImageWrapper(AbstractWrapper):
+    """
+    Wrap multiple imaging datasets by creating an instance of the ``MultiImageWrapper`` class.
+
+    :param list image_wrappers: A list of imaging wrapper classes (only :class:`~vitessce.wrappers.OmeTiffWrapper` supported now)
+    :param \*\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
+    """
     def __init__(self, image_wrappers, **kwargs):
         super().__init__(**kwargs)
         self.image_wrappers = image_wrappers
@@ -211,7 +217,19 @@ class MultiImageWrapper(AbstractWrapper):
 
 class OmeTiffWrapper(AbstractWrapper):
 
-    def __init__(self, img_path="", offsets_path="", name="", transformation_matrix=None, img_url="", offsets_url="", **kwargs):
+    """
+    Wrap an OME-TIFF File by creating an instance of the ``OmeTiffWrapper`` class.
+
+    :param str img_path: A local filepath to an OME-TIFF file.
+    :param str offsets_path: A local filepath to an offsets-json file (optional).
+    :param str img_url: A remote URL of an OME-TIFF file.
+    :param str offsets_path: A remote URL of an offsets-json file (optional).
+    :param str name: The display name for this OME-TIFF within Vitessce.
+    :param list[number] transformation_matrix: A column-major ordered matrix for transforming this image (see http://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices/#homogeneous-coordinates for more information).
+    :param \*\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
+    """
+
+    def __init__(self, img_path="", offsets_path="", img_url="", offsets_url="", name="", transformation_matrix=None, **kwargs):
         super().__init__(**kwargs)
         self.img_path = img_path
         self.img_url = img_url

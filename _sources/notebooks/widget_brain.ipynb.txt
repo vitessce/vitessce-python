@@ -89,7 +89,7 @@
    "source": [
     "## 3.1. Optionally, preprocess the dataset\n",
     "\n",
-    "This dataset contains 25,587 genes. Here, we select the top 200 highly variable genes for visualization."
+    "This dataset contains 25,587 genes. Here, we select the top 50 highly variable genes for visualization."
    ]
   },
   {

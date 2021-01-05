@@ -179,7 +179,7 @@ class MultiImageWrapper(AbstractWrapper):
         super().__init__(**kwargs)
         self.image_wrappers = image_wrappers
 
-    def create_raster_json(self, base_url, dataset_uid, obj_i):
+    def create_raster_json(self, base_url="", dataset_uid="", obj_i=""):
         raster_json = {
             "schemaVersion": "0.0.2",
             "images": [],
@@ -194,7 +194,7 @@ class MultiImageWrapper(AbstractWrapper):
             raster_json['renderLayers'].append(image.name)
         return raster_json
     
-    def get_raster(self, base_url, dataset_uid, obj_i):
+    def get_raster(self, base_url="", dataset_uid="", obj_i=""):
         raster_json = self.create_raster_json(base_url, dataset_uid, obj_i)
         obj_routes = []
         for image in self.image_wrappers:
@@ -211,21 +211,23 @@ class MultiImageWrapper(AbstractWrapper):
 
 class OmeTiffWrapper(AbstractWrapper):
 
-    def __init__(self, img_path="", offsets_path="", name="", transformation_matrix=None, **kwargs):
+    def __init__(self, img_path="", offsets_path="", name="", transformation_matrix=None, img_url="", offsets_url="", **kwargs):
         super().__init__(**kwargs)
         self.img_path = img_path
+        self.img_url = img_url
         self.offsets_path = offsets_path
+        self.offsets_url = offsets_url
         self.name = name
         self.transformation_matrix = transformation_matrix
 
-    def create_raster_json(self, img_url, offsets_url):
+    def create_raster_json(self, img_url, offsets_url=""):
         raster_json = {
             "schemaVersion": "0.0.2",
             "images": [self.create_image_json(img_url, offsets_url)],
         }
         return raster_json
     
-    def create_image_json(self, img_url, offsets_url):
+    def create_image_json(self, img_url, offsets_url=""):
         metadata = {}
         image = {
             "name": self.name,
@@ -236,7 +238,7 @@ class OmeTiffWrapper(AbstractWrapper):
             metadata["omeTiffOffsetsUrl"] = offsets_url
         if self.transformation_matrix is not None:
             metadata["transform"] = {}
-            metadata["matrix"] = self.transformation_matrix
+            metadata["transform"]["matrix"] = self.transformation_matrix
         if len(metadata.keys()) > 0:
             image['metadata'] = metadata
         return image
@@ -254,17 +256,21 @@ class OmeTiffWrapper(AbstractWrapper):
         return os.path.basename(self.img_path)
 
     def get_img_url(self, base_url="", dataset_uid="", obj_i=""):
+        if self.img_url != "":
+            return self.img_url
         img_url = self._get_url(base_url, dataset_uid, obj_i, self._get_img_filename())
         return img_url
     
     def get_offsets_url(self, base_url="", dataset_uid="", obj_i=""):
+        if self.offsets_url != "":
+            return self.offsets_url
         offsets_filename = self._get_offsets_filename()
         if offsets_filename != "":
             offsets_url = self._get_url(base_url, dataset_uid, obj_i, os.path.join("raster_offsets", offsets_filename))
             return offsets_url
         return ""
     
-    def get_routes(self, base_url, dataset_uid, obj_i):
+    def get_routes(self, base_url="", dataset_uid="", obj_i=""):
         offsets_dir_path = None if self.offsets_path is None else self._get_offsets_dir()
 
         obj_routes = [
@@ -277,7 +283,7 @@ class OmeTiffWrapper(AbstractWrapper):
             )
         return obj_routes
 
-    def get_raster(self, base_url, dataset_uid, obj_i):
+    def get_raster(self, base_url="", dataset_uid="", obj_i=""):
         obj_routes = self.get_routes(base_url, dataset_uid, obj_i)
         img_url = self.get_img_url(base_url, dataset_uid, obj_i)
         offsets_url = self.get_offsets_url(base_url, dataset_uid, obj_i)

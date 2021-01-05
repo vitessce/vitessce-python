@@ -183,31 +183,22 @@ class MultiImageWrapper(AbstractWrapper):
         raster_json = {
             "schemaVersion": "0.0.2",
             "images": [],
-        }
-        for image in self.image_wrappers:
-            img_url = image._get_url(base_url, dataset_uid, obj_i, "raster_img")
-            offsets_url = image._get_url(base_url, dataset_uid, obj_i, os.path.join("raster_offsets", image._get_offsets_filename()))
-
-            image_json = image.create_image_json(img_url, offsets_url)
-            raster_json['images'].append(image_json)
-        return raster_json
-    
-    def get_raster(self, base_url, dataset_uid, obj_i):
-        raster_json = {
-            "schemaVersion": "0.0.2",
-            "images": [],
             "renderLayers": []
         }
-        obj_routes = []
         for image in self.image_wrappers:
-            obj_routes = obj_routes + image.get_routes(base_url, dataset_uid, obj_i)
             image_json = image.create_image_json(
                 image.get_img_url(base_url, dataset_uid, obj_i),
                 image.get_offsets_url(base_url, dataset_uid, obj_i)
             )
             raster_json['images'].append(image_json)
             raster_json['renderLayers'].append(image.name)
-
+        return raster_json
+    
+    def get_raster(self, base_url, dataset_uid, obj_i):
+        raster_json = self.create_raster_json(base_url, dataset_uid, obj_i)
+        obj_routes = []
+        for image in self.image_wrappers:
+            obj_routes = obj_routes + image.get_routes(base_url, dataset_uid, obj_i)
         obj_file_defs = [
             {
                 "type": dt.RASTER.value,
@@ -262,11 +253,11 @@ class OmeTiffWrapper(AbstractWrapper):
     def _get_img_filename(self):
         return os.path.basename(self.img_path)
 
-    def get_img_url(self, base_url, dataset_uid, obj_i):
+    def get_img_url(self, base_url="", dataset_uid="", obj_i=""):
         img_url = self._get_url(base_url, dataset_uid, obj_i, self._get_img_filename())
         return img_url
     
-    def get_offsets_url(self, base_url, dataset_uid, obj_i):
+    def get_offsets_url(self, base_url="", dataset_uid="", obj_i=""):
         offsets_filename = self._get_offsets_filename()
         if offsets_filename != "":
             offsets_url = self._get_url(base_url, dataset_uid, obj_i, os.path.join("raster_offsets", offsets_filename))
@@ -274,15 +265,10 @@ class OmeTiffWrapper(AbstractWrapper):
         return ""
     
     def get_routes(self, base_url, dataset_uid, obj_i):
-        img_url = self.get_img_url(base_url, dataset_uid, obj_i)
-        offsets_dir_path, offsets_url = (None, None) if self.offsets_path is None else (self._get_offsets_dir(), self.get_offsets_url(base_url, dataset_uid, obj_i))
-
-        raster_json = self.create_raster_json(img_url, offsets_url)
+        offsets_dir_path = None if self.offsets_path is None else self._get_offsets_dir()
 
         obj_routes = [
-            Route(self._get_route(dataset_uid, obj_i, self._get_img_filename()), lambda req: range_repsonse(req, self.img_path)),
-            JsonRoute(self._get_route(dataset_uid, obj_i, "raster"),
-                  self._create_response_json(raster_json), raster_json)
+            Route(self._get_route(dataset_uid, obj_i, self._get_img_filename()), lambda req: range_repsonse(req, self.img_path))
         ]
         if self.offsets_path is not None:
             obj_routes.append(
@@ -293,12 +279,14 @@ class OmeTiffWrapper(AbstractWrapper):
 
     def get_raster(self, base_url, dataset_uid, obj_i):
         obj_routes = self.get_routes(base_url, dataset_uid, obj_i)
-
+        img_url = self.get_img_url(base_url, dataset_uid, obj_i)
+        offsets_url = self.get_offsets_url(base_url, dataset_uid, obj_i)
+        raster_json = self.create_raster_json(img_url, offsets_url)
         obj_file_defs = [
             {
                 "type": dt.RASTER.value,
                 "fileType": ft.RASTER_JSON.value,
-                "url": self._get_url(base_url, dataset_uid, obj_i, "raster")
+                "options": raster_json
             }
         ]
 

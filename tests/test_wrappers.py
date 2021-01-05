@@ -38,18 +38,18 @@ class TestWrappers(unittest.TestCase):
         )
 
     def test_ome_tiff(self):
-        w = OmeTiffWrapper(img_path="data/test.ome.tif", offsets_path="data/offsets.json", name="Test")
+        w = OmeTiffWrapper(img_path="data/test.ome.tif", name="Test")
 
         raster_json = w.create_raster_json(
             "http://localhost:8000/A/0/test.ome.tif",
-            "http://localhost:8000/A/0/raster_offsets/offsets.json"
+            "http://localhost:8000/A/0/test.offsets.json"
         )
 
         self.assertEqual(raster_json, {
             'images': [
                 {
                     'metadata': {
-                        'omeTiffOffsetsUrl': 'http://localhost:8000/A/0/raster_offsets/offsets.json'
+                        'omeTiffOffsetsUrl': 'http://localhost:8000/A/0/test.offsets.json'
                     },
                     'name': 'Test',
                     'type': 'ome-tiff',

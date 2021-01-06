@@ -48,7 +48,6 @@ def ranged( file, start = 0, end = None, block_size = 65535,):
         file.close()
 
 def range_repsonse(request, p):
-
 	path = Path(p)
 	file = path.open('rb')
 	file_size = path.stat().st_size

@@ -223,7 +223,6 @@ class OmeTiffWrapper(AbstractWrapper):
 
     :param str img_path: A local filepath to an OME-TIFF file.
     :param str img_url: A remote URL of an OME-TIFF file.
-    :param str offsets_path: A remote URL of an offsets-json file (optional).
     :param str name: The display name for this OME-TIFF within Vitessce.
     :param list[number] transformation_matrix: A column-major ordered matrix for transforming this image (see http://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices/#homogeneous-coordinates for more information).
     :param \*\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
@@ -231,11 +230,11 @@ class OmeTiffWrapper(AbstractWrapper):
 
     def __init__(self, img_path="", img_url="", offsets_url="", name="", transformation_matrix=None, **kwargs):
         super().__init__(**kwargs)
-        self.img_path = img_path
-        self.img_url = img_url
-        self.offsets_url = offsets_url
         self.name = name
-        self.transformation_matrix = transformation_matrix
+        self._img_path = img_path
+        self._img_url = img_url
+        self._offsets_url = offsets_url
+        self._transformation_matrix = transformation_matrix
 
     def create_raster_json(self, img_url, offsets_url=""):
         raster_json = {
@@ -253,23 +252,24 @@ class OmeTiffWrapper(AbstractWrapper):
         }
         if offsets_url != "":
             metadata["omeTiffOffsetsUrl"] = offsets_url
-        if self.transformation_matrix is not None:
+        if self._transformation_matrix is not None:
             metadata["transform"] = {
-                "matrix": self.transformation_matrix
+                "matrix": self._transformation_matrix
             }
+        # Only attach metadata if there is some - otherwise schema validation fails.
         if len(metadata.keys()) > 0:
             image["metadata"] = metadata
         return image
     
     def _get_image_dir(self):
-        return os.path.dirname(self.img_path)
+        return os.path.dirname(self._img_path)
     
     def _get_img_filename(self):
-        return os.path.basename(self.img_path)
+        return os.path.basename(self._img_path)
 
     def get_img_url(self, base_url="", dataset_uid="", obj_i=""):
-        if self.img_url != "":
-            return self.img_url
+        if self._img_url != "":
+            return self._img_url
         img_url = self._get_url(base_url, dataset_uid, obj_i, self._get_img_filename())
         return img_url
 
@@ -277,18 +277,17 @@ class OmeTiffWrapper(AbstractWrapper):
         return f"{self._get_img_filename().split('.')[0]}.offsets.json"
     
     def get_offsets_url(self, base_url="", dataset_uid="", obj_i=""):
-        if self.offsets_url != "" or self.img_url != "":
-            return self.offsets_url
+        if self._offsets_url != "" or self._img_url != "":
+            return self._offsets_url
         offsets_url = self._get_url(base_url, dataset_uid, obj_i, self.get_offsets_path_name())
         return offsets_url
     
     def get_routes(self, base_url="", dataset_uid="", obj_i=""):
-
         obj_routes = [
-            Route(self._get_route(dataset_uid, obj_i, self._get_img_filename()), lambda req: range_repsonse(req, self.img_path))
+            Route(self._get_route(dataset_uid, obj_i, self._get_img_filename()), lambda req: range_repsonse(req, self._img_path))
         ]
-        if self.img_path != "":
-            offsets = get_offsets(self.img_path)
+        if self._img_path != "":
+            offsets = get_offsets(self._img_path)
             obj_routes.append(
                 JsonRoute(self._get_route(dataset_uid, obj_i, self.get_offsets_path_name()),
                         self._create_response_json(offsets), offsets),

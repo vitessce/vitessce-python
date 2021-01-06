@@ -316,7 +316,7 @@ class OmeZarrWrapper(AbstractWrapper):
 
 
 class AnnDataWrapper(AbstractWrapper):
-    def __init__(self, adata, use_highly_variable_genes=True, cell_set_obs_cols=None, **kwargs):
+    def __init__(self, adata, use_highly_variable_genes=True, cell_set_obs_cols=None, spatial_obsm_key=None, **kwargs):
         """
         Wrap an AnnData object by creating an instance of the ``AnnDataWrapper`` class.
 
@@ -331,16 +331,22 @@ class AnnDataWrapper(AbstractWrapper):
         self.tempdir = tempfile.mkdtemp()
         self.use_highly_variable_genes = use_highly_variable_genes
         self.cell_set_obs_cols = cell_set_obs_cols
+        self.spatial_obsm_key = spatial_obsm_key
 
     def create_cells_json(self):
         adata = self.adata
-        available_embeddings = list(adata.obsm.keys())
+        available_embeddings = set(adata.obsm.keys()) - set([self.spatial_obsm_key])
 
         cell_ids = adata.obs.index.tolist()
         cells = Cells(cell_ids=cell_ids)
         for e in available_embeddings:
             mapping = adata.obsm[e][:, 0:2].tolist()
             cells.add_mapping(e, mapping)
+        
+        if self.spatial_obsm_key is not None:
+            centroids = adata.obsm[self.spatial_obsm_key][:, 0:2].tolist()
+            cells.add_centroids(centroids)
+        
         return cells.json
 
     def create_cell_sets_json(self):
@@ -388,189 +394,6 @@ class AnnDataWrapper(AbstractWrapper):
             gene_list = adata.var.index[adata.var['highly_variable']].values.tolist()
             gexp_arr = gexp_arr[:,adata.var['highly_variable'].values]
 
-        
-        # Re-scale the gene expression values between 0 and 255
-        gexp_arr_min = gexp_arr.min()
-        gexp_arr_max = gexp_arr.max()
-        gexp_arr_range = gexp_arr_max - gexp_arr_min
-        gexp_arr_ratio = 255 / gexp_arr_range
-
-        gexp_norm_arr = (gexp_arr - gexp_arr_min) * gexp_arr_ratio
-    
-        z = zarr.open(
-            zarr_filepath,
-            mode='w',
-            shape=gexp_norm_arr.shape,
-            dtype='uint8',
-            compressor=Zlib(level=1)
-        )
-
-        z[:] = gexp_norm_arr
-        # observations: cells (rows)
-        z.attrs["rows"] = cell_list
-        # variables: genes (columns)
-        z.attrs["cols"] = gene_list
-        
-        return
-
-    def get_cells(self, base_url, dataset_uid, obj_i):
-        obj_routes = []
-        obj_file_defs = []
-
-        cells_json = self.create_cells_json()
-
-        obj_routes = [
-            JsonRoute(self._get_route(dataset_uid, obj_i, "cells"),
-                    self._create_response_json(cells_json), cells_json),
-        ]
-        obj_file_defs = [
-            {
-                "type": dt.CELLS.value,
-                "fileType": ft.CELLS_JSON.value,
-                "url": self._get_url(base_url, dataset_uid, obj_i, "cells")
-            }
-        ]
-
-        return obj_file_defs, obj_routes
-
-    def get_cell_sets(self, base_url, dataset_uid, obj_i):
-        obj_routes = []
-        obj_file_defs = []
-  
-        cell_sets_json = self.create_cell_sets_json()
-
-        if cell_sets_json is not None:
-            obj_routes = [
-                JsonRoute(self._get_route(dataset_uid, obj_i, "cell-sets"),
-                        self._create_response_json(cell_sets_json), cell_sets_json),
-            ]
-            obj_file_defs = [
-                {
-                    "type": dt.CELL_SETS.value,
-                    "fileType": ft.CELL_SETS_JSON.value,
-                    "url": self._get_url(base_url, dataset_uid, obj_i, "cell-sets")
-                }
-            ]
-
-        return obj_file_defs, obj_routes
-    
-    def get_expression_matrix(self, base_url, dataset_uid, obj_i):
-        obj_routes = []
-        obj_file_defs = []
-
-        zarr_tempdir = self.tempdir
-        zarr_filepath = join(zarr_tempdir, 'matrix.zarr')
-
-        self.create_exp_matrix_zarr(zarr_filepath)
-
-        if zarr_tempdir is not None:
-            obj_routes = [
-                Mount(self._get_route(dataset_uid, obj_i, "expression"),
-                    app=StaticFiles(directory=os.path.dirname(zarr_filepath), html=False, check_dir=False)),
-            ]
-
-            obj_file_defs = [
-                {
-                    "type": dt.EXPRESSION_MATRIX.value,
-                    "fileType": ft.EXPRESSION_MATRIX_ZARR.value,
-                    "url": self._get_url(base_url, dataset_uid, obj_i, "expression/matrix.zarr"),
-                }
-            ]
-
-        return obj_file_defs, obj_routes
-        
-
-
-class LoomWrapper(AbstractWrapper):
-
-    def __init__(self, ds, cell_attr='CellID', gene_attr='Gene', cell_set_attrs=None, spatial_x_attr='X', spatial_y_attr='Y', embedding_attrs=None, **kwargs):
-        """
-        Wrap a Loom object by creating an instance of the ``LoomWrapper`` class.
-
-        :param ds: An Loom connection object for single-cell experiment data.
-        :type ds: loompy.loompy.LoomConnection
-        :param str cell_attr: The column attribute key for cell IDs.
-        :param str gene_attr: The row attribute key for gene IDs.
-        :param list[str] cell_set_attrs: A list of column attribute keys that should be used for creating cell sets.
-        :param str spatial_x_attr: The column attribute key for spatial X positions.
-        :param str spatial_y_attr: The column attribute key for spatial Y positions.
-        :param dict[str,list[str]] embedding_attrs: A mapping from embedding names to column attribute tuples such as { 't-SNE': ['_tSNE_1', _tSNE_2'] }
-        :param \*\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
-        """
-        super().__init__(**kwargs)
-        self.ds = ds
-        self.cell_attr = cell_attr
-        self.gene_attr = gene_attr
-        self.cell_set_attrs = cell_set_attrs
-        self.spatial_x_attr = spatial_x_attr
-        self.spatial_y_attr = spatial_y_attr
-        self.embedding_attrs = embedding_attrs
-        
-        self.tempdir = tempfile.mkdtemp()
-
-    def create_cells_json(self):
-        ds = self.ds
-        cell_attr = self.cell_attr
-        spatial_x_attr = self.spatial_x_attr
-        spatial_y_attr = self.spatial_y_attr
-        embedding_attrs = self.embedding_attrs
-        
-        has_spatial = (spatial_x_attr in ds.ca.keys() and spatial_y_attr in ds.ca.keys())
-        has_embeddings = embedding_attrs is not None and len(embedding_attrs) > 0
-        
-        cell_ids = ds.ca[cell_attr].tolist()
-        cells = Cells(cell_ids=cell_ids)
-        if has_embeddings:
-            for e, [x_attr, y_attr] in embedding_attrs.items():
-                mapping = np.vstack((ds.ca[x_attr], ds.ca[y_attr])).T.tolist()
-                cells.add_mapping(e, mapping)
-        if has_spatial:
-            centroids =  np.vstack((ds.ca[spatial_x_attr], ds.ca[spatial_y_attr])).T.tolist()
-            cells.add_centroids(centroids)
-        return cells.json
-
-    def create_cell_sets_json(self):
-        ds = self.ds
-        cell_attr = self.cell_attr
-        cell_set_attrs = self.cell_set_attrs
-
-        cell_sets = CellSets()
-
-        if cell_set_attrs is not None and len(cell_set_attrs) > 0:
-            # Each `cell_set_obs_col` is a column name in the `adata.obs` dataframe,
-            # which we want to turn into a hierarchy of cell sets.
-            for cell_set_attr in cell_set_attrs:
-                cell_sets.add_level_zero_node(cell_set_attr)
-
-                cell_ids = ds.ca[cell_attr].tolist()
-                cluster_ids = np.unique(ds.ca[cell_set_attr]).tolist()
-                cell_cluster_ids = ds.ca[cell_set_attr].tolist()
-
-                cell_cluster_tuples = list(zip(cell_ids, cell_cluster_ids))
-
-                for cluster_id in sorted(cluster_ids):
-                    cell_set = [
-                        str(cell_id)
-                        for cell_id, cell_cluster_id in cell_cluster_tuples
-                        if cell_cluster_id == cluster_id
-                    ]
-                    cell_sets.add_node(str(cluster_id), [cell_set_attr], cell_set)
-            return cell_sets.json
-        return None
-    
-    def create_exp_matrix_zarr(self, zarr_filepath):
-        ds = self.ds
-        cell_attr = self.cell_attr
-        gene_attr = self.gene_attr
-        
-        gexp_arr = ds[:,:].T
-
-        cell_list = ds.ca[cell_attr].tolist()
-        gene_list = ds.ra[gene_attr].tolist()
-
-        if type(gexp_arr) == csr_matrix:
-            # Convert from SciPy sparse format to NumPy dense format
-            gexp_arr = gexp_arr.toarray()
         
         # Re-scale the gene expression values between 0 and 255
         gexp_arr_min = gexp_arr.min()

@@ -30,7 +30,7 @@ def create_obj_routes(obj, base_url, dataset_uid, obj_i):
 	return obj_file_defs, obj_routes
 
 # Adapted from https://gist.github.com/tombulled/712fd8e19ed0618c5f9f7d5f5f543782
-def ranged( file, start = 0, end = None, block_size = 65535,):
+def ranged(file, start = 0, end = None, block_size = 65535):
     consumed = 0
     file.seek(start)
 
@@ -47,8 +47,8 @@ def ranged( file, start = 0, end = None, block_size = 65535,):
     if hasattr(file, 'close'):
         file.close()
 
-def range_repsonse(request, p):
-	path = Path(p)
+def range_repsonse(request, file_path):
+	path = Path(file_path)
 	file = path.open('rb')
 	file_size = path.stat().st_size
 	content_range = request.headers.get('range')

@@ -26,7 +26,8 @@
     "    VitessceConfig,\n",
     "    Component as cm,\n",
     "    CoordinationType as ct,\n",
-    "    OmeZarrWrapper,\n",
+    "    OmeTiffWrapper,\n",
+    "    MultiImageWrapper,\n",
     "    hconcat,\n",
     ")\n",
     "import zarr\n",
@@ -39,7 +40,12 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "z = zarr.open(join('data', 'spraggins', 'spraggins.mxif.zarr'))"
+    "transformation_matrix = [\n",
+    "    20,0,0,0,\n",
+    "    0,20,0,0,\n",
+    "    0,0,1,0,\n",
+    "    0,0,0,1\n",
+    "]"
    ]
   },
   {
@@ -48,8 +54,15 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "vc = VitessceConfig(name='Spraggins', description='Spraggins MXIF')\n",
-    "dataset = vc.add_dataset(name='Spraggins').add_object(OmeZarrWrapper(z, name='Spraggins'))\n",
+    "vc = VitessceConfig(name='Spraggins Multi-Modal', description='PAS + IMS + AF From https://portal.hubmapconsortium.org/browse/collection/6a6efd0c1a2681dc7d2faab8e4ab0bca')\n",
+    "dataset = vc.add_dataset(name='Spraggins').add_object(\n",
+    "    MultiImageWrapper(image_wrappers=[\n",
+    "        OmeTiffWrapper(img_url='https://assets.hubmapconsortium.org/f4188a148e4c759092d19369d310883b/ometiff-pyramids/processedMicroscopy/VAN0006-LK-2-85-PAS_images/VAN0006-LK-2-85-PAS_registered.ome.tif?token=', name='PAS'),\n",
+    "        OmeTiffWrapper(img_url='https://assets.hubmapconsortium.org/2130d5f91ce61d7157a42c0497b06de8/ometiff-pyramids/processedMicroscopy/VAN0006-LK-2-85-AF_preIMS_images/VAN0006-LK-2-85-AF_preIMS_registered.ome.tif?token=', name='AF'),\n",
+    "        OmeTiffWrapper(img_url='https://assets.hubmapconsortium.org/be503a021ed910c0918842e318e6efa2/ometiff-pyramids/ometiffs/VAN0006-LK-2-85-IMS_PosMode_multilayer.ome.tif?token=', transformation_matrix=transformation_matrix, name='IMS')\n",
+    "    ]\n",
+    " )\n",
+    ")\n",
     "spatial = vc.add_view(dataset, cm.SPATIAL)\n",
     "status = vc.add_view(dataset, cm.STATUS)\n",
     "lc = vc.add_view(dataset, cm.LAYER_CONTROLLER)\n",
@@ -83,7 +96,7 @@
    "name": "python",
    "nbconvert_exporter": "python",
    "pygments_lexer": "ipython3",
-   "version": "3.8.0"
+   "version": "3.8.6"
   }
  },
  "nbformat": 4,

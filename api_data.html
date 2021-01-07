@@ -370,7 +370,7 @@ Used internally by <code class="xref py py-class docutils literal notranslate"><
 
 <dl class="py class">
 <dt id="vitessce.wrappers.AnnDataWrapper">
-<em class="property">class </em><code class="sig-prename descclassname">vitessce.wrappers.</code><code class="sig-name descname">AnnDataWrapper</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">adata</span></em>, <em class="sig-param"><span class="n">use_highly_variable_genes</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">cell_set_obs_cols</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L393-L555"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.AnnDataWrapper" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">vitessce.wrappers.</code><code class="sig-name descname">AnnDataWrapper</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">adata</span></em>, <em class="sig-param"><span class="n">use_highly_variable_genes</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">cell_set_obs_cols</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">spatial_obsm_key</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L393-L561"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.AnnDataWrapper" title="Permalink to this definition">¶</a></dt>
 <dd><p>Wrap an AnnData object by creating an instance of the <code class="docutils literal notranslate"><span class="pre">AnnDataWrapper</span></code> class.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -384,7 +384,7 @@ Used internally by <code class="xref py py-class docutils literal notranslate"><
 </dl>
 <dl class="py method">
 <dt id="vitessce.wrappers.AnnDataWrapper.get_cell_sets">
-<code class="sig-name descname">get_cell_sets</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">base_url</span></em>, <em class="sig-param"><span class="n">dataset_uid</span></em>, <em class="sig-param"><span class="n">obj_i</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L511-L530"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.AnnDataWrapper.get_cell_sets" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_cell_sets</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">base_url</span></em>, <em class="sig-param"><span class="n">dataset_uid</span></em>, <em class="sig-param"><span class="n">obj_i</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L517-L536"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.AnnDataWrapper.get_cell_sets" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the file definitions and server routes
 corresponding to the <a class="reference internal" href="api_config.html#vitessce.constants.DataType.CELL_SETS" title="vitessce.constants.DataType.CELL_SETS"><code class="xref py py-class docutils literal notranslate"><span class="pre">CELL_SETS</span></code></a> data type.
 Used internally by <code class="xref py py-class docutils literal notranslate"><span class="pre">VitessceWidget</span></code>.</p>
@@ -407,7 +407,7 @@ Used internally by <code class="xref py py-class docutils literal notranslate"><
 
 <dl class="py method">
 <dt id="vitessce.wrappers.AnnDataWrapper.get_cells">
-<code class="sig-name descname">get_cells</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">base_url</span></em>, <em class="sig-param"><span class="n">dataset_uid</span></em>, <em class="sig-param"><span class="n">obj_i</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L491-L509"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.AnnDataWrapper.get_cells" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_cells</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">base_url</span></em>, <em class="sig-param"><span class="n">dataset_uid</span></em>, <em class="sig-param"><span class="n">obj_i</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L497-L515"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.AnnDataWrapper.get_cells" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the file definitions and server routes
 corresponding to the <a class="reference internal" href="api_config.html#vitessce.constants.DataType.CELLS" title="vitessce.constants.DataType.CELLS"><code class="xref py py-class docutils literal notranslate"><span class="pre">CELLS</span></code></a> data type.
 Used internally by <code class="xref py py-class docutils literal notranslate"><span class="pre">VitessceWidget</span></code>.</p>
@@ -430,38 +430,9 @@ Used internally by <code class="xref py py-class docutils literal notranslate"><
 
 <dl class="py method">
 <dt id="vitessce.wrappers.AnnDataWrapper.get_expression_matrix">
-<code class="sig-name descname">get_expression_matrix</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">base_url</span></em>, <em class="sig-param"><span class="n">dataset_uid</span></em>, <em class="sig-param"><span class="n">obj_i</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L532-L555"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.AnnDataWrapper.get_expression_matrix" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_expression_matrix</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">base_url</span></em>, <em class="sig-param"><span class="n">dataset_uid</span></em>, <em class="sig-param"><span class="n">obj_i</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L538-L561"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.AnnDataWrapper.get_expression_matrix" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the file definitions and server routes
 corresponding to the <a class="reference internal" href="api_config.html#vitessce.constants.DataType.EXPRESSION_MATRIX" title="vitessce.constants.DataType.EXPRESSION_MATRIX"><code class="xref py py-class docutils literal notranslate"><span class="pre">EXPRESSION_MATRIX</span></code></a> data type.
-Used internally by <code class="xref py py-class docutils literal notranslate"><span class="pre">VitessceWidget</span></code>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>base_url</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The web server base url.</p></li>
-<li><p><strong>dataset_uid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The unique identifier for the dataset parent of this data object.</p></li>
-<li><p><strong>obj_i</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The index of this data object child within its dataset parent.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The file definitions and server routes.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.9)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a>], <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)">list</a>[starlette.routing.Route]]</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt id="vitessce.wrappers.LoomWrapper">
-<em class="property">class </em><code class="sig-prename descclassname">vitessce.wrappers.</code><code class="sig-name descname">LoomWrapper</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">loom</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L559-L572"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.LoomWrapper" title="Permalink to this definition">¶</a></dt>
-<dd><p>Abstract constructor to be inherited by dataset wrapper classes.</p>
-<dl class="py method">
-<dt id="vitessce.wrappers.LoomWrapper.get_cells">
-<code class="sig-name descname">get_cells</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">base_url</span></em>, <em class="sig-param"><span class="n">dataset_uid</span></em>, <em class="sig-param"><span class="n">obj_i</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L565-L572"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.LoomWrapper.get_cells" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the file definitions and server routes
-corresponding to the <a class="reference internal" href="api_config.html#vitessce.constants.DataType.CELLS" title="vitessce.constants.DataType.CELLS"><code class="xref py py-class docutils literal notranslate"><span class="pre">CELLS</span></code></a> data type.
 Used internally by <code class="xref py py-class docutils literal notranslate"><span class="pre">VitessceWidget</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -592,11 +563,11 @@ Used internally by <code class="xref py py-class docutils literal notranslate"><
 
 <dl class="py class">
 <dt id="vitessce.wrappers.SnapWrapper">
-<em class="property">class </em><code class="sig-prename descclassname">vitessce.wrappers.</code><code class="sig-name descname">SnapWrapper</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">in_mtx</span></em>, <em class="sig-param"><span class="n">in_barcodes_df</span></em>, <em class="sig-param"><span class="n">in_bins_df</span></em>, <em class="sig-param"><span class="n">in_clusters_df</span></em>, <em class="sig-param"><span class="n">starting_resolution</span><span class="o">=</span><span class="default_value">5000</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L574-L837"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.SnapWrapper" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">vitessce.wrappers.</code><code class="sig-name descname">SnapWrapper</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">in_mtx</span></em>, <em class="sig-param"><span class="n">in_barcodes_df</span></em>, <em class="sig-param"><span class="n">in_bins_df</span></em>, <em class="sig-param"><span class="n">in_clusters_df</span></em>, <em class="sig-param"><span class="n">starting_resolution</span><span class="o">=</span><span class="default_value">5000</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L563-L826"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.SnapWrapper" title="Permalink to this definition">¶</a></dt>
 <dd><p>Abstract constructor to be inherited by dataset wrapper classes.</p>
 <dl class="py method">
 <dt id="vitessce.wrappers.SnapWrapper.get_cell_sets">
-<code class="sig-name descname">get_cell_sets</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">base_url</span></em>, <em class="sig-param"><span class="n">dataset_uid</span></em>, <em class="sig-param"><span class="n">obj_i</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L790-L808"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.SnapWrapper.get_cell_sets" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_cell_sets</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">base_url</span></em>, <em class="sig-param"><span class="n">dataset_uid</span></em>, <em class="sig-param"><span class="n">obj_i</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L779-L797"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.SnapWrapper.get_cell_sets" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the file definitions and server routes
 corresponding to the <a class="reference internal" href="api_config.html#vitessce.constants.DataType.CELL_SETS" title="vitessce.constants.DataType.CELL_SETS"><code class="xref py py-class docutils literal notranslate"><span class="pre">CELL_SETS</span></code></a> data type.
 Used internally by <code class="xref py py-class docutils literal notranslate"><span class="pre">VitessceWidget</span></code>.</p>
@@ -619,7 +590,7 @@ Used internally by <code class="xref py py-class docutils literal notranslate"><
 
 <dl class="py method">
 <dt id="vitessce.wrappers.SnapWrapper.get_cells">
-<code class="sig-name descname">get_cells</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">base_url</span></em>, <em class="sig-param"><span class="n">dataset_uid</span></em>, <em class="sig-param"><span class="n">obj_i</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L819-L837"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.SnapWrapper.get_cells" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_cells</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">base_url</span></em>, <em class="sig-param"><span class="n">dataset_uid</span></em>, <em class="sig-param"><span class="n">obj_i</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L808-L826"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.SnapWrapper.get_cells" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the file definitions and server routes
 corresponding to the <a class="reference internal" href="api_config.html#vitessce.constants.DataType.CELLS" title="vitessce.constants.DataType.CELLS"><code class="xref py py-class docutils literal notranslate"><span class="pre">CELLS</span></code></a> data type.
 Used internally by <code class="xref py py-class docutils literal notranslate"><span class="pre">VitessceWidget</span></code>.</p>
@@ -642,7 +613,7 @@ Used internally by <code class="xref py py-class docutils literal notranslate"><
 
 <dl class="py method">
 <dt id="vitessce.wrappers.SnapWrapper.get_genomic_profiles">
-<code class="sig-name descname">get_genomic_profiles</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">base_url</span></em>, <em class="sig-param"><span class="n">dataset_uid</span></em>, <em class="sig-param"><span class="n">obj_i</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L740-L764"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.SnapWrapper.get_genomic_profiles" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_genomic_profiles</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">base_url</span></em>, <em class="sig-param"><span class="n">dataset_uid</span></em>, <em class="sig-param"><span class="n">obj_i</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L729-L753"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.wrappers.SnapWrapper.get_genomic_profiles" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the file definitions and server routes
 corresponding to the <a class="reference internal" href="api_config.html#vitessce.constants.DataType.GENOMIC_PROFILES" title="vitessce.constants.DataType.GENOMIC_PROFILES"><code class="xref py py-class docutils literal notranslate"><span class="pre">GENOMIC_PROFILES</span></code></a> data type.
 Used internally by <code class="xref py py-class docutils literal notranslate"><span class="pre">VitessceWidget</span></code>.</p>

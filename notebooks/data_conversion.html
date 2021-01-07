@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Convert data for long-term use &mdash; vitessce  documentation</title>
+  <title>Convert data manually &mdash; vitessce  documentation</title>
   
 
   
@@ -92,7 +92,7 @@
 <li class="toctree-l1 current"><a class="reference internal" href="../data_examples.html">Data preparation examples</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="data_export_s3.html">Export data to AWS S3</a></li>
 <li class="toctree-l2"><a class="reference internal" href="data_export_files.html">Export data to local files</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Convert data for long-term use</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Convert data manually</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../api_config.html">View config API</a></li>
@@ -148,7 +148,7 @@
         
           <li><a href="../data_examples.html">Data preparation examples</a> &raquo;</li>
         
-      <li>Convert data for long-term use</li>
+      <li>Convert data manually</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -437,8 +437,8 @@ div.rendered_html tbody tr:hover {
     text-align: unset;
 }
 </style>
-<div class="section" id="Convert-data-for-long-term-use">
-<h1>Convert data for long-term use<a class="headerlink" href="#Convert-data-for-long-term-use" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="Convert-data-manually">
+<h1>Convert data manually<a class="headerlink" href="#Convert-data-manually" title="Permalink to this headline">¶</a></h1>
 <p>When running the Vitessce widget, data is converted on-the-fly into formats that the Vitessce JavaScript component can render. The converted data is stored in temporary files, preventing long-term use of the converted files.</p>
 <p>However, the data conversion utilities used by the widget are exposed so that their outputs can be saved to regular files. This allows the files to be saved for future use with the Vitessce web application by serving the files locally or moving the files onto an object storage system such as AWS S3 (for long-term storage and data sharing).</p>
 <p>This notebook demonstrates how to save the processed outputs of the <code class="docutils literal notranslate"><span class="pre">AnnDataWrapper</span></code> and <code class="docutils literal notranslate"><span class="pre">SnapWrapper</span></code> classes.</p>

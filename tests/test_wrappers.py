@@ -19,7 +19,6 @@ from vitessce import (
     OmeTiffWrapper,
     OmeZarrWrapper,
     AnnDataWrapper,
-    LoomWrapper,
     SnapWrapper,
 )
 

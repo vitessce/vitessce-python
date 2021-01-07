@@ -45,7 +45,5 @@ Optional dependencies
 
 The following dependencies are optional, and only required when using certain features.
 
-* ``anndata>=0.7.4`` - Required for AnnData support with the :class:`~vitessce.wrappers.AnnDataWrapper` class.
-* ``loompy>=3.0.6`` - Required for Loom support with the :class:`~vitessce.wrappers.LoomWrapper` class.
 * ``jupyter-server-proxy>=1.5.2`` - Required for using the widget through a proxy (e.g. a cloud notebook service like Binder). See widget parameter ``proxy``.
 

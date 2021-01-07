@@ -391,7 +391,7 @@ class OmeZarrWrapper(AbstractWrapper):
 
 
 class AnnDataWrapper(AbstractWrapper):
-    def __init__(self, adata, use_highly_variable_genes=True, cell_set_obs_cols=None, **kwargs):
+    def __init__(self, adata, use_highly_variable_genes=True, cell_set_obs_cols=None, spatial_obsm_key=None, **kwargs):
         """
         Wrap an AnnData object by creating an instance of the ``AnnDataWrapper`` class.
 
@@ -406,16 +406,22 @@ class AnnDataWrapper(AbstractWrapper):
         self.tempdir = tempfile.mkdtemp()
         self.use_highly_variable_genes = use_highly_variable_genes
         self.cell_set_obs_cols = cell_set_obs_cols
+        self.spatial_obsm_key = spatial_obsm_key
 
     def create_cells_json(self):
         adata = self.adata
-        available_embeddings = list(adata.obsm.keys())
+        available_embeddings = set(adata.obsm.keys()) - set([self.spatial_obsm_key])
 
         cell_ids = adata.obs.index.tolist()
         cells = Cells(cell_ids=cell_ids)
         for e in available_embeddings:
             mapping = adata.obsm[e][:, 0:2].tolist()
             cells.add_mapping(e, mapping)
+        
+        if self.spatial_obsm_key is not None:
+            centroids = adata.obsm[self.spatial_obsm_key][:, 0:2].tolist()
+            cells.add_centroids(centroids)
+        
         return cells.json
 
     def create_cell_sets_json(self):
@@ -552,23 +558,6 @@ class AnnDataWrapper(AbstractWrapper):
                 }
             ]
 
-        return obj_file_defs, obj_routes
-        
-
-
-class LoomWrapper(AbstractWrapper):
-
-    def __init__(self, loom, **kwargs):
-        super().__init__(**kwargs)
-        self.loom = loom
-
-    def get_cells(self, base_url, dataset_uid, obj_i):
-        obj_routes = []
-        obj_file_defs = []
-
-        # TODO: append routes
-        # TODO: add file definitions
- 
         return obj_file_defs, obj_routes
 
 class SnapWrapper(AbstractWrapper):

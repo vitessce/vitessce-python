@@ -9,7 +9,6 @@ from .wrappers import (
     OmeZarrWrapper,
     MultiImageWrapper,
     AnnDataWrapper,
-    LoomWrapper,
     SnapWrapper,
 )
 from .entities import (

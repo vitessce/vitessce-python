@@ -391,7 +391,7 @@ class OmeZarrWrapper(AbstractWrapper):
 
 
 class AnnDataWrapper(AbstractWrapper):
-    def __init__(self, adata, use_highly_variable_genes=True, cell_set_obs_cols=None, spatial_obsm_key=None, **kwargs):
+    def __init__(self, adata, expression_matrix=None, genes_filter=None, cell_set_obs_cols=None, cell_set_obs_names=None, spatial_centroid_obsm_key=None, spatial_polygon_obsm_key=None, mappings=None, mappings_keys=None, mappings_dims=None, **kwargs):
         """
         Wrap an AnnData object by creating an instance of the ``AnnDataWrapper`` class.
 
@@ -403,160 +403,98 @@ class AnnDataWrapper(AbstractWrapper):
         """
         super().__init__(**kwargs)
         self.adata = adata
-        self.tempdir = tempfile.mkdtemp()
-        self.use_highly_variable_genes = use_highly_variable_genes
+        self.zarr_filepath = join(tempfile.mkdtemp(), 'anndata.zarr')
+        self.expression_matrix = expression_matrix
+        self.genes_filter = genes_filter
         self.cell_set_obs_cols = cell_set_obs_cols
-        self.spatial_obsm_key = spatial_obsm_key
-
-    def create_cells_json(self):
-        adata = self.adata
-        available_embeddings = set(adata.obsm.keys()) - set([self.spatial_obsm_key])
-
-        cell_ids = adata.obs.index.tolist()
-        cells = Cells(cell_ids=cell_ids)
-        for e in available_embeddings:
-            mapping = adata.obsm[e][:, 0:2].tolist()
-            cells.add_mapping(e, mapping)
-        
-        if self.spatial_obsm_key is not None:
-            centroids = adata.obsm[self.spatial_obsm_key][:, 0:2].tolist()
-            cells.add_centroids(centroids)
-        
-        return cells.json
-
-    def create_cell_sets_json(self):
-        adata = self.adata
-
-        cell_set_obs_cols = self.cell_set_obs_cols
-
-        cell_sets = CellSets()
-
-        if cell_set_obs_cols is not None and len(cell_set_obs_cols) > 0:
-            # Each `cell_set_obs_col` is a column name in the `adata.obs` dataframe,
-            # which we want to turn into a hierarchy of cell sets.
-            for cell_set_obs_col in cell_set_obs_cols:
-                cell_sets.add_level_zero_node(cell_set_obs_col)
-
-                cell_ids = adata.obs.index.tolist()
-                cluster_ids = adata.obs[cell_set_obs_col].unique().tolist()
-                cell_cluster_ids = adata.obs[cell_set_obs_col].values.tolist()
-
-                cell_cluster_tuples = list(zip(cell_ids, cell_cluster_ids))
-
-                for cluster_id in sorted(cluster_ids):
-                    cell_set = [
-                        str(cell_id)
-                        for cell_id, cell_cluster_id in cell_cluster_tuples
-                        if cell_cluster_id == cluster_id
-                    ]
-                    cell_sets.add_node(str(cluster_id), [cell_set_obs_col], cell_set)
-            return cell_sets.json
-        return None
-    
-    def create_exp_matrix_zarr(self, zarr_filepath):
-        adata = self.adata
-        gexp_arr = adata.X
-
-        cell_list = adata.obs.index.values.tolist()
-        gene_list = adata.var.index.values.tolist()
-
-        if type(gexp_arr) == csr_matrix:
-            # Convert from SciPy sparse format to NumPy dense format
-            gexp_arr = gexp_arr.toarray()
-        
-        if self.use_highly_variable_genes and 'highly_variable' in adata.var.columns.values.tolist():
-            # Restrict the gene expression matrix to only the genes marked as highly variable
-            gene_list = adata.var.index[adata.var['highly_variable']].values.tolist()
-            gexp_arr = gexp_arr[:,adata.var['highly_variable'].values]
-
-        
-        # Re-scale the gene expression values between 0 and 255
-        gexp_arr_min = gexp_arr.min()
-        gexp_arr_max = gexp_arr.max()
-        gexp_arr_range = gexp_arr_max - gexp_arr_min
-        gexp_arr_ratio = 255 / gexp_arr_range
-
-        gexp_norm_arr = (gexp_arr - gexp_arr_min) * gexp_arr_ratio
-    
-        z = zarr.open(
-            zarr_filepath,
-            mode='w',
-            shape=gexp_norm_arr.shape,
-            dtype='uint8',
-            compressor=Zlib(level=1)
-        )
-
-        z[:] = gexp_norm_arr
-        # observations: cells (rows)
-        z.attrs["rows"] = cell_list
-        # variables: genes (columns)
-        z.attrs["cols"] = gene_list
-        
-        return
+        self.spatial_centroid_obsm_key = spatial_centroid_obsm_key
+        self.spatial_polygon_obsm_key = spatial_polygon_obsm_key
+        self.cell_set_obs_names = cell_set_obs_names
+        self.mappings = mappings
+        self.mappings_keys = mappings_keys
+        self.mappings_dims = mappings_dims
 
     def get_cells(self, base_url, dataset_uid, obj_i):
-        obj_routes = []
-        obj_file_defs = []
-
-        cells_json = self.create_cells_json()
-
-        obj_routes = [
-            JsonRoute(self._get_route(dataset_uid, obj_i, "cells"),
-                    self._create_response_json(cells_json), cells_json),
-        ]
+        options = {}
+        if self.spatial_centroid_obsm_key is not None:
+            options["xy"] = self.spatial_centroid_obsm_key
+        if self.spatial_polygon_obsm_key is not None:
+            options["poly"] = self.spatial_polygon_obsm_key
+        if self.mappings is not None:
+            options["mappings"] = {}
+            if self.mappings_keys is not None:
+                for key, mapping in zip(self.mappings_keys, self.mappings): 
+                    options["mappings"][key] = {
+                        "key": mapping
+                    }
+            else:
+                for mapping in self.mappings:
+                    mapping_key = mapping.strip('.')[-1]
+                    self.mappings_keys = mapping_key
+                    options["mappings"][mapping_key] = {
+                        "key": mapping
+                    }
+                    options["mappings"][mapping_key]["key"] = mapping.
+            if self.mappings_dims is not None:
+                for key, dim in zip(self.mappings_dims, self.mappings_keys):
+                    options["mappings"][key]['dims'] = dim
+        if self.cell_set_obs_cols is not None:
+            options["factors"] = []
+            for obs in self.cell_set_obs_cols:
+                options["factors"].append(obs)
         obj_file_defs = [
             {
                 "type": dt.CELLS.value,
-                "fileType": ft.CELLS_JSON.value,
-                "url": self._get_url(base_url, dataset_uid, obj_i, "cells")
+                "fileType": ft.ANNDATA_CELLS_ZARR.value,
+                "url": self._get_url(base_url, dataset_uid, obj_i, self.zarr_filepath)
+                "options": options
             }
         ]
+        obj_routes = []
 
         return obj_file_defs, obj_routes
 
     def get_cell_sets(self, base_url, dataset_uid, obj_i):
-        obj_routes = []
-        obj_file_defs = []
-  
-        cell_sets_json = self.create_cell_sets_json()
+        options = []
+        if self.cell_set_obs_cols is not None:
+            if self.cell_set_obs_names is not None:
+                names = self.cell_set_obs_names
+            else:
+                names = [obs.split('.')[-1] for obs in self.cell_set_obs_cols]
+            for obs, name in zip(self.cell_set_obs_cols, names):
+                options.append({
+                    "groupName": name,
+                    "setName": obs
+                })
 
-        if cell_sets_json is not None:
-            obj_routes = [
-                JsonRoute(self._get_route(dataset_uid, obj_i, "cell-sets"),
-                        self._create_response_json(cell_sets_json), cell_sets_json),
-            ]
-            obj_file_defs = [
-                {
-                    "type": dt.CELL_SETS.value,
-                    "fileType": ft.CELL_SETS_JSON.value,
-                    "url": self._get_url(base_url, dataset_uid, obj_i, "cell-sets")
-                }
-            ]
+        obj_file_defs = [
+            {
+                "type": dt.CELL_SETS.value,
+                "fileType": ft.ANNDATA_CELL_SETS_ZARR.value,
+                "url": self._get_url(base_url, dataset_uid, obj_i, self.zarr_filepath)
+                "options": options
+            }
+        ]
+        obj_routes = []
 
         return obj_file_defs, obj_routes
     
     def get_expression_matrix(self, base_url, dataset_uid, obj_i):
+        options = {}
+
+        if self.expression_matrix is not None:
+            options["matrix"] = expression_matrix
+            if self.genes_filter is not None:
+                options["genesFilter"] = self.genes_filter
+        obj_file_defs = [
+            {
+                "type": dt.EXPRESSION_MATRIX.value,
+                "fileType": ft.ANNDATA_EXPRESSION_MATRIX_ZARR.value,
+                "url": self._get_url(base_url, dataset_uid, obj_i, self.zarr_filepath)
+                "options": options
+            }
+        ]
         obj_routes = []
-        obj_file_defs = []
-
-        zarr_tempdir = self.tempdir
-        zarr_filepath = join(zarr_tempdir, 'matrix.zarr')
-
-        self.create_exp_matrix_zarr(zarr_filepath)
-
-        if zarr_tempdir is not None:
-            obj_routes = [
-                Mount(self._get_route(dataset_uid, obj_i, "expression"),
-                    app=StaticFiles(directory=os.path.dirname(zarr_filepath), html=False, check_dir=False)),
-            ]
-
-            obj_file_defs = [
-                {
-                    "type": dt.EXPRESSION_MATRIX.value,
-                    "fileType": ft.EXPRESSION_MATRIX_ZARR.value,
-                    "url": self._get_url(base_url, dataset_uid, obj_i, "expression/matrix.zarr"),
-                }
-            ]
 
         return obj_file_defs, obj_routes
 

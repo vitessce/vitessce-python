@@ -742,7 +742,7 @@ class VitessceConfig:
             dataset.add_object(obj)
 
             # TODO: use the available embeddings to determine how many / which scatterplots to add.
-            scatterplot = vc.add_view(dataset, cm.SCATTERPLOT, mapping="X_umap")
+            scatterplot = vc.add_view(dataset, cm.SCATTERPLOT, mapping="UMAP")
             cell_sets = vc.add_view(dataset, cm.CELL_SETS)
             genes = vc.add_view(dataset, cm.GENES)
             heatmap = vc.add_view(dataset, cm.HEATMAP)

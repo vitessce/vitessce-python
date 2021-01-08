@@ -391,7 +391,7 @@ class OmeZarrWrapper(AbstractWrapper):
 
 
 class AnnDataWrapper(AbstractWrapper):
-    def __init__(self, adata=None, adata_url=None, expression_matrix=None, genes_vars_filter=None, cell_set_obs=None, cell_set_obs_names=None, spatial_centroid_obsm=None, spatial_polygon_obsm=None, mappings_obsm=None, mappings_obsm_names=None, mappings_obsm_dims=None, **kwargs):
+    def __init__(self, adata=None, adata_url=None, expression_matrix=None, genes_var_filter=None, cell_set_obs=None, cell_set_obs_names=None, spatial_centroid_obsm=None, spatial_polygon_obsm=None, mappings_obsm=None, mappings_obsm_names=None, mappings_obsm_dims=None, **kwargs):
         """
         Wrap an AnnData object by creating an instance of the ``AnnDataWrapper`` class.
 
@@ -414,7 +414,7 @@ class AnnDataWrapper(AbstractWrapper):
         self.expression_matrix = expression_matrix
         self.cell_set_obs_names = cell_set_obs_names
         self.mappings_obsm_names = mappings_obsm_names
-        self.genes_vars_filter = "vars/" + genes_vars_filter if genes_vars_filter is not None else genes_vars_filter
+        self.genes_var_filter = "var/" + genes_var_filter if genes_var_filter is not None else genes_var_filter
         self.cell_set_obs = ["obs/" + i for i in cell_set_obs] if cell_set_obs is not None else cell_set_obs
         self.spatial_centroid_obsm = "obsm/" + spatial_centroid_obsm if spatial_centroid_obsm is not None else spatial_centroid_obsm
         self.spatial_polygon_obsm = "obsm/" + spatial_polygon_obsm if spatial_polygon_obsm is not None else spatial_polygon_obsm
@@ -507,8 +507,8 @@ class AnnDataWrapper(AbstractWrapper):
         obj_file_defs = []
         if self.expression_matrix is not None:
             options["matrix"] = self.expression_matrix
-            if self.genes_vars_filter is not None:
-                options["genesFilter"] = self.genes_vars_filter
+            if self.genes_var_filter is not None:
+                options["geneFilter"] = self.genes_var_filter
             obj_file_defs = [
                 {
                     "type": dt.EXPRESSION_MATRIX.value,

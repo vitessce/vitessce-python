@@ -391,7 +391,7 @@ class OmeZarrWrapper(AbstractWrapper):
 
 
 class AnnDataWrapper(AbstractWrapper):
-    def __init__(self, adata, expression_matrix=None, genes_filter=None, cell_set_obs_cols=None, cell_set_obs_names=None, spatial_centroid_obsm_key=None, spatial_polygon_obsm_key=None, mappings=None, mappings_keys=None, mappings_dims=None, **kwargs):
+    def __init__(self, adata=None, adata_url=None, expression_matrix=None, genes_filter=None, cell_set_obs_cols=None, cell_set_obs_names=None, spatial_centroid_obsm_key=None, spatial_polygon_obsm_key=None, mappings=None, mappings_keys=None, mappings_dims=None, **kwargs):
         """
         Wrap an AnnData object by creating an instance of the ``AnnDataWrapper`` class.
 
@@ -402,8 +402,15 @@ class AnnDataWrapper(AbstractWrapper):
         :param \*\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
         """
         super().__init__(**kwargs)
-        self.adata = adata
-        self.zarr_filepath = join(tempfile.mkdtemp(), 'anndata.zarr')
+        if adata is not None:
+            self.adata = adata
+            self._zarr_filepath = join(tempfile.mkdtemp(), 'anndata.zarr')
+            self._adata_url = adata_url
+            adata.write_zarr(self._zarr_filepath)
+        else:
+            self.adata = adata
+            self._adata_url = adata_url
+            self._zarr_filepath = None
         self.expression_matrix = expression_matrix
         self.genes_filter = genes_filter
         self.cell_set_obs_cols = cell_set_obs_cols
@@ -413,6 +420,12 @@ class AnnDataWrapper(AbstractWrapper):
         self.mappings = mappings
         self.mappings_keys = mappings_keys
         self.mappings_dims = mappings_dims
+    
+    def get_zarr_url(self, base_url="", dataset_uid="", obj_i=""):
+        if self._adata_url is not None:
+            return self._adata_url
+        else:
+            self._get_url(base_url, dataset_uid, obj_i, self._zarr_filepath)
 
     def get_cells(self, base_url, dataset_uid, obj_i):
         options = {}
@@ -434,7 +447,7 @@ class AnnDataWrapper(AbstractWrapper):
                     options["mappings"][mapping_key] = {
                         "key": mapping
                     }
-                    options["mappings"][mapping_key]["key"] = mapping.
+                    options["mappings"][mapping_key]["key"] = mapping
             if self.mappings_dims is not None:
                 for key, dim in zip(self.mappings_dims, self.mappings_keys):
                     options["mappings"][key]['dims'] = dim
@@ -446,7 +459,7 @@ class AnnDataWrapper(AbstractWrapper):
             {
                 "type": dt.CELLS.value,
                 "fileType": ft.ANNDATA_CELLS_ZARR.value,
-                "url": self._get_url(base_url, dataset_uid, obj_i, self.zarr_filepath)
+                "url": self.get_zarr_url(base_url, dataset_uid, obj_i),
                 "options": options
             }
         ]
@@ -471,7 +484,7 @@ class AnnDataWrapper(AbstractWrapper):
             {
                 "type": dt.CELL_SETS.value,
                 "fileType": ft.ANNDATA_CELL_SETS_ZARR.value,
-                "url": self._get_url(base_url, dataset_uid, obj_i, self.zarr_filepath)
+                "url": self.get_zarr_url(base_url, dataset_uid, obj_i),
                 "options": options
             }
         ]
@@ -490,7 +503,7 @@ class AnnDataWrapper(AbstractWrapper):
             {
                 "type": dt.EXPRESSION_MATRIX.value,
                 "fileType": ft.ANNDATA_EXPRESSION_MATRIX_ZARR.value,
-                "url": self._get_url(base_url, dataset_uid, obj_i, self.zarr_filepath)
+                "url": self.get_zarr_url(base_url, dataset_uid, obj_i),
                 "options": options
             }
         ]

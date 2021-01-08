@@ -412,13 +412,13 @@ class AnnDataWrapper(AbstractWrapper):
             self._adata_url = adata_url
             self._zarr_filepath = None
         self.expression_matrix = expression_matrix
+        self.cell_set_obs_names = cell_set_obs_names
+        self.mappings_obsm_names = mappings_obsm_names
         self.genes_vars_filter = "vars/" + genes_vars_filter if genes_vars_filter is not None else genes_vars_filter
         self.cell_set_obs = ["obs/" + i for i in cell_set_obs] if cell_set_obs is not None else cell_set_obs
-        self.cell_set_obs_names = ["obs/" + i for i in cell_set_obs_names] if cell_set_obs_names is not None else cell_set_obs_names
         self.spatial_centroid_obsm = "obsm/" + spatial_centroid_obsm if spatial_centroid_obsm is not None else spatial_centroid_obsm
         self.spatial_polygon_obsm = "obsm/" + spatial_polygon_obsm if spatial_polygon_obsm is not None else spatial_polygon_obsm
         self.mappings_obsm = ["obsm/" + i for i in mappings_obsm] if mappings_obsm is not None else mappings_obsm
-        self.mappings_obsm_names = ["obsm/" + i for i in mappings_obsm_names] if mappings_obsm_names is not None else mappings_obsm_names
         self.mappings_obsm_dims = ["obsm/" + i for i in mappings_obsm_dims] if mappings_obsm_dims is not None else mappings_obsm_dims
     
     def _get_zarr_dir(self):
@@ -442,16 +442,17 @@ class AnnDataWrapper(AbstractWrapper):
             if self.mappings_obsm_names is not None:
                 for key, mapping in zip(self.mappings_obsm_names, self.mappings_obsm): 
                     options["mappings"][key] = {
-                        "key": mapping
+                        "key": mapping,
+                        "dims": [0, 1]
                     }
             else:
                 for mapping in self.mappings_obsm:
                     mapping_key = mapping.split('/')[-1]
                     self.mappings_obsm_names = mapping_key
                     options["mappings"][mapping_key] = {
-                        "key": mapping
+                        "key": mapping,
+                        "dims": [0, 1]
                     }
-                    options["mappings"][mapping_key]["key"] = mapping
             if self.mappings_obsm_dims is not None:
                 for key, dim in zip(self.mappings_obsm_dims, self.mappings_obsm_names):
                     options["mappings"][key]['dims'] = dim
@@ -467,13 +468,17 @@ class AnnDataWrapper(AbstractWrapper):
                 "options": options
             }
         ]
-        obj_routes = []
+        obj_routes = [self.get_route(dataset_uid, obj_i)]
 
         return obj_file_defs, obj_routes
+    
+    def get_route(self, dataset_uid, obj_i):
+        return Mount(self._get_route(dataset_uid, obj_i, self._get_zarr_dir()),
+                        app=StaticFiles(directory=self._zarr_filepath, html=False))
 
     def get_cell_sets(self, base_url, dataset_uid, obj_i):
         obj_file_defs = []
-        obj_routes = []
+        obj_routes = [self.get_route(dataset_uid, obj_i)]
         if self.cell_set_obs is not None:
             options = []
             if self.cell_set_obs_names is not None:
@@ -498,7 +503,7 @@ class AnnDataWrapper(AbstractWrapper):
     
     def get_expression_matrix(self, base_url, dataset_uid, obj_i):
         options = {}
-        obj_routes = []
+        obj_routes = [self.get_route(dataset_uid, obj_i)]
         obj_file_defs = []
         if self.expression_matrix is not None:
             options["matrix"] = self.expression_matrix

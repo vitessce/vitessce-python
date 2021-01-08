@@ -391,14 +391,14 @@ class OmeZarrWrapper(AbstractWrapper):
 
 
 class AnnDataWrapper(AbstractWrapper):
-    def __init__(self, adata=None, adata_url=None, expression_matrix=None, genes_filter=None, cell_set_obs_cols=None, cell_set_obs_names=None, spatial_centroid_obsm_key=None, spatial_polygon_obsm_key=None, mappings=None, mappings_keys=None, mappings_dims=None, **kwargs):
+    def __init__(self, adata=None, adata_url=None, expression_matrix=None, genes_vars_filter=None, cell_set_obs=None, cell_set_obs_names=None, spatial_centroid_obsm=None, spatial_polygon_obsm=None, mappings_obsm=None, mappings_obsm_names=None, mappings_obsm_dims=None, **kwargs):
         """
         Wrap an AnnData object by creating an instance of the ``AnnDataWrapper`` class.
 
         :param adata: An AnnData object containing single-cell experiment data.
         :type adata: anndata.AnnData
         :param bool use_highly_variable_genes: When creating outputs with genes, should only the genes marked as highly variable be used?
-        :param list[str] cell_set_obs_cols: A list of column names of the ``adata.obs`` dataframe that should be used for creating cell sets.
+        :param list[str] cell_set_obs: A list of column names of the ``adata.obs`` dataframe that should be used for creating cell sets.
         :param \*\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
         """
         super().__init__(**kwargs)
@@ -412,48 +412,52 @@ class AnnDataWrapper(AbstractWrapper):
             self._adata_url = adata_url
             self._zarr_filepath = None
         self.expression_matrix = expression_matrix
-        self.genes_filter = genes_filter
-        self.cell_set_obs_cols = cell_set_obs_cols
-        self.spatial_centroid_obsm_key = spatial_centroid_obsm_key
-        self.spatial_polygon_obsm_key = spatial_polygon_obsm_key
-        self.cell_set_obs_names = cell_set_obs_names
-        self.mappings = mappings
-        self.mappings_keys = mappings_keys
-        self.mappings_dims = mappings_dims
+        self.genes_vars_filter = "vars/" + genes_vars_filter if genes_vars_filter is not None else genes_vars_filter
+        self.cell_set_obs = ["obs/" + i for i in cell_set_obs] if cell_set_obs is not None else cell_set_obs
+        self.cell_set_obs_names = ["obs/" + i for i in cell_set_obs_names] if cell_set_obs_names is not None else cell_set_obs_names
+        self.spatial_centroid_obsm = "obsm/" + spatial_centroid_obsm if spatial_centroid_obsm is not None else spatial_centroid_obsm
+        self.spatial_polygon_obsm = "obsm/" + spatial_polygon_obsm if spatial_polygon_obsm is not None else spatial_polygon_obsm
+        self.mappings_obsm = ["obsm/" + i for i in mappings_obsm] if mappings_obsm is not None else mappings_obsm
+        self.mappings_obsm_names = ["obsm/" + i for i in mappings_obsm_names] if mappings_obsm_names is not None else mappings_obsm_names
+        self.mappings_obsm_dims = ["obsm/" + i for i in mappings_obsm_dims] if mappings_obsm_dims is not None else mappings_obsm_dims
+    
+    def _get_zarr_dir(self):
+        return os.path.basename(self._zarr_filepath if self._zarr_filepath is not None else self._adata_url)
     
     def get_zarr_url(self, base_url="", dataset_uid="", obj_i=""):
         if self._adata_url is not None:
             return self._adata_url
         else:
-            self._get_url(base_url, dataset_uid, obj_i, self._zarr_filepath)
+            return self._get_url(base_url, dataset_uid, obj_i, self._get_zarr_dir())
+    
 
     def get_cells(self, base_url, dataset_uid, obj_i):
         options = {}
-        if self.spatial_centroid_obsm_key is not None:
-            options["xy"] = self.spatial_centroid_obsm_key
-        if self.spatial_polygon_obsm_key is not None:
-            options["poly"] = self.spatial_polygon_obsm_key
-        if self.mappings is not None:
+        if self.spatial_centroid_obsm is not None:
+            options["xy"] = self.spatial_centroid_obsm
+        if self.spatial_polygon_obsm is not None:
+            options["poly"] = self.spatial_polygon_obsm
+        if self.mappings_obsm is not None:
             options["mappings"] = {}
-            if self.mappings_keys is not None:
-                for key, mapping in zip(self.mappings_keys, self.mappings): 
+            if self.mappings_obsm_names is not None:
+                for key, mapping in zip(self.mappings_obsm_names, self.mappings_obsm): 
                     options["mappings"][key] = {
                         "key": mapping
                     }
             else:
-                for mapping in self.mappings:
-                    mapping_key = mapping.strip('.')[-1]
-                    self.mappings_keys = mapping_key
+                for mapping in self.mappings_obsm:
+                    mapping_key = mapping.split('/')[-1]
+                    self.mappings_obsm_names = mapping_key
                     options["mappings"][mapping_key] = {
                         "key": mapping
                     }
                     options["mappings"][mapping_key]["key"] = mapping
-            if self.mappings_dims is not None:
-                for key, dim in zip(self.mappings_dims, self.mappings_keys):
+            if self.mappings_obsm_dims is not None:
+                for key, dim in zip(self.mappings_obsm_dims, self.mappings_obsm_names):
                     options["mappings"][key]['dims'] = dim
-        if self.cell_set_obs_cols is not None:
+        if self.cell_set_obs is not None:
             options["factors"] = []
-            for obs in self.cell_set_obs_cols:
+            for obs in self.cell_set_obs:
                 options["factors"].append(obs)
         obj_file_defs = [
             {
@@ -468,47 +472,46 @@ class AnnDataWrapper(AbstractWrapper):
         return obj_file_defs, obj_routes
 
     def get_cell_sets(self, base_url, dataset_uid, obj_i):
-        options = []
-        if self.cell_set_obs_cols is not None:
+        obj_file_defs = []
+        obj_routes = []
+        if self.cell_set_obs is not None:
+            options = []
             if self.cell_set_obs_names is not None:
                 names = self.cell_set_obs_names
             else:
-                names = [obs.split('.')[-1] for obs in self.cell_set_obs_cols]
-            for obs, name in zip(self.cell_set_obs_cols, names):
+                names = [obs.split('/')[-1] for obs in self.cell_set_obs]
+            for obs, name in zip(self.cell_set_obs, names):
                 options.append({
                     "groupName": name,
                     "setName": obs
                 })
 
-        obj_file_defs = [
-            {
-                "type": dt.CELL_SETS.value,
-                "fileType": ft.ANNDATA_CELL_SETS_ZARR.value,
-                "url": self.get_zarr_url(base_url, dataset_uid, obj_i),
-                "options": options
-            }
-        ]
-        obj_routes = []
-
+            obj_file_defs = [
+                {
+                    "type": dt.CELL_SETS.value,
+                    "fileType": ft.ANNDATA_CELL_SETS_ZARR.value,
+                    "url": self.get_zarr_url(base_url, dataset_uid, obj_i),
+                    "options": options
+                }
+            ]
         return obj_file_defs, obj_routes
     
     def get_expression_matrix(self, base_url, dataset_uid, obj_i):
         options = {}
-
+        obj_routes = []
+        obj_file_defs = []
         if self.expression_matrix is not None:
             options["matrix"] = self.expression_matrix
-            if self.genes_filter is not None:
-                options["genesFilter"] = self.genes_filter
-        obj_file_defs = [
-            {
-                "type": dt.EXPRESSION_MATRIX.value,
-                "fileType": ft.ANNDATA_EXPRESSION_MATRIX_ZARR.value,
-                "url": self.get_zarr_url(base_url, dataset_uid, obj_i),
-                "options": options
-            }
-        ]
-        obj_routes = []
-
+            if self.genes_vars_filter is not None:
+                options["genesFilter"] = self.genes_vars_filter
+            obj_file_defs = [
+                {
+                    "type": dt.EXPRESSION_MATRIX.value,
+                    "fileType": ft.ANNDATA_EXPRESSION_MATRIX_ZARR.value,
+                    "url": self.get_zarr_url(base_url, dataset_uid, obj_i),
+                    "options": options
+                }
+            ]
         return obj_file_defs, obj_routes
 
 class SnapWrapper(AbstractWrapper):

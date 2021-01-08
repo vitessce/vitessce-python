@@ -496,7 +496,7 @@ class AnnDataWrapper(AbstractWrapper):
         options = {}
 
         if self.expression_matrix is not None:
-            options["matrix"] = expression_matrix
+            options["matrix"] = self.expression_matrix
             if self.genes_filter is not None:
                 options["genesFilter"] = self.genes_filter
         obj_file_defs = [

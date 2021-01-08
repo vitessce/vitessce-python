@@ -33,7 +33,7 @@ def export_to_s3(config, s3, bucket_name, prefix=''):
             routes.append(obj_route)
         return obj_file_defs
     config_dict = config.to_dict(on_obj=on_obj)
-
+    uploaded_routes = []
     for route in routes:
         route_path = route.path[1:]
         key = (prefix + "/" if len(prefix) > 0 else "") + route_path
@@ -41,17 +41,20 @@ def export_to_s3(config, s3, bucket_name, prefix=''):
         print(f"Uploading {bucket_name}:{key}")
         
         if type(route) == JsonRoute:
-            data_json = route.data_json
-            bucket.put_object(Key=key, Body=json.dumps(data_json).encode())
+            if route not in uploaded_routes:
+                data_json = route.data_json
+                bucket.put_object(Key=key, Body=json.dumps(data_json).encode())
+                uploaded_routes.append(route)
         elif type(route) == Mount:
             route_app = route.app
             if type(route_app) == StaticFiles:
-                static_dir = route_app.directory
-
-                for root, dirs, files in os.walk(static_dir):
-                    for filename in files:
-                        file_key = key + join(root, filename)[len(static_dir):]
-                        bucket.upload_file(join(root, filename), file_key)
+                if route not in uploaded_routes:
+                    uploaded_routes.append(route)
+                    static_dir = route_app.directory
+                    for root, dirs, files in os.walk(static_dir):
+                        for filename in files:
+                            file_key = key + join(root, filename)[len(static_dir):]
+                            bucket.upload_file(join(root, filename), file_key)
     
     return config_dict
 

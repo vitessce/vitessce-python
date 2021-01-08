@@ -13,7 +13,8 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "# Visualization of a microscopy image"
+    "# Visualization of Multi-Modal Imaging Data\n",
+    "We visualize IMS, PAS, and AF imaging data overlaid from the Spraggins Lab of the Biomolecular Multimodal Imaging Center (BIOMC) at Vanderbilt University, uploaded to the HuBMAP data portal."
    ]
   },
   {
@@ -28,10 +29,16 @@
     "    CoordinationType as ct,\n",
     "    OmeTiffWrapper,\n",
     "    MultiImageWrapper,\n",
-    "    hconcat,\n",
     ")\n",
-    "import zarr\n",
     "from os.path import join"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## 1. Set the transformation matrix for the IMS data\n",
+    "We downloaded this transformation from [Globus](https://app.globus.org/file-manager?origin_id=af603d86-eab9-4eec-bb1d-9d26556741bb&origin_path=%2Fd9e3c80a32567cde9b61e38ce8693559%2Fmetadata%2F), the link to which was found through the HuBMAP data portal page for the [IMS dataset](https://portal.hubmapconsortium.org/browse/dataset/d9e3c80a32567cde9b61e38ce8693559)."
    ]
   },
   {
@@ -46,6 +53,14 @@
     "    0,0,1,0,\n",
     "    0,0,0,1\n",
     "]"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## 2. Configure Vitessce\n",
+    "Set up the images from the three different assays, with the transformation matrix applied to the IMS image."
    ]
   },
   {
@@ -67,6 +82,13 @@
     "status = vc.add_view(dataset, cm.STATUS)\n",
     "lc = vc.add_view(dataset, cm.LAYER_CONTROLLER)\n",
     "vc.layout(spatial | (lc / status));"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## 3. Create the Vitessce widget"
    ]
   },
   {

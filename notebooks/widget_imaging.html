@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Visualization of a microscopy image &mdash; vitessce  documentation</title>
+  <title>Visualization of Multi-Modal Imaging Data &mdash; vitessce  documentation</title>
   
 
   
@@ -91,7 +91,12 @@
 <li class="toctree-l1 current"><a class="reference internal" href="../widget_examples.html">Widget examples</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="widget_brain.html">Visualization of single-cell RNA seq data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="widget_genomic_profiles.html">Visualization of genomic profiles</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Visualization of a microscopy image</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Visualization of Multi-Modal Imaging Data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#1.-Set-the-transformation-matrix-for-the-IMS-data">1. Set the transformation matrix for the IMS data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#2.-Configure-Vitessce">2. Configure Vitessce</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#3.-Create-the-Vitessce-widget">3. Create the Vitessce widget</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="widget_pbmc.html">Visualization of 3k PBMC reference</a></li>
 <li class="toctree-l2"><a class="reference internal" href="widget_loom.html">Visualization of a Loom file</a></li>
 <li class="toctree-l2"><a class="reference internal" href="widget_shortcut.html">The from_object shortcut</a></li>
@@ -152,7 +157,7 @@
         
           <li><a href="../widget_examples.html">Widget examples</a> &raquo;</li>
         
-      <li>Visualization of a microscopy image</li>
+      <li>Visualization of Multi-Modal Imaging Data</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -441,8 +446,9 @@ div.rendered_html tbody tr:hover {
     text-align: unset;
 }
 </style>
-<div class="section" id="Visualization-of-a-microscopy-image">
-<h1>Visualization of a microscopy image<a class="headerlink" href="#Visualization-of-a-microscopy-image" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="Visualization-of-Multi-Modal-Imaging-Data">
+<h1>Visualization of Multi-Modal Imaging Data<a class="headerlink" href="#Visualization-of-Multi-Modal-Imaging-Data" title="Permalink to this headline">¶</a></h1>
+<p>We visualize IMS, PAS, and AF imaging data overlaid from the Spraggins Lab of the Biomolecular Multimodal Imaging Center (BIOMC) at Vanderbilt University, uploaded to the HuBMAP data portal.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
@@ -454,13 +460,14 @@ div.rendered_html tbody tr:hover {
     <span class="n">CoordinationType</span> <span class="k">as</span> <span class="n">ct</span><span class="p">,</span>
     <span class="n">OmeTiffWrapper</span><span class="p">,</span>
     <span class="n">MultiImageWrapper</span><span class="p">,</span>
-    <span class="n">hconcat</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">import</span> <span class="nn">zarr</span>
 <span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">join</span>
 </pre></div>
 </div>
 </div>
+<div class="section" id="1.-Set-the-transformation-matrix-for-the-IMS-data">
+<h2>1. Set the transformation matrix for the IMS data<a class="headerlink" href="#1.-Set-the-transformation-matrix-for-the-IMS-data" title="Permalink to this headline">¶</a></h2>
+<p>We downloaded this transformation from <a class="reference external" href="https://app.globus.org/file-manager?origin_id=af603d86-eab9-4eec-bb1d-9d26556741bb&amp;origin_path=%2Fd9e3c80a32567cde9b61e38ce8693559%2Fmetadata%2F">Globus</a>, the link to which was found through the HuBMAP data portal page for the <a class="reference external" href="https://portal.hubmapconsortium.org/browse/dataset/d9e3c80a32567cde9b61e38ce8693559">IMS dataset</a>.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
@@ -475,6 +482,10 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
+</div>
+<div class="section" id="2.-Configure-Vitessce">
+<h2>2. Configure Vitessce<a class="headerlink" href="#2.-Configure-Vitessce" title="Permalink to this headline">¶</a></h2>
+<p>Set up the images from the three different assays, with the transformation matrix applied to the IMS image.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
@@ -496,6 +507,9 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
+</div>
+<div class="section" id="3.-Create-the-Vitessce-widget">
+<h2>3. Create the Vitessce widget<a class="headerlink" href="#3.-Create-the-Vitessce-widget" title="Permalink to this headline">¶</a></h2>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
@@ -504,6 +518,7 @@ div.rendered_html tbody tr:hover {
 <span></span><span class="n">vw</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">widget</span><span class="p">()</span>
 <span class="n">vw</span>
 </pre></div>
+</div>
 </div>
 </div>
 </div>

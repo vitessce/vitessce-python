@@ -124,7 +124,7 @@ class VitessceWidget(widgets.DOMWidget):
         
         if len(routes) > 0:
             middleware = [
-                Middleware(CORSMiddleware, allow_origins=['*'])
+                Middleware(CORSMiddleware, allow_origins=['*'], allow_methods=["OPTIONS", "GET"], allow_headers=['Range'])
             ]
             app = Starlette(debug=True, routes=routes, middleware=middleware)
             

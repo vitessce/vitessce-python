@@ -154,6 +154,7 @@ setup_args = dict(
         'numcodecs>=0.5.7',
         'scipy>=1.2.1',
         'negspy>=0.2.24',
+        'generate-tiff-offsets>=0.1.7'
     ],
     packages=find_packages(),
     zip_safe=False,

@@ -9,6 +9,7 @@ import zarr
 from numcodecs import Zlib
 from scipy.sparse import csr_matrix
 from scipy.sparse import coo_matrix
+from generate_tiff_offsets import get_offsets
 
 from starlette.responses import JSONResponse, UJSONResponse
 from starlette.routing import Route, Mount
@@ -16,6 +17,7 @@ from starlette.staticfiles import StaticFiles
 
 from .constants import DataType as dt, FileType as ft
 from .entities import Cells, CellSets, GenomicProfiles
+from .routes import range_repsonse
 
 class JsonRoute(Route):
     def __init__(self, path, endpoint, data_json):
@@ -173,62 +175,135 @@ class AbstractWrapper:
     def _get_route(self, dataset_uid, obj_i, suffix):
         return f"/{dataset_uid}/{obj_i}/{suffix}"
 
+class MultiImageWrapper(AbstractWrapper):
+    """
+    Wrap multiple imaging datasets by creating an instance of the ``MultiImageWrapper`` class.
 
-class OmeTiffWrapper(AbstractWrapper):
-
-    def __init__(self, img_path, offsets_path=None, name="", **kwargs):
+    :param list image_wrappers: A list of imaging wrapper classes (only :class:`~vitessce.wrappers.OmeTiffWrapper` supported now)
+    :param \*\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
+    """
+    def __init__(self, image_wrappers, **kwargs):
         super().__init__(**kwargs)
-        self.img_path = img_path
-        self.offsets_path = offsets_path
-        self.name = name
+        self.image_wrappers = image_wrappers
 
-    def create_raster_json(self, img_url, offsets_url):
+    def create_raster_json(self, base_url="", dataset_uid="", obj_i=""):
         raster_json = {
             "schemaVersion": "0.0.2",
-            "images": [
-                {
-                    "name": self.name,
-                    "type": "ome-tiff",
-                    "url": img_url,
-                    "metadata": {
-                        **({
-                            "omeTiffOffsetsUrl": offsets_url,
-                        } if offsets_url is not None else {})
-                    }
-                }
-            ],
+            "images": [],
+            "renderLayers": []
         }
-        return raster_json
-
-    def _get_offsets_dir(self):
-        return os.path.dirname(self.offsets_path)
-    
-    def _get_offsets_filename(self):
-        return os.path.basename(self.offsets_path)
-
-    def get_raster(self, base_url, dataset_uid, obj_i):
-        img_dir_path, img_url = self.img_path, self._get_url(base_url, dataset_uid, obj_i, "raster_img")
-        offsets_dir_path, offsets_url = (None, None) if self.offsets_path is None else (self._get_offsets_dir(), self._get_url(base_url, dataset_uid, obj_i, os.path.join("raster_offsets", self._get_offsets_filename())))
-
-        raster_json = self.create_raster_json(img_url, offsets_url)
-
-        obj_routes = [
-            Mount(self._get_route(dataset_uid, obj_i, "raster_img"),
-                  app=StaticFiles(directory=img_dir_path, html=False, check_dir=False)),
-            JsonRoute(self._get_route(dataset_uid, obj_i, "raster"),
-                  self._create_response_json(raster_json), raster_json)
-        ]
-        if self.offsets_path is not None:
-            obj_routes.append(
-                Mount(self._get_route(dataset_uid, obj_i, "raster_offsets"),
-                      app=StaticFiles(directory=offsets_dir_path, html=False, check_dir=False))
+        for image in self.image_wrappers:
+            image_json = image.create_image_json(
+                image.get_img_url(base_url, dataset_uid, obj_i),
+                image.get_offsets_url(base_url, dataset_uid, obj_i)
             )
-
+            raster_json['images'].append(image_json)
+            raster_json['renderLayers'].append(image.name)
+        return raster_json
+    
+    def get_raster(self, base_url="", dataset_uid="", obj_i=""):
+        raster_json = self.create_raster_json(base_url, dataset_uid, obj_i)
+        obj_routes = []
+        for image in self.image_wrappers:
+            obj_routes = obj_routes + image.get_routes(base_url, dataset_uid, obj_i)
         obj_file_defs = [
             {
                 "type": dt.RASTER.value,
                 "fileType": ft.RASTER_JSON.value,
-                "url": self._get_url(base_url, dataset_uid, obj_i, "raster")
+                "options": raster_json
+            }
+        ]
+
+        return obj_file_defs, obj_routes
+
+class OmeTiffWrapper(AbstractWrapper):
+
+    """
+    Wrap an OME-TIFF File by creating an instance of the ``OmeTiffWrapper`` class.
+
+    :param str img_path: A local filepath to an OME-TIFF file.
+    :param str img_url: A remote URL of an OME-TIFF file.
+    :param str name: The display name for this OME-TIFF within Vitessce.
+    :param list[number] transformation_matrix: A column-major ordered matrix for transforming this image (see http://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices/#homogeneous-coordinates for more information).
+    :param \*\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
+    """
+
+    def __init__(self, img_path="", img_url="", offsets_url="", name="", transformation_matrix=None, **kwargs):
+        super().__init__(**kwargs)
+        self.name = name
+        self._img_path = img_path
+        self._img_url = img_url
+        self._offsets_url = offsets_url
+        self._transformation_matrix = transformation_matrix
+
+    def create_raster_json(self, img_url, offsets_url=""):
+        raster_json = {
+            "schemaVersion": "0.0.2",
+            "images": [self.create_image_json(img_url, offsets_url)],
+        }
+        return raster_json
+    
+    def create_image_json(self, img_url, offsets_url=""):
+        metadata = {}
+        image = {
+            "name": self.name,
+            "type": "ome-tiff",
+            "url": img_url,
+        }
+        if offsets_url != "":
+            metadata["omeTiffOffsetsUrl"] = offsets_url
+        if self._transformation_matrix is not None:
+            metadata["transform"] = {
+                "matrix": self._transformation_matrix
+            }
+        # Only attach metadata if there is some - otherwise schema validation fails.
+        if len(metadata.keys()) > 0:
+            image["metadata"] = metadata
+        return image
+    
+    def _get_image_dir(self):
+        return os.path.dirname(self._img_path)
+    
+    def _get_img_filename(self):
+        return os.path.basename(self._img_path)
+
+    def get_img_url(self, base_url="", dataset_uid="", obj_i=""):
+        if self._img_url != "":
+            return self._img_url
+        img_url = self._get_url(base_url, dataset_uid, obj_i, self._get_img_filename())
+        return img_url
+
+    def get_offsets_path_name(self):
+        return f"{self._get_img_filename().split('.')[0]}.offsets.json"
+    
+    def get_offsets_url(self, base_url="", dataset_uid="", obj_i=""):
+        if self._offsets_url != "" or self._img_url != "":
+            return self._offsets_url
+        offsets_url = self._get_url(base_url, dataset_uid, obj_i, self.get_offsets_path_name())
+        return offsets_url
+    
+    def get_routes(self, base_url="", dataset_uid="", obj_i=""):
+        obj_routes = [
+            Route(self._get_route(dataset_uid, obj_i, self._get_img_filename()), lambda req: range_repsonse(req, self._img_path))
+        ]
+        if self._img_path != "":
+            offsets = get_offsets(self._img_path)
+            obj_routes.append(
+                JsonRoute(self._get_route(dataset_uid, obj_i, self.get_offsets_path_name()),
+                        self._create_response_json(offsets), offsets),
+            )
+        return obj_routes
+
+    def get_raster(self, base_url="", dataset_uid="", obj_i=""):
+        obj_routes = self.get_routes(base_url, dataset_uid, obj_i)
+        img_url = self.get_img_url(base_url, dataset_uid, obj_i)
+        offsets_url = self.get_offsets_url(base_url, dataset_uid, obj_i)
+        raster_json = self.create_raster_json(img_url, offsets_url)
+        obj_file_defs = [
+            {
+                "type": dt.RASTER.value,
+                "fileType": ft.RASTER_JSON.value,
+                "options": raster_json
             }
         ]
 
@@ -316,7 +391,7 @@ class OmeZarrWrapper(AbstractWrapper):
 
 
 class AnnDataWrapper(AbstractWrapper):
-    def __init__(self, adata, use_highly_variable_genes=True, cell_set_obs_cols=None, **kwargs):
+    def __init__(self, adata, use_highly_variable_genes=True, cell_set_obs_cols=None, spatial_obsm_key=None, **kwargs):
         """
         Wrap an AnnData object by creating an instance of the ``AnnDataWrapper`` class.
 
@@ -331,16 +406,22 @@ class AnnDataWrapper(AbstractWrapper):
         self.tempdir = tempfile.mkdtemp()
         self.use_highly_variable_genes = use_highly_variable_genes
         self.cell_set_obs_cols = cell_set_obs_cols
+        self.spatial_obsm_key = spatial_obsm_key
 
     def create_cells_json(self):
         adata = self.adata
-        available_embeddings = list(adata.obsm.keys())
+        available_embeddings = set(adata.obsm.keys()) - set([self.spatial_obsm_key])
 
         cell_ids = adata.obs.index.tolist()
         cells = Cells(cell_ids=cell_ids)
         for e in available_embeddings:
             mapping = adata.obsm[e][:, 0:2].tolist()
             cells.add_mapping(e, mapping)
+        
+        if self.spatial_obsm_key is not None:
+            centroids = adata.obsm[self.spatial_obsm_key][:, 0:2].tolist()
+            cells.add_centroids(centroids)
+        
         return cells.json
 
     def create_cell_sets_json(self):
@@ -477,23 +558,6 @@ class AnnDataWrapper(AbstractWrapper):
                 }
             ]
 
-        return obj_file_defs, obj_routes
-        
-
-
-class LoomWrapper(AbstractWrapper):
-
-    def __init__(self, loom, **kwargs):
-        super().__init__(**kwargs)
-        self.loom = loom
-
-    def get_cells(self, base_url, dataset_uid, obj_i):
-        obj_routes = []
-        obj_file_defs = []
-
-        # TODO: append routes
-        # TODO: add file definitions
- 
         return obj_file_defs, obj_routes
 
 class SnapWrapper(AbstractWrapper):

@@ -7,8 +7,8 @@ from .wrappers import (
     AbstractWrapper,
     OmeTiffWrapper,
     OmeZarrWrapper,
+    MultiImageWrapper,
     AnnDataWrapper,
-    LoomWrapper,
     SnapWrapper,
 )
 from .entities import (

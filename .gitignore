@@ -5,7 +5,8 @@ build/
 docs-dist/
 *.py[cod]
 node_modules/
-tests/data/
+tests/data/*
+!tests/data/test.ome.tif
 ./notebooks/
 docs/notebooks/data/
 

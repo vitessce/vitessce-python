@@ -19,7 +19,6 @@ from vitessce import (
     OmeTiffWrapper,
     OmeZarrWrapper,
     AnnDataWrapper,
-    LoomWrapper,
     SnapWrapper,
 )
 
@@ -38,22 +37,22 @@ class TestWrappers(unittest.TestCase):
         )
 
     def test_ome_tiff(self):
-        w = OmeTiffWrapper("data/test.ome.tif", offsets_path="data/offsets.json", name="Test")
+        w = OmeTiffWrapper(img_path="data/test.ome.tif", name="Test")
 
         raster_json = w.create_raster_json(
-            "http://localhost:8000/raster_img",
-            "http://localhost:8000/raster_offsets/offsets.json"
+            "http://localhost:8000/A/0/test.ome.tif",
+            "http://localhost:8000/A/0/test.offsets.json"
         )
 
         self.assertEqual(raster_json, {
             'images': [
                 {
                     'metadata': {
-                        'omeTiffOffsetsUrl': 'http://localhost:8000/raster_offsets/offsets.json'
+                        'omeTiffOffsetsUrl': 'http://localhost:8000/A/0/test.offsets.json'
                     },
                     'name': 'Test',
                     'type': 'ome-tiff',
-                    'url': 'http://localhost:8000/raster_img'
+                    'url': 'http://localhost:8000/A/0/test.ome.tif'
                 }
             ],
             'schemaVersion': '0.0.2'
@@ -63,9 +62,9 @@ class TestWrappers(unittest.TestCase):
 
         self.assertEqual(obj_file_defs, [
             {
-                'fileType': 'raster.json',
                 'type': 'raster',
-                'url': 'http://localhost:8000/A/0/raster'
+                'fileType': 'raster.json',
+                'options': raster_json
             }
         ])
     

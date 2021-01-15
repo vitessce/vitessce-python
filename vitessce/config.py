@@ -296,11 +296,12 @@ class VitessceConfigView:
             self.view["coordinationScopes"][c_scope.c_type] = c_scope.c_scope
         return self
     
-    def _set_xywh(self, x, y, w, h):
+    def set_xywh(self, x, y, w, h):
         self.view["x"] = x
         self.view["y"] = y
         self.view["w"] = w
         self.view["h"] = h
+        return self
     
     def set_props(self, **kwargs):
         if "props" in self.view.keys():
@@ -310,6 +311,7 @@ class VitessceConfigView:
             }
         else:
             self.view["props"] = kwargs
+        return self
     
     def to_dict(self):
         return self.view
@@ -610,7 +612,7 @@ class VitessceConfig:
             w = x_max - x_min
             h = y_max - y_min
             if type(obj) == VitessceConfigView:
-                obj._set_xywh(x_min, y_min, w, h)
+                obj.set_xywh(x_min, y_min, w, h)
             elif type(obj) == VitessceConfigViewHConcat:
                 views = obj.views
                 num_views = len(views)

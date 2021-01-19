@@ -397,8 +397,16 @@ class AnnDataWrapper(AbstractWrapper):
 
         :param adata: An AnnData object containing single-cell experiment data.
         :type adata: anndata.AnnData
-        :param bool use_highly_variable_genes: When creating outputs with genes, should only the genes marked as highly variable be used?
-        :param list[str] cell_set_obs: A list of column names of the ``adata.obs`` dataframe that should be used for creating cell sets.
+        :param str adata_url: A remote url pointing to a zarr-backed AnnData store.
+        :param str expression_matrix: Location of the expression (cell x gene) matrix, like `X` or `obsm/highly_variable_genes_subset`
+        :param str genes_var_filter: A string like `highly_variable` (from `var` in the AnnData stored) used in conjunction with expression_matrix if expression_matrix points to a subset of `X` of the full `var` list.
+        :param list[str] cell_set_obs: Column names like `['louvain', 'cellType'] for showing cell sets from `obs`
+        :param list[str] cell_set_obs_names: Names to display in place of those in `cell_set_obs`, like `['Louvain', 'Cell Type']
+        :param str spatial_centroid_obsm: Column name in `obsm` that contains centroid coordinates for displaying centroids in the spatial viewer
+        :param str spatial_polygon_obsm: Column name in `obsm` that contains polygonal coordinates for displaying outlines in the spatial viewer
+        :param list[str] mappings_obsm: Column names like `['X_umap', 'X_pca'] for showing scatterplots from `obsm`
+        :param list[str] mappings_obsm_names: Overriding names like `['UMAP', 'PCA'] for displaying above scatterplots
+        :param list[str] mappings_obsm_dims: Dimensions along which to get data for the scatterplot, like [[0, 1], [4, 5]] where [0, 1] is just the normal x and y but [4, 5] could be comparing the third and fourth principal components, for example.
         :param \*\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
         """
         super().__init__(**kwargs)
@@ -419,7 +427,7 @@ class AnnDataWrapper(AbstractWrapper):
         self.spatial_centroid_obsm = "obsm/" + spatial_centroid_obsm if spatial_centroid_obsm is not None else spatial_centroid_obsm
         self.spatial_polygon_obsm = "obsm/" + spatial_polygon_obsm if spatial_polygon_obsm is not None else spatial_polygon_obsm
         self.mappings_obsm = ["obsm/" + i for i in mappings_obsm] if mappings_obsm is not None else mappings_obsm
-        self.mappings_obsm_dims = ["obsm/" + i for i in mappings_obsm_dims] if mappings_obsm_dims is not None else mappings_obsm_dims
+        self.mappings_obsm_dims = mappings_obsm_dims
     
     def _get_zarr_dir(self):
         return os.path.basename(self._zarr_filepath if self._zarr_filepath is not None else self._adata_url)
@@ -454,7 +462,7 @@ class AnnDataWrapper(AbstractWrapper):
                         "dims": [0, 1]
                     }
             if self.mappings_obsm_dims is not None:
-                for key, dim in zip(self.mappings_obsm_dims, self.mappings_obsm_names):
+                for dim, key in zip(self.mappings_obsm_dims, self.mappings_obsm_names):
                     options["mappings"][key]['dims'] = dim
         if self.cell_set_obs is not None:
             options["factors"] = []

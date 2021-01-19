@@ -58,6 +58,8 @@ class VitessceConfigDatasetFile:
         :param str url: A URL to this file. Can be a localhost URL or a remote URL.
         :param str data_type: A data type.
         :param str file_type: A file type.
+        :type options: Extra options to pass to the file loader class.
+        :type options: dict or list or None
         """
         self.file = {
             "url": url,
@@ -96,6 +98,8 @@ class VitessceConfigDataset:
         :type data_type: str or vitessce.constants.DataType
         :param file_type: The file type. Must be compatible with the specified data type.
         :type file_type: str or vitessce.constants.FileType
+        :type options: Extra options to pass to the file loader class. Optional.
+        :type options: dict or list or None
 
         :returns: Self, to allow function chaining.
         :rtype: VitessceConfigDataset

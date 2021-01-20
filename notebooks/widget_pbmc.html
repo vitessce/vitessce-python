@@ -96,7 +96,6 @@
 <li class="toctree-l3"><a class="reference internal" href="#1.-Import-dependencies">1. Import dependencies</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#2.-Download-the-dataset">2. Download the dataset</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#3.-Load-the-dataset">3. Load the dataset</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#3.1.-Optionally,-preprocess-the-dataset">3.1. Optionally, preprocess the dataset</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#4.-Create-a-Vitessce-view-config">4. Create a Vitessce view config</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#5.-Create-the-Vitessce-widget">5. Create the Vitessce widget</a></li>
 </ul>
@@ -104,6 +103,7 @@
 <li class="toctree-l2"><a class="reference internal" href="widget_loom.html">Visualization of a Loom file</a></li>
 <li class="toctree-l2"><a class="reference internal" href="widget_shortcut.html">The from_object shortcut</a></li>
 <li class="toctree-l2"><a class="reference internal" href="widget_from_dict.html">Using an existing view config dict</a></li>
+<li class="toctree-l2"><a class="reference internal" href="widget_pbmc_remote.html">Visualization of 3k PBMC reference from Remote Zarr Store</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../data_examples.html">Data preparation examples</a></li>
@@ -455,7 +455,7 @@ div.rendered_html tbody tr:hover {
 <h2>1. Import dependencies<a class="headerlink" href="#1.-Import-dependencies" title="Permalink to this headline">¶</a></h2>
 <p>We need to import the classes and functions that we will be using from the corresponding packages.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -503,19 +503,6 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 </div>
-<div class="section" id="3.1.-Optionally,-preprocess-the-dataset">
-<h2>3.1. Optionally, preprocess the dataset<a class="headerlink" href="#3.1.-Optionally,-preprocess-the-dataset" title="Permalink to this headline">¶</a></h2>
-<p>Before visualization, you may want to filter the list of genes.</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">highly_variable_genes</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">n_top_genes</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
 <div class="section" id="4.-Create-a-Vitessce-view-config">
 <h2>4. Create a Vitessce view config<a class="headerlink" href="#4.-Create-a-Vitessce-view-config" title="Permalink to this headline">¶</a></h2>
 <p>Define the data and views you would like to include in the widget.</p>
@@ -525,9 +512,9 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="n">vc</span> <span class="o">=</span> <span class="n">VitessceConfig</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;PBMC Reference&#39;</span><span class="p">)</span>
-<span class="n">dataset</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">add_dataset</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;PBMC 3k&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">add_object</span><span class="p">(</span><span class="n">AnnDataWrapper</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">cell_set_obs_cols</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;leiden&quot;</span><span class="p">]))</span>
-<span class="n">umap</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">cm</span><span class="o">.</span><span class="n">SCATTERPLOT</span><span class="p">,</span> <span class="n">mapping</span><span class="o">=</span><span class="s2">&quot;X_umap&quot;</span><span class="p">)</span>
-<span class="n">pca</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">cm</span><span class="o">.</span><span class="n">SCATTERPLOT</span><span class="p">,</span> <span class="n">mapping</span><span class="o">=</span><span class="s2">&quot;X_pca&quot;</span><span class="p">)</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">add_dataset</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;PBMC 3k&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">add_object</span><span class="p">(</span><span class="n">AnnDataWrapper</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">cell_set_obs</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;leiden&quot;</span><span class="p">],</span> <span class="n">cell_set_obs_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Leiden&quot;</span><span class="p">],</span> <span class="n">mappings_obsm</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;X_umap&quot;</span><span class="p">,</span> <span class="s2">&quot;X_pca&quot;</span><span class="p">],</span> <span class="n">mappings_obsm_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;UMAP&quot;</span><span class="p">,</span> <span class="s2">&quot;PCA&quot;</span><span class="p">],</span> <span class="n">expression_matrix</span><span class="o">=</span><span class="s2">&quot;X&quot;</span><span class="p">))</span>
+<span class="n">umap</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">cm</span><span class="o">.</span><span class="n">SCATTERPLOT</span><span class="p">,</span> <span class="n">mapping</span><span class="o">=</span><span class="s2">&quot;UMAP&quot;</span><span class="p">)</span>
+<span class="n">pca</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">cm</span><span class="o">.</span><span class="n">SCATTERPLOT</span><span class="p">,</span> <span class="n">mapping</span><span class="o">=</span><span class="s2">&quot;PCA&quot;</span><span class="p">)</span>
 <span class="n">cell_sets</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">cm</span><span class="o">.</span><span class="n">CELL_SETS</span><span class="p">)</span>
 <span class="n">genes</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">cm</span><span class="o">.</span><span class="n">GENES</span><span class="p">)</span>
 <span class="n">heatmap</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">cm</span><span class="o">.</span><span class="n">HEATMAP</span><span class="p">)</span>
@@ -544,7 +531,7 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">vw</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">widget</span><span class="p">(</span><span class="n">proxy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span></span><span class="n">vw</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">widget</span><span class="p">()</span>
 <span class="n">vw</span>
 </pre></div>
 </div>

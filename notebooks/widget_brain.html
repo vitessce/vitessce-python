@@ -110,6 +110,7 @@
 <li class="toctree-l2"><a class="reference internal" href="widget_loom.html">Visualization of a Loom file</a></li>
 <li class="toctree-l2"><a class="reference internal" href="widget_shortcut.html">The from_object shortcut</a></li>
 <li class="toctree-l2"><a class="reference internal" href="widget_from_dict.html">Using an existing view config dict</a></li>
+<li class="toctree-l2"><a class="reference internal" href="widget_pbmc_remote.html">Visualization of 3k PBMC reference from Remote Zarr Store</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../data_examples.html">Data preparation examples</a></li>
@@ -511,13 +512,13 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="section" id="3.1.-Optionally,-preprocess-the-dataset">
 <h2>3.1. Optionally, preprocess the dataset<a class="headerlink" href="#3.1.-Optionally,-preprocess-the-dataset" title="Permalink to this headline">¶</a></h2>
-<p>This dataset contains 25,587 genes. Here, we select the top 50 highly variable genes for visualization.</p>
+<p>This dataset contains 25,587 genes, but has the <code class="docutils literal notranslate"><span class="pre">highly_variable</span></code> ones marked. We put those in a <code class="docutils literal notranslate"><span class="pre">obsm</span></code> entry for visualization (you may try to visualize all of the genes using <code class="docutils literal notranslate"><span class="pre">X</span></code> without a <code class="docutils literal notranslate"><span class="pre">genes_vars_filter</span></code> instead of <code class="docutils literal notranslate"><span class="pre">obsm/X_hvg</span></code> below, although both load time and interactions will be quite a bit slower).</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">highly_variable_genes</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">n_top_genes</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+<span></span><span class="n">adata</span><span class="o">.</span><span class="n">obsm</span><span class="p">[</span><span class="s1">&#39;X_hvg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">adata</span><span class="p">[:,</span> <span class="n">adata</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="s1">&#39;highly_variable&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -548,7 +549,16 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">dataset</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">add_dataset</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Brain&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">add_object</span><span class="p">(</span><span class="n">AnnDataWrapper</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">cell_set_obs_cols</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;CellType&quot;</span><span class="p">]))</span>
+<span></span><span class="n">dataset</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">add_dataset</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Brain&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">add_object</span><span class="p">(</span><span class="n">AnnDataWrapper</span><span class="p">(</span>
+        <span class="n">adata</span><span class="p">,</span>
+        <span class="n">mappings_obsm</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;X_umap&quot;</span><span class="p">],</span>
+        <span class="n">mappings_obsm_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;UMAP&quot;</span><span class="p">],</span>
+        <span class="n">cell_set_obs</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;CellType&quot;</span><span class="p">],</span>
+        <span class="n">cell_set_obs_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Cell Type&quot;</span><span class="p">],</span>
+        <span class="n">expression_matrix</span><span class="o">=</span><span class="s2">&quot;obsm/X_hvg&quot;</span><span class="p">,</span>
+        <span class="n">genes_var_filter</span><span class="o">=</span><span class="s2">&quot;highly_variable&quot;</span>
+    <span class="p">)</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -563,7 +573,7 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">scatterplot</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">cm</span><span class="o">.</span><span class="n">SCATTERPLOT</span><span class="p">,</span> <span class="n">mapping</span><span class="o">=</span><span class="s2">&quot;X_umap&quot;</span><span class="p">)</span>
+<span></span><span class="n">scatterplot</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">cm</span><span class="o">.</span><span class="n">SCATTERPLOT</span><span class="p">,</span> <span class="n">mapping</span><span class="o">=</span><span class="s2">&quot;UMAP&quot;</span><span class="p">)</span>
 <span class="n">cell_sets</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">cm</span><span class="o">.</span><span class="n">CELL_SETS</span><span class="p">)</span>
 <span class="n">genes</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">cm</span><span class="o">.</span><span class="n">GENES</span><span class="p">)</span>
 <span class="n">heatmap</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">cm</span><span class="o">.</span><span class="n">HEATMAP</span><span class="p">)</span>

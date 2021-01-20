@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>The from_object shortcut &mdash; vitessce  documentation</title>
+  <title>Visualization of 3k PBMC reference from Remote Zarr Store &mdash; vitessce  documentation</title>
   
 
   
@@ -40,8 +40,8 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Using an existing view config dict" href="widget_from_dict.html" />
-    <link rel="prev" title="Visualization of a Loom file" href="widget_loom.html" /> 
+    <link rel="next" title="Data preparation examples" href="../data_examples.html" />
+    <link rel="prev" title="Using an existing view config dict" href="widget_from_dict.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -94,15 +94,15 @@
 <li class="toctree-l2"><a class="reference internal" href="widget_imaging.html">Visualization of Multi-Modal Imaging Data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="widget_pbmc.html">Visualization of 3k PBMC reference</a></li>
 <li class="toctree-l2"><a class="reference internal" href="widget_loom.html">Visualization of a Loom file</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">The from_object shortcut</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="widget_shortcut.html">The from_object shortcut</a></li>
+<li class="toctree-l2"><a class="reference internal" href="widget_from_dict.html">Using an existing view config dict</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Visualization of 3k PBMC reference from Remote Zarr Store</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#1.-Import-dependencies">1. Import dependencies</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#2.-Download-the-data">2. Download the data</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#3.-Load-the-data">3. Load the data</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#3.1.-Optionally,-preprocess-the-data">3.1. Optionally, preprocess the data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#2.-Set-the-URL-for-the-Remote-Dataset">2. Set the URL for the Remote Dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#3.-Create-a-Vitessce-view-config">3. Create a Vitessce view config</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#4.-Create-the-Vitessce-widget">4. Create the Vitessce widget</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="widget_from_dict.html">Using an existing view config dict</a></li>
-<li class="toctree-l2"><a class="reference internal" href="widget_pbmc_remote.html">Visualization of 3k PBMC reference from Remote Zarr Store</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../data_examples.html">Data preparation examples</a></li>
@@ -159,13 +159,13 @@
         
           <li><a href="../widget_examples.html">Widget examples</a> &raquo;</li>
         
-      <li>The from_object shortcut</li>
+      <li>Visualization of 3k PBMC reference from Remote Zarr Store</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="../_sources/notebooks/widget_shortcut.ipynb.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/notebooks/widget_pbmc_remote.ipynb.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -448,11 +448,11 @@ div.rendered_html tbody tr:hover {
     text-align: unset;
 }
 </style>
-<div class="section" id="The-from_object-shortcut">
-<h1>The from_object shortcut<a class="headerlink" href="#The-from_object-shortcut" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="Visualization-of-3k-PBMC-reference-from-Remote-Zarr-Store">
+<h1>Visualization of 3k PBMC reference from Remote Zarr Store<a class="headerlink" href="#Visualization-of-3k-PBMC-reference-from-Remote-Zarr-Store" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="1.-Import-dependencies">
 <h2>1. Import dependencies<a class="headerlink" href="#1.-Import-dependencies" title="Permalink to this headline">¶</a></h2>
-<p>Import the functions and classes that we will be using.</p>
+<p>We need to import the classes and functions that we will be using from the corresponding packages.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
@@ -474,58 +474,48 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 </div>
-<div class="section" id="2.-Download-the-data">
-<h2>2. Download the data<a class="headerlink" href="#2.-Download-the-data" title="Permalink to this headline">¶</a></h2>
-<p>For this example, we need to download a dataset from the COVID-19 Cell Atlas <a class="reference external" href="https://www.covid19cellatlas.org/index.healthy.html#habib17">https://www.covid19cellatlas.org/index.healthy.html#habib17</a>.</p>
+<div class="section" id="2.-Set-the-URL-for-the-Remote-Dataset">
+<h2>2. Set the URL for the Remote Dataset<a class="headerlink" href="#2.-Set-the-URL-for-the-Remote-Dataset" title="Permalink to this headline">¶</a></h2>
+<p>For this example, we already have uploaded the <code class="docutils literal notranslate"><span class="pre">pbmc3k</span></code> dataset as a zarr store from the <a class="reference external" href="https://scanpy.readthedocs.io/en/stable/api/scanpy.datasets.pbmc3k.html">scanpy docs</a> to the cloud.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">adata_filepath</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="s2">&quot;habib17.processed.h5ad&quot;</span><span class="p">)</span>
-<span class="n">urlretrieve</span><span class="p">(</span><span class="s1">&#39;https://covid19.cog.sanger.ac.uk/habib17.processed.h5ad&#39;</span><span class="p">,</span> <span class="n">adata_filepath</span><span class="p">)</span>
+<span></span><span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;https://storage.googleapis.com/vitessce-demo-data/anndata-test/pbmc3k_processed.zarr/&#39;</span>
 </pre></div>
 </div>
 </div>
 </div>
-<div class="section" id="3.-Load-the-data">
-<h2>3. Load the data<a class="headerlink" href="#3.-Load-the-data" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="3.-Create-a-Vitessce-view-config">
+<h2>3. Create a Vitessce view config<a class="headerlink" href="#3.-Create-a-Vitessce-view-config" title="Permalink to this headline">¶</a></h2>
+<p>Define the data and views you would like to include in the widget.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">adata</span> <span class="o">=</span> <span class="n">read_h5ad</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="s2">&quot;habib17.processed.h5ad&quot;</span><span class="p">))</span>
+<span></span><span class="n">vc</span> <span class="o">=</span> <span class="n">VitessceConfig</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;PBMC Reference&#39;</span><span class="p">)</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">add_dataset</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;PBMC 3k&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">add_object</span><span class="p">(</span><span class="n">AnnDataWrapper</span><span class="p">(</span><span class="n">adata_url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span> <span class="n">cell_set_obs</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;louvain&quot;</span><span class="p">],</span> <span class="n">cell_set_obs_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Louvain&quot;</span><span class="p">],</span> <span class="n">mappings_obsm</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;X_umap&quot;</span><span class="p">,</span> <span class="s2">&quot;X_pca&quot;</span><span class="p">],</span> <span class="n">mappings_obsm_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;UMAP&quot;</span><span class="p">,</span> <span class="s2">&quot;PCA&quot;</span><span class="p">],</span> <span class="n">expression_matrix</span><span class="o">=</span><span class="s2">&quot;X&quot;</span><span class="p">))</span>
+<span class="n">umap</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">cm</span><span class="o">.</span><span class="n">SCATTERPLOT</span><span class="p">,</span> <span class="n">mapping</span><span class="o">=</span><span class="s2">&quot;UMAP&quot;</span><span class="p">)</span>
+<span class="n">pca</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">cm</span><span class="o">.</span><span class="n">SCATTERPLOT</span><span class="p">,</span> <span class="n">mapping</span><span class="o">=</span><span class="s2">&quot;PCA&quot;</span><span class="p">)</span>
+<span class="n">cell_sets</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">cm</span><span class="o">.</span><span class="n">CELL_SETS</span><span class="p">)</span>
+<span class="n">genes</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">cm</span><span class="o">.</span><span class="n">GENES</span><span class="p">)</span>
+<span class="n">heatmap</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">cm</span><span class="o">.</span><span class="n">HEATMAP</span><span class="p">)</span>
+<span class="n">vc</span><span class="o">.</span><span class="n">layout</span><span class="p">((</span><span class="n">umap</span> <span class="o">/</span> <span class="n">pca</span><span class="p">)</span> <span class="o">|</span> <span class="p">((</span><span class="n">cell_sets</span> <span class="o">|</span> <span class="n">genes</span><span class="p">)</span> <span class="o">/</span> <span class="n">heatmap</span><span class="p">));</span>
 </pre></div>
 </div>
 </div>
 </div>
-<div class="section" id="3.1.-Optionally,-preprocess-the-data">
-<h2>3.1. Optionally, preprocess the data<a class="headerlink" href="#3.1.-Optionally,-preprocess-the-data" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="4.-Create-the-Vitessce-widget">
+<h2>4. Create the Vitessce widget<a class="headerlink" href="#4.-Create-the-Vitessce-widget" title="Permalink to this headline">¶</a></h2>
+<p>A widget can be created with the <code class="docutils literal notranslate"><span class="pre">.widget()</span></code> method on the config instance. Here, the <code class="docutils literal notranslate"><span class="pre">proxy=True</span></code> parameter allows this widget to be used in a cloud notebook environment, such as Binder.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">adata</span><span class="o">.</span><span class="n">obsm</span><span class="p">[</span><span class="s1">&#39;X_hvg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">adata</span><span class="p">[:,</span> <span class="n">adata</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="s1">&#39;highly_variable&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
-<p>With one line of code, you may create a Vitessce widget based on an automatically inferred configuration.</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">vw</span> <span class="o">=</span> <span class="n">VitessceConfig</span><span class="o">.</span><span class="n">from_object</span><span class="p">(</span><span class="n">AnnDataWrapper</span><span class="p">(</span>
-        <span class="n">adata</span><span class="p">,</span>
-        <span class="n">mappings_obsm</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;X_umap&quot;</span><span class="p">],</span>
-        <span class="n">cell_set_obs</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;CellType&quot;</span><span class="p">],</span>
-        <span class="n">cell_set_obs_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Cell Type&quot;</span><span class="p">],</span>
-        <span class="n">expression_matrix</span><span class="o">=</span><span class="s2">&quot;obsm/X_hvg&quot;</span><span class="p">,</span>
-        <span class="n">genes_var_filter</span><span class="o">=</span><span class="s2">&quot;highly_variable&quot;</span>
-<span class="p">))</span><span class="o">.</span><span class="n">widget</span><span class="p">(</span><span class="n">height</span><span class="o">=</span><span class="mi">800</span><span class="p">)</span>
+<span></span><span class="n">vw</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">widget</span><span class="p">()</span>
 <span class="n">vw</span>
 </pre></div>
 </div>
@@ -539,8 +529,8 @@ div.rendered_html tbody tr:hover {
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="widget_from_dict.html" class="btn btn-neutral float-right" title="Using an existing view config dict" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="widget_loom.html" class="btn btn-neutral float-left" title="Visualization of a Loom file" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../data_examples.html" class="btn btn-neutral float-right" title="Data preparation examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="widget_from_dict.html" class="btn btn-neutral float-left" title="Using an existing view config dict" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>

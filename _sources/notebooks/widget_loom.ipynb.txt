@@ -94,7 +94,7 @@
    "outputs": [],
    "source": [
     "vc = VitessceConfig(name='Loom Example', description='osmFISH dataset of the mouse cortex including all cells')\n",
-    "w = AnnDataWrapper(adata, cell_set_obs_cols=[\"ClusterName\"], spatial_obsm_key=\"spatial\")\n",
+    "w = AnnDataWrapper(adata, cell_set_obs=[\"ClusterName\"], cell_set_obs_names=[\"Clusters\"], spatial_centroid_obsm=\"spatial\", mappings_obsm=[\"tSNE\"])\n",
     "dataset = vc.add_dataset(name='SScortex').add_object(w)\n",
     "tsne = vc.add_view(dataset, cm.SCATTERPLOT, mapping=\"tSNE\")\n",
     "cell_sets = vc.add_view(dataset, cm.CELL_SETS)\n",

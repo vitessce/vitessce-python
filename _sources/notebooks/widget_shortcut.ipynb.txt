@@ -94,7 +94,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "sc.pp.highly_variable_genes(adata, n_top_genes=200)"
+    "adata.obsm['X_hvg'] = adata[:, adata.var['highly_variable']].X.copy()"
    ]
   },
   {
@@ -110,7 +110,14 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "vw = VitessceConfig.from_object(AnnDataWrapper(adata, cell_set_obs_cols=[\"CellType\"])).widget(height=800)\n",
+    "vw = VitessceConfig.from_object(AnnDataWrapper(\n",
+    "        adata,\n",
+    "        mappings_obsm=[\"X_umap\"],\n",
+    "        cell_set_obs=[\"CellType\"],\n",
+    "        cell_set_obs_names=[\"Cell Type\"],\n",
+    "        expression_matrix=\"obsm/X_hvg\",\n",
+    "        genes_var_filter=\"highly_variable\"\n",
+    ")).widget(height=800)\n",
     "vw"
    ]
   }
@@ -131,7 +138,7 @@
    "name": "python",
    "nbconvert_exporter": "python",
    "pygments_lexer": "ipython3",
-   "version": "3.8.0"
+   "version": "3.8.6"
   }
  },
  "nbformat": 4,

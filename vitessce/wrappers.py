@@ -400,11 +400,11 @@ class AnnDataWrapper(AbstractWrapper):
         :param str adata_url: A remote url pointing to a zarr-backed AnnData store.
         :param str expression_matrix: Location of the expression (cell x gene) matrix, like `X` or `obsm/highly_variable_genes_subset`
         :param str genes_var_filter: A string like `highly_variable` (from `var` in the AnnData stored) used in conjunction with expression_matrix if expression_matrix points to a subset of `X` of the full `var` list.
-        :param list[str] cell_set_obs: Column names like `['louvain', 'cellType'] for showing cell sets from `obs`
+        :param list[str] cell_set_obs: Column names like `['louvain', 'cellType']` for showing cell sets from `obs`
         :param list[str] cell_set_obs_names: Names to display in place of those in `cell_set_obs`, like `['Louvain', 'Cell Type']
         :param str spatial_centroid_obsm: Column name in `obsm` that contains centroid coordinates for displaying centroids in the spatial viewer
         :param str spatial_polygon_obsm: Column name in `obsm` that contains polygonal coordinates for displaying outlines in the spatial viewer
-        :param list[str] mappings_obsm: Column names like `['X_umap', 'X_pca'] for showing scatterplots from `obsm`
+        :param list[str] mappings_obsm: Column names like `['X_umap', 'X_pca']` for showing scatterplots from `obsm`
         :param list[str] mappings_obsm_names: Overriding names like `['UMAP', 'PCA'] for displaying above scatterplots
         :param list[str] mappings_obsm_dims: Dimensions along which to get data for the scatterplot, like [[0, 1], [4, 5]] where [0, 1] is just the normal x and y but [4, 5] could be comparing the third and fourth principal components, for example.
         :param \*\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`

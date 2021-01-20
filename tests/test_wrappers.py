@@ -110,16 +110,13 @@ class TestWrappers(unittest.TestCase):
     
     def test_anndata(self):
         adata = read_h5ad(join('data', 'test.h5ad'))
-        w = AnnDataWrapper(adata, cell_set_obs_cols=['CellType'])
+        w = AnnDataWrapper(adata, cell_set_obs=['CellType'])
 
-        cells_json = w.create_cells_json()
-        cell_sets_json = w.create_cell_sets_json()
+        obj_file_defs, _ = w.get_cells("http://localhost:8000", 'A', 0)
+        self.assertEqual(obj_file_defs, [{'type': 'cells', 'fileType': 'anndata-cells.zarr', 'url': 'http://localhost:8000/A/0/anndata.zarr', 'options': {'factors': ['obs/CellType']}}])
 
-        obj_file_defs, obj_routes = w.get_cells("http://localhost:8000", 'A', 0)
-        self.assertEqual(obj_file_defs, [{'type': 'cells', 'fileType': 'cells.json', 'url': 'http://localhost:8000/A/0/cells'}])
-
-        obj_file_defs, obj_routes = w.get_cell_sets("http://localhost:8000", 'A', 0)
-        self.assertEqual(obj_file_defs, [{'type': 'cell-sets', 'fileType': 'cell-sets.json', 'url': 'http://localhost:8000/A/0/cell-sets'}])
+        obj_file_defs, _ = w.get_cell_sets("http://localhost:8000", 'A', 0)
+        self.assertEqual(obj_file_defs, [{'type': 'cell-sets', 'fileType': 'anndata-cell-sets.zarr', 'url': 'http://localhost:8000/A/0/anndata.zarr', 'options': [{'groupName': 'CellType', 'setName': 'obs/CellType'}]}])
 
     def test_snaptools(self):
         mtx = mmread(join('data', 'test.snap.mtx'))

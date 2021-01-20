@@ -51,18 +51,21 @@ class VitessceConfigDatasetFile:
     """
     A class to represent a file (described by a URL, data type, and file type) in a Vitessce view config dataset.
     """
-    def __init__(self, url, data_type, file_type):
+    def __init__(self, url, data_type, file_type, options):
         """
         Not meant to be instantiated directly, but instead created and returned by the ``VitessceConfigDataset.add_file()`` method.
 
         :param str url: A URL to this file. Can be a localhost URL or a remote URL.
         :param str data_type: A data type.
         :param str file_type: A file type.
+        :type options: Extra options to pass to the file loader class.
+        :type options: dict or list or None
         """
         self.file = {
             "url": url,
             "type": data_type,
             "fileType": file_type,
+            **({ "options": options } if options is not None else {})
         }
     
     def to_dict(self):
@@ -86,7 +89,7 @@ class VitessceConfigDataset:
         }
         self.objs = []
     
-    def add_file(self, url, data_type, file_type):
+    def add_file(self, url, data_type, file_type, options=None):
         """
         Add a new file definition to this dataset instance.
 
@@ -95,6 +98,8 @@ class VitessceConfigDataset:
         :type data_type: str or vitessce.constants.DataType
         :param file_type: The file type. Must be compatible with the specified data type.
         :type file_type: str or vitessce.constants.FileType
+        :type options: Extra options to pass to the file loader class. Optional.
+        :type options: dict or list or None
 
         :returns: Self, to allow function chaining.
         :rtype: VitessceConfigDataset
@@ -130,7 +135,7 @@ class VitessceConfigDataset:
         else:
             file_type_str = file_type.value
 
-        self.dataset["files"].append(VitessceConfigDatasetFile(url=url, data_type=data_type_str, file_type=file_type_str))
+        self.dataset["files"].append(VitessceConfigDatasetFile(url=url, data_type=data_type_str, file_type=file_type_str, options=options))
         return self
     
     def add_object(self, obj):
@@ -742,7 +747,7 @@ class VitessceConfig:
             dataset.add_object(obj)
 
             # TODO: use the available embeddings to determine how many / which scatterplots to add.
-            scatterplot = vc.add_view(dataset, cm.SCATTERPLOT, mapping="X_umap")
+            scatterplot = vc.add_view(dataset, cm.SCATTERPLOT, mapping=obj.mappings_obsm[0].split('/')[-1])
             cell_sets = vc.add_view(dataset, cm.CELL_SETS)
             genes = vc.add_view(dataset, cm.GENES)
             heatmap = vc.add_view(dataset, cm.HEATMAP)

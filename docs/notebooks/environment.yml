@@ -12,6 +12,7 @@ dependencies:
  - zarr>=2.5.0
  - boto3>=1.16.30
  - pyBigWig>=0.3.17
+ - leidenalg>=0.8.3
  - pip
  - pip:
    - loompy>=3.0.6

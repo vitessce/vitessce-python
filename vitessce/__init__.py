@@ -10,6 +10,7 @@ from .wrappers import (
     MultiImageWrapper,
     AnnDataWrapper,
     SnapWrapper,
+    MultiBigWigWrapper,
 )
 from .entities import (
     CellSets,

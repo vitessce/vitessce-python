@@ -187,7 +187,7 @@ class GenomicProfiles():
 
     compressor = 'default'
 
-    chromosomes = [ str(chr_name) for chr_name in nc.get_chromorder(assembly)[:25] ] # TODO: should more than chr1-chrM be used?
+    chromosomes = [ str(chr_name) for chr_name in nc.get_chromorder(assembly) ]
     num_chromosomes = len(chromosomes)
     chroms_length_arr = np.array([ nc.get_chrominfo(assembly).chrom_lengths[x] for x in chromosomes ], dtype="i8")
     chroms_cumsum_arr = np.concatenate((np.array([0]), np.cumsum(chroms_length_arr)))

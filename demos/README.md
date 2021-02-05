@@ -8,3 +8,8 @@ However, now we are standardizing the way that we process data stored in common 
 
 Set up the `vitessce-python-dev` environment using the instructions in the repository root README.
 
+### Run
+
+```sh
+snakemake -j 1
+```

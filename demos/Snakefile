@@ -3,13 +3,11 @@ from snakemake.remote.S3 import RemoteProvider as S3RemoteProvider
 
 S3 = S3RemoteProvider()
 
+BUCKET_NAME = "vitessce-data"
+BUCKET = PosixPath(BUCKET_NAME) / "0.0.31" / "master_release"
+
 DATA_DIR = Path("data")
 PROCESSED_DIR = DATA_DIR / "processed"
-
-#BUCKET = Path("vitessce-data") / "0.0.31" / "master_release"
-
-BUCKET_NAME = "vitessce-export-examples"
-BUCKET = PosixPath(BUCKET_NAME) / "0.0.31" / "master_release"
 
 subworkflow habib2017:
     workdir:
@@ -18,14 +16,12 @@ subworkflow habib2017:
         "habib_2017_nature_methods/Snakefile"
 
 rule all:
-    input: S3.remote(str(BUCKET / "habib-2017" / "habib-2017.h5ad.zarr" / ".zgroup"))
-
-rule s3_upload:
     input:
-        habib2017(str(PROCESSED_DIR / "habib-2017.h5ad.zarr"))
-    output:
-        S3.remote(str(BUCKET / "habib-2017" / "habib-2017.h5ad.zarr" / ".zgroup"))
+        habib2017(str(PROCESSED_DIR / "habib-2017.h5ad.zarr")),
+    params:
+        # This should be in output: https://github.com/snakemake/snakemake/issues/870
+        habib2017=S3.remote(str(BUCKET / "habib-2017" / "habib-2017.h5ad.zarr")),
     shell:
         """
-        aws s3 cp --recursive {input} s3://$(dirname {output})
+        aws s3 cp --recursive {input} s3://{params.habib2017}
         """

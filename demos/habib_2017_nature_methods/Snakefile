@@ -11,14 +11,14 @@ H5AD_URL = "https://covid19.cog.sanger.ac.uk/habib17.processed.h5ad"
 
 # Rules
 rule all:
-    input: (PROCESSED_DIR / "habib-2017.h5ad.zarr")
+    input: (PROCESSED_DIR / "habib_2017.h5ad.zarr")
 
 # Convert the raw AnnData .h5ad file to a processed AnnData .zarr store.
 rule convert_h5ad_to_zarr:
     input:
         (RAW_DIR / "habib17.processed.h5ad")
     output:
-        directory(PROCESSED_DIR / "habib-2017.h5ad.zarr")
+        directory(PROCESSED_DIR / "habib_2017.h5ad.zarr")
     params:
         script=(SRC_DIR / "convert_h5ad_to_zarr.py")
     shell:

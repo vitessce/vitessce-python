@@ -22,16 +22,25 @@ subworkflow mouse_brain_10x:
     snakefile:
         "mouse_brain_10x_visium/Snakefile"
 
+subworkflow human_lymph_node_10x:
+    workdir:
+        "human_lymph_node_10x_visium"
+    snakefile:
+        "human_lymph_node_10x_visium/Snakefile"
+
 rule all:
     input:
         habib_2017=habib_2017(str(PROCESSED_DIR / "habib_2017.h5ad.zarr")),
         mouse_brain_10x=mouse_brain_10x(str(PROCESSED_DIR / "mouse_brain_10x.h5ad.zarr")),
+        human_lymph_node_10x=human_lymph_node_10x(str(PROCESSED_DIR / "human_lymph_node_10x.h5ad.zarr")),
     params:
         # This should be in output: https://github.com/snakemake/snakemake/issues/870
         habib_2017=S3.remote(str(BUCKET / "habib_2017" / "habib_2017.h5ad.zarr")),
         mouse_brain_10x=S3.remote(str(BUCKET / "mouse_brain_10x" / "mouse_brain_10x.h5ad.zarr")),
+        human_lymph_node_10x=S3.remote(str(BUCKET / "human_lymph_node_10x" / "human_lymph_node_10x.h5ad.zarr")),
     shell:
         """
         aws s3 cp --recursive {input.habib_2017} s3://{params.habib_2017} && \
-        aws s3 cp --recursive {input.mouse_brain_10x} s3://{params.mouse_brain_10x}
+        aws s3 cp --recursive {input.mouse_brain_10x} s3://{params.mouse_brain_10x} && \
+        aws s3 cp --recursive {input.human_lymph_node_10x} s3://{params.human_lymph_node_10x}
         """

@@ -57,7 +57,15 @@ def create_zarr(output_path):
     adata = adata[:, var_index_ordering].copy()
     adata.obsm["X_hvg"] = adata[:, adata.var['highly_variable']].X.copy()
 
-    adata.obsm['xy'] = np.stack((adata.obs['array_col'].values, adata.obs['array_row'].values), axis=-1).astype('uint8')
+    adata.obsm['spatial'] = adata.obsm['spatial'].astype('uint16')
+    adata.obsm['xy'] = np.stack((adata.obs['array_col'].values, adata.obs['array_row'].values), axis=-1).astype('uint16')
+
+    # Need to convert images from interleaved to non-interleaved (color axis should be first).
+    img_hires = adata.uns['spatial']['V1_Human_Lymph_Node']['images']['hires']
+    img_lowres = adata.uns['spatial']['V1_Human_Lymph_Node']['images']['lowres']
+
+    adata.uns['spatial']['V1_Human_Lymph_Node']['images']['hires'] = np.transpose(img_hires, (2, 0, 1))
+    adata.uns['spatial']['V1_Human_Lymph_Node']['images']['lowres'] = np.transpose(img_lowres, (2, 0, 1))
 
     adata.write_zarr(output_path)
 

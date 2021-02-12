@@ -9,6 +9,7 @@ from vitessce import (
     FileType as ft,
     hconcat,
     vconcat,
+    AbstractWrapper
 )
 
 class TestConfig(unittest.TestCase):
@@ -254,44 +255,40 @@ class TestConfig(unittest.TestCase):
     def test_config_add_dataset_add_objects(self):
         vc = VitessceConfig()
 
-        class MockAnnData:
+        class MockWrapperA(AbstractWrapper):
             def __init__(self, name):
                 self.name = name
-        
-        def serve_obj(obj, obj_i, dataset_uid):
-            if type(obj) == MockAnnData:
-                if obj.name == "Experiment A":
-                    return [
-                        {
-                            "url": "http://localhost:8000/cells",
-                            "type": "cells",
-                            "fileType": "cells.json"
-                        },
-                        {
-                            "url": "http://localhost:8000/molecules",
-                            "type": "molecules",
-                            "fileType": "molecules.json"
-                        }
-                    ]
-                elif obj.name == "Experiment B":
-                    return [
-                        {
-                            "url": "http://localhost:8000/cell-sets",
-                            "type": "cell-sets",
-                            "fileType": "cell-sets.json"
-                        }
-                    ]
-            return None
+            def get_molecules(self, base_url, *args):
+                return [{
+                    "url": f"{base_url}/molecules",
+                    "type": "molecules",
+                    "fileType": "molecules.json"
+                }], None
+            def get_cells(self, base_url, *args):
+                return [{
+                    "url": f"{base_url}/cells",
+                    "type": "cells",
+                    "fileType": "cells.json"
+                }], None
 
+        class MockWrapperB(AbstractWrapper):
+            def __init__(self, name):
+                self.name = name
+            def get_cell_sets(self, base_url, *args):
+                return [{
+                    "url": f"{base_url}/cell-sets",
+                    "type": "cell-sets",
+                    "fileType": "cell-sets.json"
+                }], None
         my_dataset = (vc.add_dataset(name='My Object Dataset')
             .add_object(
-                obj=MockAnnData("Experiment A")
+                obj=MockWrapperA("Experiment A")
             ).add_object(
-                obj=MockAnnData("Experiment B")
+                obj=MockWrapperB("Experiment B")
             )
         )
 
-        vc_dict = vc.to_dict(on_obj=serve_obj)
+        vc_dict = vc.to_dict(base_url="http://localhost:8000")
         vc_json = json.dumps(vc_dict)
 
         self.assertEqual(vc_dict, {

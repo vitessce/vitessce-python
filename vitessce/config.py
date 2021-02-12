@@ -679,8 +679,8 @@ class VitessceConfig:
         routes = []            
         for d in self.config["datasets"]:
             for obj_i, obj in enumerate(d.objs):
-                route = create_obj_routes(obj, base_url, d.dataset["uid"], obj_i)
-                routes += [route]
+                obj_routes = create_obj_routes(obj, base_url, d.dataset["uid"], obj_i)
+                routes += obj_routes
         return routes
 
     @staticmethod

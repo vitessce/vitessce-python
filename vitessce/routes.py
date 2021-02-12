@@ -5,16 +5,13 @@ from .constants import DataType as dt
 
 def create_obj_routes(obj, base_url, dataset_uid, obj_i):
 	"""
-	For a particular data object, simultaneously set up:
-	
-	* its server routes and their responses, and
-	* the corresponding view config dataset file definitions
+	For a particular data object, simultaneously set up its server routes and their responses
 
 	:param obj: An object representing a single-cell data analysis result or microscopy image.
 	:type obj: anndata.AnnData or loompy.LoomConnection or zarr.hierarchy.Group
 	
 	:returns: A list of view config file definitions and a list of server routes.
-	:rtype: tuple[list[dict], list[starlette.routing.Route]]
+	:rtype: list[starlette.routing.Route]]
 	"""
 	obj_routes = []
 
@@ -29,16 +26,13 @@ def create_obj_routes(obj, base_url, dataset_uid, obj_i):
 
 def create_obj_files(obj, base_url, dataset_uid, obj_i):
 	"""
-	For a particular data object, simultaneously set up:
-	
-	* its server routes and their responses, and
-	* the corresponding view config dataset file definitions
+	For a particular data object, set up view config dataset file definitions
 
 	:param obj: An object representing a single-cell data analysis result or microscopy image.
 	:type obj: anndata.AnnData or loompy.LoomConnection or zarr.hierarchy.Group
 	
 	:returns: A list of view config file definitions and a list of server routes.
-	:rtype: tuple[list[dict], list[starlette.routing.Route]]
+	:rtype: tuple[list[dict]
 	"""
 	obj_file_defs = []
 

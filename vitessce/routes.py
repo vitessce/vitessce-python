@@ -11,7 +11,7 @@ def create_obj_routes(obj, base_url, dataset_uid, obj_i):
 	:type obj: anndata.AnnData or loompy.LoomConnection or zarr.hierarchy.Group
 	
 	:returns: A list of server routes.
-	:rtype: list[starlette.routing.Route]]
+	:rtype: list[starlette.routing.Route]
 	"""
 	obj_routes = []
 
@@ -32,7 +32,7 @@ def create_obj_files(obj, base_url, dataset_uid, obj_i):
 	:type obj: anndata.AnnData or loompy.LoomConnection or zarr.hierarchy.Group
 	
 	:returns: A list of view config file definitions
-	:rtype: tuple[list[dict]
+	:rtype: list[dict]
 	"""
 	obj_file_defs = []
 

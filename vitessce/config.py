@@ -654,8 +654,7 @@ class VitessceConfig:
         """
         Convert the view config instance to a dict object.
 
-        :param on_obj: This callback is required only if datasets within the view config contain objects added via the ``VitessceConfigDataset.add_object`` method (rather than only files added via the ``VitessceConfigDataset.add_file`` method). This function must take the data object as a parameter, and return a list of valid file definition dicts (URL, data type, file type). This parameter is primarily intended to be used internally by the ``VitessceWidget`` class.
-        :type on_obj: function or None
+        :param str base_url: Optional parameter for non-remote data to specify the url from which the data will be served.
 
         :returns: The view config as a dict. Useful for serializing to JSON.
         :rtype: dict
@@ -676,6 +675,14 @@ class VitessceConfig:
         }
     
     def get_routes(self, base_url=""):
+        """
+        Convert the routes for this view config from the datasets.
+
+        :param str base_url: Optional parameter for non-remote data to specify the url from which the data will be served.
+
+        :returns: A list of server routes.
+	    :rtype: list[starlette.routing.Route]]
+        """
         routes = []            
         for d in self.config["datasets"]:
             for obj_i, obj in enumerate(d.objs):

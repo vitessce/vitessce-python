@@ -7,7 +7,6 @@ from shutil import copyfile
 from starlette.routing import Route, Mount
 from starlette.staticfiles import StaticFiles
 
-from .routes import create_obj_routes
 from .wrappers import JsonRoute
 
 def export_to_s3(config, s3, bucket_name, prefix=''):
@@ -25,14 +24,8 @@ def export_to_s3(config, s3, bucket_name, prefix=''):
     
     base_url = f"https://{bucket_name}.s3.amazonaws.com" + ("/" + prefix if len(prefix) > 0 else "")
     bucket = s3.Bucket(bucket_name)
-    
-    routes = []
-    def on_obj(obj, dataset_uid, obj_i):
-        obj_file_defs, obj_routes = create_obj_routes(obj, base_url, dataset_uid, obj_i)
-        for obj_route in obj_routes:
-            routes.append(obj_route)
-        return obj_file_defs
-    config_dict = config.to_dict(on_obj=on_obj)
+    config_dict = config.to_dict(base_url=base_url)
+    routes = config.get_routes(base_url=base_url)
     uploaded_routes = []
     for route in routes:
         route_path = route.path[1:]
@@ -69,14 +62,8 @@ def export_to_files(config, base_url, out_dir='.'):
     :rtype: dict
     """
     
-    routes = []
-    def on_obj(obj, dataset_uid, obj_i):
-        obj_file_defs, obj_routes = create_obj_routes(obj, base_url, dataset_uid, obj_i)
-        for obj_route in obj_routes:
-            routes.append(obj_route)
-        return obj_file_defs
-    config_dict = config.to_dict(on_obj=on_obj)
-
+    config_dict = config.to_dict(base_url=base_url)
+    routes = config.get_routes(base_url=base_url)
     for route in routes:
         route_path = route.path[1:]
         out_path = join(out_dir, route_path)

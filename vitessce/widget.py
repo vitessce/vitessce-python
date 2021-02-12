@@ -112,13 +112,8 @@ class VitessceWidget(widgets.DOMWidget):
         else:
             base_url = f"http://localhost:{use_port}"
 
-        routes = []
-        def on_obj(obj, dataset_uid, obj_i):
-            obj_file_defs, obj_routes = create_obj_routes(obj, base_url, dataset_uid, obj_i)
-            for obj_route in obj_routes:
-                routes.append(obj_route)
-            return obj_file_defs
-        config_dict = config.to_dict(on_obj=on_obj)
+        config_dict = config.to_dict(base_url=base_url)
+        routes = config.get_routes(base_url=base_url)
 
         super(VitessceWidget, self).__init__(config=config_dict, height=height, theme=theme, proxy=proxy)
         

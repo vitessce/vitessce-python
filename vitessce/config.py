@@ -17,6 +17,7 @@ from .export import (
     export_to_s3,
     export_to_files,
 )
+from .routes import create_obj_routes, create_obj_files
 
 def _get_next_scope(prev_scopes):
     chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
@@ -649,7 +650,7 @@ class VitessceConfig:
 
         return self
         
-    def to_dict(self, on_obj=None):
+    def to_dict(self, base_url=""):
         """
         Convert the view config instance to a dict object.
 
@@ -659,6 +660,9 @@ class VitessceConfig:
         :returns: The view config as a dict. Useful for serializing to JSON.
         :rtype: dict
         """
+        def on_obj(obj, dataset_uid, obj_i):
+            obj_file_defs = create_obj_files(obj, base_url, dataset_uid, obj_i)
+            return obj_file_defs
         return {
             **self.config,
             "datasets": [ d.to_dict(on_obj) for d in self.config["datasets"] ],
@@ -670,6 +674,14 @@ class VitessceConfig:
             # TODO: compute the x,y,w,h values if not explicitly defined
             "layout": [ c.to_dict() for c in self.config["layout"] ]
         }
+    
+    def get_routes(self, base_url=""):
+        routes = []            
+        for d in self.config["datasets"]:
+            for obj_i, obj in enumerate(d.objs):
+                route = create_obj_routes(obj, base_url, d.dataset["uid"], obj_i)
+                routes += [route]
+        return routes
 
     @staticmethod
     def from_dict(config):

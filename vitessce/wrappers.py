@@ -182,13 +182,15 @@ class MultiImageWrapper(AbstractWrapper):
     :param list image_wrappers: A list of imaging wrapper classes (only :class:`~vitessce.wrappers.OmeTiffWrapper` supported now)
     :param \*\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
     """
-    def __init__(self, image_wrappers, **kwargs):
+    def __init__(self, image_wrappers, use_physical_size_scaling=False, **kwargs):
         super().__init__(**kwargs)
         self.image_wrappers = image_wrappers
+        self.use_physical_size_scaling = use_physical_size_scaling
 
     def create_raster_json(self, base_url="", dataset_uid="", obj_i=""):
         raster_json = {
             "schemaVersion": "0.0.2",
+            "usePhysicalSizeScaling": self.use_physical_size_scaling,
             "images": [],
             "renderLayers": []
         }

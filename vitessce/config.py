@@ -681,7 +681,7 @@ class VitessceConfig:
         :param str base_url: Optional parameter for non-remote data to specify the url from which the data will be served.
 
         :returns: A list of server routes.
-	    :rtype: list[starlette.routing.Route]]
+        :rtype: list[starlette.routing.Route]]
         """
         routes = []            
         for d in self.config["datasets"]:

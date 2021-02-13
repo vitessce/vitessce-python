@@ -23,7 +23,9 @@ class JsonRoute(Route):
     def __init__(self, path, endpoint, data_json):
         super().__init__(path, endpoint)
         self.data_json = data_json
-    
+
+class RemoteWrapperType:
+    pass
 
 class AbstractWrapper:
     """
@@ -182,13 +184,15 @@ class MultiImageWrapper(AbstractWrapper):
     :param list image_wrappers: A list of imaging wrapper classes (only :class:`~vitessce.wrappers.OmeTiffWrapper` supported now)
     :param \*\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
     """
-    def __init__(self, image_wrappers, **kwargs):
+    def __init__(self, image_wrappers, use_physical_size_scaling=False, **kwargs):
         super().__init__(**kwargs)
         self.image_wrappers = image_wrappers
+        self.use_physical_size_scaling = use_physical_size_scaling
 
     def create_raster_json(self, base_url="", dataset_uid="", obj_i=""):
         raster_json = {
             "schemaVersion": "0.0.2",
+            "usePhysicalSizeScaling": self.use_physical_size_scaling,
             "images": [],
             "renderLayers": []
         }
@@ -216,24 +220,22 @@ class MultiImageWrapper(AbstractWrapper):
 
         return obj_file_defs, obj_routes
 
-class OmeTiffWrapper(AbstractWrapper):
+class RemoteMultiImageWrapper(MultiImageWrapper, RemoteWrapperType):
+    pass
+
+class AbstractOmeTiffWrapper(AbstractWrapper):
 
     """
-    Wrap an OME-TIFF File by creating an instance of the ``OmeTiffWrapper`` class.
+    Wrap an OME-TIFF File by creating an subclass of the ``AbstractOmeTiffWrapper`` class.
 
-    :param str img_path: A local filepath to an OME-TIFF file.
-    :param str img_url: A remote URL of an OME-TIFF file.
     :param str name: The display name for this OME-TIFF within Vitessce.
     :param list[number] transformation_matrix: A column-major ordered matrix for transforming this image (see http://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices/#homogeneous-coordinates for more information).
     :param \*\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
     """
 
-    def __init__(self, img_path="", img_url="", offsets_url="", name="", transformation_matrix=None, **kwargs):
+    def __init__(self, name="", transformation_matrix=None, **kwargs):
         super().__init__(**kwargs)
         self.name = name
-        self._img_path = img_path
-        self._img_url = img_url
-        self._offsets_url = offsets_url
         self._transformation_matrix = transformation_matrix
 
     def create_raster_json(self, img_url, offsets_url=""):
@@ -260,6 +262,20 @@ class OmeTiffWrapper(AbstractWrapper):
         if len(metadata.keys()) > 0:
             image["metadata"] = metadata
         return image
+
+
+class OmeTiffWrapper(AbstractOmeTiffWrapper):
+
+    """
+    Wrap a local OME-TIFF File by creating an instance of the ``OmeTiffWrapper`` class.
+
+    :param str img_path: A local filepath to an OME-TIFF file.
+    :param \*\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractOmeTiffWrapper`
+    """
+
+    def __init__(self, img_path="", **kwargs):
+        super().__init__(**kwargs)
+        self._img_path = img_path
     
     def _get_image_dir(self):
         return os.path.dirname(self._img_path)
@@ -268,8 +284,6 @@ class OmeTiffWrapper(AbstractWrapper):
         return os.path.basename(self._img_path)
 
     def get_img_url(self, base_url="", dataset_uid="", obj_i=""):
-        if self._img_url != "":
-            return self._img_url
         img_url = self._get_url(base_url, dataset_uid, obj_i, self._get_img_filename())
         return img_url
 
@@ -277,8 +291,6 @@ class OmeTiffWrapper(AbstractWrapper):
         return f"{self._get_img_filename().split('.')[0]}.offsets.json"
     
     def get_offsets_url(self, base_url="", dataset_uid="", obj_i=""):
-        if self._offsets_url != "" or self._img_url != "":
-            return self._offsets_url
         offsets_url = self._get_url(base_url, dataset_uid, obj_i, self.get_offsets_path_name())
         return offsets_url
     
@@ -308,6 +320,43 @@ class OmeTiffWrapper(AbstractWrapper):
         ]
 
         return obj_file_defs, obj_routes
+
+class RemoteOmeTiffWrapper(AbstractOmeTiffWrapper, RemoteWrapperType):
+    """
+    Wrap a remote OME-TIFF File by creating an instance of the ``RemoteOmeTiffWrapper`` class.
+
+    :param str img_url: A remote URL of an OME-TIFF file.
+    :param \*\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractOmeTiffWrapper`
+    """
+
+    def __init__(self, img_url="", offsets_url="", **kwargs):
+        super().__init__(**kwargs)
+        self._img_url = img_url
+        self._offsets_url = offsets_url
+
+    def get_img_url(self, base_url="", dataset_uid="", obj_i=""):
+        return self._img_url
+
+    def get_offsets_url(self, base_url="", dataset_uid="", obj_i=""):
+        return self._offsets_url
+    
+    def get_routes(self, base_url="", dataset_uid="", obj_i=""):
+        return []
+
+    def get_raster(self, base_url="", dataset_uid="", obj_i=""):
+        img_url = self._img_url
+        offsets_url = self._offsets_url
+        raster_json = self.create_raster_json(img_url, offsets_url)
+        obj_file_defs = [
+            {
+                "type": dt.RASTER.value,
+                "fileType": ft.RASTER_JSON.value,
+                "options": raster_json
+            }
+        ]
+        
+        return obj_file_defs, None
+
 
 
 class OmeZarrWrapper(AbstractWrapper):
@@ -440,6 +489,7 @@ class AnnDataWrapper(AbstractWrapper):
     
 
     def get_cells(self, base_url, dataset_uid, obj_i):
+        print("get cells")
         options = {}
         if self.spatial_centroid_obsm is not None:
             options["xy"] = self.spatial_centroid_obsm

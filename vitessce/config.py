@@ -11,6 +11,7 @@ from .constants import (
 from .wrappers import (
     AnnDataWrapper,
     SnapWrapper,
+    RemoteWrapperType,
 )
 from .widget import VitessceWidget
 from .export import (
@@ -62,11 +63,13 @@ class VitessceConfigDatasetFile:
         :type options: dict or list or None
         """
         self.file = {
-            "url": url,
             "type": data_type,
             "fileType": file_type,
-            **({ "options": options } if options is not None else {})
         }
+        if url is not None:
+            self.file["url"] = url
+        if options is not None:
+            self.file["options"] = options
     
     def to_dict(self):
         return self.file
@@ -148,15 +151,28 @@ class VitessceConfigDataset:
         :returns: Self, to allow function chaining.
         :rtype: VitessceConfigDataset
         """
-        self.objs.append(obj)
+        if not isinstance(obj, RemoteWrapperType):
+            self.objs.append(obj)
+        else:
+            for data_type in dt:
+                try:
+                    obj_file_defs, _ = obj._get_data(data_type, None, None, None)
+                    for obj_file_def in obj_file_defs:
+                        url = obj_file_def["url"] if "url" in obj_file_def else None
+                        data_type_str = obj_file_def["type"]
+                        file_type_str = obj_file_def["fileType"]
+                        options = obj_file_def["options"] if "options" in obj_file_def else None
+                        self.add_file(url=url, data_type=data_type_str, file_type=file_type_str, options=options)
+                except NotImplementedError:
+                    pass
         return self
 
-    def to_dict(self, on_obj):
+    def to_dict(self, on_obj=None):
         obj_file_defs = []
-        for obj_i, obj in enumerate(self.objs):
-            if on_obj is not None:
+        if on_obj is not None:
+            for obj_i, obj in enumerate(self.objs):
                 obj_file_defs += on_obj(obj, self.dataset["uid"], obj_i)
-                
+                    
         return {
             **self.dataset,
             "files": [ f.to_dict() for f in self.dataset["files"] ] + obj_file_defs,

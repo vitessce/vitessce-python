@@ -489,7 +489,6 @@ class AnnDataWrapper(AbstractWrapper):
     
 
     def get_cells(self, base_url, dataset_uid, obj_i):
-        print("get cells")
         options = {}
         if self.spatial_centroid_obsm is not None:
             options["xy"] = self.spatial_centroid_obsm

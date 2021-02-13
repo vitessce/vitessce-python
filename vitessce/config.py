@@ -70,7 +70,7 @@ class VitessceConfigDatasetFile:
             self.file["url"] = url
         if options is not None:
             self.file["options"] = options
-    
+
     def to_dict(self):
         return self.file
 

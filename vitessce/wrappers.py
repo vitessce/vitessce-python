@@ -2,6 +2,7 @@ import os
 from os.path import join
 import tempfile
 import math
+import json
 
 import numpy as np
 import pandas as pd
@@ -34,146 +35,55 @@ class AbstractWrapper:
     def __init__(self, **kwargs):
         """
         Abstract constructor to be inherited by dataset wrapper classes.
+
+        :param str out_dir: The path to a local directory used for data processing outputs. By default, uses a temp. directory.
         """
-        pass
+        self.out_dir = kwargs['out_dir'] if 'out_dir' in kwargs else tempfile.mkdtemp()
+        self.routes = []
+        self.file_def_creators = []
 
-    def get_cells(self, base_url, dataset_uid, obj_i):
+    def convert_and_save(self, dataset_uid, obj_i):
         """
-        Get the file definitions and server routes
-        corresponding to the :class:`~vitessce.constants.DataType.CELLS` data type.
-        Used internally by :class:`~vitessce.widget.VitessceWidget`.
+        Fill in the file_def_creators array.
+        If this wrapper is wrapping local data, then create routes and fill in the routes array.
+        This method is void, should not return anything.
 
-        :param str base_url: The web server base url.
-        :param str dataset_uid: The unique identifier for the dataset parent of this data object.
-        :param int obj_i: The index of this data object child within its dataset parent.
-
-        :returns: The file definitions and server routes.
-        :rtype: tuple[list[dict], list[starlette.routing.Route]]
+        :param str dataset_uid: A unique identifier for this dataset.
+        :param int obj_i: Within the dataset, the index of this data wrapper object.
         """
-        raise NotImplementedError()
+        os.makedirs(self._get_out_dir(dataset_uid, obj_i), exist_ok=True)
 
-    def get_cell_sets(self, base_url, dataset_uid, obj_i):
+    def get_routes(self):
         """
-        Get the file definitions and server routes
-        corresponding to the :class:`~vitessce.constants.DataType.CELL_SETS` data type.
-        Used internally by :class:`~vitessce.widget.VitessceWidget`.
+        Obtain the routes that have been created for this wrapper class.
 
-        :param str base_url: The web server base url.
-        :param str dataset_uid: The unique identifier for the dataset parent of this data object.
-        :param int obj_i: The index of this data object child within its dataset parent.
-
-        :returns: The file definitions and server routes.
-        :rtype: tuple[list[dict], list[starlette.routing.Route]]
+        :returns: A list of server routes.
+        :rtype: list[starlette.routing.Route]
         """
-        raise NotImplementedError()
+        return self.routes
 
-    def get_raster(self, base_url, dataset_uid, obj_i):
+    def get_file_defs(self, base_url):
         """
-        Get the file definitions and server routes
-        corresponding to the :class:`~vitessce.constants.DataType.RASTER` data type.
-        Used internally by :class:`~vitessce.widget.VitessceWidget`.
+        Obtain the file definitions for this wrapper class.
 
-        :param str base_url: The web server base url.
-        :param str dataset_uid: The unique identifier for the dataset parent of this data object.
-        :param int obj_i: The index of this data object child within its dataset parent.
+        :param str base_url: A base URL to prepend to relative URLs.
 
-        :returns: The file definitions and server routes.
-        :rtype: tuple[list[dict], list[starlette.routing.Route]]
+        :returns: A list of file definitions.
+        :rtype: list[dict]
         """
-        raise NotImplementedError()
+        file_defs_with_base_url = []
+        for file_def_creator in self.file_def_creators:
+            file_defs_with_base_url.append(file_def_creator(base_url))
+        return file_defs_with_base_url
 
-    def get_molecules(self, base_url, dataset_uid, obj_i):
-        """
-        Get the file definitions and server routes
-        corresponding to the :class:`~vitessce.constants.DataType.MOLECULES` data type.
+    def _get_url(self, base_url, dataset_uid, obj_i, *args):
+        return base_url + self._get_route(dataset_uid, obj_i, *args)
 
-        :param str base_url: The web server base url.
-        :param str dataset_uid: The unique identifier for the dataset parent of this data object.
-        :param int obj_i: The index of this data object child within its dataset parent.
-
-        :returns: The file definitions and server routes.
-        :rtype: tuple[list[dict], list[starlette.routing.Route]]
-        """
-        raise NotImplementedError()
-
-    def get_neighborhoods(self, base_url, dataset_uid, obj_i):
-        """
-        Get the file definitions and server routes
-        corresponding to the :class:`~vitessce.constants.DataType.NEIGHBORHOODS` data type.
-        Used internally by :class:`~vitessce.widget.VitessceWidget`.
-
-        :param str base_url: The web server base url.
-        :param str dataset_uid: The unique identifier for the dataset parent of this data object.
-        :param int obj_i: The index of this data object child within its dataset parent.
-
-        :returns: The file definitions and server routes.
-        :rtype: tuple[list[dict], list[starlette.routing.Route]]
-        """
-        raise NotImplementedError()
-
-    def get_expression_matrix(self, base_url, dataset_uid, obj_i):
-        """
-        Get the file definitions and server routes
-        corresponding to the :class:`~vitessce.constants.DataType.EXPRESSION_MATRIX` data type.
-        Used internally by :class:`~vitessce.widget.VitessceWidget`.
-
-        :param str base_url: The web server base url.
-        :param str dataset_uid: The unique identifier for the dataset parent of this data object.
-        :param int obj_i: The index of this data object child within its dataset parent.
-
-        :returns: The file definitions and server routes.
-        :rtype: tuple[list[dict], list[starlette.routing.Route]]
-        """
-        raise NotImplementedError()
-
-    def get_genomic_profiles(self, base_url, dataset_uid, obj_i):
-        """
-        Get the file definitions and server routes
-        corresponding to the :class:`~vitessce.constants.DataType.GENOMIC_PROFILES` data type.
-        Used internally by :class:`~vitessce.widget.VitessceWidget`.
-
-        :param str base_url: The web server base url.
-        :param str dataset_uid: The unique identifier for the dataset parent of this data object.
-        :param int obj_i: The index of this data object child within its dataset parent.
-
-        :returns: The file definitions and server routes.
-        :rtype: tuple[list[dict], list[starlette.routing.Route]]
-        """
-        raise NotImplementedError()
-
-    def _create_response_json(self, data_json):
-        """
-        Helper function that can be used for creating JSON responses.
-
-        :param dict data_json: The data to return as JSON in the response body.
-        :returns: The response handler function.
-        :rtype: function
-        """
-        async def response_func(req):
-            return UJSONResponse(data_json)
-        return response_func
-
-    def _get_data(self, data_type, base_url, dataset_uid, obj_i):
-        if data_type == dt.CELLS:
-            return self.get_cells(base_url, dataset_uid, obj_i)
-        elif data_type == dt.CELL_SETS:
-            return self.get_cell_sets(base_url, dataset_uid, obj_i)
-        elif data_type == dt.RASTER:
-            return self.get_raster(base_url, dataset_uid, obj_i)
-        elif data_type == dt.MOLECULES:
-            return self.get_molecules(base_url, dataset_uid, obj_i)
-        elif data_type == dt.NEIGHBORHOODS:
-            return self.get_neighborhoods(base_url, dataset_uid, obj_i)
-        elif data_type == dt.EXPRESSION_MATRIX:
-            return self.get_expression_matrix(base_url, dataset_uid, obj_i)
-        elif data_type == dt.GENOMIC_PROFILES:
-            return self.get_genomic_profiles(base_url, dataset_uid, obj_i)
-
-    def _get_url(self, base_url, dataset_uid, obj_i, suffix):
-        return base_url + self._get_route(dataset_uid, obj_i, suffix)
-
-    def _get_route(self, dataset_uid, obj_i, suffix):
-        return f"/{dataset_uid}/{obj_i}/{suffix}"
+    def _get_route(self, dataset_uid, obj_i, *args):
+        return "/" + "/".join(map(str, [dataset_uid, obj_i, *args]))
+    
+    def _get_out_dir(self, dataset_uid, obj_i, *args):
+        return join(self.out_dir, dataset_uid, str(obj_i), *args)
 
 class MultiImageWrapper(AbstractWrapper):
     """
@@ -186,37 +96,43 @@ class MultiImageWrapper(AbstractWrapper):
         super().__init__(**kwargs)
         self.image_wrappers = image_wrappers
         self.use_physical_size_scaling = use_physical_size_scaling
-
-    def create_raster_json(self, base_url="", dataset_uid="", obj_i=""):
-        raster_json = {
-            "schemaVersion": "0.0.2",
-            "usePhysicalSizeScaling": self.use_physical_size_scaling,
-            "images": [],
-            "renderLayers": []
-        }
-        for image in self.image_wrappers:
-            image_json = image.create_image_json(
-                image.get_img_url(base_url, dataset_uid, obj_i),
-                image.get_offsets_url(base_url, dataset_uid, obj_i)
-            )
-            raster_json['images'].append(image_json)
-            raster_json['renderLayers'].append(image.name)
-        return raster_json
     
-    def get_raster(self, base_url="", dataset_uid="", obj_i=""):
-        raster_json = self.create_raster_json(base_url, dataset_uid, obj_i)
+    def convert_and_save(self, dataset_uid, obj_i):
+        super().convert_and_save(dataset_uid, obj_i)
+        for image in self.image_wrappers:
+            image.convert_and_save(dataset_uid, obj_i)
+        file_def_creator = self.make_raster_file_def_creator(dataset_uid, obj_i)
+        routes = self.make_raster_routes(dataset_uid, obj_i)
+        self.file_def_creators.append(file_def_creator)
+        self.routes += routes
+
+    def make_raster_routes(self, dataset_uid, obj_i):
         obj_routes = []
         for image in self.image_wrappers:
-            obj_routes = obj_routes + image.get_routes(base_url, dataset_uid, obj_i)
-        obj_file_defs = [
-            {
+            obj_routes = obj_routes + image.get_routes()
+        return obj_routes
+    
+    def make_raster_file_def_creator(self, dataset_uid, obj_i):
+
+        def raster_file_def_creator(base_url):
+            raster_json = {
+                "schemaVersion": "0.0.2",
+                "usePhysicalSizeScaling": self.use_physical_size_scaling,
+                "images": [],
+                "renderLayers": []
+            }
+            for image in self.image_wrappers:
+                image_json = image.make_image_def(dataset_uid, obj_i, base_url)
+                raster_json['images'].append(image_json)
+                raster_json['renderLayers'].append(image.name)
+            
+            return {
                 "type": dt.RASTER.value,
                 "fileType": ft.RASTER_JSON.value,
                 "options": raster_json
             }
-        ]
 
-        return obj_file_defs, obj_routes
+        return raster_file_def_creator
 
 class OmeTiffWrapper(AbstractWrapper):
 
@@ -230,29 +146,67 @@ class OmeTiffWrapper(AbstractWrapper):
     :param \*\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
     """
 
-    def __init__(self, img_path="", img_url="", offsets_url="", name="", transformation_matrix=None, **kwargs):
+    def __init__(self, img_path=None, offsets_path=None, img_url=None, offsets_url=None, name="", transformation_matrix=None, **kwargs):
         super().__init__(**kwargs)
         self.name = name
         self._img_path = img_path
         self._img_url = img_url
         self._offsets_url = offsets_url
         self._transformation_matrix = transformation_matrix
-
-    def create_raster_json(self, img_url, offsets_url=""):
-        raster_json = {
-            "schemaVersion": "0.0.2",
-            "images": [self.create_image_json(img_url, offsets_url)],
-        }
-        return raster_json
+        self.is_remote = img_url is not None
+        if img_url is not None and (img_path is not None or offsets_path is not None):
+            raise ValueError("Did not expect img_path or offsets_path to be provided with img_url")
     
-    def create_image_json(self, img_url, offsets_url=""):
+    def convert_and_save(self, dataset_uid, obj_i):   
+        super().convert_and_save(dataset_uid, obj_i)
+        file_def_creator = self.make_raster_file_def_creator(dataset_uid, obj_i)
+        routes = self.make_raster_routes(dataset_uid, obj_i)
+        self.file_def_creators.append(file_def_creator)
+        self.routes += routes
+    
+    def make_raster_routes(self, dataset_uid, obj_i):
+        if self.is_remote:
+            return []
+        else:
+            os.makedirs(self._get_out_dir(dataset_uid, obj_i, 'offsets'), exist_ok=True)
+            os.makedirs(self._get_out_dir(dataset_uid, obj_i, 'images'), exist_ok=True)
+            offsets = get_offsets(self._img_path)
+            with open(self._get_out_dir(dataset_uid, obj_i, 'offsets', self.get_offsets_path_name()), 'w') as f:
+                json.dump(offsets, f)
+            routes = [
+                Route(self._get_route(dataset_uid, obj_i, 'images', self._get_img_filename()), lambda req: range_repsonse(req, self._img_path)),
+                Mount(self._get_route(dataset_uid, obj_i, 'offsets'),
+                        app=StaticFiles(directory=self._get_out_dir(dataset_uid, obj_i, 'offsets'), html=False))
+            ]
+            return routes
+    
+    def make_image_def(self, dataset_uid, obj_i, base_url):
+        img_url = self.get_img_url(base_url, dataset_uid, obj_i)
+        offsets_url = self.get_offsets_url(base_url, dataset_uid, obj_i)
+        return self.create_image_json(img_url, offsets_url)
+
+    def make_raster_file_def_creator(self, dataset_uid, obj_i):
+        def raster_file_def_creator(base_url):
+            raster_json = {
+                "schemaVersion": "0.0.2",
+                "images": [self.make_image_def(dataset_uid, obj_i, base_url)],
+            }
+
+            return {
+                "type": dt.RASTER.value,
+                "fileType": ft.RASTER_JSON.value,
+                "options": raster_json
+            }
+        return raster_file_def_creator
+    
+    def create_image_json(self, img_url, offsets_url=None):
         metadata = {}
         image = {
             "name": self.name,
             "type": "ome-tiff",
             "url": img_url,
         }
-        if offsets_url != "":
+        if offsets_url is not None:
             metadata["omeTiffOffsetsUrl"] = offsets_url
         if self._transformation_matrix is not None:
             metadata["transform"] = {
@@ -270,46 +224,19 @@ class OmeTiffWrapper(AbstractWrapper):
         return os.path.basename(self._img_path)
 
     def get_img_url(self, base_url="", dataset_uid="", obj_i=""):
-        if self._img_url != "":
+        if self._img_url is not None:
             return self._img_url
-        img_url = self._get_url(base_url, dataset_uid, obj_i, self._get_img_filename())
+        img_url = self._get_url(base_url, dataset_uid, obj_i, 'images', self._get_img_filename())
         return img_url
 
     def get_offsets_path_name(self):
         return f"{self._get_img_filename().split('.')[0]}.offsets.json"
     
     def get_offsets_url(self, base_url="", dataset_uid="", obj_i=""):
-        if self._offsets_url != "" or self._img_url != "":
+        if self._offsets_url is not None or self._img_url is not None:
             return self._offsets_url
-        offsets_url = self._get_url(base_url, dataset_uid, obj_i, self.get_offsets_path_name())
+        offsets_url = self._get_url(base_url, dataset_uid, obj_i, 'offsets', self.get_offsets_path_name())
         return offsets_url
-    
-    def get_routes(self, base_url="", dataset_uid="", obj_i=""):
-        obj_routes = [
-            Route(self._get_route(dataset_uid, obj_i, self._get_img_filename()), lambda req: range_repsonse(req, self._img_path))
-        ]
-        if self._img_path != "":
-            offsets = get_offsets(self._img_path)
-            obj_routes.append(
-                JsonRoute(self._get_route(dataset_uid, obj_i, self.get_offsets_path_name()),
-                        self._create_response_json(offsets), offsets),
-            )
-        return obj_routes
-
-    def get_raster(self, base_url="", dataset_uid="", obj_i=""):
-        obj_routes = self.get_routes(base_url, dataset_uid, obj_i)
-        img_url = self.get_img_url(base_url, dataset_uid, obj_i)
-        offsets_url = self.get_offsets_url(base_url, dataset_uid, obj_i)
-        raster_json = self.create_raster_json(img_url, offsets_url)
-        obj_file_defs = [
-            {
-                "type": dt.RASTER.value,
-                "fileType": ft.RASTER_JSON.value,
-                "options": raster_json
-            }
-        ]
-
-        return obj_file_defs, obj_routes
 
 
 class OmeZarrWrapper(AbstractWrapper):

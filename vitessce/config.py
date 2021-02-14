@@ -149,19 +149,26 @@ class VitessceConfigDataset:
         :returns: Self, to allow function chaining.
         :rtype: VitessceConfigDataset
         """
+        obj.convert_and_save(self.dataset["uid"], len(self.objs))
         self.objs.append(obj)
         return self
 
-    def to_dict(self, on_obj):
+    def to_dict(self, base_url):
         obj_file_defs = []
-        for obj_i, obj in enumerate(self.objs):
-            if on_obj is not None:
-                obj_file_defs += on_obj(obj, self.dataset["uid"], obj_i)
+        for obj in self.objs:
+            obj_file_defs += obj.get_file_defs(base_url)
                 
         return {
             **self.dataset,
             "files": [ f.to_dict() for f in self.dataset["files"] ] + obj_file_defs,
         }
+    
+    def get_routes(self):
+        routes = []
+        for obj in self.objs:
+            routes += obj.get_routes()
+
+        return routes
 
 class VitessceConfigViewHConcat:
     """
@@ -650,7 +657,7 @@ class VitessceConfig:
 
         return self
         
-    def to_dict(self, base_url=""):
+    def to_dict(self, base_url=None):
         """
         Convert the view config instance to a dict object.
 
@@ -659,12 +666,9 @@ class VitessceConfig:
         :returns: The view config as a dict. Useful for serializing to JSON.
         :rtype: dict
         """
-        def on_obj(obj, dataset_uid, obj_i):
-            obj_file_defs = create_obj_files(obj, base_url, dataset_uid, obj_i)
-            return obj_file_defs
         return {
             **self.config,
-            "datasets": [ d.to_dict(on_obj) for d in self.config["datasets"] ],
+            "datasets": [ d.to_dict(base_url) for d in self.config["datasets"] ],
             "coordinationSpace": dict([
                 (c_type, dict([
                     (c_scope_name, c_scope.c_value) for c_scope_name, c_scope in c_scopes.items() 
@@ -674,20 +678,16 @@ class VitessceConfig:
             "layout": [ c.to_dict() for c in self.config["layout"] ]
         }
     
-    def get_routes(self, base_url=""):
+    def get_routes(self):
         """
         Convert the routes for this view config from the datasets.
-
-        :param str base_url: Optional parameter for non-remote data to specify the url from which the data will be served.
 
         :returns: A list of server routes.
         :rtype: list[starlette.routing.Route]
         """
-        routes = []            
+        routes = []
         for d in self.config["datasets"]:
-            for obj_i, obj in enumerate(d.objs):
-                obj_routes = create_obj_routes(obj, base_url, d.dataset["uid"], obj_i)
-                routes += obj_routes
+            routes += d.get_routes()
         return routes
 
     @staticmethod

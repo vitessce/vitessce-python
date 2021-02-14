@@ -113,7 +113,7 @@ class VitessceWidget(widgets.DOMWidget):
             base_url = f"http://localhost:{use_port}"
 
         config_dict = config.to_dict(base_url=base_url)
-        routes = config.get_routes(base_url=base_url)
+        routes = config.get_routes()
 
         super(VitessceWidget, self).__init__(config=config_dict, height=height, theme=theme, proxy=proxy)
         

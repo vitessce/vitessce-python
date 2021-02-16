@@ -73,7 +73,9 @@ class AbstractWrapper:
         """
         file_defs_with_base_url = []
         for file_def_creator in self.file_def_creators:
-            file_defs_with_base_url.append(file_def_creator(base_url))
+            file_def = file_def_creator(base_url)
+            if file_def is not None:
+                file_defs_with_base_url.append(file_def)
         return file_defs_with_base_url
 
     def _get_url(self, base_url, dataset_uid, obj_i, *args):
@@ -98,7 +100,6 @@ class MultiImageWrapper(AbstractWrapper):
         self.use_physical_size_scaling = use_physical_size_scaling
     
     def convert_and_save(self, dataset_uid, obj_i):
-        super().convert_and_save(dataset_uid, obj_i)
         for image in self.image_wrappers:
             image.convert_and_save(dataset_uid, obj_i)
         file_def_creator = self.make_raster_file_def_creator(dataset_uid, obj_i)
@@ -157,8 +158,10 @@ class OmeTiffWrapper(AbstractWrapper):
         if img_url is not None and (img_path is not None or offsets_path is not None):
             raise ValueError("Did not expect img_path or offsets_path to be provided with img_url")
     
-    def convert_and_save(self, dataset_uid, obj_i):   
-        super().convert_and_save(dataset_uid, obj_i)
+    def convert_and_save(self, dataset_uid, obj_i):
+        # Only create out-directory if needed
+        if not self.is_remote:   
+            super().convert_and_save(dataset_uid, obj_i)
         file_def_creator = self.make_raster_file_def_creator(dataset_uid, obj_i)
         routes = self.make_raster_routes(dataset_uid, obj_i)
         self.file_def_creators.append(file_def_creator)
@@ -339,25 +342,35 @@ class AnnDataWrapper(AbstractWrapper):
         :param \*\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
         """
         super().__init__(**kwargs)
+        self._adata = adata
+        self._adata_url = adata_url
         if adata is not None:
-            self.adata = adata
-            self._zarr_filepath = join(tempfile.mkdtemp(), 'anndata.zarr')
-            self._adata_url = adata_url
-            adata.write_zarr(self._zarr_filepath)
+            self.is_remote = False
         else:
-            self.adata = adata
-            self._adata_url = adata_url
-            self._zarr_filepath = None
-        self.expression_matrix = expression_matrix
-        self.cell_set_obs_names = cell_set_obs_names
-        self.mappings_obsm_names = mappings_obsm_names
-        self.genes_var_filter = "var/" + genes_var_filter if genes_var_filter is not None else genes_var_filter
-        self.cell_set_obs = ["obs/" + i for i in cell_set_obs] if cell_set_obs is not None else cell_set_obs
-        self.spatial_centroid_obsm = "obsm/" + spatial_centroid_obsm if spatial_centroid_obsm is not None else spatial_centroid_obsm
-        self.spatial_polygon_obsm = "obsm/" + spatial_polygon_obsm if spatial_polygon_obsm is not None else spatial_polygon_obsm
-        self.mappings_obsm = ["obsm/" + i for i in mappings_obsm] if mappings_obsm is not None else mappings_obsm
-        self.mappings_obsm_dims = mappings_obsm_dims
-    
+            self.is_remote = True
+        self._expression_matrix = expression_matrix
+        self._cell_set_obs_names = cell_set_obs_names
+        self._mappings_obsm_names = mappings_obsm_names
+        self._genes_var_filter = "var/" + genes_var_filter if genes_var_filter is not None else genes_var_filter
+        self._cell_set_obs = ["obs/" + i for i in cell_set_obs] if cell_set_obs is not None else cell_set_obs
+        self._spatial_centroid_obsm = "obsm/" + spatial_centroid_obsm if spatial_centroid_obsm is not None else spatial_centroid_obsm
+        self._spatial_polygon_obsm = "obsm/" + spatial_polygon_obsm if spatial_polygon_obsm is not None else spatial_polygon_obsm
+        self._mappings_obsm = ["obsm/" + i for i in mappings_obsm] if mappings_obsm is not None else mappings_obsm
+        self._mappings_obsm_dims = mappings_obsm_dims
+
+    def convert_and_save(self, dataset_uid, obj_i):
+        # Only create out-directory if needed
+        if not self.is_remote:   
+            super().convert_and_save(dataset_uid, obj_i)
+            out_dir = self._get_out_dir(dataset_uid, obj_i)
+            self._zarr_filepath = join(out_dir, 'anndata.zarr')
+            self._adata.write_zarr(self._zarr_filepath)
+        cells_file_creator = self.make_cells_file_def_creator(dataset_uid, obj_i)
+        cell_sets_file_creator = self.make_cell_sets_file_def_creator(dataset_uid, obj_i)
+        expression_matrix_file_creator = self.make_expression_matrix_file_def_creator(dataset_uid, obj_i)
+        self.file_def_creators += [cells_file_creator, cell_sets_file_creator, expression_matrix_file_creator] 
+        self.routes += self.get_route(dataset_uid, obj_i)
+
     def _get_zarr_dir(self):
         return os.path.basename(self._zarr_filepath if self._zarr_filepath is not None else self._adata_url)
     
@@ -367,94 +380,98 @@ class AnnDataWrapper(AbstractWrapper):
         else:
             return self._get_url(base_url, dataset_uid, obj_i, self._get_zarr_dir())
     
+    def make_cells_file_def_creator(self, dataset_uid, obj_i):
+        def get_cells(base_url):
+            options = {}
+            if self._spatial_centroid_obsm is not None:
+                options["xy"] = self._spatial_centroid_obsm
+            if self._spatial_polygon_obsm is not None:
+                options["poly"] = self._spatial_polygon_obsm
+            if self._mappings_obsm is not None:
+                options["mappings"] = {}
+                if self._mappings_obsm_names is not None:
+                    for key, mapping in zip(self._mappings_obsm_names, self._mappings_obsm): 
+                        options["mappings"][key] = {
+                            "key": mapping,
+                            "dims": [0, 1]
+                        }
+                else:
+                    for mapping in self._mappings_obsm:
+                        mapping_key = mapping.split('/')[-1]
+                        self._mappings_obsm_names = mapping_key
+                        options["mappings"][mapping_key] = {
+                            "key": mapping,
+                            "dims": [0, 1]
+                        }
+                if self._mappings_obsm_dims is not None:
+                    for dim, key in zip(self._mappings_obsm_dims, self._mappings_obsm_names):
+                        options["mappings"][key]['dims'] = dim
+            if self._cell_set_obs is not None:
+                options["factors"] = []
+                for obs in self._cell_set_obs:
+                    options["factors"].append(obs)
+            if len(options.keys()) > 0:
+                obj_file_def = {
+                    "type": dt.CELLS.value,
+                    "fileType": ft.ANNDATA_CELLS_ZARR.value,
+                    "url": self.get_zarr_url(base_url, dataset_uid, obj_i),
+                    "options": options
+                }
+                
 
-    def get_cells(self, base_url, dataset_uid, obj_i):
-        options = {}
-        if self.spatial_centroid_obsm is not None:
-            options["xy"] = self.spatial_centroid_obsm
-        if self.spatial_polygon_obsm is not None:
-            options["poly"] = self.spatial_polygon_obsm
-        if self.mappings_obsm is not None:
-            options["mappings"] = {}
-            if self.mappings_obsm_names is not None:
-                for key, mapping in zip(self.mappings_obsm_names, self.mappings_obsm): 
-                    options["mappings"][key] = {
-                        "key": mapping,
-                        "dims": [0, 1]
-                    }
-            else:
-                for mapping in self.mappings_obsm:
-                    mapping_key = mapping.split('/')[-1]
-                    self.mappings_obsm_names = mapping_key
-                    options["mappings"][mapping_key] = {
-                        "key": mapping,
-                        "dims": [0, 1]
-                    }
-            if self.mappings_obsm_dims is not None:
-                for dim, key in zip(self.mappings_obsm_dims, self.mappings_obsm_names):
-                    options["mappings"][key]['dims'] = dim
-        if self.cell_set_obs is not None:
-            options["factors"] = []
-            for obs in self.cell_set_obs:
-                options["factors"].append(obs)
-        obj_file_defs = [
-            {
-                "type": dt.CELLS.value,
-                "fileType": ft.ANNDATA_CELLS_ZARR.value,
-                "url": self.get_zarr_url(base_url, dataset_uid, obj_i),
-                "options": options
-            }
-        ]
-        obj_routes = [self.get_route(dataset_uid, obj_i)]
-
-        return obj_file_defs, obj_routes
+                return obj_file_def
+            return None
+        return get_cells
     
     def get_route(self, dataset_uid, obj_i):
-        return Mount(self._get_route(dataset_uid, obj_i, self._get_zarr_dir()),
-                        app=StaticFiles(directory=self._zarr_filepath, html=False))
+        if self.is_remote is not True:
+            return [Mount(self._get_route(dataset_uid, obj_i, self._get_zarr_dir()),
+                            app=StaticFiles(directory=self._zarr_filepath, html=False))]
+        return []
 
-    def get_cell_sets(self, base_url, dataset_uid, obj_i):
-        obj_file_defs = []
-        obj_routes = [self.get_route(dataset_uid, obj_i)]
-        if self.cell_set_obs is not None:
-            options = []
-            if self.cell_set_obs_names is not None:
-                names = self.cell_set_obs_names
-            else:
-                names = [obs.split('/')[-1] for obs in self.cell_set_obs]
-            for obs, name in zip(self.cell_set_obs, names):
-                options.append({
-                    "groupName": name,
-                    "setName": obs
-                })
+    def make_cell_sets_file_def_creator(self, dataset_uid, obj_i):
+        def get_cell_sets(base_url):
+            if self._cell_set_obs is not None:
+                options = []
+                if self._cell_set_obs_names is not None:
+                    names = self._cell_set_obs_names
+                else:
+                    names = [obs.split('/')[-1] for obs in self._cell_set_obs]
+                for obs, name in zip(self._cell_set_obs, names):
+                    options.append({
+                        "groupName": name,
+                        "setName": obs
+                    })
 
-            obj_file_defs = [
-                {
+                obj_file_def = {
                     "type": dt.CELL_SETS.value,
                     "fileType": ft.ANNDATA_CELL_SETS_ZARR.value,
                     "url": self.get_zarr_url(base_url, dataset_uid, obj_i),
                     "options": options
                 }
-            ]
-        return obj_file_defs, obj_routes
-    
-    def get_expression_matrix(self, base_url, dataset_uid, obj_i):
-        options = {}
-        obj_routes = [self.get_route(dataset_uid, obj_i)]
-        obj_file_defs = []
-        if self.expression_matrix is not None:
-            options["matrix"] = self.expression_matrix
-            if self.genes_var_filter is not None:
-                options["geneFilter"] = self.genes_var_filter
-            obj_file_defs = [
-                {
+                
+                return obj_file_def
+            return None
+        return get_cell_sets
+
+    def make_expression_matrix_file_def_creator(self, dataset_uid, obj_i):
+        def get_expression_matrix(base_url):
+            options = {}
+            obj_file_defs = []
+            if self._expression_matrix is not None:
+                options["matrix"] = self._expression_matrix
+                if self._genes_var_filter is not None:
+                    options["geneFilter"] = self._genes_var_filter
+                obj_file_def = {
                     "type": dt.EXPRESSION_MATRIX.value,
                     "fileType": ft.ANNDATA_EXPRESSION_MATRIX_ZARR.value,
                     "url": self.get_zarr_url(base_url, dataset_uid, obj_i),
                     "options": options
                 }
-            ]
-        return obj_file_defs, obj_routes
+                
+                return obj_file_def
+            return None
+        return get_expression_matrix
 
 class SnapWrapper(AbstractWrapper):
 
@@ -478,6 +495,15 @@ class SnapWrapper(AbstractWrapper):
         # Convert to dense matrix if sparse.
         if type(in_mtx) == coo_matrix:
             self.in_mtx = in_mtx.toarray()
+    
+    def convert_and_save(self, dataset_uid, obj_i):
+        print("Please wait, the following conversion is slow")
+        zarr_tempdir = self.tempdir
+        zarr_filepath = join(zarr_tempdir, 'profiles.zarr')
+        self.create_genomic_multivec_zarr(zarr_filepath)
+        file_def_creator = self.make_raster_file_def_creator(dataset_uid, obj_i)
+        routes = self.make_raster_routes(dataset_uid, obj_i)
+        self.file_def_creators.append(file_def_creator)
 
 
     def create_genomic_multivec_zarr(self, zarr_filepath):
@@ -628,9 +654,6 @@ class SnapWrapper(AbstractWrapper):
         
         zarr_tempdir = self.tempdir
         zarr_filepath = join(zarr_tempdir, 'profiles.zarr')
-
-        print("Please wait, the following conversion is slow")
-        self.create_genomic_multivec_zarr(zarr_filepath)
 
         if zarr_tempdir is not None:
             obj_routes = [

@@ -17,7 +17,6 @@ from create_test_data import (
 
 from vitessce import (
     OmeTiffWrapper,
-    OmeZarrWrapper,
     AnnDataWrapper,
     SnapWrapper,
 )
@@ -39,84 +38,40 @@ class TestWrappers(unittest.TestCase):
     def test_ome_tiff(self):
         w = OmeTiffWrapper(img_path="data/test.ome.tif", name="Test")
 
-        raster_json = w.create_raster_json(
-            "http://localhost:8000/A/0/test.ome.tif",
-            "http://localhost:8000/A/0/test.offsets.json"
+        raster_file_def_creator = w.make_raster_file_def_creator(
+            "A",
+            "0"
         )
-
+        raster_json = raster_file_def_creator('http://localhost:8000')
         self.assertEqual(raster_json, {
-            'images': [
-                {
-                    'metadata': {
-                        'omeTiffOffsetsUrl': 'http://localhost:8000/A/0/test.offsets.json'
-                    },
-                    'name': 'Test',
-                    'type': 'ome-tiff',
-                    'url': 'http://localhost:8000/A/0/test.ome.tif'
-                }
-            ],
-            'schemaVersion': '0.0.2'
+            'type': 'raster',
+            'fileType': 'raster.json',
+            'options': {
+                'schemaVersion': '0.0.2',
+                'images': [
+                    {
+                        'name': 'Test',
+                        'type': 'ome-tiff',
+                        'url': 'http://localhost:8000/A/0/test.ome.tif',
+                        'metadata': {
+                            'omeTiffOffsetsUrl': 'http://localhost:8000/A/0/test.offsets.json'
+                        }
+                    }
+                ],
+            }
         })
-
-        obj_file_defs, obj_routes = w.get_raster("http://localhost:8000", 'A', 0)
-
-        self.assertEqual(obj_file_defs, [
-            {
-                'type': 'raster',
-                'fileType': 'raster.json',
-                'options': raster_json
-            }
-        ])
-    
-    def test_omezarr_store(self):
-        z = zarr.open('data/test.ome.zarr')
-        w = OmeZarrWrapper(z)
-
-        raster_json = w.create_raster_json(
-            "http://localhost:8000/raster_img"
-        )
-        
-        # TODO
-        # self.assertEqual(raster_json, {})
-
-        obj_file_defs, obj_routes = w.get_raster("http://localhost:8000", 'A', 0)
-        self.assertEqual(obj_file_defs, [
-            {
-                'fileType': 'raster.json',
-                'type': 'raster',
-                'url': 'http://localhost:8000/A/0/raster'
-            }
-        ])
-    
-    def test_base_url(self):
-        z = zarr.open('data/test.ome.zarr')
-        w = OmeZarrWrapper(z)
-
-        raster_json = w.create_raster_json(
-            "https://example.com/raster_img"
-        )
-        
-        # TODO
-        # self.assertEqual(raster_json, {})
-
-        obj_file_defs, obj_routes = w.get_raster("https://example.com", 'A', 0)
-        self.assertEqual(obj_file_defs, [
-            {
-                'fileType': 'raster.json',
-                'type': 'raster',
-                'url': 'https://example.com/A/0/raster'
-            }
-        ])
     
     def test_anndata(self):
         adata = read_h5ad(join('data', 'test.h5ad'))
         w = AnnDataWrapper(adata, cell_set_obs=['CellType'])
 
-        obj_file_defs, _ = w.get_cells("http://localhost:8000", 'A', 0)
-        self.assertEqual(obj_file_defs, [{'type': 'cells', 'fileType': 'anndata-cells.zarr', 'url': 'http://localhost:8000/A/0/anndata.zarr', 'options': {'factors': ['obs/CellType']}}])
+        cells_creator = w.make_cells_file_def_creator('A', 0)
+        cells = cells_creator( 'http://localhost:8000')
+        self.assertEqual(cells, {'type': 'cells', 'fileType': 'anndata-cells.zarr', 'url': 'http://localhost:8000/A/0/anndata.zarr', 'options': {'factors': ['obs/CellType']}})
 
-        obj_file_defs, _ = w.get_cell_sets("http://localhost:8000", 'A', 0)
-        self.assertEqual(obj_file_defs, [{'type': 'cell-sets', 'fileType': 'anndata-cell-sets.zarr', 'url': 'http://localhost:8000/A/0/anndata.zarr', 'options': [{'groupName': 'CellType', 'setName': 'obs/CellType'}]}])
+        cell_sets_creator = w.make_cell_sets_file_def_creator('A', 0)
+        cell_sets = cell_sets_creator( 'http://localhost:8000')
+        self.assertEqual(cell_sets, {'type': 'cell-sets', 'fileType': 'anndata-cell-sets.zarr', 'url': 'http://localhost:8000/A/0/anndata.zarr', 'options': [{'groupName': 'CellType', 'setName': 'obs/CellType'}]})
 
     def test_snaptools(self):
         mtx = mmread(join('data', 'test.snap.mtx'))

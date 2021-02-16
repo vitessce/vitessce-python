@@ -256,40 +256,45 @@ class TestConfig(unittest.TestCase):
         vc = VitessceConfig()
 
         class MockWrapperA(AbstractWrapper):
-            def __init__(self, name):
+            def __init__(self, name, **kwargs):
+                super().__init__(**kwargs)
                 self.name = name
-            def get_molecules(self, base_url, *args):
-                return [{
-                    "url": f"{base_url}/molecules",
-                    "type": "molecules",
-                    "fileType": "molecules.json"
-                }], None
-            def get_cells(self, base_url, *args):
-                return [{
-                    "url": f"{base_url}/cells",
-                    "type": "cells",
-                    "fileType": "cells.json"
-                }], None
+            def convert_and_save(self, dataset_uid, obj_i):
+                def get_molecules(base_url):
+                    return {
+                        "url": f"{base_url}/molecules",
+                        "type": "molecules",
+                        "fileType": "molecules.json"
+                    }
+                def get_cells(base_url):
+                    return {
+                        "url": f"{base_url}/cells",
+                        "type": "cells",
+                        "fileType": "cells.json"
+                    }
+                self.file_def_creators += [get_molecules, get_cells]
 
         class MockWrapperB(AbstractWrapper):
-            def __init__(self, name):
+            def __init__(self, name, **kwargs):
+                super().__init__(**kwargs)
                 self.name = name
-            def get_cell_sets(self, base_url, *args):
-                return [{
-                    "url": f"{base_url}/cell-sets",
-                    "type": "cell-sets",
-                    "fileType": "cell-sets.json"
-                }], None
-        my_dataset = (vc.add_dataset(name='My Object Dataset')
-            .add_object(
-                obj=MockWrapperA("Experiment A")
-            ).add_object(
-                obj=MockWrapperB("Experiment B")
-            )
+            def convert_and_save(self, dataset_uid, obj_i):
+                def get_cell_sets(base_url):
+                    return {
+                        "url": f"{base_url}/cell-sets",
+                        "type": "cell-sets",
+                        "fileType": "cell-sets.json"
+                    }
+                self.file_def_creators += [get_cell_sets]
+
+        vc.add_dataset(name='My Object Dataset').add_object(
+            obj=MockWrapperA("Experiment A")
+        ).add_object(
+            obj=MockWrapperB("Experiment B")
         )
 
         vc_dict = vc.to_dict(base_url="http://localhost:8000")
-        vc_json = json.dumps(vc_dict)
+        print(vc_dict)
 
         self.assertEqual(vc_dict, {
             "version": "1.0.0",
@@ -301,14 +306,14 @@ class TestConfig(unittest.TestCase):
                     'name': 'My Object Dataset',
                     'files': [
                         {
-                            "url": "http://localhost:8000/cells",
-                            "type": "cells",
-                            "fileType": "cells.json"
-                        },
-                        {
                             "url": "http://localhost:8000/molecules",
                             "type": "molecules",
                             "fileType": "molecules.json"
+                        },
+                        {
+                            "url": "http://localhost:8000/cells",
+                            "type": "cells",
+                            "fileType": "cells.json"
                         },
                         {
                             "url": "http://localhost:8000/cell-sets",

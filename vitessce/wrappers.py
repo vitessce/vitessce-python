@@ -362,23 +362,25 @@ class AnnDataWrapper(AbstractWrapper):
         # Only create out-directory if needed
         if not self.is_remote:   
             super().convert_and_save(dataset_uid, obj_i)
-            out_dir = self._get_out_dir(dataset_uid, obj_i)
-            self._zarr_filepath = join(out_dir, 'anndata.zarr')
-            self._adata.write_zarr(self._zarr_filepath)
+            zarr_filepath = self.get_zarr_path(dataset_uid, obj_i)
+            self._adata.write_zarr(zarr_filepath)
         cells_file_creator = self.make_cells_file_def_creator(dataset_uid, obj_i)
         cell_sets_file_creator = self.make_cell_sets_file_def_creator(dataset_uid, obj_i)
         expression_matrix_file_creator = self.make_expression_matrix_file_def_creator(dataset_uid, obj_i)
         self.file_def_creators += [cells_file_creator, cell_sets_file_creator, expression_matrix_file_creator] 
         self.routes += self.get_route(dataset_uid, obj_i)
-
-    def _get_zarr_dir(self):
-        return os.path.basename(self._zarr_filepath if self._zarr_filepath is not None else self._adata_url)
     
+    def get_zarr_path(self, dataset_uid, obj_i):
+        out_dir = self._get_out_dir(dataset_uid, obj_i)
+        zarr_filepath = join(out_dir, 'anndata.zarr')
+        return zarr_filepath
+        
+
     def get_zarr_url(self, base_url="", dataset_uid="", obj_i=""):
-        if self._adata_url is not None:
+        if self.is_remote:
             return self._adata_url
         else:
-            return self._get_url(base_url, dataset_uid, obj_i, self._get_zarr_dir())
+            return self._get_url(base_url, dataset_uid, obj_i, 'anndata.zarr')
     
     def make_cells_file_def_creator(self, dataset_uid, obj_i):
         def get_cells(base_url):
@@ -424,9 +426,10 @@ class AnnDataWrapper(AbstractWrapper):
         return get_cells
     
     def get_route(self, dataset_uid, obj_i):
-        if self.is_remote is not True:
-            return [Mount(self._get_route(dataset_uid, obj_i, self._get_zarr_dir()),
-                            app=StaticFiles(directory=self._zarr_filepath, html=False))]
+        if not self.is_remote:
+            out_dir = self._get_out_dir(dataset_uid, obj_i)
+            return [Mount(self._get_route(dataset_uid, obj_i),
+                            app=StaticFiles(directory=out_dir, html=False))]
         return []
 
     def make_cell_sets_file_def_creator(self, dataset_uid, obj_i):
@@ -457,7 +460,6 @@ class AnnDataWrapper(AbstractWrapper):
     def make_expression_matrix_file_def_creator(self, dataset_uid, obj_i):
         def get_expression_matrix(base_url):
             options = {}
-            obj_file_defs = []
             if self._expression_matrix is not None:
                 options["matrix"] = self._expression_matrix
                 if self._genes_var_filter is not None:
@@ -488,7 +490,6 @@ class SnapWrapper(AbstractWrapper):
         self.in_bins_df = in_bins_df # pandas dataframe (bins.txt)
         self.in_clusters_df = in_clusters_df # pandas dataframe (umap_coords_clusters.csv)
 
-        self.tempdir = tempfile.mkdtemp()
 
         self.starting_resolution = starting_resolution
 
@@ -497,14 +498,23 @@ class SnapWrapper(AbstractWrapper):
             self.in_mtx = in_mtx.toarray()
     
     def convert_and_save(self, dataset_uid, obj_i):
-        print("Please wait, the following conversion is slow")
-        zarr_tempdir = self.tempdir
-        zarr_filepath = join(zarr_tempdir, 'profiles.zarr')
+        super().convert_and_save(dataset_uid, obj_i)
+        out_dir = self._get_out_dir(dataset_uid, obj_i)
+        zarr_filepath = join(out_dir, 'profiles.zarr')
         self.create_genomic_multivec_zarr(zarr_filepath)
-        file_def_creator = self.make_raster_file_def_creator(dataset_uid, obj_i)
-        routes = self.make_raster_routes(dataset_uid, obj_i)
-        self.file_def_creators.append(file_def_creator)
-
+        with open(join(out_dir, 'cell-sets'), 'w') as f:
+            f.write(json.dumps(self.create_cell_sets_json()))
+        with open(join(out_dir, 'cells'), 'w') as f:
+            f.write(json.dumps(self.create_cells_json()))
+        cells_file_creator = self.make_cells_file_def_creator(dataset_uid, obj_i)
+        cell_sets_file_creator = self.make_cell_sets_file_def_creator(dataset_uid, obj_i)
+        genomic_profiles_file_creator = self.make_genomic_profiles_file_def_creator(dataset_uid, obj_i)
+        self.file_def_creators += [cells_file_creator, cell_sets_file_creator, genomic_profiles_file_creator] 
+        self.routes += self.get_route(dataset_uid, obj_i)
+    
+    def get_route(self, dataset_uid, obj_i):
+        out_dir = self._get_out_dir(dataset_uid, obj_i)
+        return [Mount(self._get_route(dataset_uid, obj_i), app=StaticFiles(directory=out_dir, html=False))]
 
     def create_genomic_multivec_zarr(self, zarr_filepath):
         in_mtx = self.in_mtx
@@ -647,29 +657,16 @@ class SnapWrapper(AbstractWrapper):
                 genomic_profiles.add_profile(cluster_profile, chr_name, cluster_index)
         
         return
-
-    def get_genomic_profiles(self, base_url, dataset_uid, obj_i):
-        obj_routes = []
-        obj_file_defs = []
+    
+    def make_genomic_profiles_file_def_creator(self, dataset_uid, obj_i):
+        def get_genomic_profiles(base_url):
+            return {
+                "type": dt.GENOMIC_PROFILES.value,
+                "fileType": ft.GENOMIC_PROFILES_ZARR.value,
+                "url": self._get_url(base_url, dataset_uid, obj_i, "profiles.zarr")
+            }
         
-        zarr_tempdir = self.tempdir
-        zarr_filepath = join(zarr_tempdir, 'profiles.zarr')
-
-        if zarr_tempdir is not None:
-            obj_routes = [
-                Mount(self._get_route(dataset_uid, obj_i, "genomic"),
-                    app=StaticFiles(directory=os.path.dirname(zarr_filepath), html=False, check_dir=False)),
-            ]
-
-            obj_file_defs = [
-                {
-                    "type": dt.GENOMIC_PROFILES.value,
-                    "fileType": ft.GENOMIC_PROFILES_ZARR.value,
-                    "url": self._get_url(base_url, dataset_uid, obj_i, "genomic/profiles.zarr")
-                }
-            ]
-
-        return obj_file_defs, obj_routes
+        return get_genomic_profiles
     
 
     def create_cell_sets_json(self):
@@ -695,25 +692,14 @@ class SnapWrapper(AbstractWrapper):
 
         return cell_sets.json
     
-    def get_cell_sets(self, base_url, dataset_uid, obj_i):
-        obj_routes = []
-        obj_file_defs = []
-
-        cell_sets_json = self.create_cell_sets_json()
-
-        obj_routes = [
-            JsonRoute(self._get_route(dataset_uid, obj_i, "cell-sets"),
-                    self._create_response_json(cell_sets_json), cell_sets_json),
-        ]
-        obj_file_defs = [
-            {
+    def make_cell_sets_file_def_creator(self, dataset_uid, obj_i):
+        def get_cell_sets(base_url):
+            return {
                 "type": dt.CELL_SETS.value,
                 "fileType": ft.CELL_SETS_JSON.value,
                 "url": self._get_url(base_url, dataset_uid, obj_i, "cell-sets")
             }
-        ]
-
-        return obj_file_defs, obj_routes
+        return get_cell_sets
     
     def create_cells_json(self):
         in_clusters_df = self.in_clusters_df
@@ -724,22 +710,12 @@ class SnapWrapper(AbstractWrapper):
         cells.add_mapping("UMAP", mapping)
         return cells.json
     
-    def get_cells(self, base_url, dataset_uid, obj_i):
-        obj_routes = []
-        obj_file_defs = []
+    def make_cells_file_def_creator(self, dataset_uid, obj_i):
+        def get_cells(base_url):
 
-        cells_json = self.create_cells_json()
-
-        obj_routes = [
-            JsonRoute(self._get_route(dataset_uid, obj_i, "cells"),
-                    self._create_response_json(cells_json), cells_json),
-        ]
-        obj_file_defs = [
-            {
+            return {
                 "type": dt.CELLS.value,
                 "fileType": ft.CELLS_JSON.value,
                 "url": self._get_url(base_url, dataset_uid, obj_i, "cells")
             }
-        ]
-
-        return obj_file_defs, obj_routes
+        return get_cells

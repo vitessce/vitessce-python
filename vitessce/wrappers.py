@@ -171,11 +171,6 @@ class OmeTiffWrapper(AbstractWrapper):
         # Only create out-directory if needed
         if not self.is_remote:   
             super().convert_and_save(dataset_uid, obj_i)
-        offsets = get_offsets(self._img_path)
-        out_dir = self._get_out_dir(dataset_uid, obj_i)
-        with open(join(out_dir, self.get_offsets_path_name()), 'w') as f:
-            json.dump(offsets, f)
-        shutil.copy(self._img_path, out_dir)
         file_def_creator = self.make_raster_file_def_creator(dataset_uid, obj_i)
         routes = self.make_raster_routes(dataset_uid, obj_i)
         self.file_def_creators.append(file_def_creator)
@@ -185,11 +180,12 @@ class OmeTiffWrapper(AbstractWrapper):
         if self.is_remote:
             return []
         else:
-            out_dir = self._get_out_dir(dataset_uid, obj_i)
+            offsets = get_offsets(self._img_path)
+            async def response_func(req):
+                return UJSONResponse(offsets)
             routes = [
-                Route(self._get_route(dataset_uid, obj_i, self._get_img_filename()), lambda req: range_repsonse(req, join(out_dir, self._get_img_filename()))),
-                Mount(self._get_route(dataset_uid, obj_i),
-                        app=StaticFiles(directory=out_dir, html=False))
+                Route(self._get_route(dataset_uid, obj_i, self._get_img_filename()), lambda req: range_repsonse(req, self._img_path)),
+                JsonRoute(self._get_route(dataset_uid, obj_i, self.get_offsets_path_name()), response_func, offsets)
             ]
             return routes
     

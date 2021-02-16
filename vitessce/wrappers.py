@@ -40,6 +40,7 @@ class AbstractWrapper:
         """
         self.out_dir = kwargs['out_dir'] if 'out_dir' in kwargs else tempfile.mkdtemp()
         self.routes = []
+        self.is_remote = False
         self.file_def_creators = []
 
     def convert_and_save(self, dataset_uid, obj_i):
@@ -86,6 +87,13 @@ class AbstractWrapper:
     
     def _get_out_dir(self, dataset_uid, obj_i, *args):
         return join(self.out_dir, dataset_uid, str(obj_i), *args)
+    
+    def get_route(self, dataset_uid, obj_i):
+        if not self.is_remote:
+            out_dir = self._get_out_dir(dataset_uid, obj_i)
+            return [Mount(self._get_route(dataset_uid, obj_i),
+                            app=StaticFiles(directory=out_dir, html=False))]
+        return []
 
 class MultiImageWrapper(AbstractWrapper):
     """
@@ -426,13 +434,6 @@ class AnnDataWrapper(AbstractWrapper):
                 return obj_file_def
             return None
         return get_cells
-    
-    def get_route(self, dataset_uid, obj_i):
-        if not self.is_remote:
-            out_dir = self._get_out_dir(dataset_uid, obj_i)
-            return [Mount(self._get_route(dataset_uid, obj_i),
-                            app=StaticFiles(directory=out_dir, html=False))]
-        return []
 
     def make_cell_sets_file_def_creator(self, dataset_uid, obj_i):
         def get_cell_sets(base_url):
@@ -514,10 +515,6 @@ class SnapWrapper(AbstractWrapper):
         self.file_def_creators += [cells_file_creator, cell_sets_file_creator, genomic_profiles_file_creator] 
         self.routes += self.get_route(dataset_uid, obj_i)
     
-    def get_route(self, dataset_uid, obj_i):
-        out_dir = self._get_out_dir(dataset_uid, obj_i)
-        return [Mount(self._get_route(dataset_uid, obj_i), app=StaticFiles(directory=out_dir, html=False))]
-
     def create_genomic_multivec_zarr(self, zarr_filepath):
         in_mtx = self.in_mtx
         in_clusters_df = self.in_clusters_df

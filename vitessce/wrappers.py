@@ -346,8 +346,10 @@ class AnnDataWrapper(AbstractWrapper):
         self._adata_url = adata_url
         if adata is not None:
             self.is_remote = False
+            self.zarr_folder = 'anndata.zarr'
         else:
             self.is_remote = True
+            self.zarr_folder = None
         self._expression_matrix = expression_matrix
         self._cell_set_obs_names = cell_set_obs_names
         self._mappings_obsm_names = mappings_obsm_names
@@ -372,7 +374,7 @@ class AnnDataWrapper(AbstractWrapper):
     
     def get_zarr_path(self, dataset_uid, obj_i):
         out_dir = self._get_out_dir(dataset_uid, obj_i)
-        zarr_filepath = join(out_dir, 'anndata.zarr')
+        zarr_filepath = join(out_dir, self.zarr_folder)
         return zarr_filepath
         
 
@@ -380,7 +382,7 @@ class AnnDataWrapper(AbstractWrapper):
         if self.is_remote:
             return self._adata_url
         else:
-            return self._get_url(base_url, dataset_uid, obj_i, 'anndata.zarr')
+            return self._get_url(base_url, dataset_uid, obj_i, self.zarr_folder)
     
     def make_cells_file_def_creator(self, dataset_uid, obj_i):
         def get_cells(base_url):
@@ -489,7 +491,7 @@ class SnapWrapper(AbstractWrapper):
         self.in_barcodes_df = in_barcodes_df # pandas dataframe (barcodes.txt)
         self.in_bins_df = in_bins_df # pandas dataframe (bins.txt)
         self.in_clusters_df = in_clusters_df # pandas dataframe (umap_coords_clusters.csv)
-
+        self.zarr_folder = 'profiles.zarr'
 
         self.starting_resolution = starting_resolution
 
@@ -500,7 +502,7 @@ class SnapWrapper(AbstractWrapper):
     def convert_and_save(self, dataset_uid, obj_i):
         super().convert_and_save(dataset_uid, obj_i)
         out_dir = self._get_out_dir(dataset_uid, obj_i)
-        zarr_filepath = join(out_dir, 'profiles.zarr')
+        zarr_filepath = join(out_dir, self.zarr_folder)
         self.create_genomic_multivec_zarr(zarr_filepath)
         with open(join(out_dir, 'cell-sets'), 'w') as f:
             f.write(json.dumps(self.create_cell_sets_json()))
@@ -663,7 +665,7 @@ class SnapWrapper(AbstractWrapper):
             return {
                 "type": dt.GENOMIC_PROFILES.value,
                 "fileType": ft.GENOMIC_PROFILES_ZARR.value,
-                "url": self._get_url(base_url, dataset_uid, obj_i, "profiles.zarr")
+                "url": self._get_url(base_url, dataset_uid, obj_i, self.zarr_folder)
             }
         
         return get_genomic_profiles

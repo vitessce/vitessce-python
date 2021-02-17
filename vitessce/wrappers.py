@@ -47,6 +47,7 @@ class AbstractWrapper:
     def convert_and_save(self, dataset_uid, obj_i):
         """
         Fill in the file_def_creators array.
+        Each function added to this list should take in a base URL and generate a Vitessce file.
         If this wrapper is wrapping local data, then create routes and fill in the routes array.
         This method is void, should not return anything.
 
@@ -79,22 +80,32 @@ class AbstractWrapper:
             if file_def is not None:
                 file_defs_with_base_url.append(file_def)
         return file_defs_with_base_url
+    
+        
+    def get_out_dir_route(self, dataset_uid, obj_i):
+        """
+        Obtain the Mount for the `out_dir`
+
+        :param str dataset_uid: A dataset unique identifier for the Mount
+        :param str obj_i: A index of the current vitessce.wrappers.AbstractWrapper among all other wrappers in the view config
+
+        :returns: A starlette Mount of the the `out_dir`
+        :rtype: list[starlette.routing.Mount]
+        """
+        if not self.is_remote:
+            out_dir = self._get_out_dir(dataset_uid, obj_i)
+            return [Mount(self._get_route_str(dataset_uid, obj_i),
+                            app=StaticFiles(directory=out_dir, html=False))]
+        return []
 
     def _get_url(self, base_url, dataset_uid, obj_i, *args):
-        return base_url + self._get_route(dataset_uid, obj_i, *args)
+        return base_url + self._get_route_str(dataset_uid, obj_i, *args)
 
-    def _get_route(self, dataset_uid, obj_i, *args):
+    def _get_route_str(self, dataset_uid, obj_i, *args):
         return "/" + "/".join(map(str, [dataset_uid, obj_i, *args]))
     
     def _get_out_dir(self, dataset_uid, obj_i, *args):
         return join(self.out_dir, dataset_uid, str(obj_i), *args)
-    
-    def get_route(self, dataset_uid, obj_i):
-        if not self.is_remote:
-            out_dir = self._get_out_dir(dataset_uid, obj_i)
-            return [Mount(self._get_route(dataset_uid, obj_i),
-                            app=StaticFiles(directory=out_dir, html=False))]
-        return []
 
 class MultiImageWrapper(AbstractWrapper):
     """
@@ -171,8 +182,10 @@ class OmeTiffWrapper(AbstractWrapper):
         # Only create out-directory if needed
         if not self.is_remote:   
             super().convert_and_save(dataset_uid, obj_i)
+        
         file_def_creator = self.make_raster_file_def_creator(dataset_uid, obj_i)
         routes = self.make_raster_routes(dataset_uid, obj_i)
+        
         self.file_def_creators.append(file_def_creator)
         self.routes += routes
     
@@ -184,8 +197,8 @@ class OmeTiffWrapper(AbstractWrapper):
             async def response_func(req):
                 return UJSONResponse(offsets)
             routes = [
-                Route(self._get_route(dataset_uid, obj_i, self._get_img_filename()), lambda req: range_repsonse(req, self._img_path)),
-                JsonRoute(self._get_route(dataset_uid, obj_i, self.get_offsets_path_name()), response_func, offsets)
+                Route(self._get_route_str(dataset_uid, obj_i, self._get_img_filename()), lambda req: range_repsonse(req, self._img_path)),
+                JsonRoute(self._get_route_str(dataset_uid, obj_i, self.get_offsets_path_name()), response_func, offsets)
             ]
             return routes
     
@@ -312,9 +325,9 @@ class OmeTiffWrapper(AbstractWrapper):
 #             )
 
 #             obj_routes = [
-#                 Mount(self._get_route(dataset_uid, obj_i, "raster_img"),
+#                 Mount(self._get_route_str(dataset_uid, obj_i, "raster_img"),
 #                         app=StaticFiles(directory=img_dir_path, html=False)),
-#                 JsonRoute(self._get_route(dataset_uid, obj_i, "raster"),
+#                 JsonRoute(self._get_route_str(dataset_uid, obj_i, "raster"),
 #                         self._create_response_json(raster_json), raster_json)
 #             ]
 #             obj_file_defs = [
@@ -372,11 +385,13 @@ class AnnDataWrapper(AbstractWrapper):
             super().convert_and_save(dataset_uid, obj_i)
             zarr_filepath = self.get_zarr_path(dataset_uid, obj_i)
             self._adata.write_zarr(zarr_filepath)
+        
         cells_file_creator = self.make_cells_file_def_creator(dataset_uid, obj_i)
         cell_sets_file_creator = self.make_cell_sets_file_def_creator(dataset_uid, obj_i)
         expression_matrix_file_creator = self.make_expression_matrix_file_def_creator(dataset_uid, obj_i)
+        
         self.file_def_creators += [cells_file_creator, cell_sets_file_creator, expression_matrix_file_creator] 
-        self.routes += self.get_route(dataset_uid, obj_i)
+        self.routes += self.get_out_dir_route(dataset_uid, obj_i)
     
     def get_zarr_path(self, dataset_uid, obj_i):
         out_dir = self._get_out_dir(dataset_uid, obj_i)
@@ -426,9 +441,7 @@ class AnnDataWrapper(AbstractWrapper):
                     "fileType": ft.ANNDATA_CELLS_ZARR.value,
                     "url": self.get_zarr_url(base_url, dataset_uid, obj_i),
                     "options": options
-                }
-                
-
+                }   
                 return obj_file_def
             return None
         return get_cells
@@ -502,16 +515,19 @@ class SnapWrapper(AbstractWrapper):
         super().convert_and_save(dataset_uid, obj_i)
         out_dir = self._get_out_dir(dataset_uid, obj_i)
         zarr_filepath = join(out_dir, self.zarr_folder)
+
         self.create_genomic_multivec_zarr(zarr_filepath)
         with open(join(out_dir, 'cell-sets'), 'w') as f:
             f.write(json.dumps(self.create_cell_sets_json()))
         with open(join(out_dir, 'cells'), 'w') as f:
             f.write(json.dumps(self.create_cells_json()))
+        
         cells_file_creator = self.make_cells_file_def_creator(dataset_uid, obj_i)
         cell_sets_file_creator = self.make_cell_sets_file_def_creator(dataset_uid, obj_i)
         genomic_profiles_file_creator = self.make_genomic_profiles_file_def_creator(dataset_uid, obj_i)
+        
         self.file_def_creators += [cells_file_creator, cell_sets_file_creator, genomic_profiles_file_creator] 
-        self.routes += self.get_route(dataset_uid, obj_i)
+        self.routes += self.get_out_dir_route(dataset_uid, obj_i)
     
     def create_genomic_multivec_zarr(self, zarr_filepath):
         in_mtx = self.in_mtx

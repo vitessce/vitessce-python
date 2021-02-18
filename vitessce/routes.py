@@ -3,48 +3,6 @@ from starlette.responses import StreamingResponse
 from pathlib import Path
 from .constants import DataType as dt
 
-def create_obj_routes(obj, base_url, dataset_uid, obj_i):
-	"""
-	For a particular data object, set up its server routes and their responses
-
-	:param obj: An object representing a single-cell data analysis result or microscopy image.
-	:type obj: anndata.AnnData or loompy.LoomConnection or zarr.hierarchy.Group
-	
-	:returns: A list of server routes.
-	:rtype: list[starlette.routing.Route]
-	"""
-	obj_routes = []
-
-	for data_type in dt:
-		try:
-			_, dt_obj_routes = obj._get_data(data_type, base_url, dataset_uid, obj_i)
-			obj_routes += dt_obj_routes
-		except NotImplementedError:
-			pass
-
-	return obj_routes
-
-def create_obj_files(obj, base_url, dataset_uid, obj_i):
-	"""
-	For a particular data object, set up view config dataset file definitions
-
-	:param obj: An object representing a single-cell data analysis result or microscopy image.
-	:type obj: anndata.AnnData or loompy.LoomConnection or zarr.hierarchy.Group
-	
-	:returns: A list of view config file definitions
-	:rtype: list[dict]
-	"""
-	obj_file_defs = []
-
-	for data_type in dt:
-		try:
-			dt_obj_file_defs, _ = obj._get_data(data_type, base_url, dataset_uid, obj_i)
-			obj_file_defs += dt_obj_file_defs
-		except NotImplementedError:
-			pass
-
-	return obj_file_defs
-
 # Adapted from https://gist.github.com/tombulled/712fd8e19ed0618c5f9f7d5f5f543782
 def ranged(file, start = 0, end = None, block_size = 65535):
     consumed = 0

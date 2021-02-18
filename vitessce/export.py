@@ -25,7 +25,7 @@ def export_to_s3(config, s3, bucket_name, prefix=''):
     base_url = f"https://{bucket_name}.s3.amazonaws.com" + ("/" + prefix if len(prefix) > 0 else "")
     bucket = s3.Bucket(bucket_name)
     config_dict = config.to_dict(base_url=base_url)
-    routes = config.get_routes(base_url=base_url)
+    routes = config.get_routes()
     uploaded_routes = []
     for route in routes:
         route_path = route.path[1:]
@@ -63,7 +63,7 @@ def export_to_files(config, base_url, out_dir='.'):
     """
     
     config_dict = config.to_dict(base_url=base_url)
-    routes = config.get_routes(base_url=base_url)
+    routes = config.get_routes()
     for route in routes:
         route_path = route.path[1:]
         out_path = join(out_dir, route_path)

@@ -17,7 +17,6 @@ from .export import (
     export_to_s3,
     export_to_files,
 )
-from .routes import create_obj_routes, create_obj_files
 
 def _get_next_scope(prev_scopes):
     chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
@@ -760,30 +759,9 @@ class VitessceConfig:
             vc = VitessceConfig.from_object(my_scanpy_object)
         """
         vc = VitessceConfig(name=name, description=description)
-        dataset = vc.add_dataset()
 
-        if type(obj) == AnnDataWrapper:
-            dataset.add_object(obj)
-
-            # TODO: use the available embeddings to determine how many / which scatterplots to add.
-            scatterplot = vc.add_view(dataset, cm.SCATTERPLOT, mapping=obj.mappings_obsm[0].split('/')[-1])
-            cell_sets = vc.add_view(dataset, cm.CELL_SETS)
-            genes = vc.add_view(dataset, cm.GENES)
-            heatmap = vc.add_view(dataset, cm.HEATMAP)
-
-            vc.layout((scatterplot | (cell_sets / genes)) / heatmap)
-        
-        elif type(obj) == SnapWrapper:
-            dataset.add_object(obj)
-
-            genomic_profiles = vc.add_view(dataset, cm.GENOMIC_PROFILES)
-            scatter = vc.add_view(dataset, cm.SCATTERPLOT, mapping = "UMAP")
-            cell_sets = vc.add_view(dataset, cm.CELL_SETS)
-
-            vc.layout(genomic_profiles / (scatter | cell_sets))
-        
-        else:
-            print("Encountered an unknown object type. Unable to automatically generate a Vitessce view config.")
+        # The data object may modify the view config if it implements the auto_view_config() method.
+        obj.auto_view_config(vc)
 
         return vc
     

@@ -17,7 +17,12 @@ from starlette.responses import JSONResponse, UJSONResponse
 from starlette.routing import Route, Mount
 from starlette.staticfiles import StaticFiles
 
-from .constants import DataType as dt, FileType as ft
+from .constants import (
+    CoordinationType as ct,
+    Component as cm,
+    DataType as dt,
+    FileType as ft
+)
 from .entities import Cells, CellSets, GenomicProfiles
 from .routes import range_repsonse
 
@@ -47,7 +52,7 @@ class AbstractWrapper:
     def convert_and_save(self, dataset_uid, obj_i):
         """
         Fill in the file_def_creators array.
-        Each function added to this list should take in a base URL and generate a Vitessce file.
+        Each function added to this list should take in a base URL and generate a Vitessce file definition.
         If this wrapper is wrapping local data, then create routes and fill in the routes array.
         This method is void, should not return anything.
 
@@ -106,6 +111,18 @@ class AbstractWrapper:
     
     def _get_out_dir(self, dataset_uid, obj_i, *args):
         return join(self.out_dir, dataset_uid, str(obj_i), *args)
+
+    def auto_view_config(self, vc):
+        """
+        Auto view configuration is intended to be used internally by the `VitessceConfig.from_object` method.
+        Each subclass of `AbstractWrapper` may implement this method which takes in a `VitessceConfig` instance
+        and modifies it by adding datasets, visualization components, and view coordinations.
+        Implementations of this method may create an opinionated view config based on inferred use cases.
+
+        :param vc: The view config instance.
+        :type vc: VitessceConfig
+        """
+        raise NotImplementedError("Auto view configuration has not yet been implemented for this data object wrapper class.")
 
 class MultiImageWrapper(AbstractWrapper):
     """
@@ -488,6 +505,18 @@ class AnnDataWrapper(AbstractWrapper):
                 return obj_file_def
             return None
         return get_expression_matrix
+    
+    def auto_view_config(self, vc):
+        dataset = vc.add_dataset().add_object(self)
+        scatterplot = vc.add_view(dataset, cm.SCATTERPLOT, mapping=self._mappings_obsm[0].split('/')[-1])
+        cell_sets = vc.add_view(dataset, cm.CELL_SETS)
+        genes = vc.add_view(dataset, cm.GENES)
+        heatmap = vc.add_view(dataset, cm.HEATMAP)
+        if self._spatial_polygon_obsm  is not None or self._spatial_centroid_obsm is not None:
+            spatial = vc.add_view(dataset, cm.SPATIAL)
+            vc.layout((scatterplot | spatial) / (heatmap | (cell_sets / genes)))
+        else:
+            vc.layout((scatterplot | (cell_sets / genes)) / heatmap)
 
 class SnapWrapper(AbstractWrapper):
 
@@ -732,3 +761,11 @@ class SnapWrapper(AbstractWrapper):
                 "url": self._get_url(base_url, dataset_uid, obj_i, "cells")
             }
         return get_cells
+
+    def auto_view_config(self, vc):
+        dataset = vc.add_dataset().add_object(self)
+        genomic_profiles = vc.add_view(dataset, cm.GENOMIC_PROFILES)
+        scatter = vc.add_view(dataset, cm.SCATTERPLOT, mapping = "UMAP")
+        cell_sets = vc.add_view(dataset, cm.CELL_SETS)
+
+        vc.layout(genomic_profiles / (scatter | cell_sets))

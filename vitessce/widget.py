@@ -16,9 +16,6 @@ from starlette.middleware.cors import CORSMiddleware
 from threading import Thread
 import socket
 
-# Config creation dependencies
-from .routes import create_obj_routes
-
 # See js/lib/widget.js for the frontend counterpart to this file.
 
 MAX_PORT_TRIES = 1000

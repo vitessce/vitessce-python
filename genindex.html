@@ -192,12 +192,12 @@
 </li>
       <li><a href="api_config.html#vitessce.config.VitessceConfigDataset.add_object">add_object() (vitessce.config.VitessceConfigDataset method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api_config.html#vitessce.config.VitessceConfig.add_view">add_view() (vitessce.config.VitessceConfig method)</a>
 </li>
       <li><a href="api_config.html#vitessce.constants.CoordinationType.ADDITIONAL_CELL_SETS">ADDITIONAL_CELL_SETS (vitessce.constants.CoordinationType attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api_config.html#vitessce.constants.FileType.ANNDATA_CELL_SETS_ZARR">ANNDATA_CELL_SETS_ZARR (vitessce.constants.FileType attribute)</a>
 </li>
       <li><a href="api_config.html#vitessce.constants.FileType.ANNDATA_CELLS_ZARR">ANNDATA_CELLS_ZARR (vitessce.constants.FileType attribute)</a>
@@ -206,6 +206,14 @@
 </li>
       <li><a href="api_data.html#vitessce.wrappers.AnnDataWrapper">AnnDataWrapper (class in vitessce.wrappers)</a>
 </li>
+      <li><a href="api_data.html#vitessce.wrappers.AbstractWrapper.auto_view_config">auto_view_config() (vitessce.wrappers.AbstractWrapper method)</a>
+
+      <ul>
+        <li><a href="api_data.html#vitessce.wrappers.AnnDataWrapper.auto_view_config">(vitessce.wrappers.AnnDataWrapper method)</a>
+</li>
+        <li><a href="api_data.html#vitessce.wrappers.SnapWrapper.auto_view_config">(vitessce.wrappers.SnapWrapper method)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -226,14 +234,14 @@
 </li>
       <li><a href="api_config.html#vitessce.constants.Component.CELL_SET_SIZES">CELL_SET_SIZES (vitessce.constants.Component attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api_config.html#vitessce.constants.Component.CELL_SETS">CELL_SETS (vitessce.constants.Component attribute)</a>
 
       <ul>
         <li><a href="api_config.html#vitessce.constants.DataType.CELL_SETS">(vitessce.constants.DataType attribute)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api_config.html#vitessce.constants.FileType.CELL_SETS_JSON">CELL_SETS_JSON (vitessce.constants.FileType attribute)</a>
 </li>
       <li><a href="api_config.html#vitessce.constants.DataType.CELLS">CELLS (vitessce.constants.DataType attribute)</a>
@@ -242,6 +250,18 @@
 </li>
       <li><a href="api_config.html#vitessce.constants.Component">Component (class in vitessce.constants)</a>
 </li>
+      <li><a href="api_data.html#vitessce.wrappers.AbstractWrapper.convert_and_save">convert_and_save() (vitessce.wrappers.AbstractWrapper method)</a>
+
+      <ul>
+        <li><a href="api_data.html#vitessce.wrappers.AnnDataWrapper.convert_and_save">(vitessce.wrappers.AnnDataWrapper method)</a>
+</li>
+        <li><a href="api_data.html#vitessce.wrappers.MultiImageWrapper.convert_and_save">(vitessce.wrappers.MultiImageWrapper method)</a>
+</li>
+        <li><a href="api_data.html#vitessce.wrappers.OmeTiffWrapper.convert_and_save">(vitessce.wrappers.OmeTiffWrapper method)</a>
+</li>
+        <li><a href="api_data.html#vitessce.wrappers.SnapWrapper.convert_and_save">(vitessce.wrappers.SnapWrapper method)</a>
+</li>
+      </ul></li>
       <li><a href="api_config.html#vitessce.constants.CoordinationType">CoordinationType (class in vitessce.constants)</a>
 </li>
   </ul></td>
@@ -326,6 +346,8 @@
       </ul></li>
       <li><a href="api_config.html#vitessce.constants.FileType.GENOMIC_PROFILES_ZARR">GENOMIC_PROFILES_ZARR (vitessce.constants.FileType attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api_config.html#vitessce.constants.CoordinationType.GENOMIC_TARGET_X">GENOMIC_TARGET_X (vitessce.constants.CoordinationType attribute)</a>
 </li>
       <li><a href="api_config.html#vitessce.constants.CoordinationType.GENOMIC_TARGET_Y">GENOMIC_TARGET_Y (vitessce.constants.CoordinationType attribute)</a>
@@ -334,48 +356,14 @@
 </li>
       <li><a href="api_config.html#vitessce.constants.CoordinationType.GENOMIC_ZOOM_Y">GENOMIC_ZOOM_Y (vitessce.constants.CoordinationType attribute)</a>
 </li>
-      <li><a href="api_data.html#vitessce.wrappers.AbstractWrapper.get_cell_sets">get_cell_sets() (vitessce.wrappers.AbstractWrapper method)</a>
+      <li><a href="api_data.html#vitessce.wrappers.AbstractWrapper.get_file_defs">get_file_defs() (vitessce.wrappers.AbstractWrapper method)</a>
+</li>
+      <li><a href="api_data.html#vitessce.wrappers.AbstractWrapper.get_out_dir_route">get_out_dir_route() (vitessce.wrappers.AbstractWrapper method)</a>
+</li>
+      <li><a href="api_config.html#vitessce.config.VitessceConfig.get_routes">get_routes() (vitessce.config.VitessceConfig method)</a>
 
       <ul>
-        <li><a href="api_data.html#vitessce.wrappers.AnnDataWrapper.get_cell_sets">(vitessce.wrappers.AnnDataWrapper method)</a>
-</li>
-        <li><a href="api_data.html#vitessce.wrappers.SnapWrapper.get_cell_sets">(vitessce.wrappers.SnapWrapper method)</a>
-</li>
-      </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api_data.html#vitessce.wrappers.AbstractWrapper.get_cells">get_cells() (vitessce.wrappers.AbstractWrapper method)</a>
-
-      <ul>
-        <li><a href="api_data.html#vitessce.wrappers.AnnDataWrapper.get_cells">(vitessce.wrappers.AnnDataWrapper method)</a>
-</li>
-        <li><a href="api_data.html#vitessce.wrappers.SnapWrapper.get_cells">(vitessce.wrappers.SnapWrapper method)</a>
-</li>
-      </ul></li>
-      <li><a href="api_data.html#vitessce.wrappers.AbstractWrapper.get_expression_matrix">get_expression_matrix() (vitessce.wrappers.AbstractWrapper method)</a>
-
-      <ul>
-        <li><a href="api_data.html#vitessce.wrappers.AnnDataWrapper.get_expression_matrix">(vitessce.wrappers.AnnDataWrapper method)</a>
-</li>
-      </ul></li>
-      <li><a href="api_data.html#vitessce.wrappers.AbstractWrapper.get_genomic_profiles">get_genomic_profiles() (vitessce.wrappers.AbstractWrapper method)</a>
-
-      <ul>
-        <li><a href="api_data.html#vitessce.wrappers.SnapWrapper.get_genomic_profiles">(vitessce.wrappers.SnapWrapper method)</a>
-</li>
-      </ul></li>
-      <li><a href="api_data.html#vitessce.wrappers.AbstractWrapper.get_molecules">get_molecules() (vitessce.wrappers.AbstractWrapper method)</a>
-</li>
-      <li><a href="api_data.html#vitessce.wrappers.AbstractWrapper.get_neighborhoods">get_neighborhoods() (vitessce.wrappers.AbstractWrapper method)</a>
-</li>
-      <li><a href="api_data.html#vitessce.wrappers.AbstractWrapper.get_raster">get_raster() (vitessce.wrappers.AbstractWrapper method)</a>
-
-      <ul>
-        <li><a href="api_data.html#vitessce.wrappers.MultiImageWrapper.get_raster">(vitessce.wrappers.MultiImageWrapper method)</a>
-</li>
-        <li><a href="api_data.html#vitessce.wrappers.OmeTiffWrapper.get_raster">(vitessce.wrappers.OmeTiffWrapper method)</a>
-</li>
-        <li><a href="api_data.html#vitessce.wrappers.OmeZarrWrapper.get_raster">(vitessce.wrappers.OmeZarrWrapper method)</a>
+        <li><a href="api_data.html#vitessce.wrappers.AbstractWrapper.get_routes">(vitessce.wrappers.AbstractWrapper method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -458,10 +446,6 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api_data.html#vitessce.wrappers.OmeTiffWrapper">OmeTiffWrapper (class in vitessce.wrappers)</a>
-</li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api_data.html#vitessce.wrappers.OmeZarrWrapper">OmeZarrWrapper (class in vitessce.wrappers)</a>
 </li>
   </ul></td>
 </tr></table>

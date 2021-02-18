@@ -92,9 +92,8 @@
 <li class="toctree-l2"><a class="reference internal" href="widget_brain.html">Visualization of single-cell RNA seq data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="widget_genomic_profiles.html">Visualization of genomic profiles</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Visualization of Multi-Modal Imaging Data</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#1.-Set-the-transformation-matrix-for-the-IMS-data">1. Set the transformation matrix for the IMS data</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#2.-Configure-Vitessce">2. Configure Vitessce</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#3.-Create-the-Vitessce-widget">3. Create the Vitessce widget</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#1.-Configure-Vitessce">1. Configure Vitessce</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#2.-Create-the-Vitessce-widget">2. Create the Vitessce widget</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="widget_pbmc.html">Visualization of 3k PBMC reference</a></li>
@@ -466,27 +465,9 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
-<div class="section" id="1.-Set-the-transformation-matrix-for-the-IMS-data">
-<h2>1. Set the transformation matrix for the IMS data<a class="headerlink" href="#1.-Set-the-transformation-matrix-for-the-IMS-data" title="Permalink to this headline">¶</a></h2>
-<p>We downloaded this transformation from <a class="reference external" href="https://app.globus.org/file-manager?origin_id=af603d86-eab9-4eec-bb1d-9d26556741bb&amp;origin_path=%2Fd9e3c80a32567cde9b61e38ce8693559%2Fmetadata%2F">Globus</a>, the link to which was found through the HuBMAP data portal page for the <a class="reference external" href="https://portal.hubmapconsortium.org/browse/dataset/d9e3c80a32567cde9b61e38ce8693559">IMS dataset</a>.</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">transformation_matrix</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="mi">20</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span>
-    <span class="mi">0</span><span class="p">,</span><span class="mi">20</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span>
-    <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span>
-    <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span>
-<span class="p">]</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div class="section" id="2.-Configure-Vitessce">
-<h2>2. Configure Vitessce<a class="headerlink" href="#2.-Configure-Vitessce" title="Permalink to this headline">¶</a></h2>
-<p>Set up the images from the three different assays, with the transformation matrix applied to the IMS image.</p>
+<div class="section" id="1.-Configure-Vitessce">
+<h2>1. Configure Vitessce<a class="headerlink" href="#1.-Configure-Vitessce" title="Permalink to this headline">¶</a></h2>
+<p>Set up the images from the three different assays, with the <code class="docutils literal notranslate"><span class="pre">use_physical_size_scaling</span></code> set to <code class="docutils literal notranslate"><span class="pre">True</span></code> so that the IMS image scales to the other images based on their physical sizes.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
@@ -494,11 +475,13 @@ div.rendered_html tbody tr:hover {
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="n">vc</span> <span class="o">=</span> <span class="n">VitessceConfig</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Spraggins Multi-Modal&#39;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;PAS + IMS + AF From https://portal.hubmapconsortium.org/browse/collection/6a6efd0c1a2681dc7d2faab8e4ab0bca&#39;</span><span class="p">)</span>
 <span class="n">dataset</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">add_dataset</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Spraggins&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">add_object</span><span class="p">(</span>
-    <span class="n">MultiImageWrapper</span><span class="p">(</span><span class="n">image_wrappers</span><span class="o">=</span><span class="p">[</span>
-        <span class="n">OmeTiffWrapper</span><span class="p">(</span><span class="n">img_url</span><span class="o">=</span><span class="s1">&#39;https://assets.hubmapconsortium.org/f4188a148e4c759092d19369d310883b/ometiff-pyramids/processedMicroscopy/VAN0006-LK-2-85-PAS_images/VAN0006-LK-2-85-PAS_registered.ome.tif?token=&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;PAS&#39;</span><span class="p">),</span>
-        <span class="n">OmeTiffWrapper</span><span class="p">(</span><span class="n">img_url</span><span class="o">=</span><span class="s1">&#39;https://assets.hubmapconsortium.org/2130d5f91ce61d7157a42c0497b06de8/ometiff-pyramids/processedMicroscopy/VAN0006-LK-2-85-AF_preIMS_images/VAN0006-LK-2-85-AF_preIMS_registered.ome.tif?token=&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;AF&#39;</span><span class="p">),</span>
-        <span class="n">OmeTiffWrapper</span><span class="p">(</span><span class="n">img_url</span><span class="o">=</span><span class="s1">&#39;https://assets.hubmapconsortium.org/be503a021ed910c0918842e318e6efa2/ometiff-pyramids/ometiffs/VAN0006-LK-2-85-IMS_PosMode_multilayer.ome.tif?token=&#39;</span><span class="p">,</span> <span class="n">transformation_matrix</span><span class="o">=</span><span class="n">transformation_matrix</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;IMS&#39;</span><span class="p">)</span>
-    <span class="p">]</span>
+    <span class="n">MultiImageWrapper</span><span class="p">(</span>
+        <span class="n">image_wrappers</span><span class="o">=</span><span class="p">[</span>
+            <span class="n">OmeTiffWrapper</span><span class="p">(</span><span class="n">img_url</span><span class="o">=</span><span class="s1">&#39;https://assets.hubmapconsortium.org/f4188a148e4c759092d19369d310883b/ometiff-pyramids/processedMicroscopy/VAN0006-LK-2-85-PAS_images/VAN0006-LK-2-85-PAS_registered.ome.tif?token=&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;PAS&#39;</span><span class="p">),</span>
+            <span class="n">OmeTiffWrapper</span><span class="p">(</span><span class="n">img_url</span><span class="o">=</span><span class="s1">&#39;https://assets.hubmapconsortium.org/2130d5f91ce61d7157a42c0497b06de8/ometiff-pyramids/processedMicroscopy/VAN0006-LK-2-85-AF_preIMS_images/VAN0006-LK-2-85-AF_preIMS_registered.ome.tif?token=&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;AF&#39;</span><span class="p">),</span>
+            <span class="n">OmeTiffWrapper</span><span class="p">(</span><span class="n">img_url</span><span class="o">=</span><span class="s1">&#39;https://assets.hubmapconsortium.org/be503a021ed910c0918842e318e6efa2/ometiff-pyramids/ometiffs/VAN0006-LK-2-85-IMS_PosMode_multilayer.ome.tif?token=&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;IMS&#39;</span><span class="p">)</span>
+        <span class="p">],</span>
+        <span class="n">use_physical_size_scaling</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
  <span class="p">)</span>
 <span class="p">)</span>
 <span class="n">spatial</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">cm</span><span class="o">.</span><span class="n">SPATIAL</span><span class="p">)</span>
@@ -509,8 +492,8 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 </div>
-<div class="section" id="3.-Create-the-Vitessce-widget">
-<h2>3. Create the Vitessce widget<a class="headerlink" href="#3.-Create-the-Vitessce-widget" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="2.-Create-the-Vitessce-widget">
+<h2>2. Create the Vitessce widget<a class="headerlink" href="#2.-Create-the-Vitessce-widget" title="Permalink to this headline">¶</a></h2>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>

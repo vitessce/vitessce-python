@@ -197,7 +197,7 @@ support for exporting to dict or JSON format.</p>
 <span id="vitessce-config"></span><h2>vitessce.config<a class="headerlink" href="#module-vitessce.config" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="vitessce.config.VitessceConfig">
-<em class="property">class </em><code class="sig-prename descclassname">vitessce.config.</code><code class="sig-name descname">VitessceConfig</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">description</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/config.py#L378-L823"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.config.VitessceConfig" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">vitessce.config.</span></code><code class="sig-name descname"><span class="pre">VitessceConfig</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/config.py#L385-L820"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.config.VitessceConfig" title="Permalink to this definition">¶</a></dt>
 <dd><p>A class to represent a Vitessce view config.</p>
 <p>Construct a Vitessce view config object.</p>
 <dl class="field-list simple">
@@ -215,7 +215,7 @@ support for exporting to dict or JSON format.</p>
 </div>
 <dl class="py method">
 <dt id="vitessce.config.VitessceConfig.add_coordination">
-<code class="sig-name descname">add_coordination</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">c_types</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/config.py#L512-L555"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.config.VitessceConfig.add_coordination" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">add_coordination</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">c_types</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/config.py#L519-L562"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.config.VitessceConfig.add_coordination" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add scope(s) for new coordination type(s) to the config.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -250,7 +250,7 @@ support for exporting to dict or JSON format.</p>
 
 <dl class="py method">
 <dt id="vitessce.config.VitessceConfig.add_dataset">
-<code class="sig-name descname">add_dataset</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">uid</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/config.py#L417-L448"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.config.VitessceConfig.add_dataset" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">add_dataset</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/config.py#L424-L455"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.config.VitessceConfig.add_dataset" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a dataset to the config.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -283,7 +283,7 @@ support for exporting to dict or JSON format.</p>
 
 <dl class="py method">
 <dt id="vitessce.config.VitessceConfig.add_view">
-<code class="sig-name descname">add_view</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dataset</span></em>, <em class="sig-param"><span class="n">component</span></em>, <em class="sig-param"><span class="n">x</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">y</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">w</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">h</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">mapping</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/config.py#L450-L509"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.config.VitessceConfig.add_view" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">add_view</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">component</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mapping</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/config.py#L457-L516"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.config.VitessceConfig.add_view" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a view to the config.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -316,7 +316,7 @@ support for exporting to dict or JSON format.</p>
 
 <dl class="py method">
 <dt id="vitessce.config.VitessceConfig.export">
-<code class="sig-name descname">export</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">to</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/config.py#L797-L823"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.config.VitessceConfig.export" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">export</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">to</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/config.py#L794-L820"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.config.VitessceConfig.export" title="Permalink to this definition">¶</a></dt>
 <dd><p>Export this config’s data objects to the local file system or a cloud storage system and get the resulting view config.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -346,7 +346,7 @@ support for exporting to dict or JSON format.</p>
 
 <dl class="py method">
 <dt id="vitessce.config.VitessceConfig.from_dict">
-<em class="property">static </em><code class="sig-name descname">from_dict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/config.py#L674-L721"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.config.VitessceConfig.from_dict" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">from_dict</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/config.py#L692-L739"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.config.VitessceConfig.from_dict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Helper function to construct a Vitessce view config object from an existing config.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -368,12 +368,12 @@ support for exporting to dict or JSON format.</p>
 
 <dl class="py method">
 <dt id="vitessce.config.VitessceConfig.from_object">
-<em class="property">static </em><code class="sig-name descname">from_object</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">obj</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">description</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/config.py#L724-L769"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.config.VitessceConfig.from_object" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">from_object</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/config.py#L742-L766"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.config.VitessceConfig.from_object" title="Permalink to this definition">¶</a></dt>
 <dd><p>Helper function to automatically construct a Vitessce view config object from a single-cell dataset object.
 Particularly helpful when using the <code class="docutils literal notranslate"><span class="pre">VitessceWidget</span></code> Jupyter widget.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>obj</strong> (<a class="reference external" href="https://anndata.readthedocs.io/en/latest/anndata.AnnData.html#anndata.AnnData" title="(in anndata v0.7.6.dev44+gf1d1e17)"><em>anndata.AnnData</em></a><em> or </em><em>loompy.LoomConnection</em><em> or </em><em>zarr.Store</em>) – A single-cell dataset in the format of a commonly-used single-cell or imaging data analysis package.</p>
+<dd class="field-odd"><p><strong>obj</strong> (<a class="reference external" href="https://anndata.readthedocs.io/en/latest/anndata.AnnData.html#anndata.AnnData" title="(in anndata v0.7.6.dev48+g5f3be07)"><em>anndata.AnnData</em></a><em> or </em><em>loompy.LoomConnection</em><em> or </em><em>zarr.Store</em>) – A single-cell dataset in the format of a commonly-used single-cell or imaging data analysis package.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The config instance.</p>
@@ -390,8 +390,22 @@ Particularly helpful when using the <code class="docutils literal notranslate"><
 </dd></dl>
 
 <dl class="py method">
+<dt id="vitessce.config.VitessceConfig.get_routes">
+<code class="sig-name descname"><span class="pre">get_routes</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/config.py#L680-L690"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.config.VitessceConfig.get_routes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert the routes for this view config from the datasets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A list of server routes.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)">list</a>[starlette.routing.Route]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="vitessce.config.VitessceConfig.layout">
-<code class="sig-name descname">layout</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">view_concat</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/config.py#L581-L650"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.config.VitessceConfig.layout" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">layout</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">view_concat</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/config.py#L588-L657"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.config.VitessceConfig.layout" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a multi-view layout based on (potentially recursive) view concatenations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -428,7 +442,7 @@ Particularly helpful when using the <code class="docutils literal notranslate"><
 
 <dl class="py method">
 <dt id="vitessce.config.VitessceConfig.link_views">
-<code class="sig-name descname">link_views</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">views</span></em>, <em class="sig-param"><span class="n">c_types</span></em>, <em class="sig-param"><span class="n">c_values</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/config.py#L557-L579"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.config.VitessceConfig.link_views" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">link_views</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">views</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c_types</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c_values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/config.py#L564-L586"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.config.VitessceConfig.link_views" title="Permalink to this definition">¶</a></dt>
 <dd><p>A convenience function for setting up new coordination scopes across a set of views.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -449,11 +463,11 @@ Particularly helpful when using the <code class="docutils literal notranslate"><
 
 <dl class="py method">
 <dt id="vitessce.config.VitessceConfig.to_dict">
-<code class="sig-name descname">to_dict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">on_obj</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/config.py#L652-L672"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.config.VitessceConfig.to_dict" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">to_dict</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/config.py#L659-L678"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.config.VitessceConfig.to_dict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert the view config instance to a dict object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>on_obj</strong> (<em>function</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)"><em>None</em></a>) – This callback is required only if datasets within the view config contain objects added via the <code class="docutils literal notranslate"><span class="pre">VitessceConfigDataset.add_object</span></code> method (rather than only files added via the <code class="docutils literal notranslate"><span class="pre">VitessceConfigDataset.add_file</span></code> method). This function must take the data object as a parameter, and return a list of valid file definition dicts (URL, data type, file type). This parameter is primarily intended to be used internally by the <code class="docutils literal notranslate"><span class="pre">VitessceWidget</span></code> class.</p>
+<dd class="field-odd"><p><strong>base_url</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Optional parameter for non-remote data to specify the url from which the data will be served.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The view config as a dict. Useful for serializing to JSON.</p>
@@ -466,7 +480,7 @@ Particularly helpful when using the <code class="docutils literal notranslate"><
 
 <dl class="py method">
 <dt id="vitessce.config.VitessceConfig.widget">
-<code class="sig-name descname">widget</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/config.py#L771-L795"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.config.VitessceConfig.widget" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">widget</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/config.py#L768-L792"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.config.VitessceConfig.widget" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convenience function for instantiating a VitessceWidget object based on this config.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -500,7 +514,7 @@ Particularly helpful when using the <code class="docutils literal notranslate"><
 
 <dl class="py class">
 <dt id="vitessce.config.VitessceConfigCoordinationScope">
-<em class="property">class </em><code class="sig-prename descclassname">vitessce.config.</code><code class="sig-name descname">VitessceConfigCoordinationScope</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">c_type</span></em>, <em class="sig-param"><span class="n">c_scope</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/config.py#L331-L376"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.config.VitessceConfigCoordinationScope" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">vitessce.config.</span></code><code class="sig-name descname"><span class="pre">VitessceConfigCoordinationScope</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">c_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c_scope</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/config.py#L338-L383"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.config.VitessceConfigCoordinationScope" title="Permalink to this definition">¶</a></dt>
 <dd><p>A class to represent a coordination scope in the Vitessce view config coordination space.</p>
 <p>Not meant to be instantiated directly, but instead created and returned by the <code class="docutils literal notranslate"><span class="pre">VitessceConfig.add_coordination()</span></code> method.</p>
 <dl class="field-list simple">
@@ -513,7 +527,7 @@ Particularly helpful when using the <code class="docutils literal notranslate"><
 </dl>
 <dl class="py method">
 <dt id="vitessce.config.VitessceConfigCoordinationScope.set_value">
-<code class="sig-name descname">set_value</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">c_value</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/config.py#L346-L376"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.config.VitessceConfigCoordinationScope.set_value" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">set_value</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">c_value</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/config.py#L353-L383"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.config.VitessceConfigCoordinationScope.set_value" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the value of the coordination scope.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -550,7 +564,7 @@ Particularly helpful when using the <code class="docutils literal notranslate"><
 
 <dl class="py class">
 <dt id="vitessce.config.VitessceConfigDataset">
-<em class="property">class </em><code class="sig-prename descclassname">vitessce.config.</code><code class="sig-name descname">VitessceConfigDataset</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">uid</span></em>, <em class="sig-param"><span class="n">name</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/config.py#L74-L163"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.config.VitessceConfigDataset" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">vitessce.config.</span></code><code class="sig-name descname"><span class="pre">VitessceConfigDataset</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/config.py#L74-L170"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.config.VitessceConfigDataset" title="Permalink to this definition">¶</a></dt>
 <dd><p>A class to represent a dataset (i.e. list of files containing common biological entities) in the Vitessce view config.</p>
 <p>Not meant to be instantiated directly, but instead created and returned by the <code class="docutils literal notranslate"><span class="pre">VitessceConfig.add_dataset()</span></code> method.</p>
 <dl class="field-list simple">
@@ -563,7 +577,7 @@ Particularly helpful when using the <code class="docutils literal notranslate"><
 </dl>
 <dl class="py method">
 <dt id="vitessce.config.VitessceConfigDataset.add_file">
-<code class="sig-name descname">add_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">url</span></em>, <em class="sig-param"><span class="n">data_type</span></em>, <em class="sig-param"><span class="n">file_type</span></em>, <em class="sig-param"><span class="n">options</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/config.py#L92-L139"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.config.VitessceConfigDataset.add_file" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">add_file</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/config.py#L92-L139"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.config.VitessceConfigDataset.add_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a new file definition to this dataset instance.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -597,11 +611,11 @@ Particularly helpful when using the <code class="docutils literal notranslate"><
 
 <dl class="py method">
 <dt id="vitessce.config.VitessceConfigDataset.add_object">
-<code class="sig-name descname">add_object</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">obj</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/config.py#L141-L152"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.config.VitessceConfigDataset.add_object" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">add_object</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/config.py#L141-L153"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.config.VitessceConfigDataset.add_object" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a data object to this dataset instance.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>obj</strong> (<a class="reference external" href="https://anndata.readthedocs.io/en/latest/anndata.AnnData.html#anndata.AnnData" title="(in anndata v0.7.6.dev44+gf1d1e17)"><em>anndata.AnnData</em></a><em> or </em><em>loompy.LoomConnection</em><em> or </em><em>zarr.Store</em>) – A data object that can be served locally or uploaded to a remote storage provider.</p>
+<dd class="field-odd"><p><strong>obj</strong> (<a class="reference external" href="https://anndata.readthedocs.io/en/latest/anndata.AnnData.html#anndata.AnnData" title="(in anndata v0.7.6.dev48+g5f3be07)"><em>anndata.AnnData</em></a><em> or </em><em>loompy.LoomConnection</em><em> or </em><em>zarr.Store</em>) – A data object that can be served locally or uploaded to a remote storage provider.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Self, to allow function chaining.</p>
@@ -616,7 +630,7 @@ Particularly helpful when using the <code class="docutils literal notranslate"><
 
 <dl class="py class">
 <dt id="vitessce.config.VitessceConfigDatasetFile">
-<em class="property">class </em><code class="sig-prename descclassname">vitessce.config.</code><code class="sig-name descname">VitessceConfigDatasetFile</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">url</span></em>, <em class="sig-param"><span class="n">data_type</span></em>, <em class="sig-param"><span class="n">file_type</span></em>, <em class="sig-param"><span class="n">options</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/config.py#L50-L72"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.config.VitessceConfigDatasetFile" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">vitessce.config.</span></code><code class="sig-name descname"><span class="pre">VitessceConfigDatasetFile</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/config.py#L50-L72"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.config.VitessceConfigDatasetFile" title="Permalink to this definition">¶</a></dt>
 <dd><p>A class to represent a file (described by a URL, data type, and file type) in a Vitessce view config dataset.</p>
 <p>Not meant to be instantiated directly, but instead created and returned by the <code class="docutils literal notranslate"><span class="pre">VitessceConfigDataset.add_file()</span></code> method.</p>
 <dl class="field-list simple">
@@ -632,7 +646,7 @@ Particularly helpful when using the <code class="docutils literal notranslate"><
 
 <dl class="py class">
 <dt id="vitessce.config.VitessceConfigView">
-<em class="property">class </em><code class="sig-prename descclassname">vitessce.config.</code><code class="sig-name descname">VitessceConfigView</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">component</span></em>, <em class="sig-param"><span class="n">coordination_scopes</span></em>, <em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">w</span></em>, <em class="sig-param"><span class="n">h</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/config.py#L245-L328"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.config.VitessceConfigView" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">vitessce.config.</span></code><code class="sig-name descname"><span class="pre">VitessceConfigView</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coordination_scopes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/config.py#L252-L335"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.config.VitessceConfigView" title="Permalink to this definition">¶</a></dt>
 <dd><p>A class to represent a view (i.e. visualization component) in the Vitessce view config layout.</p>
 <p>Not meant to be instantiated directly, but instead created and returned by the <code class="docutils literal notranslate"><span class="pre">VitessceConfig.add_view()</span></code> method.</p>
 <dl class="field-list simple">
@@ -649,7 +663,7 @@ Particularly helpful when using the <code class="docutils literal notranslate"><
 </dl>
 <dl class="py method">
 <dt id="vitessce.config.VitessceConfigView.use_coordination">
-<code class="sig-name descname">use_coordination</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">c_scopes</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/config.py#L269-L302"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.config.VitessceConfigView.use_coordination" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">use_coordination</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">c_scopes</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/config.py#L276-L309"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.config.VitessceConfigView.use_coordination" title="Permalink to this definition">¶</a></dt>
 <dd><p>Attach a coordination scope to this view instance. All views using the same coordination scope for a particular coordination type will effectively be linked together.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -686,21 +700,21 @@ Particularly helpful when using the <code class="docutils literal notranslate"><
 
 <dl class="py class">
 <dt id="vitessce.config.VitessceConfigViewHConcat">
-<em class="property">class </em><code class="sig-prename descclassname">vitessce.config.</code><code class="sig-name descname">VitessceConfigViewHConcat</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">views</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/config.py#L165-L179"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.config.VitessceConfigViewHConcat" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">vitessce.config.</span></code><code class="sig-name descname"><span class="pre">VitessceConfigViewHConcat</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">views</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/config.py#L172-L186"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.config.VitessceConfigViewHConcat" title="Permalink to this definition">¶</a></dt>
 <dd><p>A class to represent a horizontal concatenation of view instances.</p>
 <p>Not meant to be instantiated directly, but instead created and returned by the <code class="docutils literal notranslate"><span class="pre">hconcat</span></code> helper function.</p>
 </dd></dl>
 
 <dl class="py class">
 <dt id="vitessce.config.VitessceConfigViewVConcat">
-<em class="property">class </em><code class="sig-prename descclassname">vitessce.config.</code><code class="sig-name descname">VitessceConfigViewVConcat</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">views</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/config.py#L205-L219"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.config.VitessceConfigViewVConcat" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">vitessce.config.</span></code><code class="sig-name descname"><span class="pre">VitessceConfigViewVConcat</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">views</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/config.py#L212-L226"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.config.VitessceConfigViewVConcat" title="Permalink to this definition">¶</a></dt>
 <dd><p>A class to represent a vertical concatenation of view instances.</p>
 <p>Not meant to be instantiated directly, but instead created and returned by the <code class="docutils literal notranslate"><span class="pre">vconcat</span></code> helper function.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt id="vitessce.config.hconcat">
-<code class="sig-prename descclassname">vitessce.config.</code><code class="sig-name descname">hconcat</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">views</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/config.py#L181-L203"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.config.hconcat" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">vitessce.config.</span></code><code class="sig-name descname"><span class="pre">hconcat</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">views</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/config.py#L188-L210"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.config.hconcat" title="Permalink to this definition">¶</a></dt>
 <dd><p>A helper function to create a <code class="docutils literal notranslate"><span class="pre">VitessceConfigViewHConcat</span></code> instance.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -727,7 +741,7 @@ Particularly helpful when using the <code class="docutils literal notranslate"><
 
 <dl class="py function">
 <dt id="vitessce.config.vconcat">
-<code class="sig-prename descclassname">vitessce.config.</code><code class="sig-name descname">vconcat</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">views</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/config.py#L221-L243"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.config.vconcat" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">vitessce.config.</span></code><code class="sig-name descname"><span class="pre">vconcat</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">views</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/config.py#L228-L250"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.config.vconcat" title="Permalink to this definition">¶</a></dt>
 <dd><p>A helper function to create a <code class="docutils literal notranslate"><span class="pre">VitessceConfigViewVConcat</span></code> instance.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -757,321 +771,321 @@ Particularly helpful when using the <code class="docutils literal notranslate"><
 <span id="vitessce-constants"></span><h2>vitessce.constants<a class="headerlink" href="#module-vitessce.constants" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="vitessce.constants.Component">
-<em class="property">class </em><code class="sig-prename descclassname">vitessce.constants.</code><code class="sig-name descname">Component</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py#L52-L65"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.Component" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">vitessce.constants.</span></code><code class="sig-name descname"><span class="pre">Component</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py#L52-L65"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.Component" title="Permalink to this definition">¶</a></dt>
 <dd><p>An enum type representing a view type in the visualization layout.</p>
 <dl class="py attribute">
 <dt id="vitessce.constants.Component.CELL_SETS">
-<code class="sig-name descname">CELL_SETS</code><em class="property"> = 'cellSets'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.Component.CELL_SETS" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">CELL_SETS</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'cellSets'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.Component.CELL_SETS" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.Component.CELL_SET_SIZES">
-<code class="sig-name descname">CELL_SET_SIZES</code><em class="property"> = 'cellSetSizes'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.Component.CELL_SET_SIZES" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">CELL_SET_SIZES</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'cellSetSizes'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.Component.CELL_SET_SIZES" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.Component.DESCRIPTION">
-<code class="sig-name descname">DESCRIPTION</code><em class="property"> = 'description'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.Component.DESCRIPTION" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">DESCRIPTION</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'description'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.Component.DESCRIPTION" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.Component.GENES">
-<code class="sig-name descname">GENES</code><em class="property"> = 'genes'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.Component.GENES" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">GENES</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'genes'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.Component.GENES" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.Component.GENOMIC_PROFILES">
-<code class="sig-name descname">GENOMIC_PROFILES</code><em class="property"> = 'genomicProfiles'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.Component.GENOMIC_PROFILES" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">GENOMIC_PROFILES</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'genomicProfiles'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.Component.GENOMIC_PROFILES" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.Component.HEATMAP">
-<code class="sig-name descname">HEATMAP</code><em class="property"> = 'heatmap'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.Component.HEATMAP" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">HEATMAP</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'heatmap'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.Component.HEATMAP" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.Component.LAYER_CONTROLLER">
-<code class="sig-name descname">LAYER_CONTROLLER</code><em class="property"> = 'layerController'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.Component.LAYER_CONTROLLER" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">LAYER_CONTROLLER</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'layerController'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.Component.LAYER_CONTROLLER" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.Component.SCATTERPLOT">
-<code class="sig-name descname">SCATTERPLOT</code><em class="property"> = 'scatterplot'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.Component.SCATTERPLOT" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">SCATTERPLOT</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'scatterplot'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.Component.SCATTERPLOT" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.Component.SPATIAL">
-<code class="sig-name descname">SPATIAL</code><em class="property"> = 'spatial'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.Component.SPATIAL" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">SPATIAL</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'spatial'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.Component.SPATIAL" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.Component.STATUS">
-<code class="sig-name descname">STATUS</code><em class="property"> = 'status'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.Component.STATUS" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">STATUS</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'status'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.Component.STATUS" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt id="vitessce.constants.CoordinationType">
-<em class="property">class </em><code class="sig-prename descclassname">vitessce.constants.</code><code class="sig-name descname">CoordinationType</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py#L12-L50"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.CoordinationType" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">vitessce.constants.</span></code><code class="sig-name descname"><span class="pre">CoordinationType</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py#L12-L50"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.CoordinationType" title="Permalink to this definition">¶</a></dt>
 <dd><p>An enum type representing a coordination type in the Vitessce coordination model.
 The term coordination type refers to a parameter to be coordinated, and its programming-language-like type.
 For example, the <code class="docutils literal notranslate"><span class="pre">SPATIAL_ZOOM</span></code> coordination type represents a coordination of the zoom level of a spatial view, which can take a float value.</p>
 <dl class="py attribute">
 <dt id="vitessce.constants.CoordinationType.ADDITIONAL_CELL_SETS">
-<code class="sig-name descname">ADDITIONAL_CELL_SETS</code><em class="property"> = 'additionalCellSets'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.ADDITIONAL_CELL_SETS" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">ADDITIONAL_CELL_SETS</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'additionalCellSets'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.ADDITIONAL_CELL_SETS" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.CoordinationType.CELL_COLOR_ENCODING">
-<code class="sig-name descname">CELL_COLOR_ENCODING</code><em class="property"> = 'cellColorEncoding'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.CELL_COLOR_ENCODING" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">CELL_COLOR_ENCODING</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'cellColorEncoding'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.CELL_COLOR_ENCODING" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.CoordinationType.CELL_FILTER">
-<code class="sig-name descname">CELL_FILTER</code><em class="property"> = 'cellFilter'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.CELL_FILTER" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">CELL_FILTER</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'cellFilter'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.CELL_FILTER" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.CoordinationType.CELL_HIGHLIGHT">
-<code class="sig-name descname">CELL_HIGHLIGHT</code><em class="property"> = 'cellHighlight'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.CELL_HIGHLIGHT" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">CELL_HIGHLIGHT</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'cellHighlight'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.CELL_HIGHLIGHT" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.CoordinationType.CELL_SET_COLOR">
-<code class="sig-name descname">CELL_SET_COLOR</code><em class="property"> = 'cellSetColor'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.CELL_SET_COLOR" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">CELL_SET_COLOR</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'cellSetColor'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.CELL_SET_COLOR" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.CoordinationType.CELL_SET_HIGHLIGHT">
-<code class="sig-name descname">CELL_SET_HIGHLIGHT</code><em class="property"> = 'cellSetHighlight'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.CELL_SET_HIGHLIGHT" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">CELL_SET_HIGHLIGHT</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'cellSetHighlight'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.CELL_SET_HIGHLIGHT" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.CoordinationType.CELL_SET_SELECTION">
-<code class="sig-name descname">CELL_SET_SELECTION</code><em class="property"> = 'cellSetSelection'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.CELL_SET_SELECTION" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">CELL_SET_SELECTION</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'cellSetSelection'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.CELL_SET_SELECTION" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.CoordinationType.DATASET">
-<code class="sig-name descname">DATASET</code><em class="property"> = 'dataset'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.DATASET" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">DATASET</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'dataset'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.DATASET" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.CoordinationType.EMBEDDING_ROTATION">
-<code class="sig-name descname">EMBEDDING_ROTATION</code><em class="property"> = 'embeddingRotation'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.EMBEDDING_ROTATION" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">EMBEDDING_ROTATION</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'embeddingRotation'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.EMBEDDING_ROTATION" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.CoordinationType.EMBEDDING_TARGET_X">
-<code class="sig-name descname">EMBEDDING_TARGET_X</code><em class="property"> = 'embeddingTargetX'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.EMBEDDING_TARGET_X" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">EMBEDDING_TARGET_X</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'embeddingTargetX'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.EMBEDDING_TARGET_X" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.CoordinationType.EMBEDDING_TARGET_Y">
-<code class="sig-name descname">EMBEDDING_TARGET_Y</code><em class="property"> = 'embeddingTargetY'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.EMBEDDING_TARGET_Y" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">EMBEDDING_TARGET_Y</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'embeddingTargetY'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.EMBEDDING_TARGET_Y" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.CoordinationType.EMBEDDING_TARGET_Z">
-<code class="sig-name descname">EMBEDDING_TARGET_Z</code><em class="property"> = 'embeddingTargetZ'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.EMBEDDING_TARGET_Z" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">EMBEDDING_TARGET_Z</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'embeddingTargetZ'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.EMBEDDING_TARGET_Z" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.CoordinationType.EMBEDDING_TYPE">
-<code class="sig-name descname">EMBEDDING_TYPE</code><em class="property"> = 'embeddingType'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.EMBEDDING_TYPE" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">EMBEDDING_TYPE</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'embeddingType'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.EMBEDDING_TYPE" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.CoordinationType.EMBEDDING_ZOOM">
-<code class="sig-name descname">EMBEDDING_ZOOM</code><em class="property"> = 'embeddingZoom'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.EMBEDDING_ZOOM" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">EMBEDDING_ZOOM</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'embeddingZoom'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.EMBEDDING_ZOOM" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.CoordinationType.GENE_EXPRESSION_COLORMAP">
-<code class="sig-name descname">GENE_EXPRESSION_COLORMAP</code><em class="property"> = 'geneExpressionColormap'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.GENE_EXPRESSION_COLORMAP" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">GENE_EXPRESSION_COLORMAP</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'geneExpressionColormap'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.GENE_EXPRESSION_COLORMAP" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.CoordinationType.GENE_EXPRESSION_COLORMAP_RANGE">
-<code class="sig-name descname">GENE_EXPRESSION_COLORMAP_RANGE</code><em class="property"> = 'geneExpressionColormapRange'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.GENE_EXPRESSION_COLORMAP_RANGE" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">GENE_EXPRESSION_COLORMAP_RANGE</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'geneExpressionColormapRange'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.GENE_EXPRESSION_COLORMAP_RANGE" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.CoordinationType.GENE_FILTER">
-<code class="sig-name descname">GENE_FILTER</code><em class="property"> = 'geneFilter'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.GENE_FILTER" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">GENE_FILTER</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'geneFilter'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.GENE_FILTER" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.CoordinationType.GENE_HIGHLIGHT">
-<code class="sig-name descname">GENE_HIGHLIGHT</code><em class="property"> = 'geneHighlight'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.GENE_HIGHLIGHT" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">GENE_HIGHLIGHT</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'geneHighlight'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.GENE_HIGHLIGHT" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.CoordinationType.GENOMIC_TARGET_X">
-<code class="sig-name descname">GENOMIC_TARGET_X</code><em class="property"> = 'genomicTargetX'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.GENOMIC_TARGET_X" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">GENOMIC_TARGET_X</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'genomicTargetX'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.GENOMIC_TARGET_X" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.CoordinationType.GENOMIC_TARGET_Y">
-<code class="sig-name descname">GENOMIC_TARGET_Y</code><em class="property"> = 'genomicTargetY'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.GENOMIC_TARGET_Y" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">GENOMIC_TARGET_Y</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'genomicTargetY'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.GENOMIC_TARGET_Y" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.CoordinationType.GENOMIC_ZOOM_X">
-<code class="sig-name descname">GENOMIC_ZOOM_X</code><em class="property"> = 'genomicZoomX'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.GENOMIC_ZOOM_X" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">GENOMIC_ZOOM_X</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'genomicZoomX'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.GENOMIC_ZOOM_X" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.CoordinationType.GENOMIC_ZOOM_Y">
-<code class="sig-name descname">GENOMIC_ZOOM_Y</code><em class="property"> = 'genomicZoomY'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.GENOMIC_ZOOM_Y" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">GENOMIC_ZOOM_Y</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'genomicZoomY'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.GENOMIC_ZOOM_Y" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.CoordinationType.HEATMAP_TARGET_X">
-<code class="sig-name descname">HEATMAP_TARGET_X</code><em class="property"> = 'heatmapTargetX'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.HEATMAP_TARGET_X" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">HEATMAP_TARGET_X</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'heatmapTargetX'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.HEATMAP_TARGET_X" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.CoordinationType.HEATMAP_TARGET_Y">
-<code class="sig-name descname">HEATMAP_TARGET_Y</code><em class="property"> = 'heatmapTargetY'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.HEATMAP_TARGET_Y" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">HEATMAP_TARGET_Y</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'heatmapTargetY'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.HEATMAP_TARGET_Y" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.CoordinationType.HEATMAP_ZOOM_X">
-<code class="sig-name descname">HEATMAP_ZOOM_X</code><em class="property"> = 'heatmapZoomX'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.HEATMAP_ZOOM_X" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">HEATMAP_ZOOM_X</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'heatmapZoomX'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.HEATMAP_ZOOM_X" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.CoordinationType.HEATMAP_ZOOM_Y">
-<code class="sig-name descname">HEATMAP_ZOOM_Y</code><em class="property"> = 'heatmapZoomY'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.HEATMAP_ZOOM_Y" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">HEATMAP_ZOOM_Y</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'heatmapZoomY'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.HEATMAP_ZOOM_Y" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.CoordinationType.SPATIAL_LAYERS">
-<code class="sig-name descname">SPATIAL_LAYERS</code><em class="property"> = 'spatialLayers'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.SPATIAL_LAYERS" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">SPATIAL_LAYERS</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'spatialLayers'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.SPATIAL_LAYERS" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.CoordinationType.SPATIAL_ROTATION">
-<code class="sig-name descname">SPATIAL_ROTATION</code><em class="property"> = 'spatialRotation'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.SPATIAL_ROTATION" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">SPATIAL_ROTATION</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'spatialRotation'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.SPATIAL_ROTATION" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.CoordinationType.SPATIAL_TARGET_X">
-<code class="sig-name descname">SPATIAL_TARGET_X</code><em class="property"> = 'spatialTargetX'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.SPATIAL_TARGET_X" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">SPATIAL_TARGET_X</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'spatialTargetX'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.SPATIAL_TARGET_X" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.CoordinationType.SPATIAL_TARGET_Y">
-<code class="sig-name descname">SPATIAL_TARGET_Y</code><em class="property"> = 'spatialTargetY'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.SPATIAL_TARGET_Y" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">SPATIAL_TARGET_Y</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'spatialTargetY'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.SPATIAL_TARGET_Y" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.CoordinationType.SPATIAL_TARGET_Z">
-<code class="sig-name descname">SPATIAL_TARGET_Z</code><em class="property"> = 'spatialTargetZ'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.SPATIAL_TARGET_Z" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">SPATIAL_TARGET_Z</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'spatialTargetZ'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.SPATIAL_TARGET_Z" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.CoordinationType.SPATIAL_ZOOM">
-<code class="sig-name descname">SPATIAL_ZOOM</code><em class="property"> = 'spatialZoom'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.SPATIAL_ZOOM" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">SPATIAL_ZOOM</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'spatialZoom'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.CoordinationType.SPATIAL_ZOOM" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt id="vitessce.constants.DataType">
-<em class="property">class </em><code class="sig-prename descclassname">vitessce.constants.</code><code class="sig-name descname">DataType</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py#L67-L77"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.DataType" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">vitessce.constants.</span></code><code class="sig-name descname"><span class="pre">DataType</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py#L67-L77"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.DataType" title="Permalink to this definition">¶</a></dt>
 <dd><p>An enum type representing the type of data contained in a file.</p>
 <dl class="py attribute">
 <dt id="vitessce.constants.DataType.CELLS">
-<code class="sig-name descname">CELLS</code><em class="property"> = 'cells'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.DataType.CELLS" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">CELLS</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'cells'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.DataType.CELLS" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.DataType.CELL_SETS">
-<code class="sig-name descname">CELL_SETS</code><em class="property"> = 'cell-sets'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.DataType.CELL_SETS" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">CELL_SETS</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'cell-sets'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.DataType.CELL_SETS" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.DataType.EXPRESSION_MATRIX">
-<code class="sig-name descname">EXPRESSION_MATRIX</code><em class="property"> = 'expression-matrix'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.DataType.EXPRESSION_MATRIX" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">EXPRESSION_MATRIX</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'expression-matrix'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.DataType.EXPRESSION_MATRIX" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.DataType.GENOMIC_PROFILES">
-<code class="sig-name descname">GENOMIC_PROFILES</code><em class="property"> = 'genomic-profiles'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.DataType.GENOMIC_PROFILES" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">GENOMIC_PROFILES</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'genomic-profiles'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.DataType.GENOMIC_PROFILES" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.DataType.MOLECULES">
-<code class="sig-name descname">MOLECULES</code><em class="property"> = 'molecules'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.DataType.MOLECULES" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">MOLECULES</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'molecules'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.DataType.MOLECULES" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.DataType.NEIGHBORHOODS">
-<code class="sig-name descname">NEIGHBORHOODS</code><em class="property"> = 'neighborhoods'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.DataType.NEIGHBORHOODS" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">NEIGHBORHOODS</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'neighborhoods'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.DataType.NEIGHBORHOODS" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.DataType.RASTER">
-<code class="sig-name descname">RASTER</code><em class="property"> = 'raster'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.DataType.RASTER" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">RASTER</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'raster'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.DataType.RASTER" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt id="vitessce.constants.FileType">
-<em class="property">class </em><code class="sig-prename descclassname">vitessce.constants.</code><code class="sig-name descname">FileType</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py#L79-L92"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.FileType" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">vitessce.constants.</span></code><code class="sig-name descname"><span class="pre">FileType</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py#L79-L92"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.FileType" title="Permalink to this definition">¶</a></dt>
 <dd><p>An enum type representing the file format or schema to which a file conforms.</p>
 <dl class="py attribute">
 <dt id="vitessce.constants.FileType.ANNDATA_CELLS_ZARR">
-<code class="sig-name descname">ANNDATA_CELLS_ZARR</code><em class="property"> = 'anndata-cells.zarr'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.FileType.ANNDATA_CELLS_ZARR" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">ANNDATA_CELLS_ZARR</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'anndata-cells.zarr'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.FileType.ANNDATA_CELLS_ZARR" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.FileType.ANNDATA_CELL_SETS_ZARR">
-<code class="sig-name descname">ANNDATA_CELL_SETS_ZARR</code><em class="property"> = 'anndata-cell-sets.zarr'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.FileType.ANNDATA_CELL_SETS_ZARR" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">ANNDATA_CELL_SETS_ZARR</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'anndata-cell-sets.zarr'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.FileType.ANNDATA_CELL_SETS_ZARR" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.FileType.ANNDATA_EXPRESSION_MATRIX_ZARR">
-<code class="sig-name descname">ANNDATA_EXPRESSION_MATRIX_ZARR</code><em class="property"> = 'anndata-expression-matrix.zarr'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.FileType.ANNDATA_EXPRESSION_MATRIX_ZARR" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">ANNDATA_EXPRESSION_MATRIX_ZARR</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'anndata-expression-matrix.zarr'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.FileType.ANNDATA_EXPRESSION_MATRIX_ZARR" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.FileType.CELLS_JSON">
-<code class="sig-name descname">CELLS_JSON</code><em class="property"> = 'cells.json'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.FileType.CELLS_JSON" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">CELLS_JSON</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'cells.json'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.FileType.CELLS_JSON" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.FileType.CELL_SETS_JSON">
-<code class="sig-name descname">CELL_SETS_JSON</code><em class="property"> = 'cell-sets.json'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.FileType.CELL_SETS_JSON" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">CELL_SETS_JSON</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'cell-sets.json'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.FileType.CELL_SETS_JSON" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.FileType.EXPRESSION_MATRIX_ZARR">
-<code class="sig-name descname">EXPRESSION_MATRIX_ZARR</code><em class="property"> = 'expression-matrix.zarr'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.FileType.EXPRESSION_MATRIX_ZARR" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">EXPRESSION_MATRIX_ZARR</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'expression-matrix.zarr'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.FileType.EXPRESSION_MATRIX_ZARR" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.FileType.GENOMIC_PROFILES_ZARR">
-<code class="sig-name descname">GENOMIC_PROFILES_ZARR</code><em class="property"> = 'genomic-profiles.zarr'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.FileType.GENOMIC_PROFILES_ZARR" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">GENOMIC_PROFILES_ZARR</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'genomic-profiles.zarr'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.FileType.GENOMIC_PROFILES_ZARR" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.FileType.MOLECULES_JSON">
-<code class="sig-name descname">MOLECULES_JSON</code><em class="property"> = 'molecules.json'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.FileType.MOLECULES_JSON" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">MOLECULES_JSON</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'molecules.json'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.FileType.MOLECULES_JSON" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.FileType.NEIGHBORHOODS_JSON">
-<code class="sig-name descname">NEIGHBORHOODS_JSON</code><em class="property"> = 'neighborhoods.json'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.FileType.NEIGHBORHOODS_JSON" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">NEIGHBORHOODS_JSON</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'neighborhoods.json'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.FileType.NEIGHBORHOODS_JSON" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="vitessce.constants.FileType.RASTER_JSON">
-<code class="sig-name descname">RASTER_JSON</code><em class="property"> = 'raster.json'</em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vitessce.constants.FileType.RASTER_JSON" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">RASTER_JSON</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'raster.json'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.FileType.RASTER_JSON" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>

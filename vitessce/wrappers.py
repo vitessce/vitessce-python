@@ -508,7 +508,8 @@ class AnnDataWrapper(AbstractWrapper):
     
     def auto_view_config(self, vc):
         dataset = vc.add_dataset().add_object(self)
-        scatterplot = vc.add_view(dataset, cm.SCATTERPLOT, mapping=self._mappings_obsm[0].split('/')[-1])
+        mapping_name = self._mappings_obsm_names[0] if (self._mappings_obsm_names is not None) else self._mappings_obsm[0].split('/')[-1]
+        scatterplot = vc.add_view(dataset, cm.SCATTERPLOT, mapping=mapping_name)
         cell_sets = vc.add_view(dataset, cm.CELL_SETS)
         genes = vc.add_view(dataset, cm.GENES)
         heatmap = vc.add_view(dataset, cm.HEATMAP)

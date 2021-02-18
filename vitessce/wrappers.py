@@ -512,8 +512,8 @@ class AnnDataWrapper(AbstractWrapper):
         cell_sets = vc.add_view(dataset, cm.CELL_SETS)
         genes = vc.add_view(dataset, cm.GENES)
         heatmap = vc.add_view(dataset, cm.HEATMAP)
-        spatial = vc.add_view(dataset, cm.SPATIAL)
         if self._spatial_polygon_obsm  is not None or self._spatial_centroid_obsm is not None:
+            spatial = vc.add_view(dataset, cm.SPATIAL)
             vc.layout((scatterplot | spatial) / (heatmap | (cell_sets / genes)))
         else:
             vc.layout((scatterplot | (cell_sets / genes)) / heatmap)

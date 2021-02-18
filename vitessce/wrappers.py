@@ -113,6 +113,15 @@ class AbstractWrapper:
         return join(self.out_dir, dataset_uid, str(obj_i), *args)
 
     def auto_view_config(self, vc):
+        """
+        Auto view configuration is intended to be used internally by the `VitessceConfig.from_object` method.
+        Each subclass of `AbstractWrapper` may implement this method which takes in a `VitessceConfig` instance
+        and modifies it by adding datasets, visualization components, and view coordinations.
+        Implementations of this method may create an opinionated view config based on inferred use cases.
+
+        :param vc: The view config instance.
+        :type vc: VitessceConfig
+        """
         raise NotImplementedError("Auto view configuration has not yet been implemented for this data object wrapper class.")
 
 class MultiImageWrapper(AbstractWrapper):

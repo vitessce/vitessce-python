@@ -6,7 +6,6 @@ from .constants import CoordinationType, Component, DataType, FileType
 from .wrappers import (
     AbstractWrapper,
     OmeTiffWrapper,
-    OmeZarrWrapper,
     MultiImageWrapper,
     AnnDataWrapper,
     SnapWrapper,

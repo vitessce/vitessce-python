@@ -16,9 +16,6 @@ from starlette.middleware.cors import CORSMiddleware
 from threading import Thread
 import socket
 
-# Config creation dependencies
-from .routes import create_obj_routes
-
 # See js/lib/widget.js for the frontend counterpart to this file.
 
 MAX_PORT_TRIES = 1000
@@ -112,13 +109,8 @@ class VitessceWidget(widgets.DOMWidget):
         else:
             base_url = f"http://localhost:{use_port}"
 
-        routes = []
-        def on_obj(obj, dataset_uid, obj_i):
-            obj_file_defs, obj_routes = create_obj_routes(obj, base_url, dataset_uid, obj_i)
-            for obj_route in obj_routes:
-                routes.append(obj_route)
-            return obj_file_defs
-        config_dict = config.to_dict(on_obj=on_obj)
+        config_dict = config.to_dict(base_url=base_url)
+        routes = config.get_routes()
 
         super(VitessceWidget, self).__init__(config=config_dict, height=height, theme=theme, proxy=proxy)
         

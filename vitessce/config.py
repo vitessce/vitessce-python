@@ -148,19 +148,26 @@ class VitessceConfigDataset:
         :returns: Self, to allow function chaining.
         :rtype: VitessceConfigDataset
         """
+        obj.convert_and_save(self.dataset["uid"], len(self.objs))
         self.objs.append(obj)
         return self
 
-    def to_dict(self, on_obj):
+    def to_dict(self, base_url):
         obj_file_defs = []
-        for obj_i, obj in enumerate(self.objs):
-            if on_obj is not None:
-                obj_file_defs += on_obj(obj, self.dataset["uid"], obj_i)
+        for obj in self.objs:
+            obj_file_defs += obj.get_file_defs(base_url)
                 
         return {
             **self.dataset,
             "files": [ f.to_dict() for f in self.dataset["files"] ] + obj_file_defs,
         }
+    
+    def get_routes(self):
+        routes = []
+        for obj in self.objs:
+            routes += obj.get_routes()
+
+        return routes
 
 class VitessceConfigViewHConcat:
     """
@@ -457,10 +464,10 @@ class VitessceConfig:
         :type component: str or vitessce.constants.Component
 
         :param str mapping: An optional convenience parameter for setting the EMBEDDING_TYPE coordination scope value. This parameter is only applicable to the SCATTERPLOT component.
-        :param int x: The horizontal position of the view. Must be an integer between 0 and 11. Optional.
-        :param int y: The vertical position of the view. Must be an integer between 0 and 11. Optional.
-        :param int w: The width of the view. Must be an integer between 1 and 12. Optional.
-        :param int h: The height of the view. Must be an integer between 1 and 12. Optional.
+        :param int x: The horizontal position of the view. Must be an integer between 0 and 11. Optional. This will be ignored if you call the `layout` method of this class using `VitessceConfigViewHConcat` and `VitessceConfigViewVConcat` objects.
+        :param int y: The vertical position of the view. Must be an integer between 0 and 11. Optional. This will be ignored if you call the `layout` method of this class using `VitessceConfigViewHConcat` and `VitessceConfigViewVConcat` objects.
+        :param int w: The width of the view. Must be an integer between 1 and 12. Optional. This will be ignored if you call the `layout` method of this class using `VitessceConfigViewHConcat` and `VitessceConfigViewVConcat` objects.
+        :param int h: The height of the view. Must be an integer between 1 and 12. Optional. This will be ignored if you call the `layout` method of this class using `VitessceConfigViewHConcat` and `VitessceConfigViewVConcat` objects.
 
         :returns: The instance for the new view.
         :rtype: VitessceConfigView
@@ -649,19 +656,18 @@ class VitessceConfig:
 
         return self
         
-    def to_dict(self, on_obj=None):
+    def to_dict(self, base_url=None):
         """
         Convert the view config instance to a dict object.
 
-        :param on_obj: This callback is required only if datasets within the view config contain objects added via the ``VitessceConfigDataset.add_object`` method (rather than only files added via the ``VitessceConfigDataset.add_file`` method). This function must take the data object as a parameter, and return a list of valid file definition dicts (URL, data type, file type). This parameter is primarily intended to be used internally by the ``VitessceWidget`` class.
-        :type on_obj: function or None
+        :param str base_url: Optional parameter for non-remote data to specify the url from which the data will be served.
 
         :returns: The view config as a dict. Useful for serializing to JSON.
         :rtype: dict
         """
         return {
             **self.config,
-            "datasets": [ d.to_dict(on_obj) for d in self.config["datasets"] ],
+            "datasets": [ d.to_dict(base_url) for d in self.config["datasets"] ],
             "coordinationSpace": dict([
                 (c_type, dict([
                     (c_scope_name, c_scope.c_value) for c_scope_name, c_scope in c_scopes.items() 
@@ -670,6 +676,18 @@ class VitessceConfig:
             # TODO: compute the x,y,w,h values if not explicitly defined
             "layout": [ c.to_dict() for c in self.config["layout"] ]
         }
+    
+    def get_routes(self):
+        """
+        Convert the routes for this view config from the datasets.
+
+        :returns: A list of server routes.
+        :rtype: list[starlette.routing.Route]
+        """
+        routes = []
+        for d in self.config["datasets"]:
+            routes += d.get_routes()
+        return routes
 
     @staticmethod
     def from_dict(config):
@@ -741,30 +759,9 @@ class VitessceConfig:
             vc = VitessceConfig.from_object(my_scanpy_object)
         """
         vc = VitessceConfig(name=name, description=description)
-        dataset = vc.add_dataset()
 
-        if type(obj) == AnnDataWrapper:
-            dataset.add_object(obj)
-
-            # TODO: use the available embeddings to determine how many / which scatterplots to add.
-            scatterplot = vc.add_view(dataset, cm.SCATTERPLOT, mapping=obj.mappings_obsm[0].split('/')[-1])
-            cell_sets = vc.add_view(dataset, cm.CELL_SETS)
-            genes = vc.add_view(dataset, cm.GENES)
-            heatmap = vc.add_view(dataset, cm.HEATMAP)
-
-            vc.layout((scatterplot | (cell_sets / genes)) / heatmap)
-        
-        elif type(obj) == SnapWrapper:
-            dataset.add_object(obj)
-
-            genomic_profiles = vc.add_view(dataset, cm.GENOMIC_PROFILES)
-            scatter = vc.add_view(dataset, cm.SCATTERPLOT, mapping = "UMAP")
-            cell_sets = vc.add_view(dataset, cm.CELL_SETS)
-
-            vc.layout(genomic_profiles / (scatter | cell_sets))
-        
-        else:
-            print("Encountered an unknown object type. Unable to automatically generate a Vitessce view config.")
+        # The data object may modify the view config if it implements the auto_view_config() method.
+        obj.auto_view_config(vc)
 
         return vc
     

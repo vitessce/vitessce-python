@@ -464,10 +464,10 @@ class VitessceConfig:
         :type component: str or vitessce.constants.Component
 
         :param str mapping: An optional convenience parameter for setting the EMBEDDING_TYPE coordination scope value. This parameter is only applicable to the SCATTERPLOT component.
-        :param int x: The horizontal position of the view. Must be an integer between 0 and 11. Optional.
-        :param int y: The vertical position of the view. Must be an integer between 0 and 11. Optional.
-        :param int w: The width of the view. Must be an integer between 1 and 12. Optional.
-        :param int h: The height of the view. Must be an integer between 1 and 12. Optional.
+        :param int x: The horizontal position of the view. Must be an integer between 0 and 11. Optional. This will be ignored if you call the `layout` method of this class using `VitessceConfigViewHConcat` and `VitessceConfigViewVConcat` objects.
+        :param int y: The vertical position of the view. Must be an integer between 0 and 11. Optional. This will be ignored if you call the `layout` method of this class using `VitessceConfigViewHConcat` and `VitessceConfigViewVConcat` objects.
+        :param int w: The width of the view. Must be an integer between 1 and 12. Optional. This will be ignored if you call the `layout` method of this class using `VitessceConfigViewHConcat` and `VitessceConfigViewVConcat` objects.
+        :param int h: The height of the view. Must be an integer between 1 and 12. Optional. This will be ignored if you call the `layout` method of this class using `VitessceConfigViewHConcat` and `VitessceConfigViewVConcat` objects.
 
         :returns: The instance for the new view.
         :rtype: VitessceConfigView

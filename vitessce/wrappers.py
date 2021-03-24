@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 import zarr
 from numcodecs import Zlib
+from scipy import sparse
 from scipy.sparse import csr_matrix
 from scipy.sparse import coo_matrix
 from generate_tiff_offsets import get_offsets
@@ -21,10 +22,12 @@ from .constants import (
     CoordinationType as ct,
     Component as cm,
     DataType as dt,
-    FileType as ft
+    FileType as ft,
 )
 from .entities import Cells, CellSets, GenomicProfiles
 from .routes import range_repsonse
+
+VAR_CHUNK_SIZE = 10
 
 class JsonRoute(Route):
     def __init__(self, path, endpoint, data_json):
@@ -407,7 +410,11 @@ class AnnDataWrapper(AbstractWrapper):
         if not self.is_remote:   
             super().convert_and_save(dataset_uid, obj_i)
             zarr_filepath = self.get_zarr_path(dataset_uid, obj_i)
-            self._adata.write_zarr(zarr_filepath)
+            # In the future, we can use sparse matrices with equal performance:
+            # https://github.com/theislab/anndata/issues/524
+            if isinstance(self._adata.X, sparse.spmatrix):
+                self._adata.X = self._adata.X.todense()
+            self._adata.write_zarr(zarr_filepath, chunks=[self._adata.shape[0], VAR_CHUNK_SIZE])
         
         cells_file_creator = self.make_cells_file_def_creator(dataset_uid, obj_i)
         cell_sets_file_creator = self.make_cell_sets_file_def_creator(dataset_uid, obj_i)

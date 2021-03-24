@@ -63,11 +63,11 @@ class TestWrappers(unittest.TestCase):
     
     def test_anndata(self):
         adata = read_h5ad(join('data', 'test.h5ad'))
-        w = AnnDataWrapper(adata, cell_set_obs=['CellType'])
+        w = AnnDataWrapper(adata, cell_set_obs=['CellType'], mappings_obsm=['X_umap'], mappings_obsm_names=['UMAP'])
 
         cells_creator = w.make_cells_file_def_creator('A', 0)
         cells = cells_creator( 'http://localhost:8000')
-        self.assertEqual(cells, {'type': 'cells', 'fileType': 'anndata-cells.zarr', 'url': 'http://localhost:8000/A/0/anndata.zarr' })
+        self.assertEqual(cells, {'type': 'cells', 'fileType': 'anndata-cells.zarr', 'url': 'http://localhost:8000/A/0/anndata.zarr', 'options': { "mappings": { 'UMAP': { 'dims': [0, 1], 'key': 'obsm/X_umap' } } } })
 
         cell_sets_creator = w.make_cell_sets_file_def_creator('A', 0)
         cell_sets = cell_sets_creator( 'http://localhost:8000')

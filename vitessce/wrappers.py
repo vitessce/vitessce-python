@@ -359,7 +359,7 @@ class OmeTiffWrapper(AbstractWrapper):
 
 
 class AnnDataWrapper(AbstractWrapper):
-    def __init__(self, adata=None, adata_url=None, expression_matrix=None, matrix_gene_var_filter=None, gene_var_filter=None, cell_set_obs=None, cell_set_obs_names=None, spatial_centroid_obsm=None, spatial_polygon_obsm=None, mappings_obsm=None, mappings_obsm_names=None, mappings_obsm_dims=None, request_init=None, **kwargs):
+    def __init__(self, adata=None, adata_url=None, expression_matrix=None, matrix_gene_var_filter=None, gene_var_filter=None, cell_set_obs=None, cell_set_obs_names=None, spatial_centroid_obsm=None, spatial_polygon_obsm=None, mappings_obsm=None, mappings_obsm_names=None, mappings_obsm_dims=None, request_init=None, factors_obs=None, **kwargs):
         """
         Wrap an AnnData object by creating an instance of the ``AnnDataWrapper`` class.
 
@@ -369,6 +369,7 @@ class AnnDataWrapper(AbstractWrapper):
         :param str expression_matrix: Location of the expression (cell x gene) matrix, like `X` or `obsm/highly_variable_genes_subset`
         :param str gene_var_filter: A string like `highly_variable` (from `var` in the AnnData stored) used in conjunction with expression_matrix if expression_matrix points to a subset of `X` of the full `var` list.
         :param str matrix_gene_var_filter: A string like `highly_variable` (from `var` in the AnnData stored) used in conjunction with expression_matrix if expression_matrix points to a subset of `X` of the full `var` list.
+        :param list[str] factors_obs: Column names like `['top_marker_gene', 'sex']` for showing factors when cells are hovered over
         :param list[str] cell_set_obs: Column names like `['louvain', 'cellType']` for showing cell sets from `obs`
         :param list[str] cell_set_obs_names: Names to display in place of those in `cell_set_obs`, like `['Louvain', 'Cell Type']
         :param str spatial_centroid_obsm: Column name in `obsm` that contains centroid coordinates for displaying centroids in the spatial viewer
@@ -394,6 +395,7 @@ class AnnDataWrapper(AbstractWrapper):
         self._gene_var_filter = "var/" + gene_var_filter if gene_var_filter is not None else gene_var_filter
         self._matrix_gene_var_filter = "var/" + matrix_gene_var_filter if matrix_gene_var_filter is not None else matrix_gene_var_filter
         self._cell_set_obs = ["obs/" + i for i in cell_set_obs] if cell_set_obs is not None else cell_set_obs
+        self._factors_obs = ["obs/" + i for i in factors_obs] if factors_obs is not None else factors_obs
         self._spatial_centroid_obsm = "obsm/" + spatial_centroid_obsm if spatial_centroid_obsm is not None else spatial_centroid_obsm
         self._spatial_polygon_obsm = "obsm/" + spatial_polygon_obsm if spatial_polygon_obsm is not None else spatial_polygon_obsm
         self._mappings_obsm = ["obsm/" + i for i in mappings_obsm] if mappings_obsm is not None else mappings_obsm
@@ -452,9 +454,9 @@ class AnnDataWrapper(AbstractWrapper):
                 if self._mappings_obsm_dims is not None:
                     for dim, key in zip(self._mappings_obsm_dims, self._mappings_obsm_names):
                         options["mappings"][key]['dims'] = dim
-            if self._cell_set_obs is not None:
+            if self._factors_obs is not None:
                 options["factors"] = []
-                for obs in self._cell_set_obs:
+                for obs in self._factors_obs:
                     options["factors"].append(obs)
             if len(options.keys()) > 0:
                 obj_file_def = {

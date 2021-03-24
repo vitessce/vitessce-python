@@ -148,8 +148,8 @@ def create_test_anndata_file(h5ad_path):
             for i, ct in zip(obs_index_arr, obs_celltype_arr)
         ]
     )
-
-    adata = AnnData(X, var=var_df, obs=obs_df)
+    obsm = { "X_umap": np.array([[0, 1] for c in obs_index_arr]) }
+    adata = AnnData(X, var=var_df, obs=obs_df, obsm=obsm)
     adata.write_h5ad(h5ad_path)
 
 def create_test_loom_file(loom_path):

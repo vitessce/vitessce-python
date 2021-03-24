@@ -486,8 +486,15 @@ div.rendered_html tbody tr:hover {
 <span class="n">adata_filepath</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="s2">&quot;habib17.processed.h5ad&quot;</span><span class="p">)</span>
 <span class="n">urlretrieve</span><span class="p">(</span><span class="s1">&#39;https://covid19.cog.sanger.ac.uk/habib17.processed.h5ad&#39;</span><span class="p">,</span> <span class="n">adata_filepath</span><span class="p">)</span>
 
-<span class="n">adata</span> <span class="o">=</span> <span class="n">read_h5ad</span><span class="p">(</span><span class="n">adata_filepath</span><span class="p">)</span>
-<span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">highly_variable_genes</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">n_top_genes</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">top_dispersion</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="s2">&quot;dispersions_norm&quot;</span><span class="p">][</span>
+    <span class="nb">sorted</span><span class="p">(</span>
+        <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="s2">&quot;dispersions_norm&quot;</span><span class="p">])),</span>
+        <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">k</span><span class="p">:</span> <span class="n">adata</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="s2">&quot;dispersions_norm&quot;</span><span class="p">][</span><span class="n">k</span><span class="p">],</span>
+    <span class="p">)[</span><span class="o">-</span><span class="mi">51</span><span class="p">:][</span><span class="mi">0</span><span class="p">]</span>
+<span class="p">]</span>
+<span class="n">adata</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="s2">&quot;top_highly_variable&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">adata</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="s2">&quot;dispersions_norm&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">top_dispersion</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -501,7 +508,15 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="n">vc</span> <span class="o">=</span> <span class="n">VitessceConfig</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Habib et al&#39;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;COVID-19 Healthy Donor Brain&#39;</span><span class="p">)</span>
-<span class="n">dataset</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">add_dataset</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Brain&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">add_object</span><span class="p">(</span><span class="n">AnnDataWrapper</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">cell_set_obs_cols</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;CellType&quot;</span><span class="p">]))</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">add_dataset</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Brain&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">add_object</span><span class="p">(</span><span class="n">AnnDataWrapper</span><span class="p">(</span>
+        <span class="n">adata</span><span class="p">,</span>
+        <span class="n">mappings_obsm</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;X_umap&quot;</span><span class="p">],</span>
+        <span class="n">mappings_obsm_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;UMAP&quot;</span><span class="p">],</span>
+        <span class="n">cell_set_obs</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;CellType&quot;</span><span class="p">],</span>
+        <span class="n">cell_set_obs_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Cell Type&quot;</span><span class="p">],</span>
+        <span class="n">expression_matrix</span><span class="o">=</span><span class="s2">&quot;X&quot;</span><span class="p">,</span>
+        <span class="n">matrix_gene_var_filter</span><span class="o">=</span><span class="s2">&quot;top_highly_variable&quot;</span>
+<span class="p">))</span>
 <span class="n">scatterplot</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">cm</span><span class="o">.</span><span class="n">SCATTERPLOT</span><span class="p">,</span> <span class="n">mapping</span><span class="o">=</span><span class="s2">&quot;X_umap&quot;</span><span class="p">)</span>
 <span class="n">cell_sets</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">cm</span><span class="o">.</span><span class="n">CELL_SETS</span><span class="p">)</span>
 <span class="n">genes</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">cm</span><span class="o">.</span><span class="n">GENES</span><span class="p">)</span>

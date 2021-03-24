@@ -93,7 +93,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#1.-Import-dependencies">1. Import dependencies</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#2.-Download-the-data">2. Download the data</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#3.-Load-the-data">3. Load the data</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#3.1.-Optionally,-preprocess-the-dataset">3.1. Optionally, preprocess the dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#3.1.-Preprocess-the-Data-For-Visualization">3.1. Preprocess the Data For Visualization</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#4.-Create-the-Vitessce-widget-configuration">4. Create the Vitessce widget configuration</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#4.1.-Instantiate-a-VitessceConfig-object">4.1. Instantiate a <code class="docutils literal notranslate"><span class="pre">VitessceConfig</span></code> object</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#4.2.-Add-a-dataset-to-the-VitessceConfig-instance">4.2. Add a dataset to the <code class="docutils literal notranslate"><span class="pre">VitessceConfig</span></code> instance</a></li>
@@ -510,15 +510,23 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 </div>
-<div class="section" id="3.1.-Optionally,-preprocess-the-dataset">
-<h2>3.1. Optionally, preprocess the dataset<a class="headerlink" href="#3.1.-Optionally,-preprocess-the-dataset" title="Permalink to this headline">¶</a></h2>
-<p>This dataset contains 25,587 genes, but has the <code class="docutils literal notranslate"><span class="pre">highly_variable</span></code> ones marked. We put those in a <code class="docutils literal notranslate"><span class="pre">obsm</span></code> entry for visualization (you may try to visualize all of the genes using <code class="docutils literal notranslate"><span class="pre">X</span></code> without a <code class="docutils literal notranslate"><span class="pre">genes_vars_filter</span></code> instead of <code class="docutils literal notranslate"><span class="pre">obsm/X_hvg</span></code> below, although both load time and interactions will be quite a bit slower).</p>
+<div class="section" id="3.1.-Preprocess-the-Data-For-Visualization">
+<h2>3.1. Preprocess the Data For Visualization<a class="headerlink" href="#3.1.-Preprocess-the-Data-For-Visualization" title="Permalink to this headline">¶</a></h2>
+<p>This dataset contains 25,587 genes. In order to visualize it efficiently, we convert it to CSC sparse format so that we can make fast requests for gene data. We also prepare to visualize the top 50 highly variable genes for the heatmap as ranked by dispersion norm, although one may use any boolean array filter for the heatmap.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">adata</span><span class="o">.</span><span class="n">obsm</span><span class="p">[</span><span class="s1">&#39;X_hvg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">adata</span><span class="p">[:,</span> <span class="n">adata</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="s1">&#39;highly_variable&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span></span><span class="n">top_dispersion</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="s2">&quot;dispersions_norm&quot;</span><span class="p">][</span>
+    <span class="nb">sorted</span><span class="p">(</span>
+        <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="s2">&quot;dispersions_norm&quot;</span><span class="p">])),</span>
+        <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">k</span><span class="p">:</span> <span class="n">adata</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="s2">&quot;dispersions_norm&quot;</span><span class="p">][</span><span class="n">k</span><span class="p">],</span>
+    <span class="p">)[</span><span class="o">-</span><span class="mi">51</span><span class="p">:][</span><span class="mi">0</span><span class="p">]</span>
+<span class="p">]</span>
+<span class="n">adata</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="s2">&quot;top_highly_variable&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">adata</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="s2">&quot;dispersions_norm&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">top_dispersion</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -555,8 +563,8 @@ div.rendered_html tbody tr:hover {
         <span class="n">mappings_obsm_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;UMAP&quot;</span><span class="p">],</span>
         <span class="n">cell_set_obs</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;CellType&quot;</span><span class="p">],</span>
         <span class="n">cell_set_obs_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Cell Type&quot;</span><span class="p">],</span>
-        <span class="n">expression_matrix</span><span class="o">=</span><span class="s2">&quot;obsm/X_hvg&quot;</span><span class="p">,</span>
-        <span class="n">genes_var_filter</span><span class="o">=</span><span class="s2">&quot;highly_variable&quot;</span>
+        <span class="n">expression_matrix</span><span class="o">=</span><span class="s2">&quot;X&quot;</span><span class="p">,</span>
+        <span class="n">matrix_gene_var_filter</span><span class="o">=</span><span class="s2">&quot;top_highly_variable&quot;</span>
     <span class="p">)</span>
 <span class="p">)</span>
 </pre></div>

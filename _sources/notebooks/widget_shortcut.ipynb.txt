@@ -85,7 +85,7 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "## 3.1. Optionally, preprocess the data"
+    "## 3.1. Preprocess the Data For Visualization"
    ]
   },
   {
@@ -94,7 +94,15 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "adata.obsm['X_hvg'] = adata[:, adata.var['highly_variable']].X.copy()"
+    "top_dispersion = adata.var[\"dispersions_norm\"][\n",
+    "    sorted(\n",
+    "        range(len(adata.var[\"dispersions_norm\"])),\n",
+    "        key=lambda k: adata.var[\"dispersions_norm\"][k],\n",
+    "    )[-51:][0]\n",
+    "]\n",
+    "adata.var[\"top_highly_variable\"] = (\n",
+    "    adata.var[\"dispersions_norm\"] > top_dispersion\n",
+    ")"
    ]
   },
   {
@@ -113,10 +121,11 @@
     "vw = VitessceConfig.from_object(AnnDataWrapper(\n",
     "        adata,\n",
     "        mappings_obsm=[\"X_umap\"],\n",
+    "        mappings_obsm_names=[\"UMAP\"],\n",
     "        cell_set_obs=[\"CellType\"],\n",
     "        cell_set_obs_names=[\"Cell Type\"],\n",
-    "        expression_matrix=\"obsm/X_hvg\",\n",
-    "        genes_var_filter=\"highly_variable\"\n",
+    "        expression_matrix=\"X\",\n",
+    "        matrix_gene_var_filter=\"top_highly_variable\"\n",
     ")).widget(height=800)\n",
     "vw"
    ]

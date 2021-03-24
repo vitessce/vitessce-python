@@ -771,11 +771,16 @@ Particularly helpful when using the <code class="docutils literal notranslate"><
 <span id="vitessce-constants"></span><h2>vitessce.constants<a class="headerlink" href="#module-vitessce.constants" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="vitessce.constants.Component">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">vitessce.constants.</span></code><code class="sig-name descname"><span class="pre">Component</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py#L52-L65"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.Component" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">vitessce.constants.</span></code><code class="sig-name descname"><span class="pre">Component</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py#L52-L66"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.Component" title="Permalink to this definition">¶</a></dt>
 <dd><p>An enum type representing a view type in the visualization layout.</p>
 <dl class="py attribute">
 <dt id="vitessce.constants.Component.CELL_SETS">
 <code class="sig-name descname"><span class="pre">CELL_SETS</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'cellSets'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.Component.CELL_SETS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="vitessce.constants.Component.CELL_SET_EXPRESSION">
+<code class="sig-name descname"><span class="pre">CELL_SET_EXPRESSION</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'cellSetExpression'</span></em><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.Component.CELL_SET_EXPRESSION" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -995,7 +1000,7 @@ For example, the <code class="docutils literal notranslate"><span class="pre">SP
 
 <dl class="py class">
 <dt id="vitessce.constants.DataType">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">vitessce.constants.</span></code><code class="sig-name descname"><span class="pre">DataType</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py#L67-L77"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.DataType" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">vitessce.constants.</span></code><code class="sig-name descname"><span class="pre">DataType</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py#L68-L78"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.DataType" title="Permalink to this definition">¶</a></dt>
 <dd><p>An enum type representing the type of data contained in a file.</p>
 <dl class="py attribute">
 <dt id="vitessce.constants.DataType.CELLS">
@@ -1036,7 +1041,7 @@ For example, the <code class="docutils literal notranslate"><span class="pre">SP
 
 <dl class="py class">
 <dt id="vitessce.constants.FileType">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">vitessce.constants.</span></code><code class="sig-name descname"><span class="pre">FileType</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py#L79-L92"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.FileType" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">vitessce.constants.</span></code><code class="sig-name descname"><span class="pre">FileType</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/constants.py#L80-L93"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.constants.FileType" title="Permalink to this definition">¶</a></dt>
 <dd><p>An enum type representing the file format or schema to which a file conforms.</p>
 <dl class="py attribute">
 <dt id="vitessce.constants.FileType.ANNDATA_CELLS_ZARR">

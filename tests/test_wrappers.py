@@ -67,7 +67,7 @@ class TestWrappers(unittest.TestCase):
 
         cells_creator = w.make_cells_file_def_creator('A', 0)
         cells = cells_creator( 'http://localhost:8000')
-        self.assertEqual(cells, {'type': 'cells', 'fileType': 'anndata-cells.zarr', 'url': 'http://localhost:8000/A/0/anndata.zarr', 'options': {'factors': ['obs/CellType']}})
+        self.assertEqual(cells, {'type': 'cells', 'fileType': 'anndata-cells.zarr', 'url': 'http://localhost:8000/A/0/anndata.zarr' })
 
         cell_sets_creator = w.make_cell_sets_file_def_creator('A', 0)
         cell_sets = cell_sets_creator( 'http://localhost:8000')

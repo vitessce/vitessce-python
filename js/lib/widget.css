@@ -14,3 +14,7 @@
 .vitessce-container .layer-controller-container select {
     height: revert;
 }
+
+html {
+    font-size: 14px;
+}

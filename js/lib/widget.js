@@ -63,7 +63,8 @@ function VitessceWidget(props) {
         jpn.style.overflow = "hidden";
       }
     }
-    function handleMouseLeave() {
+    function handleMouseLeave(event) {
+      if(event.relatedTarget === null || (event.relatedTarget && event.relatedTarget.closest('.jp-Notebook')?.length)) return;
       const jpn = divRef.current.closest('.jp-Notebook');
       if(jpn) {
         jpn.style.overflow = "auto";

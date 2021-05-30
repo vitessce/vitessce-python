@@ -127,6 +127,18 @@ class AbstractWrapper:
         """
         raise NotImplementedError("Auto view configuration has not yet been implemented for this data object wrapper class.")
 
+
+def _make_repr(obj, args):
+    """
+    >>> _make_repr(Exception(), {'answer': 42})
+    'Exception(answer=42)'
+
+    """
+    obj_name = obj.__class__.__name__
+    params = ', '.join([f'{k}={repr(v)}' for k, v in args.items()])
+    return f'{obj_name}({params})'
+
+
 class MultiImageWrapper(AbstractWrapper):
     """
     Wrap multiple imaging datasets by creating an instance of the ``MultiImageWrapper`` class.
@@ -136,8 +148,16 @@ class MultiImageWrapper(AbstractWrapper):
     """
     def __init__(self, image_wrappers, use_physical_size_scaling=False, **kwargs):
         super().__init__(**kwargs)
+        self.repr = _make_repr(self, {
+            'image_wrappers': image_wrappers,
+            'use_physical_size_scaling': use_physical_size_scaling,
+            **kwargs
+        })
         self.image_wrappers = image_wrappers
         self.use_physical_size_scaling = use_physical_size_scaling
+
+    def __repr__(self):
+        return self.repr
     
     def convert_and_save(self, dataset_uid, obj_i):
         for image in self.image_wrappers:

@@ -141,6 +141,7 @@ setup_args = dict(
             'vitessce/static/index.js',
             'vitessce/static/index.js.map',
         ]),
+        ('share/jupyter/labextensions/vitessce-jupyter/', 'share/jupyter/labextensions/vitessce-jupyter/', '**'),
         # like `jupyter nbextension enable --sys-prefix`
         ('etc/jupyter/nbconfig/notebook.d' ,['vitessce-jupyter.json'])
     ],

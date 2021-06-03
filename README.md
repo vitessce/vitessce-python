@@ -23,12 +23,6 @@ To enable the widget for Jupyter Lab run the following additional lines:
 Explore our [example notebooks](./docs/notebooks/).
 These contain demos of different use cases and integrations with single-cell data analysis packages.
 
-## Compatibility
-
-The Vitessce widget is compatible with the following interactive Python platforms:
-- JupyterLab `>=3.0.0`
-- Jupyter Notebook (classic) `>=1.0.0`
-
 ## Development
 
 For a development installation (requires npm),

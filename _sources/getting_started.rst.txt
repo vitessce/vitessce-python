@@ -40,6 +40,15 @@ To use the widget in `JupyterLab <https://jupyterlab.readthedocs.io/en/stable/>`
     jupyter labextension install vitessce-jupyter
 
 
+Widget Compatibility
+--------------------
+
+The Vitessce widget is compatible with the following interactive Python platforms:
+
+* JupyterLab ``>=3.0.0``
+* Jupyter Notebook (classic) ``>=1.0.0``
+
+
 Optional dependencies
 ---------------------
 

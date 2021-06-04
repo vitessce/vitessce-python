@@ -63,6 +63,7 @@ class Component(DocEnum):
     GENOMIC_PROFILES = "genomicProfiles", "The higlass component can be used to visualize genome-wide ATAC-seq profiles."
     CELL_SET_SIZES = "cellSetSizes", "The cell set sizes component can display the quantities of cells in selected cell sets."
     GENES = "genes", "The gene list selector."
+    CELL_SET_EXPRESSION = "cellSetExpression", "Expression levels are displayed by cell set"
 
 class DataType(DocEnum):
     """

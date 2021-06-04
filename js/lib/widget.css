@@ -10,3 +10,11 @@
 .vitessce-container div {
     font-size: 14px;
 }
+
+.vitessce-container .layer-controller-container select {
+    height: revert;
+}
+
+html {
+    font-size: 14px;
+}

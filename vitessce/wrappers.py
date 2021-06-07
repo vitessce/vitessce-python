@@ -39,9 +39,6 @@ class AbstractWrapper:
     """
     An abstract class that can be extended when
     implementing custom dataset object wrapper classes. 
-
-    >>> assert 2+2 == 5
-
     """
 
     def __init__(self, **kwargs):

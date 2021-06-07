@@ -39,6 +39,9 @@ class AbstractWrapper:
     """
     An abstract class that can be extended when
     implementing custom dataset object wrapper classes. 
+
+    >>> assert 2+2 == 5
+
     """
 
     def __init__(self, **kwargs):
@@ -132,7 +135,7 @@ class MultiImageWrapper(AbstractWrapper):
     Wrap multiple imaging datasets by creating an instance of the ``MultiImageWrapper`` class.
 
     :param list image_wrappers: A list of imaging wrapper classes (only :class:`~vitessce.wrappers.OmeTiffWrapper` supported now)
-    :param \*\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
+    :param \\*\\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
     """
     def __init__(self, image_wrappers, use_physical_size_scaling=False, **kwargs):
         super().__init__(**kwargs)
@@ -184,7 +187,7 @@ class OmeTiffWrapper(AbstractWrapper):
     :param str img_url: A remote URL of an OME-TIFF file.
     :param str name: The display name for this OME-TIFF within Vitessce.
     :param list[number] transformation_matrix: A column-major ordered matrix for transforming this image (see http://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices/#homogeneous-coordinates for more information).
-    :param \*\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
+    :param \\*\\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
     """
 
     def __init__(self, img_path=None, offsets_path=None, img_url=None, offsets_url=None, name="", transformation_matrix=None, **kwargs):
@@ -381,7 +384,7 @@ class AnnDataWrapper(AbstractWrapper):
         :param list[str] mappings_obsm_names: Overriding names like `['UMAP', 'PCA'] for displaying above scatterplots
         :param list[str] mappings_obsm_dims: Dimensions along which to get data for the scatterplot, like [[0, 1], [4, 5]] where [0, 1] is just the normal x and y but [4, 5] could be comparing the third and fourth principal components, for example.
         :param dict request_init: options to be passed along with every fetch request from the browser, like { "header": { "Authorization": "Bearer dsfjalsdfa1431" } }
-        :param \*\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
+        :param \\*\\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
         """
         super().__init__(**kwargs)
         self._adata = adata

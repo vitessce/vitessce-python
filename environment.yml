@@ -12,6 +12,7 @@ dependencies:
  - scipy>=1.0.0
  - nbsphinx>=0.7.1
  - pandoc>=2.11.3
+ - pytest>=6.2.4
  - pip
  - pip:
    - build==0.1.0

@@ -39,6 +39,11 @@ class AbstractWrapper:
     """
     An abstract class that can be extended when
     implementing custom dataset object wrapper classes. 
+
+    TODO: Add some useful tests.
+
+    >>> assert True
+
     """
 
     def __init__(self, **kwargs):

@@ -128,15 +128,16 @@ class AbstractWrapper:
         raise NotImplementedError("Auto view configuration has not yet been implemented for this data object wrapper class.")
 
 
-def _make_repr(obj, args):
-    """
-    >>> _make_repr(Exception(), {'answer': 42})
-    'Exception(answer=42)'
-
-    """
-    obj_name = obj.__class__.__name__
+def _make_repr(init_locals):
+    del init_locals['self']
+    clazz = init_locals.pop('__class__')
+    kwargs = init_locals.pop('kwargs')
+    args = {
+        **init_locals,
+        **kwargs
+    }
     params = ', '.join([f'{k}={repr(v)}' for k, v in args.items()])
-    return f'{obj_name}({params})'
+    return f'{clazz.__name__}({params})'
 
 
 class MultiImageWrapper(AbstractWrapper):
@@ -148,14 +149,7 @@ class MultiImageWrapper(AbstractWrapper):
     """
     def __init__(self, image_wrappers, use_physical_size_scaling=False, **kwargs):
         super().__init__(**kwargs)
-        args = locals()
-        del args['self']
-        del args['kwargs']
-        del args['__class__']
-        self.repr = _make_repr(self, {
-            **args,
-            **kwargs
-        })
+        self.repr = _make_repr(locals())
         self.image_wrappers = image_wrappers
         self.use_physical_size_scaling = use_physical_size_scaling
 

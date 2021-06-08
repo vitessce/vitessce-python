@@ -48,6 +48,13 @@ This takes a minute or so to get started, but then automatically rebuilds Jupyte
 
 Note on first `jupyter lab --watch`, you may need to touch a file to get Jupyter Lab to open.
 
+### Conda environments
+
+In this repository, there are multiple conda environments for different purposes:
+
+- `vitessce-jupyter-dev` (defined in [environment.yml](https://github.com/vitessce/vitessce-python/blob/master/environment.yml)) is used for the development of the `vitessce` package itself
+- `vitessce-jupyter-examples` (defined in [docs/notebooks/environment.yml](https://github.com/vitessce/vitessce-python/blob/master/docs/notebooks/environment.yml)) is used for running the example notebooks in the `docs/notebooks/` directory (see [`docs/notebooks/README.md`](https://github.com/vitessce/vitessce-python/tree/master/docs/notebooks#readme) for more information)
+- `vitessce-jupyter-binder` (defined in [binder/environment.yml](https://github.com/vitessce/vitessce-python/blob/master/binder/environment.yml)) is the environment used by Binder upon opening notebooks from this repository
 
 ## Testing
 

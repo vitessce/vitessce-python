@@ -52,6 +52,9 @@ class AbstractWrapper:
         self.is_remote = False
         self.file_def_creators = []
 
+    def __repr__(self):
+        return self.repr
+
     def convert_and_save(self, dataset_uid, obj_i):
         """
         Fill in the file_def_creators array.
@@ -144,6 +147,13 @@ class MultiImageWrapper(AbstractWrapper):
     """
     Wrap multiple imaging datasets by creating an instance of the ``MultiImageWrapper`` class.
 
+    >>> orig = MultiImageWrapper('IMAGE_WRAPPERS', foo='bar')
+    >>> orig_repr = repr(orig)
+    >>> print(orig_repr)
+    MultiImageWrapper(image_wrappers='IMAGE_WRAPPERS', use_physical_size_scaling=False, foo='bar')
+    >>> evalled = eval(orig_repr)
+    >>> assert orig_repr == repr(evalled)
+
     :param list image_wrappers: A list of imaging wrapper classes (only :class:`~vitessce.wrappers.OmeTiffWrapper` supported now)
     :param \\*\\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
     """
@@ -152,17 +162,6 @@ class MultiImageWrapper(AbstractWrapper):
         self.repr = _make_repr(locals())
         self.image_wrappers = image_wrappers
         self.use_physical_size_scaling = use_physical_size_scaling
-
-    def __repr__(self):
-        '''
-        >>> orig = MultiImageWrapper('IMAGE_WRAPPERS', foo='bar')
-        >>> orig_repr = repr(orig)
-        >>> print(orig_repr)
-        MultiImageWrapper(image_wrappers='IMAGE_WRAPPERS', use_physical_size_scaling=False, foo='bar')
-        >>> evalled = eval(orig_repr)
-        >>> assert orig_repr == repr(evalled)
-        '''
-        return self.repr
     
     def convert_and_save(self, dataset_uid, obj_i):
         for image in self.image_wrappers:

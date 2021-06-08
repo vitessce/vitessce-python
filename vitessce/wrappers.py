@@ -213,6 +213,7 @@ class OmeTiffWrapper(AbstractWrapper):
 
     def __init__(self, img_path=None, offsets_path=None, img_url=None, offsets_url=None, name="", transformation_matrix=None, **kwargs):
         super().__init__(**kwargs)
+        self.repr = _make_repr(locals())
         self.name = name
         self._img_path = img_path
         self._img_url = img_url
@@ -408,6 +409,7 @@ class AnnDataWrapper(AbstractWrapper):
         :param \\*\\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
         """
         super().__init__(**kwargs)
+        self.repr = _make_repr(locals())
         self._adata = adata
         self._adata_url = adata_url
         if adata is not None:
@@ -574,6 +576,7 @@ class SnapWrapper(AbstractWrapper):
 
     def __init__(self, in_mtx, in_barcodes_df, in_bins_df, in_clusters_df, starting_resolution=5000, **kwargs):
         super().__init__(**kwargs)
+        self.repr = _make_repr(locals())
         self.in_mtx = in_mtx # scipy.sparse.coo.coo_matrix (filtered_cell_by_bin.mtx)
         self.in_barcodes_df = in_barcodes_df # pandas dataframe (barcodes.txt)
         self.in_bins_df = in_bins_df # pandas dataframe (bins.txt)

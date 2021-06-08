@@ -132,8 +132,16 @@ class AbstractWrapper:
 
 
 def _make_repr(init_locals):
+    '''
+    >>> orig = MultiImageWrapper('IMAGE_WRAPPERS', foo='bar')
+    >>> orig_repr = repr(orig)
+    >>> print(orig_repr)
+    MultiImageWrapper(image_wrappers='IMAGE_WRAPPERS', use_physical_size_scaling=False, foo='bar')
+    >>> evalled = eval(orig_repr)
+    >>> assert orig_repr == repr(evalled)
+    '''
     del init_locals['self']
-    clazz = init_locals.pop('__class__')
+    clazz = init_locals.pop('__class__')  # Requires superclass to be initialized.
     kwargs = init_locals.pop('kwargs')
     args = {
         **init_locals,
@@ -146,13 +154,6 @@ def _make_repr(init_locals):
 class MultiImageWrapper(AbstractWrapper):
     """
     Wrap multiple imaging datasets by creating an instance of the ``MultiImageWrapper`` class.
-
-    >>> orig = MultiImageWrapper('IMAGE_WRAPPERS', foo='bar')
-    >>> orig_repr = repr(orig)
-    >>> print(orig_repr)
-    MultiImageWrapper(image_wrappers='IMAGE_WRAPPERS', use_physical_size_scaling=False, foo='bar')
-    >>> evalled = eval(orig_repr)
-    >>> assert orig_repr == repr(evalled)
 
     :param list image_wrappers: A list of imaging wrapper classes (only :class:`~vitessce.wrappers.OmeTiffWrapper` supported now)
     :param \\*\\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`

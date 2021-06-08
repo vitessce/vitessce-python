@@ -39,11 +39,6 @@ class AbstractWrapper:
     """
     An abstract class that can be extended when
     implementing custom dataset object wrapper classes. 
-
-    TODO: Add some useful tests.
-
-    >>> assert True
-
     """
 
     def __init__(self, **kwargs):
@@ -162,6 +157,14 @@ class MultiImageWrapper(AbstractWrapper):
         self.use_physical_size_scaling = use_physical_size_scaling
 
     def __repr__(self):
+        '''
+        >>> orig = MultiImageWrapper('IMAGE_WRAPPERS', foo='bar')
+        >>> orig_repr = repr(orig)
+        >>> print(orig_repr)
+        MultiImageWrapper(image_wrappers='IMAGE_WRAPPERS', use_physical_size_scaling=False, foo='bar')
+        >>> evalled = eval(orig_repr)
+        >>> assert orig_repr == repr(evalled)
+        '''
         return self.repr
     
     def convert_and_save(self, dataset_uid, obj_i):

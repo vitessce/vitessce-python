@@ -186,13 +186,17 @@ class OmeTiffWrapper(AbstractWrapper):
     Wrap an OME-TIFF File by creating an instance of the ``OmeTiffWrapper`` class.
 
     :param str img_path: A local filepath to an OME-TIFF file.
+    :param str offsets_path: A local filepath to an offsets.json file.
     :param str img_url: A remote URL of an OME-TIFF file.
+    :param str offsets_url: A remote URL of an offsets.json file.
     :param str name: The display name for this OME-TIFF within Vitessce.
     :param list[number] transformation_matrix: A column-major ordered matrix for transforming this image (see http://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices/#homogeneous-coordinates for more information).
+    :param bool is_bitmask: Whether or not this image is a bitmask.
     :param \\*\\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
     """
 
-    def __init__(self, img_path=None, offsets_path=None, img_url=None, offsets_url=None, name="", transformation_matrix=None, **kwargs):
+    def __init__(self, img_path=None, offsets_path=None, img_url=None, offsets_url=None, name="", transformation_matrix=None, is_bitmask=False,
+     **kwargs):
         super().__init__(**kwargs)
         self.name = name
         self._img_path = img_path
@@ -200,6 +204,7 @@ class OmeTiffWrapper(AbstractWrapper):
         self._offsets_url = offsets_url
         self._transformation_matrix = transformation_matrix
         self.is_remote = img_url is not None
+        self.is_bitmask = is_bitmask
         if img_url is not None and (img_path is not None or offsets_path is not None):
             raise ValueError("Did not expect img_path or offsets_path to be provided with img_url")
     
@@ -259,6 +264,7 @@ class OmeTiffWrapper(AbstractWrapper):
             metadata["transform"] = {
                 "matrix": self._transformation_matrix
             }
+        metadata["isBitmask"] = self.is_bitmask
         # Only attach metadata if there is some - otherwise schema validation fails.
         if len(metadata.keys()) > 0:
             image["metadata"] = metadata

@@ -148,9 +148,12 @@ class MultiImageWrapper(AbstractWrapper):
     """
     def __init__(self, image_wrappers, use_physical_size_scaling=False, **kwargs):
         super().__init__(**kwargs)
+        args = locals()
+        del args['self']
+        del args['kwargs']
+        del args['__class__']
         self.repr = _make_repr(self, {
-            'image_wrappers': image_wrappers,
-            'use_physical_size_scaling': use_physical_size_scaling,
+            **args,
             **kwargs
         })
         self.image_wrappers = image_wrappers

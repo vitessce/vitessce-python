@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Visualization of Multi-Modal Imaging Data &mdash; vitessce  documentation</title>
+  <title>Visualization of Segmentation Bitmask &mdash; vitessce  documentation</title>
   
 
   
@@ -44,9 +44,7 @@
 
     
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Visualization of 3k PBMC reference" href="widget_pbmc.html" />
-    <link rel="prev" title="Visualization of genomic profiles" href="widget_genomic_profiles.html" /> 
+    <link rel="search" title="Search" href="../search.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -91,23 +89,9 @@
               
             
             
-              <ul class="current">
+              <ul>
 <li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../widget_examples.html">Widget examples</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="widget_brain.html">Visualization of single-cell RNA seq data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="widget_genomic_profiles.html">Visualization of genomic profiles</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Visualization of Multi-Modal Imaging Data</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#1.-Configure-Vitessce">1. Configure Vitessce</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#2.-Create-the-Vitessce-widget">2. Create the Vitessce widget</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="widget_pbmc.html">Visualization of 3k PBMC reference</a></li>
-<li class="toctree-l2"><a class="reference internal" href="widget_loom.html">Visualization of a Loom file</a></li>
-<li class="toctree-l2"><a class="reference internal" href="widget_shortcut.html">The from_object shortcut</a></li>
-<li class="toctree-l2"><a class="reference internal" href="widget_from_dict.html">Using an existing view config dict</a></li>
-<li class="toctree-l2"><a class="reference internal" href="widget_pbmc_remote.html">Visualization of 3k PBMC reference from Remote Zarr Store</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="../widget_examples.html">Widget examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../data_examples.html">Data preparation examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api_config.html">View config API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api_data.html">Data preparation APIs</a></li>
@@ -160,15 +144,13 @@
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
-          <li><a href="../widget_examples.html">Widget examples</a> &raquo;</li>
-        
-      <li>Visualization of Multi-Modal Imaging Data</li>
+      <li>Visualization of Segmentation Bitmask</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="../_sources/notebooks/widget_imaging.ipynb.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/notebooks/widget_imaging_segmentation.ipynb.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -451,9 +433,9 @@ div.rendered_html tbody tr:hover {
     text-align: unset;
 }
 </style>
-<div class="section" id="Visualization-of-Multi-Modal-Imaging-Data">
-<h1>Visualization of Multi-Modal Imaging Data<a class="headerlink" href="#Visualization-of-Multi-Modal-Imaging-Data" title="Permalink to this headline">¶</a></h1>
-<p>We visualize IMS, PAS, and AF imaging data overlaid from the Spraggins Lab of the Biomolecular Multimodal Imaging Center (BIOMC) at Vanderbilt University, uploaded to the HuBMAP data portal.</p>
+<div class="section" id="Visualization-of-Segmentation-Bitmask">
+<h1>Visualization of Segmentation Bitmask<a class="headerlink" href="#Visualization-of-Segmentation-Bitmask" title="Permalink to this headline">¶</a></h1>
+<p>We visualize raw imaging data + a segmentation bitmask the <a class="reference external" href="https://mcmicro.org/">MCMicro piplene</a> - see <a class="reference external" href="https://www.biorxiv.org/content/10.1101/2021.03.15.435473v1.full">https://www.biorxiv.org/content/10.1101/2021.03.15.435473v1.full</a> and specifically <a class="reference external" href="https://www.google.com/url?q=https://www.biorxiv.org/content/10.1101/2021.03.15.435473v1.full%23F3&amp;sa=D&amp;source=editors&amp;ust=1623173627976000&amp;usg=AOvVaw3JkzCxYyE86q8jxfNCgShh">Figure S1</a></p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
@@ -472,22 +454,19 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="section" id="1.-Configure-Vitessce">
 <h2>1. Configure Vitessce<a class="headerlink" href="#1.-Configure-Vitessce" title="Permalink to this headline">¶</a></h2>
-<p>Set up the images from the three different assays, with the <code class="docutils literal notranslate"><span class="pre">use_physical_size_scaling</span></code> set to <code class="docutils literal notranslate"><span class="pre">True</span></code> so that the IMS image scales to the other images based on their physical sizes.</p>
+<p>Set up the two images, already pyramidal from the <a class="reference external" href="https://github.com/hms-dbmi/viv/tree/master/tutorial">bioformats2raw + raw2ometiff pipeline</a>, labeling the segmentation “on top” as the bitmask and the other as simply the image data.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">vc</span> <span class="o">=</span> <span class="n">VitessceConfig</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Spraggins Multi-Modal&#39;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;PAS + IMS + AF From https://portal.hubmapconsortium.org/browse/collection/6a6efd0c1a2681dc7d2faab8e4ab0bca&#39;</span><span class="p">)</span>
-<span class="n">dataset</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">add_dataset</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Spraggins&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">add_object</span><span class="p">(</span>
+<span></span><span class="n">vc</span> <span class="o">=</span> <span class="n">VitessceConfig</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;MCMicro Bitmask Visualization&#39;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;Segmentation + Data of Exemplar 001&#39;</span><span class="p">)</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">add_dataset</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;MCMicro&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">add_object</span><span class="p">(</span>
     <span class="n">MultiImageWrapper</span><span class="p">(</span>
         <span class="n">image_wrappers</span><span class="o">=</span><span class="p">[</span>
-            <span class="n">OmeTiffWrapper</span><span class="p">(</span><span class="n">img_url</span><span class="o">=</span><span class="s1">&#39;https://assets.hubmapconsortium.org/f4188a148e4c759092d19369d310883b/ometiff-pyramids/processedMicroscopy/VAN0006-LK-2-85-PAS_images/VAN0006-LK-2-85-PAS_registered.ome.tif?token=&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;PAS&#39;</span><span class="p">),</span>
-            <span class="n">OmeTiffWrapper</span><span class="p">(</span><span class="n">img_url</span><span class="o">=</span><span class="s1">&#39;https://assets.hubmapconsortium.org/2130d5f91ce61d7157a42c0497b06de8/ometiff-pyramids/processedMicroscopy/VAN0006-LK-2-85-AF_preIMS_images/VAN0006-LK-2-85-AF_preIMS_registered.ome.tif?token=&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;AF&#39;</span><span class="p">),</span>
-            <span class="n">OmeTiffWrapper</span><span class="p">(</span><span class="n">img_url</span><span class="o">=</span><span class="s1">&#39;https://assets.hubmapconsortium.org/be503a021ed910c0918842e318e6efa2/ometiff-pyramids/ometiffs/VAN0006-LK-2-85-IMS_PosMode_multilayer.ome.tif?token=&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;IMS Pos Mode&#39;</span><span class="p">),</span>
-            <span class="n">OmeTiffWrapper</span><span class="p">(</span><span class="n">img_url</span><span class="o">=</span><span class="s1">&#39;https://assets.hubmapconsortium.org/ca886a630b2038997a4cfbbf4abfd283/ometiff-pyramids/ometiffs/VAN0006-LK-2-85-IMS_NegMode_multilayer.ome.tif?token=&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;IMS Neg Mode&#39;</span><span class="p">)</span>
-        <span class="p">],</span>
-        <span class="n">use_physical_size_scaling</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">OmeTiffWrapper</span><span class="p">(</span><span class="n">img_url</span><span class="o">=</span><span class="s1">&#39;https://vitessce-demo-data.storage.googleapis.com/exemplar-001/exemplar-001.pyramid.ome.tif&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Image&#39;</span><span class="p">),</span>
+            <span class="n">OmeTiffWrapper</span><span class="p">(</span><span class="n">img_url</span><span class="o">=</span><span class="s1">&#39;https://vitessce-demo-data.storage.googleapis.com/exemplar-001/cellMask.pyramid.ome.tif&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Mask&#39;</span><span class="p">,</span> <span class="n">is_bitmask</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+        <span class="p">]</span>
  <span class="p">)</span>
 <span class="p">)</span>
 <span class="n">spatial</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">cm</span><span class="o">.</span><span class="n">SPATIAL</span><span class="p">)</span>
@@ -518,10 +497,6 @@ div.rendered_html tbody tr:hover {
            
           </div>
           <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="widget_pbmc.html" class="btn btn-neutral float-right" title="Visualization of 3k PBMC reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="widget_genomic_profiles.html" class="btn btn-neutral float-left" title="Visualization of genomic profiles" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-    </div>
 
   <hr/>
 

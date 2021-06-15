@@ -7,6 +7,7 @@ The notebooks contained in this directory demonstrate the Vitessce Python packag
 Some of the example notebooks rely on external single-cell data analysis packages. An environment containing these additional packages can be installed with `conda` or `pip`.
 
 ```sh
+cd docs/notebooks
 conda env create -f environment.yml
 conda activate vitessce-jupyter-examples
 pip install -e ../..

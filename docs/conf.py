@@ -55,7 +55,7 @@ templates_path = ['_templates']
 exclude_patterns = [
     'notebooks/README.md',
     'notebooks/environment.yml',
-    'notebooks/example_configs.py',
+    'notebooks/example-config-*.json',
     'notebooks/data/**'
 ]
 

@@ -1,12 +1,12 @@
-dries = {
-    "name": "Dries",
+{
+  "name": "Dries",
 	"version": "1.0.0",
 	"description": "Giotto, a pipeline for integrative analysis and visualization of single-cell spatial transcriptomic data",
-    "public": True,
+    "public": true,
     "datasets": [
         {
-            "uid": 'dries-2019',
-            "name": 'Dries 2019',
+            "uid": "dries-2019",
+            "name": "Dries 2019",
             "files": [
                 {
                   "type": "cells",
@@ -24,22 +24,22 @@ dries = {
     "initStrategy": "auto",
     "coordinationSpace": {
       "embeddingType": {
-        "TSNE": 't-SNE',
-        "UMAP": 'UMAP',
+        "TSNE": "t-SNE",
+        "UMAP": "UMAP"
       },
       "embeddingZoom": {
         "TSNE": 3,
-        "UMAP": 3,
+        "UMAP": 3
       },
       "spatialZoom": {
-        "A": -4.4,
+        "A": -4.4
       },
       "spatialTargetX": {
-        "A": 3800,
+        "A": 3800
       },
       "spatialTargetY": {
-        "A": -900,
-      },
+        "A": -900
+      }
     },
     "layout": [
 		{
@@ -69,8 +69,8 @@ dries = {
 		{
 		  "component": "scatterplot",
 		  "coordinationScopes": {
-              "embeddingType": 'TSNE',
-              "embeddingZoom": 'TSNE'
+              "embeddingType": "TSNE",
+              "embeddingZoom": "TSNE"
           },
           "x": 0,
 		  "y": 2,
@@ -83,9 +83,9 @@ dries = {
 			"cellRadius": 50
 		  },
           "coordinationScopes": {
-              "spatialZoom": 'A',
-              "spatialTargetX": 'A',
-              "spatialTargetY": 'A'
+              "spatialZoom": "A",
+              "spatialTargetX": "A",
+              "spatialTargetY": "A"
           },
 		  "x": 5,
 		  "y": 0,
@@ -95,13 +95,13 @@ dries = {
 		{
 		  "component": "scatterplot",
 		  "coordinationScopes": {
-              "embeddingType": 'UMAP',
-              "embeddingZoom": 'UMAP'
+              "embeddingType": "UMAP",
+              "embeddingZoom": "UMAP"
           },
 		  "x": 0,
 		  "y": 0,
 		  "w": 5,
 		  "h": 4
 		}
-  	]
+  ]
 }

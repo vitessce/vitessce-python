@@ -21,4 +21,3 @@ dependencies:
    - sphinx-rtd-theme
    - nbclean>=0.3.2
    - generate-tiff-offsets>=0.1.7
-   - obonet>=0.2.5

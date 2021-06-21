@@ -17,6 +17,7 @@ dependencies:
  - networkx>=2.4
  - scanpy>=1.6.0
  - leidenalg>=0.8.3
+ - pytest>=6.2.4
  - pip
  - pip:
    - build==0.1.0

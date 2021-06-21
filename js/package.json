@@ -27,6 +27,7 @@
   },
   "devDependencies": {
     "@babel/core": "7.9.0",
+    "@jupyterlab/builder": "^3.0.0",
     "babel-loader": "8.1.0",
     "babel-preset-react-app": "^9.1.2",
     "css-loader": "^1.0.1",
@@ -38,17 +39,21 @@
     "webpack-cli": "^3.3.6"
   },
   "dependencies": {
-    "@jupyter-widgets/base": "^1.1 || ^2 || ^3",
+    "@jupyter-widgets/base": "^1.1 || ^2 || ^3 || ^4",
     "lodash": "^4.17.4",
     "pubsub-js": "^1.9.0",
-    "react": "~16.9.0",
-    "react-dom": "~16.9.0",
-    "vitessce": "^1.1.9"
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
+    "vitessce": "^1.1.10"
   },
   "jupyterlab": {
     "extension": "dist/labplugin",
-    "externalExtensions": {
-      "@jupyter-widgets/jupyterlab-manager": "2.0.0"
+    "outputDir": "../vitessce/static",
+    "sharedPackages": {
+      "@jupyter-widgets/base": {
+        "bundled": false,
+        "singleton": true
+      }
     }
   },
   "babel": {

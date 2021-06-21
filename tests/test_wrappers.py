@@ -54,6 +54,7 @@ class TestWrappers(unittest.TestCase):
                         'type': 'ome-tiff',
                         'url': 'http://localhost:8000/A/0/test.ome.tif',
                         'metadata': {
+                            'isBitmask': False,
                             'omeTiffOffsetsUrl': 'http://localhost:8000/A/0/test.offsets.json'
                         }
                     }

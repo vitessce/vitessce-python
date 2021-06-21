@@ -6,7 +6,14 @@ However, now we are standardizing the way that we process data stored in common 
 
 ### Setup
 
-Set up the `vitessce-python-dev` environment using the instructions in the repository root README.
+Set up the `vitessce-python-demos` environment using conda.
+
+```sh
+cd demos
+conda env create -f environment.yml
+conda activate vitessce-python-demos
+pip install -e ..
+```
 
 ### Run
 

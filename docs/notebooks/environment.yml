@@ -1,4 +1,4 @@
-name: vitessce-python-docs-notebooks
+name: vitessce-jupyter-examples
 channels:
  - bioconda
  - conda-forge

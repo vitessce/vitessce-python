@@ -1,4 +1,4 @@
-name: vitessce-python-binder
+name: vitessce-jupyter-binder
 channels:
  - bioconda
  - conda-forge

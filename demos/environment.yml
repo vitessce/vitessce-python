@@ -9,21 +9,13 @@ dependencies:
  - anndata>=0.7.4
  - zarr>=2.5.0
  - numcodecs>=0.7.2
- - scipy>=1.0.0
- - nbsphinx>=0.7.1
- - pandoc>=2.11.3
+ - scipy
  - snakemake>=6.0
- - h5py>=2.10.0
- - networkx>=2.4
- - scanpy>=1.6.0
- - leidenalg>=0.8.3
- - pytest>=6.2.4
  - pip
  - pip:
-   - build==0.1.0
    - loompy>=3.0.6
-   - sphinx
-   - sphinx-rtd-theme
-   - nbclean>=0.3.2
    - generate-tiff-offsets>=0.1.7
-   - obonet>=0.2.5
+   - networkx
+   - obonet
+   - scanpy
+   - leidenalg

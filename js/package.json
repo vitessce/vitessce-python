@@ -44,7 +44,7 @@
     "pubsub-js": "^1.9.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
-    "vitessce": "^1.1.10"
+    "vitessce": "^1.1.12"
   },
   "jupyterlab": {
     "extension": "dist/labplugin",

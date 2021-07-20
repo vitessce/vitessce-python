@@ -3,8 +3,9 @@ from snakemake.remote.S3 import RemoteProvider as S3RemoteProvider
 
 S3 = S3RemoteProvider()
 
+BUCKET_VERSION = "0.0.32"
 BUCKET_NAME = "vitessce-data"
-BUCKET = PosixPath(BUCKET_NAME) / "0.0.32" / "master_release"
+BUCKET = PosixPath(BUCKET_NAME) / BUCKET_VERSION / "master_release"
 
 DATA_DIR = Path("data")
 PROCESSED_DIR = DATA_DIR / "processed"

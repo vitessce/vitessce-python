@@ -92,4 +92,4 @@ Then, when you push or merge the code with the incremented versions to master, t
 
 ## Getting/Offering Help
 
-If you have a specific bug or feature request, please feel free to open an [issue](https://github.com/vitessce/vitessce-python/issues/new).  Otherwise our [discussions](https://github.com/vitessce/vitessce-python/discussions) section is a great place to get help or offer it.  If you aren't sure if something is a bug or not, don't have all the reporduction steps, or just have a general question, feel free to open a discussion post.
+If you have a specific bug or feature request, please feel free to open an [issue](https://github.com/vitessce/vitessce-python/issues/new).  Otherwise our [discussions](https://github.com/vitessce/vitessce-python/discussions) section is a great place to get help or offer it.  If you aren't sure if something is a bug or not, don't have all the reproduction steps, or just have a general question, feel free to open a discussion post.

@@ -21,6 +21,7 @@ import socket
 # See js/lib/widget.js for the frontend counterpart to this file.
 
 MAX_PORT_TRIES = 1000
+DEFAULT_PORT = 8000
 
 def run_server_loop(app, port):
     loop = asyncio.new_event_loop()
@@ -38,7 +39,7 @@ def is_port_in_use(port):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         return s.connect_ex(('localhost', port)) == 0
 
-def get_port_and_routes(config, port, next_port, proxy=False, base_url=None):
+def get_base_url_and_port(port, next_port, proxy=False, base_url=None):
     if port is None:
         use_port = next_port
         next_port += 1
@@ -57,11 +58,8 @@ def get_port_and_routes(config, port, next_port, proxy=False, base_url=None):
             base_url = f"proxy/{use_port}"
         else:
             base_url = f"http://localhost:{use_port}"
-
-    config_dict = config.to_dict(base_url=base_url)
-    routes = config.get_routes()
-
-    return routes, config_dict, use_port, next_port
+    
+    return base_url, use_port, next_port
 
 def serve_routes(routes, use_port):
     if len(routes) > 0:
@@ -76,7 +74,9 @@ def serve_routes(routes, use_port):
 
 def launch_vitessce_io(config, theme='light', port=None, base_url=None, open=True):
     import webbrowser
-    routes, config_dict, use_port, _ = get_port_and_routes(config, port, 8000, base_url=base_url)
+    base_url, use_port, _ = get_base_url_and_port(port, DEFAULT_PORT, base_url=base_url)
+    config_dict = config.to_dict(base_url=base_url)
+    routes = config.get_routes()
     serve_routes(routes, use_port)
     vitessce_url = f"http://vitessce.io/?theme={theme}&url=data:," + quote_plus(json.dumps(config_dict))
     if open:
@@ -116,7 +116,7 @@ class VitessceWidget(widgets.DOMWidget):
     theme = Unicode('auto').tag(sync=True)
     proxy = Bool(False).tag(sync=True)
 
-    next_port = 8000
+    next_port = DEFAULT_PORT
 
     def __init__(self, config, height=600, theme='auto', port=None, proxy=False):
         """
@@ -138,8 +138,10 @@ class VitessceWidget(widgets.DOMWidget):
             vw = vc.widget()
             vw
         """
-
-        routes, config_dict, use_port, VitessceWidget.next_port = get_port_and_routes(config, port, VitessceWidget.next_port, proxy=proxy)
+        
+        base_url, use_port, VitessceWidget.next_port = get_base_url_and_port(port, VitessceWidget.next_port, proxy=proxy)
+        config_dict = config.to_dict(base_url=base_url)
+        routes = config.get_routes()
 
         super(VitessceWidget, self).__init__(config=config_dict, height=height, theme=theme, proxy=proxy)
         

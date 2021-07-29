@@ -1,5 +1,12 @@
 
-## [0.1.1] (In Progress)
+## [0.1.0a13] (In Progress)
+
+### Added
+- Added a `VitessceConfig.web_app()` method for launching the `vitessce.io` web application based on the current config object, and serving the data associated with the config via the Starlette server.
+
+### Changed
+
+## [0.1.0a12]
 
 ### Added
 - Added a `VitessceConfig.widget()` method for convenience when creating the widget (no more need to import a separate `VitessceWidget` class).

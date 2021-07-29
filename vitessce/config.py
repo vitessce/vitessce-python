@@ -12,7 +12,10 @@ from .wrappers import (
     AnnDataWrapper,
     SnapWrapper,
 )
-from .widget import VitessceWidget
+from .widget import (
+    VitessceWidget,
+    launch_vitessce_io,
+)
 from .export import (
     export_to_s3,
     export_to_files,
@@ -767,7 +770,7 @@ class VitessceConfig:
     
     def widget(self, **kwargs):
         """
-        Convenience function for instantiating a VitessceWidget object based on this config.
+        Instantiate a VitessceWidget object based on this config.
         
         :param str theme: The theme name, either "light" or "dark". By default, "auto", which selects light or dark based on operating system preferences.
         :param int height: The height of the widget, in pixels. By default, 600.
@@ -790,6 +793,32 @@ class VitessceConfig:
             vw
         """
         return VitessceWidget(self, **kwargs)
+    
+    def web_app(self, **kwargs):
+        """
+        Launch the http://vitessce.io web app using this config.
+        
+        :param str theme: The theme name, either "light" or "dark". By default, "auto", which selects light or dark based on operating system preferences.
+        :param int port: The port to use when serving data objects on localhost. By default, 8000.
+        :param base_url: If the web app is being accessed remotely (i.e. the data is being served from a remote machine), specify the base URL here. If serving and accessing the data on the same machine, keep as None to use a localhost URL. 
+        :type base_url: str or None
+        :param bool open: Should the browser be opened to the web app URL? By default, True.
+        
+        :returns: The URL of the web app (containing the Vitessce configuration as URL-encoded JSON).
+        :rtype: str
+
+        .. code-block:: python
+            :emphasize-lines: 6
+
+            from vitessce import VitessceConfig, Component as cm, CoordinationType as ct
+
+            vc = VitessceConfig()
+            my_dataset = vc.add_dataset(name='My Dataset')
+            v1 = vc.add_view(my_dataset, cm.SPATIAL)
+            vc.layout(v1)
+            vc.web_app()
+        """
+        return launch_vitessce_io(self, **kwargs)
         
     def export(self, to, *args, **kwargs):
         """

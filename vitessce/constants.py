@@ -87,8 +87,9 @@ class FileType(DocEnum):
     NEIGHBORHOODS_JSON = "neighborhoods.json", "The JSON-based neighborhoods file type."
     RASTER_JSON = "raster.json", "The JSON-based raster manifest file type."
     CELL_SETS_JSON = "cell-sets.json", "The JSON-based cell sets file type."
+    CLUSTERS_JSON = "clusters.json", "A JSON-based expression matrix file type (this file type is poorly named)."
+    GENES_JSON = "genes.json", "A JSON-based expression matrix file type."
     GENOMIC_PROFILES_ZARR = "genomic-profiles.zarr", "The Zarr-based genomic profile (multivec) file type."
     ANNDATA_CELLS_ZARR = "anndata-cells.zarr", "The Zarr-based cells file type from an anndata object."
     ANNDATA_CELL_SETS_ZARR = "anndata-cell-sets.zarr", "The Zarr-based cell-sets file type from an anndata object."
     ANNDATA_EXPRESSION_MATRIX_ZARR = "anndata-expression-matrix.zarr", "The Zarr-based expression matrix file type from an anndata object."
-

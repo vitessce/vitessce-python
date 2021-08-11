@@ -5,7 +5,7 @@
 - Added a `VitessceConfig.web_app()` method for launching the `vitessce.io` web application based on the current config object, and serving the data associated with the config via the Starlette server.
 
 ### Changed
-- Bump version of config to 1.0.3.  `disableChannelsIfRgbDetected` prop now needs to be used on the `LayerController` component to hide the channel controller for detected RGB images.
+- Bump version of config to 1.0.3.  `disableChannelsIfRgbDetected` prop now needs to be used on the `LayerController` component to hide the channel controller for detected RGB images.  Fix notebooks for this.
 
 ## [0.1.0a12]
 

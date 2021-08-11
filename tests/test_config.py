@@ -20,7 +20,7 @@ class TestConfig(unittest.TestCase):
         vc_json = json.dumps(vc_dict)
 
         self.assertEqual(vc_dict, {
-            "version": "1.0.3",
+            "version": "1.0.2",
             "name": "",
             "description": "",
             "datasets": [],
@@ -37,7 +37,7 @@ class TestConfig(unittest.TestCase):
         vc_json = json.dumps(vc_dict)
 
         self.assertEqual(vc_dict, {
-            "version": "1.0.3",
+            "version": "1.0.2",
             "name": "",
             "description": "",
             "datasets": [
@@ -74,7 +74,7 @@ class TestConfig(unittest.TestCase):
         vc_json = json.dumps(vc_dict)
 
         self.assertEqual(vc_dict, {
-            "version": "1.0.3",
+            "version": "1.0.2",
             "name": "",
             "description": "",
             "datasets": [
@@ -114,7 +114,7 @@ class TestConfig(unittest.TestCase):
         vc_json = json.dumps(vc_dict)
 
         self.assertEqual(vc_dict, {
-            "version": "1.0.3",
+            "version": "1.0.2",
             "name": "",
             "description": "",
             "datasets": [
@@ -154,7 +154,7 @@ class TestConfig(unittest.TestCase):
         vc_json = json.dumps(vc_dict)
 
         self.assertEqual(vc_dict, {
-            "version": "1.0.3",
+            "version": "1.0.2",
             "name": "",
             "description": "",
             "datasets": [
@@ -206,7 +206,7 @@ class TestConfig(unittest.TestCase):
         vc_json = json.dumps(vc_dict)
 
         self.assertEqual(vc_dict, {
-            "version": "1.0.3",
+            "version": "1.0.2",
             "name": "",
             "description": "",
             "datasets": [
@@ -297,7 +297,7 @@ class TestConfig(unittest.TestCase):
         print(vc_dict)
 
         self.assertEqual(vc_dict, {
-            "version": "1.0.3",
+            "version": "1.0.2",
             "name": "",
             "description": "",
             "datasets": [
@@ -342,7 +342,7 @@ class TestConfig(unittest.TestCase):
         vc_json = json.dumps(vc_dict)
 
         self.assertEqual(vc_dict, {
-            "version": "1.0.3",
+            "version": "1.0.2",
             "name": "",
             "description": "",
             "datasets": [
@@ -385,7 +385,7 @@ class TestConfig(unittest.TestCase):
         vc_json = json.dumps(vc_dict)
 
         self.assertEqual(vc_dict, {
-            "version": "1.0.3",
+            "version": "1.0.2",
             "name": "",
             "description": "",
             "datasets": [
@@ -448,7 +448,7 @@ class TestConfig(unittest.TestCase):
         vc_json = json.dumps(vc_dict)
 
         self.assertEqual(vc_dict, {
-            "version": "1.0.3",
+            "version": "1.0.2",
             "name": "",
             "description": "",
             "datasets": [
@@ -500,7 +500,7 @@ class TestConfig(unittest.TestCase):
 
     def test_load_config(self):
         vc = VitessceConfig.from_dict({
-            "version": "1.0.3",
+            "version": "1.0.2",
             "name": "Test name",
             "description": "Test description",
             "datasets": [
@@ -548,7 +548,7 @@ class TestConfig(unittest.TestCase):
         vc_json = json.dumps(vc_dict)
 
         self.assertEqual(vc_dict, {
-            "version": "1.0.3",
+            "version": "1.0.2",
             "name": "Test name",
             "description": "Test description",
             "datasets": [

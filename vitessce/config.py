@@ -405,7 +405,7 @@ class VitessceConfig:
             vc = VitessceConfig(name='My Config')
         """
         self.config = {
-            "version": "1.0.3",
+            "version": "1.0.4",
             "name": name,
             "description": description,
             "datasets": [],

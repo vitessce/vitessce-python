@@ -6,6 +6,7 @@
 
 ### Changed
 - Bump version of config to 1.0.3.  `disableChannelsIfRgbDetected` prop now needs to be used on the `LayerController` component to hide the channel controller for detected RGB images.  Fix notebooks for this.
+- Bump version of config to 1.0.4.
 
 ## [0.1.0a12]
 

@@ -92,6 +92,15 @@ class VitessceConfigDataset:
         }
         self.objs = []
     
+    def get_uid(self):
+        """
+        Get the uid value for this dataset.
+
+        :returns: The uid.
+        :rtype: str
+        """
+        return self.dataset["uid"]
+    
     def add_file(self, url, data_type, file_type, options=None):
         """
         Add a new file definition to this dataset instance.
@@ -155,7 +164,7 @@ class VitessceConfigDataset:
         self.objs.append(obj)
         return self
 
-    def to_dict(self, base_url):
+    def to_dict(self, base_url=''):
         obj_file_defs = []
         for obj in self.objs:
             obj_file_defs += obj.get_file_defs(base_url)
@@ -456,7 +465,33 @@ class VitessceConfig:
         [d_scope] = self.add_coordination(ct.DATASET)
         d_scope.set_value(uid)
         return vcd
-    
+
+
+    def get_datasets(self):
+        """
+        Get the datasets associated with this configuration.
+
+        :returns: The list of datasets.
+        :rtype: list of VitessceConfigDataset
+        """
+        return self.config["datasets"]
+
+
+    def get_dataset(self, uid):
+        """
+        Get a dataset associated with this configuration.
+
+        :param str uid: The unique identifier for the dataset of interest.
+
+        :returns: The datasets.
+        :rtype: VitessceConfigDataset or None
+        """
+        for dataset in self.config["datasets"]:
+            if uid == dataset.get_uid():
+                return dataset
+        return None
+
+
     def add_view(self, dataset, component, x=0, y=0, w=1, h=1, mapping=None):
         """
         Add a view to the config.

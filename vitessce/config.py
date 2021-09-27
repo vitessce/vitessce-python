@@ -164,7 +164,7 @@ class VitessceConfigDataset:
         self.objs.append(obj)
         return self
 
-    def to_dict(self, base_url=''):
+    def to_dict(self, base_url=None):
         obj_file_defs = []
         for obj in self.objs:
             obj_file_defs += obj.get_file_defs(base_url)

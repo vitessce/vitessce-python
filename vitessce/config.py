@@ -471,7 +471,7 @@ class VitessceConfig:
         """
         Get the datasets associated with this configuration.
 
-        :returns: The list of datasets.
+        :returns: The list of dataset objects.
         :rtype: list of VitessceConfigDataset
         """
         return self.config["datasets"]
@@ -483,7 +483,7 @@ class VitessceConfig:
 
         :param str uid: The unique identifier for the dataset of interest.
 
-        :returns: The datasets.
+        :returns: The dataset object.
         :rtype: VitessceConfigDataset or None
         """
         for dataset in self.config["datasets"]:

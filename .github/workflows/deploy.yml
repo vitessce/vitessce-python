@@ -54,7 +54,7 @@ jobs:
       - name: Deploy package to NPM
         continue-on-error: true
         working-directory: ./js
-        run: npm publish
+        run: npm ci && npm publish
         shell: /bin/bash -e {0}
         env:
           NPM_CONFIG_USERCONFIG: /home/runner/work/_temp/.npmrc

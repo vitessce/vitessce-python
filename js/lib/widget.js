@@ -74,8 +74,10 @@ function VitessceWidget(props) {
     divRef.current.addEventListener("mouseleave", handleMouseLeave);
 
     return () => {
-      divRef.current.removeEventListener("mouseenter", handleMouseEnter);
-      divRef.current.removeEventListener("mouseleave", handleMouseLeave);
+      if(divRef.current) {
+        divRef.current.removeEventListener("mouseenter", handleMouseEnter);
+        divRef.current.removeEventListener("mouseleave", handleMouseLeave);
+      }
     };
   }, [divRef]);
 

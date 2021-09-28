@@ -10,14 +10,6 @@ Python API and Jupyter widget facilitating interactive visualization of spatial 
 To install with pip:
 
     $ pip install vitessce
-    $ jupyter nbextension install --py vitessce
-    $ jupyter nbextension enable --py vitessce
-
-To enable the widget for Jupyter Lab run the following additional lines:
-
-    $ jupyter labextension install @jupyter-widgets/jupyterlab-manager
-    $ jupyter labextension install vitessce-jupyter
-
 
 ## Getting started
 
@@ -27,26 +19,26 @@ These contain demos of different use cases and integrations with single-cell dat
 
 ## Development
 
-For a development installation (requires npm),
+For a development installation (requires NodeJS and NPM),
 
     $ git clone https://github.com/vitessce/vitessce-python.git
     $ cd vitessce-python
     $ conda env create -f environment.yml
     $ conda activate vitessce-jupyter-dev
     $ pip install -e .
-    $ jupyter nbextension install --py --symlink --sys-prefix vitessce
+    $ jupyter nbextension install --py --symlink --overwrite --sys-prefix vitessce
     $ jupyter nbextension enable --py --sys-prefix vitessce
+
+When actively developing your extension for JupyterLab, run the command:
+
+    $ jupyter labextension develop --overwrite vitessce
+
+Then you need to rebuild the JS when you make a code change:
+
     $ cd js
-    $ jupyter labextension install @jupyter-widgets/jupyterlab-manager
-    $ jupyter labextension install
+    $ npm run build
 
-When actively developing your extension, build Jupyter Lab with the command:
-
-    $ jupyter lab --watch
-
-This takes a minute or so to get started, but then automatically rebuilds JupyterLab when your javascript changes.
-
-Note on first `jupyter lab --watch`, you may need to touch a file to get Jupyter Lab to open.
+You then need to refresh the JupyterLab page when your javascript changes.
 
 ### Conda environments
 

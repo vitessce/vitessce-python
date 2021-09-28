@@ -12,6 +12,9 @@ docs/notebooks/data/
 
 # Compiled javascript
 vitessce/static/
+vitessce/nbextension/
+vitessce/labextension/
+
 
 # Created by jupyter labextension install
 js/yarn.lock

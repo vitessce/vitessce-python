@@ -23,6 +23,23 @@ jobs:
           activate-environment: vitessce-jupyter-dev
           environment-file: environment.yml
           auto-activate-base: false
+      - name: NPM CI
+        working-directory: ./js
+        run: npm ci && npm run clean
+        shell: /bin/bash -e {0}
+        env:
+          NPM_CONFIG_USERCONFIG: /home/runner/work/_temp/.npmrc
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+      - name: Build nbextension
+        working-directory: ./js
+        run: npm run build:nbextension
+        shell: /bin/bash -e {0}
+        env:
+          NPM_CONFIG_USERCONFIG: /home/runner/work/_temp/.npmrc
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+       - name: Build labextension
+        working-directory: ./js
+        run: jupyter labextension build .
       - name: Install vitessce
         run: pip install -e .
       - name: Run tests

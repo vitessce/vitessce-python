@@ -1,3 +1,5 @@
+import sys
+
 from ._version import version_info, __version__
 
 from .widget import VitessceWidget
@@ -19,6 +21,14 @@ from .export import (
     export_to_s3,
     export_to_files,
 )
+
+try:
+    if "google.colab" in sys.modules:
+        from google.colab import output
+
+        output.enable_custom_widget_manager()
+except ImportError:
+    pass
 
 def _jupyter_labextension_paths():
     """Called by Jupyter Lab Server to detect if it is a valid labextension and

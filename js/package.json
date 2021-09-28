@@ -1,6 +1,6 @@
 {
   "name": "vitessce-jupyter",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Jupyter widget facilitating interactive visualization of spatial single-cell data with Vitessce",
   "author": "Mark Keller",
   "main": "dist/index.js",
@@ -20,7 +20,7 @@
     "dist/*.js"
   ],
   "scripts": {
-    "prepublish": "npm run build:prod",
+    "prepublish": "webpack --mode=production",
     "build": "webpack --mode=development",
     "build:prod": "webpack --mode=production && npm run build:labextension",
     "build:labextension": "jupyter labextension build .",

@@ -1,6 +1,9 @@
 # vitessce-python
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/vitessce/vitessce-python/master?filepath=docs/notebooks/widget_pbmc.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/vitessce/vitessce-python/blob/master/docs/notebooks/widget_on_colab.ipynb)
+
+
 
 Python API and Jupyter widget facilitating interactive visualization of spatial single-cell data with [Vitessce](https://github.com/vitessce/vitessce).
 
@@ -65,7 +68,12 @@ make html
 
 ## Deployment
 
-To deploy a new version, increment the version of the Python package in [`vitessce/_version.py`](./vitessce/_version.py) and the JS package in [`js/package.json`](./js/package.json).
+To deploy a new version, increment the version of the Python package in [`vitessce/_version.py`](./vitessce/_version.py) and the JS package in [`js/package.json`](./js/package.json):
+
+```
+cd js
+npm version patch
+```
 
 Then, when you push or merge the code with the incremented versions to master, the GitHub Action `deploy.yml` workflow will build and push the packages to PyPI and NPM.
 

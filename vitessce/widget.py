@@ -104,7 +104,7 @@ class VitessceWidget(widgets.DOMWidget):
     _model_module = Unicode('vitessce-jupyter').tag(sync=True)
 
     # Version of the front-end module containing widget view
-    _view_module_version = Unicode('^').tag(sync=True)
+    _view_module_version = Unicode('^%s.%s.%s' % (js_version_info[0], js_version_info[1], js_version_info[2])).tag(sync=True)
     # Version of the front-end module containing widget model
     _model_module_version = Unicode('^%s.%s.%s' % (js_version_info[0], js_version_info[1], js_version_info[2])).tag(sync=True)
     

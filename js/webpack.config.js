@@ -40,7 +40,11 @@ const rules = [
     },
 ];
 
-const resolve = {};
+const resolve = {
+    alias: {
+      'txml/txml': 'txml/dist/txml'
+    },
+};
 
 const resolveLoader = {
     plugins: [

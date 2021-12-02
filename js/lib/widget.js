@@ -4,7 +4,7 @@ import ReactDOM from 'react-dom';
 import extend from 'lodash/extend';
 import { Vitessce } from 'vitessce';
 import packageJson from '../package.json';
-import 'vitessce/dist/es/production/static/css/index.css';
+import 'vitessce/dist/esm/index.css';
 import './widget.css';
 
 // See widget.py for the kernel counterpart to this file.

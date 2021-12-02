@@ -114,7 +114,7 @@ getter functions for the data types that can be derived from your object.</p>
 <span id="vitessce-wrappers"></span><h2>vitessce.wrappers<a class="headerlink" href="#module-vitessce.wrappers" title="Permalink to this headline"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="vitessce.wrappers.AbstractWrapper">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">vitessce.wrappers.</span></span><span class="sig-name descname"><span class="pre">AbstractWrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L38-L133"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.wrappers.AbstractWrapper" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">vitessce.wrappers.</span></span><span class="sig-name descname"><span class="pre">AbstractWrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L38-L133"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.wrappers.AbstractWrapper" title="Permalink to this definition"></a></dt>
 <dd><p>An abstract class that can be extended when
 implementing custom dataset object wrapper classes.</p>
 <p>TODO: Add some useful tests.</p>
@@ -124,7 +124,7 @@ implementing custom dataset object wrapper classes.</p>
 <p>Abstract constructor to be inherited by dataset wrapper classes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>out_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The path to a local directory used for data processing outputs. By default, uses a temp. directory.</p>
+<dd class="field-odd"><p><strong>out_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The path to a local directory used for data processing outputs. By default, uses a temp. directory.</p>
 </dd>
 </dl>
 <dl class="py method">
@@ -151,8 +151,8 @@ This method is void, should not return anything.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dataset_uid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – A unique identifier for this dataset.</p></li>
-<li><p><strong>obj_i</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Within the dataset, the index of this data wrapper object.</p></li>
+<li><p><strong>dataset_uid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – A unique identifier for this dataset.</p></li>
+<li><p><strong>obj_i</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – Within the dataset, the index of this data wrapper object.</p></li>
 </ul>
 </dd>
 </dl>
@@ -164,13 +164,13 @@ This method is void, should not return anything.</p>
 <dd><p>Obtain the file definitions for this wrapper class.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>base_url</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – A base URL to prepend to relative URLs.</p>
+<dd class="field-odd"><p><strong>base_url</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – A base URL to prepend to relative URLs.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>A list of file definitions.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a>]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -182,15 +182,15 @@ This method is void, should not return anything.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dataset_uid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – A dataset unique identifier for the Mount</p></li>
-<li><p><strong>obj_i</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – A index of the current vitessce.wrappers.AbstractWrapper among all other wrappers in the view config</p></li>
+<li><p><strong>dataset_uid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – A dataset unique identifier for the Mount</p></li>
+<li><p><strong>obj_i</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – A index of the current vitessce.wrappers.AbstractWrapper among all other wrappers in the view config</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>A starlette Mount of the the <cite>out_dir</cite></p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)">list</a>[starlette.routing.Mount]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)">list</a>[starlette.routing.Mount]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -204,7 +204,7 @@ This method is void, should not return anything.</p>
 <dd class="field-odd"><p>A list of server routes.</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)">list</a>[starlette.routing.Route]</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)">list</a>[starlette.routing.Route]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -213,25 +213,25 @@ This method is void, should not return anything.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="vitessce.wrappers.AnnDataWrapper">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">vitessce.wrappers.</span></span><span class="sig-name descname"><span class="pre">AnnDataWrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adata_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expression_matrix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">matrix_gene_var_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gene_var_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_set_obs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_set_obs_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spatial_centroid_obsm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spatial_polygon_obsm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mappings_obsm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mappings_obsm_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mappings_obsm_dims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">request_init</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factors_obs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L375-L552"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.wrappers.AnnDataWrapper" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">vitessce.wrappers.</span></span><span class="sig-name descname"><span class="pre">AnnDataWrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adata_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expression_matrix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">matrix_gene_var_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gene_var_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_set_obs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_set_obs_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spatial_centroid_obsm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spatial_polygon_obsm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mappings_obsm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mappings_obsm_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mappings_obsm_dims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">request_init</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factors_obs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L375-L552"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.wrappers.AnnDataWrapper" title="Permalink to this definition"></a></dt>
 <dd><p>Wrap an AnnData object by creating an instance of the <code class="docutils literal notranslate"><span class="pre">AnnDataWrapper</span></code> class.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>adata</strong> (<a class="reference external" href="https://anndata.readthedocs.io/en/latest/anndata.AnnData.html#anndata.AnnData" title="(in anndata v0.7.7.dev9+g0b29fd6)"><em>anndata.AnnData</em></a>) – An AnnData object containing single-cell experiment data.</p></li>
-<li><p><strong>adata_url</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – A remote url pointing to a zarr-backed AnnData store.</p></li>
-<li><p><strong>expression_matrix</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Location of the expression (cell x gene) matrix, like <cite>X</cite> or <cite>obsm/highly_variable_genes_subset</cite></p></li>
-<li><p><strong>gene_var_filter</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – A string like <cite>highly_variable</cite> (from <cite>var</cite> in the AnnData stored) used in conjunction with expression_matrix if expression_matrix points to a subset of <cite>X</cite> of the full <cite>var</cite> list.</p></li>
-<li><p><strong>matrix_gene_var_filter</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – A string like <cite>highly_variable</cite> (from <cite>var</cite> in the AnnData stored) used in conjunction with expression_matrix if expression_matrix points to a subset of <cite>X</cite> of the full <cite>var</cite> list.</p></li>
-<li><p><strong>factors_obs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em>) – Column names like <cite>[‘top_marker_gene’, ‘sex’]</cite> for showing factors when cells are hovered over</p></li>
-<li><p><strong>cell_set_obs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em>) – Column names like <cite>[‘louvain’, ‘cellType’]</cite> for showing cell sets from <cite>obs</cite></p></li>
-<li><p><strong>cell_set_obs_names</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em>) – Names to display in place of those in <cite>cell_set_obs</cite>, like <a href="#id1"><span class="problematic" id="id2">`</span></a>[‘Louvain’, ‘Cell Type’]</p></li>
-<li><p><strong>spatial_centroid_obsm</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Column name in <cite>obsm</cite> that contains centroid coordinates for displaying centroids in the spatial viewer</p></li>
-<li><p><strong>spatial_polygon_obsm</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Column name in <cite>obsm</cite> that contains polygonal coordinates for displaying outlines in the spatial viewer</p></li>
-<li><p><strong>mappings_obsm</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em>) – Column names like <cite>[‘X_umap’, ‘X_pca’]</cite> for showing scatterplots from <cite>obsm</cite></p></li>
-<li><p><strong>mappings_obsm_names</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em>) – Overriding names like <a href="#id3"><span class="problematic" id="id4">`</span></a>[‘UMAP’, ‘PCA’] for displaying above scatterplots</p></li>
-<li><p><strong>mappings_obsm_dims</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em>) – Dimensions along which to get data for the scatterplot, like [[0, 1], [4, 5]] where [0, 1] is just the normal x and y but [4, 5] could be comparing the third and fourth principal components, for example.</p></li>
-<li><p><strong>request_init</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – options to be passed along with every fetch request from the browser, like { “header”: { “Authorization”: “Bearer dsfjalsdfa1431” } }</p></li>
+<li><p><strong>adata</strong> (<a class="reference external" href="https://anndata.readthedocs.io/en/latest/generated/anndata.AnnData.html#anndata.AnnData" title="(in anndata v0.7.9.dev5+g62089e2)"><em>anndata.AnnData</em></a>) – An AnnData object containing single-cell experiment data.</p></li>
+<li><p><strong>adata_url</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – A remote url pointing to a zarr-backed AnnData store.</p></li>
+<li><p><strong>expression_matrix</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Location of the expression (cell x gene) matrix, like <cite>X</cite> or <cite>obsm/highly_variable_genes_subset</cite></p></li>
+<li><p><strong>gene_var_filter</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – A string like <cite>highly_variable</cite> (from <cite>var</cite> in the AnnData stored) used in conjunction with expression_matrix if expression_matrix points to a subset of <cite>X</cite> of the full <cite>var</cite> list.</p></li>
+<li><p><strong>matrix_gene_var_filter</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – A string like <cite>highly_variable</cite> (from <cite>var</cite> in the AnnData stored) used in conjunction with expression_matrix if expression_matrix points to a subset of <cite>X</cite> of the full <cite>var</cite> list.</p></li>
+<li><p><strong>factors_obs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em>) – Column names like <cite>[‘top_marker_gene’, ‘sex’]</cite> for showing factors when cells are hovered over</p></li>
+<li><p><strong>cell_set_obs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em>) – Column names like <cite>[‘louvain’, ‘cellType’]</cite> for showing cell sets from <cite>obs</cite></p></li>
+<li><p><strong>cell_set_obs_names</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em>) – Names to display in place of those in <cite>cell_set_obs</cite>, like <a href="#id1"><span class="problematic" id="id2">`</span></a>[‘Louvain’, ‘Cell Type’]</p></li>
+<li><p><strong>spatial_centroid_obsm</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Column name in <cite>obsm</cite> that contains centroid coordinates for displaying centroids in the spatial viewer</p></li>
+<li><p><strong>spatial_polygon_obsm</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Column name in <cite>obsm</cite> that contains polygonal coordinates for displaying outlines in the spatial viewer</p></li>
+<li><p><strong>mappings_obsm</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em>) – Column names like <cite>[‘X_umap’, ‘X_pca’]</cite> for showing scatterplots from <cite>obsm</cite></p></li>
+<li><p><strong>mappings_obsm_names</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em>) – Overriding names like <a href="#id3"><span class="problematic" id="id4">`</span></a>[‘UMAP’, ‘PCA’] for displaying above scatterplots</p></li>
+<li><p><strong>mappings_obsm_dims</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em>) – Dimensions along which to get data for the scatterplot, like [[0, 1], [4, 5]] where [0, 1] is just the normal x and y but [4, 5] could be comparing the third and fourth principal components, for example.</p></li>
+<li><p><strong>request_init</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) – options to be passed along with every fetch request from the browser, like { “header”: { “Authorization”: “Bearer dsfjalsdfa1431” } }</p></li>
 <li><p><strong>**kwargs</strong> – Keyword arguments inherited from <a class="reference internal" href="#vitessce.wrappers.AbstractWrapper" title="vitessce.wrappers.AbstractWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractWrapper</span></code></a></p></li>
 </ul>
 </dd>
@@ -260,8 +260,8 @@ This method is void, should not return anything.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dataset_uid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – A unique identifier for this dataset.</p></li>
-<li><p><strong>obj_i</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Within the dataset, the index of this data wrapper object.</p></li>
+<li><p><strong>dataset_uid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – A unique identifier for this dataset.</p></li>
+<li><p><strong>obj_i</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – Within the dataset, the index of this data wrapper object.</p></li>
 </ul>
 </dd>
 </dl>
@@ -271,12 +271,12 @@ This method is void, should not return anything.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="vitessce.wrappers.MultiImageWrapper">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">vitessce.wrappers.</span></span><span class="sig-name descname"><span class="pre">MultiImageWrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_wrappers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_physical_size_scaling</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L135-L181"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.wrappers.MultiImageWrapper" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">vitessce.wrappers.</span></span><span class="sig-name descname"><span class="pre">MultiImageWrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_wrappers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_physical_size_scaling</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L135-L181"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.wrappers.MultiImageWrapper" title="Permalink to this definition"></a></dt>
 <dd><p>Wrap multiple imaging datasets by creating an instance of the <code class="docutils literal notranslate"><span class="pre">MultiImageWrapper</span></code> class.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>image_wrappers</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a>) – A list of imaging wrapper classes (only <a class="reference internal" href="#vitessce.wrappers.OmeTiffWrapper" title="vitessce.wrappers.OmeTiffWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">OmeTiffWrapper</span></code></a> supported now)</p></li>
+<li><p><strong>image_wrappers</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a>) – A list of imaging wrapper classes (only <a class="reference internal" href="#vitessce.wrappers.OmeTiffWrapper" title="vitessce.wrappers.OmeTiffWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">OmeTiffWrapper</span></code></a> supported now)</p></li>
 <li><p><strong>**kwargs</strong> – Keyword arguments inherited from <a class="reference internal" href="#vitessce.wrappers.AbstractWrapper" title="vitessce.wrappers.AbstractWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractWrapper</span></code></a></p></li>
 </ul>
 </dd>
@@ -284,7 +284,7 @@ This method is void, should not return anything.</p>
 <p>Abstract constructor to be inherited by dataset wrapper classes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>out_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The path to a local directory used for data processing outputs. By default, uses a temp. directory.</p>
+<dd class="field-odd"><p><strong>out_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The path to a local directory used for data processing outputs. By default, uses a temp. directory.</p>
 </dd>
 </dl>
 <dl class="py method">
@@ -297,8 +297,8 @@ This method is void, should not return anything.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dataset_uid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – A unique identifier for this dataset.</p></li>
-<li><p><strong>obj_i</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Within the dataset, the index of this data wrapper object.</p></li>
+<li><p><strong>dataset_uid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – A unique identifier for this dataset.</p></li>
+<li><p><strong>obj_i</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – Within the dataset, the index of this data wrapper object.</p></li>
 </ul>
 </dd>
 </dl>
@@ -308,18 +308,18 @@ This method is void, should not return anything.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="vitessce.wrappers.OmeTiffWrapper">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">vitessce.wrappers.</span></span><span class="sig-name descname"><span class="pre">OmeTiffWrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offsets_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offsets_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transformation_matrix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_bitmask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L183-L292"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.wrappers.OmeTiffWrapper" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">vitessce.wrappers.</span></span><span class="sig-name descname"><span class="pre">OmeTiffWrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offsets_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offsets_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transformation_matrix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_bitmask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L183-L292"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.wrappers.OmeTiffWrapper" title="Permalink to this definition"></a></dt>
 <dd><p>Wrap an OME-TIFF File by creating an instance of the <code class="docutils literal notranslate"><span class="pre">OmeTiffWrapper</span></code> class.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>img_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – A local filepath to an OME-TIFF file.</p></li>
-<li><p><strong>offsets_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – A local filepath to an offsets.json file.</p></li>
-<li><p><strong>img_url</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – A remote URL of an OME-TIFF file.</p></li>
-<li><p><strong>offsets_url</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – A remote URL of an offsets.json file.</p></li>
-<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The display name for this OME-TIFF within Vitessce.</p></li>
-<li><p><strong>transformation_matrix</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>[</em><em>number</em><em>]</em>) – A column-major ordered matrix for transforming this image (see <a class="reference external" href="http://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices/#homogeneous-coordinates">http://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices/#homogeneous-coordinates</a> for more information).</p></li>
-<li><p><strong>is_bitmask</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Whether or not this image is a bitmask.</p></li>
+<li><p><strong>img_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – A local filepath to an OME-TIFF file.</p></li>
+<li><p><strong>offsets_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – A local filepath to an offsets.json file.</p></li>
+<li><p><strong>img_url</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – A remote URL of an OME-TIFF file.</p></li>
+<li><p><strong>offsets_url</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – A remote URL of an offsets.json file.</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The display name for this OME-TIFF within Vitessce.</p></li>
+<li><p><strong>transformation_matrix</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em>[</em><em>number</em><em>]</em>) – A column-major ordered matrix for transforming this image (see <a class="reference external" href="http://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices/#homogeneous-coordinates">http://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices/#homogeneous-coordinates</a> for more information).</p></li>
+<li><p><strong>is_bitmask</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – Whether or not this image is a bitmask.</p></li>
 <li><p><strong>**kwargs</strong> – Keyword arguments inherited from <a class="reference internal" href="#vitessce.wrappers.AbstractWrapper" title="vitessce.wrappers.AbstractWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractWrapper</span></code></a></p></li>
 </ul>
 </dd>
@@ -327,7 +327,7 @@ This method is void, should not return anything.</p>
 <p>Abstract constructor to be inherited by dataset wrapper classes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>out_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The path to a local directory used for data processing outputs. By default, uses a temp. directory.</p>
+<dd class="field-odd"><p><strong>out_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The path to a local directory used for data processing outputs. By default, uses a temp. directory.</p>
 </dd>
 </dl>
 <dl class="py method">
@@ -340,8 +340,8 @@ This method is void, should not return anything.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dataset_uid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – A unique identifier for this dataset.</p></li>
-<li><p><strong>obj_i</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Within the dataset, the index of this data wrapper object.</p></li>
+<li><p><strong>dataset_uid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – A unique identifier for this dataset.</p></li>
+<li><p><strong>obj_i</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – Within the dataset, the index of this data wrapper object.</p></li>
 </ul>
 </dd>
 </dl>
@@ -351,11 +351,11 @@ This method is void, should not return anything.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="vitessce.wrappers.SnapWrapper">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">vitessce.wrappers.</span></span><span class="sig-name descname"><span class="pre">SnapWrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_mtx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_barcodes_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_bins_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_clusters_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">starting_resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5000</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L554-L804"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.wrappers.SnapWrapper" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">vitessce.wrappers.</span></span><span class="sig-name descname"><span class="pre">SnapWrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_mtx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_barcodes_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_bins_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_clusters_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">starting_resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5000</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/vitessce/vitessce-jupyter/blob/master/vitessce/wrappers.py#L554-L804"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vitessce.wrappers.SnapWrapper" title="Permalink to this definition"></a></dt>
 <dd><p>Abstract constructor to be inherited by dataset wrapper classes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>out_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The path to a local directory used for data processing outputs. By default, uses a temp. directory.</p>
+<dd class="field-odd"><p><strong>out_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The path to a local directory used for data processing outputs. By default, uses a temp. directory.</p>
 </dd>
 </dl>
 <dl class="py method">
@@ -382,8 +382,8 @@ This method is void, should not return anything.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dataset_uid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – A unique identifier for this dataset.</p></li>
-<li><p><strong>obj_i</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Within the dataset, the index of this data wrapper object.</p></li>
+<li><p><strong>dataset_uid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – A unique identifier for this dataset.</p></li>
+<li><p><strong>obj_i</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – Within the dataset, the index of this data wrapper object.</p></li>
 </ul>
 </dd>
 </dl>
@@ -401,15 +401,15 @@ This method is void, should not return anything.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>config</strong> (<a class="reference internal" href="api_config.html#vitessce.config.VitessceConfig" title="vitessce.config.VitessceConfig"><em>VitessceConfig</em></a>) – The Vitessce view config to export to files.</p></li>
-<li><p><strong>out_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The path to the output directory. By default, the current directory.</p></li>
-<li><p><strong>base_url</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The URL on which the files will be served.</p></li>
+<li><p><strong>out_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The path to the output directory. By default, the current directory.</p></li>
+<li><p><strong>base_url</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The URL on which the files will be served.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The config as a dict, with urls filled in.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -422,15 +422,15 @@ This method is void, should not return anything.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>config</strong> (<a class="reference internal" href="api_config.html#vitessce.config.VitessceConfig" title="vitessce.config.VitessceConfig"><em>VitessceConfig</em></a>) – The Vitessce view config to export to S3.</p></li>
 <li><p><strong>s3</strong> (<em>boto3.resource</em>) – A boto3 S3 resource object with permission to upload to the specified bucket.</p></li>
-<li><p><strong>bucket_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The name of the bucket to which to upload.</p></li>
-<li><p><strong>prefix</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The prefix path for the bucket keys (think subdirectory).</p></li>
+<li><p><strong>bucket_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The name of the bucket to which to upload.</p></li>
+<li><p><strong>prefix</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The prefix path for the bucket keys (think subdirectory).</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The config as a dict, with S3 urls filled in.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></p>
 </dd>
 </dl>
 </dd></dl>

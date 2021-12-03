@@ -817,6 +817,12 @@ class VitessceConfig:
         return routes
     
     def to_python(self):
+        """
+        Convert the VitessceConfig instance to a one-line Python code snippet that can be used to generate it.
+        
+        :returns: (A list of classes from the vitessce package used in the code block, The formatted code block)
+        :rtype: (list[str], str)
+        """
         classes_to_import = {self.__class__.__name__}
         code_block = f'{self.__class__.__name__}({self._to_py_repr()}, return_self=True)'
 

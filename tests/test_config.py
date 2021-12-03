@@ -643,7 +643,6 @@ class TestConfig(unittest.TestCase):
         vc.add_view(dataset, cm.SPATIAL, x=1, y=2, w=3, h=4, mapping="PCA").set_props(title="My spatial plot")
 
         vc_dict = vc.to_dict(base_url="http://localhost:8000")
-        print(vc_dict)
         
         classes_to_import, code_block = vc.to_python()
         
@@ -651,9 +650,8 @@ class TestConfig(unittest.TestCase):
         reconstructed_vc_dict = reconstructed_vc.to_dict(base_url="http://localhost:8000")
 
         self.assertEqual(set(classes_to_import), {"VitessceConfig", "MockWrapperA", "MockWrapperB"})
-        print(reconstructed_vc_dict)
         self.assertEqual(reconstructed_vc_dict, {
-            "version": "1.0.0",
+            "version": "1.0.4",
             "name": "",
             "description": "",
             "datasets": [

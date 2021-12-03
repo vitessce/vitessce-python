@@ -13,7 +13,10 @@ from .wrappers import (
     AnnDataWrapper,
     SnapWrapper,
 )
-from .widget import VitessceWidget
+from .widget import (
+    VitessceWidget,
+    launch_vitessce_io,
+)
 from .export import (
     export_to_s3,
     export_to_files,
@@ -99,11 +102,17 @@ class VitessceConfigDataset:
     def _to_py_repr(self):
         return self._repr
     
-    def get_uid(self):
-        return self.dataset["uid"]
-    
     def get_name(self):
         return self.dataset["name"]
+    
+    def get_uid(self):
+        """
+        Get the uid value for this dataset.
+
+        :returns: The uid.
+        :rtype: str
+        """
+        return self.dataset["uid"]
     
     def add_file(self, url, data_type, file_type, options=None):
         """
@@ -177,7 +186,7 @@ class VitessceConfigDataset:
             *self.objs
         ]
 
-    def to_dict(self, base_url):
+    def to_dict(self, base_url=None):
         obj_file_defs = []
         for obj in self.objs:
             obj_file_defs += obj.get_file_defs(base_url)
@@ -439,7 +448,7 @@ class VitessceConfig:
     A class to represent a Vitessce view config.
     """
 
-    def __init__(self, name=None, description=None, schema_version="1.0.0", return_self=False):
+    def __init__(self, name=None, description=None, schema_version="1.0.4", return_self=False):
         """
         Construct a Vitessce view config object.
 
@@ -521,6 +530,14 @@ class VitessceConfig:
             return vcd
     
     def get_dataset_by_uid(self, uid):
+        """
+        Get a dataset associated with this configuration.
+
+        :param str uid: The unique identifier for the dataset of interest.
+
+        :returns: The dataset object.
+        :rtype: VitessceConfigDataset or None
+        """
         for dataset in self.config["datasets"]:
             if dataset.get_uid() == uid:
                 return dataset
@@ -532,6 +549,15 @@ class VitessceConfig:
                 if scope_name == query_scope_name:
                     return self.get_dataset_by_uid(dataset_scope.c_value)
         return None
+
+    def get_datasets(self):
+        """
+        Get the datasets associated with this configuration.
+
+        :returns: The list of dataset objects.
+        :rtype: list of VitessceConfigDataset
+        """
+        return self.config["datasets"]
 
     def add_view(self, dataset, component, x=0, y=0, w=1, h=1, mapping=None, coordination_scopes=None, props=None):
         """
@@ -905,7 +931,7 @@ class VitessceConfig:
     
     def widget(self, **kwargs):
         """
-        Convenience function for instantiating a VitessceWidget object based on this config.
+        Instantiate a VitessceWidget object based on this config.
         
         :param str theme: The theme name, either "light" or "dark". By default, "auto", which selects light or dark based on operating system preferences.
         :param int height: The height of the widget, in pixels. By default, 600.
@@ -928,6 +954,32 @@ class VitessceConfig:
             vw
         """
         return VitessceWidget(self, **kwargs)
+    
+    def web_app(self, **kwargs):
+        """
+        Launch the http://vitessce.io web app using this config.
+        
+        :param str theme: The theme name, either "light" or "dark". By default, "auto", which selects light or dark based on operating system preferences.
+        :param int port: The port to use when serving data objects on localhost. By default, 8000.
+        :param base_url: If the web app is being accessed remotely (i.e. the data is being served from a remote machine), specify the base URL here. If serving and accessing the data on the same machine, keep as None to use a localhost URL. 
+        :type base_url: str or None
+        :param bool open: Should the browser be opened to the web app URL? By default, True.
+        
+        :returns: The URL of the web app (containing the Vitessce configuration as URL-encoded JSON).
+        :rtype: str
+
+        .. code-block:: python
+            :emphasize-lines: 6
+
+            from vitessce import VitessceConfig, Component as cm, CoordinationType as ct
+
+            vc = VitessceConfig()
+            my_dataset = vc.add_dataset(name='My Dataset')
+            v1 = vc.add_view(my_dataset, cm.SPATIAL)
+            vc.layout(v1)
+            vc.web_app()
+        """
+        return launch_vitessce_io(self, **kwargs)
         
     def export(self, to, *args, **kwargs):
         """

@@ -1,6 +1,9 @@
 # vitessce-python
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/vitessce/vitessce-python/master?filepath=docs/notebooks/widget_pbmc.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/vitessce/vitessce-python/blob/master/docs/notebooks/widget_on_colab.ipynb)
+
+
 
 Python API and Jupyter widget facilitating interactive visualization of spatial single-cell data with [Vitessce](https://github.com/vitessce/vitessce).
 
@@ -10,14 +13,6 @@ Python API and Jupyter widget facilitating interactive visualization of spatial 
 To install with pip:
 
     $ pip install vitessce
-    $ jupyter nbextension install --py vitessce
-    $ jupyter nbextension enable --py vitessce
-
-To enable the widget for Jupyter Lab run the following additional lines:
-
-    $ jupyter labextension install @jupyter-widgets/jupyterlab-manager
-    $ jupyter labextension install vitessce-jupyter
-
 
 ## Getting started
 
@@ -27,26 +22,26 @@ These contain demos of different use cases and integrations with single-cell dat
 
 ## Development
 
-For a development installation (requires npm),
+For a development installation (requires NodeJS and NPM),
 
     $ git clone https://github.com/vitessce/vitessce-python.git
     $ cd vitessce-python
     $ conda env create -f environment.yml
     $ conda activate vitessce-jupyter-dev
     $ pip install -e .
-    $ jupyter nbextension install --py --symlink --sys-prefix vitessce
+    $ jupyter nbextension install --py --symlink --overwrite --sys-prefix vitessce
     $ jupyter nbextension enable --py --sys-prefix vitessce
+
+When actively developing your extension for JupyterLab, run the command:
+
+    $ jupyter labextension develop --overwrite vitessce
+
+Then you need to rebuild the JS when you make a code change:
+
     $ cd js
-    $ jupyter labextension install @jupyter-widgets/jupyterlab-manager
-    $ jupyter labextension install
+    $ npm run build
 
-When actively developing your extension, build Jupyter Lab with the command:
-
-    $ jupyter lab --watch
-
-This takes a minute or so to get started, but then automatically rebuilds JupyterLab when your javascript changes.
-
-Note on first `jupyter lab --watch`, you may need to touch a file to get Jupyter Lab to open.
+You then need to refresh the JupyterLab page when your javascript changes.
 
 ### Conda environments
 
@@ -73,7 +68,12 @@ make html
 
 ## Deployment
 
-To deploy a new version, increment the version of the Python package in [`vitessce/_version.py`](./vitessce/_version.py) and the JS package in [`js/package.json`](./js/package.json).
+To deploy a new version, increment the version of the Python package in [`vitessce/_version.py`](./vitessce/_version.py) and the JS package in [`js/package.json`](./js/package.json):
+
+```
+cd js
+npm version patch
+```
 
 Then, when you push or merge the code with the incremented versions to master, the GitHub Action `deploy.yml` workflow will build and push the packages to PyPI and NPM.
 
@@ -89,3 +89,7 @@ Then, when you push or merge the code with the incremented versions to master, t
 - [Sphinx: Getting Started](https://www.sphinx-doc.org/en/master/usage/quickstart.html)
 - [Read the Docs Sphinx Theme](https://github.com/readthedocs/sphinx_rtd_theme)
 - [jupyter server proxy](https://jupyter-server-proxy.readthedocs.io/en/latest/arbitrary-ports-hosts.html)
+
+## Getting/Offering Help
+
+If you have a specific bug or feature request, please feel free to open an [issue](https://github.com/vitessce/vitessce-python/issues/new).  Otherwise our [discussions](https://github.com/vitessce/vitessce-python/discussions) section is a great place to get help or offer it.  If you aren't sure if something is a bug or not, don't have all the reproduction steps, or just have a general question, feel free to open a discussion post.

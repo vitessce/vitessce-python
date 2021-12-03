@@ -1,4 +1,7 @@
+from ._version import js_version_info
 import importlib.util
+from urllib.parse import quote_plus
+import json
 
 # Widget dependencies
 import ipywidgets as widgets
@@ -19,6 +22,7 @@ import socket
 # See js/lib/widget.js for the frontend counterpart to this file.
 
 MAX_PORT_TRIES = 1000
+DEFAULT_PORT = 8000
 
 def run_server_loop(app, port):
     loop = asyncio.new_event_loop()
@@ -35,6 +39,51 @@ def run_server_loop(app, port):
 def is_port_in_use(port):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         return s.connect_ex(('localhost', port)) == 0
+
+def get_base_url_and_port(port, next_port, proxy=False, base_url=None):
+    if port is None:
+        use_port = next_port
+        next_port += 1
+        port_tries = 1
+        while is_port_in_use(use_port) and port_tries < MAX_PORT_TRIES:
+            use_port = next_port
+            next_port += 1
+            port_tries += 1
+    else:
+        use_port = port
+    
+    if base_url is None:
+        if proxy:
+            if importlib.util.find_spec('jupyter_server_proxy') is None:
+                raise ValueError("To use the widget through a proxy, jupyter-server-proxy must be installed.")
+            base_url = f"proxy/{use_port}"
+        else:
+            base_url = f"http://localhost:{use_port}"
+    
+    return base_url, use_port, next_port
+
+def serve_routes(routes, use_port):
+    if len(routes) > 0:
+        middleware = [
+            Middleware(CORSMiddleware, allow_origins=['*'], allow_methods=["OPTIONS", "GET"], allow_headers=['Range'])
+        ]
+        app = Starlette(debug=True, routes=routes, middleware=middleware)
+        
+        t = Thread(target=run_server_loop, args=(app, use_port))
+        t.start()
+        time.sleep(1)
+
+def launch_vitessce_io(config, theme='light', port=None, base_url=None, open=True):
+    import webbrowser
+    base_url, use_port, _ = get_base_url_and_port(port, DEFAULT_PORT, base_url=base_url)
+    config_dict = config.to_dict(base_url=base_url)
+    routes = config.get_routes()
+    serve_routes(routes, use_port)
+    vitessce_url = f"http://vitessce.io/?theme={theme}&url=data:," + quote_plus(json.dumps(config_dict))
+    if open:
+        webbrowser.open(vitessce_url)
+    return vitessce_url
+
 
 @widgets.register
 class VitessceWidget(widgets.DOMWidget):
@@ -55,9 +104,9 @@ class VitessceWidget(widgets.DOMWidget):
     _model_module = Unicode('vitessce-jupyter').tag(sync=True)
 
     # Version of the front-end module containing widget view
-    _view_module_version = Unicode('^0.1.0').tag(sync=True)
+    _view_module_version = Unicode('^%s.%s.%s' % (js_version_info[0], js_version_info[1], js_version_info[2])).tag(sync=True)
     # Version of the front-end module containing widget model
-    _model_module_version = Unicode('^0.1.0').tag(sync=True)
+    _model_module_version = Unicode('^%s.%s.%s' % (js_version_info[0], js_version_info[1], js_version_info[2])).tag(sync=True)
     
     # Widget specific property.
     # Widget properties are defined as traitlets. Any property tagged with `sync=True`
@@ -68,7 +117,7 @@ class VitessceWidget(widgets.DOMWidget):
     theme = Unicode('auto').tag(sync=True)
     proxy = Bool(False).tag(sync=True)
 
-    next_port = 8000
+    next_port = DEFAULT_PORT
 
     def __init__(self, config, height=600, theme='auto', port=None, proxy=False):
         """
@@ -90,39 +139,14 @@ class VitessceWidget(widgets.DOMWidget):
             vw = vc.widget()
             vw
         """
-
-        if port is None:
-            use_port = VitessceWidget.next_port
-            VitessceWidget.next_port += 1
-            port_tries = 1
-            while is_port_in_use(use_port) and port_tries < MAX_PORT_TRIES:
-                use_port = VitessceWidget.next_port
-                VitessceWidget.next_port += 1
-                port_tries += 1
-        else:
-            use_port = port
         
-        if proxy:
-            if importlib.util.find_spec('jupyter_server_proxy') is None:
-                raise ValueError("To use the widget through a proxy, jupyter-server-proxy must be installed.")
-            base_url = f"proxy/{use_port}"
-        else:
-            base_url = f"http://localhost:{use_port}"
-
+        base_url, use_port, VitessceWidget.next_port = get_base_url_and_port(port, VitessceWidget.next_port, proxy=proxy)
         config_dict = config.to_dict(base_url=base_url)
         routes = config.get_routes()
 
         super(VitessceWidget, self).__init__(config=config_dict, height=height, theme=theme, proxy=proxy)
         
-        if len(routes) > 0:
-            middleware = [
-                Middleware(CORSMiddleware, allow_origins=['*'], allow_methods=["OPTIONS", "GET"], allow_headers=['Range'])
-            ]
-            app = Starlette(debug=True, routes=routes, middleware=middleware)
-            
-            t = Thread(target=run_server_loop, args=(app, use_port))
-            t.start()
-            time.sleep(1)
+        serve_routes(routes, use_port)
             
     def _get_coordination_value(self, coordination_type, coordination_scope):
         obj = self.config['coordinationSpace'][coordination_type]

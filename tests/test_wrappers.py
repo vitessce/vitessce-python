@@ -19,7 +19,6 @@ from vitessce import (
     OmeTiffWrapper,
     AnnDataWrapper,
     SnapWrapper,
-    MultiImageWrapper,
 )
 
 class TestWrappers(unittest.TestCase):
@@ -110,3 +109,4 @@ class TestWrappers(unittest.TestCase):
         cells_json = w.create_cells_json()
         self.assertEqual(len(cells_json), 6)
         self.assertEqual(cells_json['AAACATCGAGTACAAGACAGCAGA'], { 'mappings': { 'UMAP': [4.43, 1.64] } })
+        

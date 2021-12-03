@@ -1,5 +1,14 @@
 
 def make_repr(init_locals, class_name=None, params_only=False):
+    '''
+    >>> from .wrappers import MultiImageWrapper
+    >>> orig = MultiImageWrapper('IMAGE_WRAPPERS', foo='bar')
+    >>> orig_repr = repr(orig)
+    >>> print(orig_repr)
+    MultiImageWrapper(image_wrappers='IMAGE_WRAPPERS', use_physical_size_scaling=False, foo='bar')
+    >>> evalled = eval(orig_repr)
+    >>> assert orig_repr == repr(evalled)
+    '''
     try:
         del init_locals['self']
     except KeyError:

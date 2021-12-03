@@ -103,6 +103,12 @@ class VitessceConfigDataset:
         return self._repr
     
     def get_name(self):
+        """
+        Get the name for this dataset.
+
+        :returns: The name.
+        :rtype: str
+        """
         return self.dataset["name"]
     
     def get_uid(self):
@@ -181,6 +187,12 @@ class VitessceConfigDataset:
         return self
     
     def _get_files_and_objs(self):
+        """
+        Get a list of files and data objects associated with this dataset.
+
+        :returns: The list of files and datasets.
+        :rtype: list of VitessceConfigDatasetFile and AbstractWrapper instances
+        """
         return [
             *self.dataset["files"],
             *self.objs
@@ -318,6 +330,14 @@ class VitessceConfigView:
         }, class_name='VitessceConfigView', params_only=True)
     
     def get_coordination_scope(self, c_type):
+        """
+        Get the coordination scope name for a particular coordination type.
+
+        :param str c_type: The coordination type of interest.
+
+        :returns: The coordination scope name.
+        :rtype: str or None
+        """
         if c_type in self.view["coordinationScopes"]:
             return self.view["coordinationScopes"][c_type]
         return None
@@ -358,6 +378,17 @@ class VitessceConfigView:
         return self
     
     def set_xywh(self, x, y, w, h):
+        """
+        Set the dimensions for this view.
+
+        :param int x: The horizontal position.
+        :param int y: The vertical position.
+        :param int w: The width.
+        :param int h: The height.
+
+        :returns: Self, to allow chaining.
+        :rtype: VitessceConfigView
+        """
         self.view["x"] = x
         self.view["y"] = y
         self.view["w"] = w
@@ -365,6 +396,14 @@ class VitessceConfigView:
         return self
     
     def set_props(self, **kwargs):
+        """
+        Set the props for this view.
+
+        :param \*\*kwargs: A variable number of named props.
+
+        :returns: Self, to allow chaining.
+        :rtype: VitessceConfigView
+        """
         if "props" in self.view.keys():
             self.view["props"] = {
                 **self.view["props"],
@@ -375,6 +414,12 @@ class VitessceConfigView:
         return self
     
     def get_props(self):
+        """
+        Get the props for this view.
+
+        :returns: The props.
+        :rtype: dict or None
+        """
         if "props" in self.view.keys():
             return self.view["props"]
         return None
@@ -399,6 +444,7 @@ class VitessceConfigCoordinationScope:
 
         :param str c_type: The coordination type for this coordination scope.
         :param str c_scope: The coordination scope name.
+        :param c_value: The value for the coordination scope. Optional.
         """
         self.c_type = c_type
         self.c_scope = c_scope
@@ -454,6 +500,8 @@ class VitessceConfig:
 
         :param str name: A name for the view config. Optional.
         :param str description: A description for the view config. Optional.
+        :param str schema_version: The view config schema version.
+        :param bool return_self: Should the functions add_dataset, add_view, and set_coordination_value return the VitessceConfig instance instead of their default return value? By default, False.
 
         .. code-block:: python
             :emphasize-lines: 3
@@ -495,6 +543,7 @@ class VitessceConfig:
 
         :param str name: A name for this dataset.
         :param str uid: A unique identifier for this dataset. Optional. If None, will be automatically generated.
+        :param list files: Optional. A list of VitessceConfigDatasetFile instances and/or AbstractWrapper instances.
 
         :returns: The instance for the new dataset.
         :rtype: VitessceConfigDataset
@@ -531,7 +580,7 @@ class VitessceConfig:
     
     def get_dataset_by_uid(self, uid):
         """
-        Get a dataset associated with this configuration.
+        Get a dataset associated with this configuration based on its uid.
 
         :param str uid: The unique identifier for the dataset of interest.
 
@@ -544,6 +593,14 @@ class VitessceConfig:
         return None
     
     def get_dataset_by_coordination_scope_name(self, query_scope_name):
+        """
+        Get a dataset associated with this configuration based on a coordination scope.
+
+        :param str query_scope_name: The unique identifier for the dataset coordination scope of interest.
+
+        :returns: The dataset object.
+        :rtype: VitessceConfigDataset or None
+        """
         if ct.DATASET.value in self.config["coordinationSpace"].keys():
             for scope_name, dataset_scope in self.config["coordinationSpace"][ct.DATASET.value].items():
                 if scope_name == query_scope_name:
@@ -573,6 +630,8 @@ class VitessceConfig:
         :param int y: The vertical position of the view. Must be an integer between 0 and 11. Optional. This will be ignored if you call the `layout` method of this class using `VitessceConfigViewHConcat` and `VitessceConfigViewVConcat` objects.
         :param int w: The width of the view. Must be an integer between 1 and 12. Optional. This will be ignored if you call the `layout` method of this class using `VitessceConfigViewHConcat` and `VitessceConfigViewVConcat` objects.
         :param int h: The height of the view. Must be an integer between 1 and 12. Optional. This will be ignored if you call the `layout` method of this class using `VitessceConfigViewHConcat` and `VitessceConfigViewVConcat` objects.
+        :param dict coordination_scopes: A mapping from coordination types to coordination scope names for this view.
+        :param dict props: Props to set for the view using the VitessceConfigView.set_props method.
 
         :returns: The instance for the new view.
         :rtype: VitessceConfigView
@@ -679,6 +738,16 @@ class VitessceConfig:
         return result
     
     def set_coordination_value(self, c_type, c_scope, c_value):
+        """
+        Set the value for a coordination scope. If a coordination object for the coordination type does not yet exist in the coordination space, it will be created.
+
+        :param str c_type: The coordination type for this coordination scope.
+        :param str c_scope: The coordination scope name.
+        :param any c_value: The value for the coordination scope. Optional.
+
+        :returns: The coordination scope instance.
+        :rtype: VitessceConfigCoordinationScope
+        """
         scope = VitessceConfigCoordinationScope(c_type, c_scope, c_value)
         if scope.c_type not in self.config["coordinationSpace"]:
             self.config["coordinationSpace"][scope.c_type] = {}

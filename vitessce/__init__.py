@@ -1,7 +1,17 @@
 from ._version import version_info, __version__
 
 from .widget import VitessceWidget
-from .config import VitessceConfig, hconcat, vconcat
+from .config import (
+    VitessceConfig,
+    VitessceConfigDataset,
+    VitessceConfigDatasetFile,
+    VitessceConfigView,
+    VitessceConfigViewHConcat,
+    VitessceConfigViewVConcat,
+    VitessceConfigCoordinationScope,
+    hconcat,
+    vconcat,
+)
 from .constants import CoordinationType, Component, DataType, FileType
 from .wrappers import (
     AbstractWrapper,
@@ -19,6 +29,7 @@ from .export import (
     export_to_s3,
     export_to_files,
 )
+from .repr import make_repr
 
 def _jupyter_nbextension_paths():
     """Called by Jupyter Notebook Server to detect if it is a valid nbextension and

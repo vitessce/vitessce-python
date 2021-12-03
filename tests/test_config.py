@@ -9,7 +9,8 @@ from vitessce import (
     FileType as ft,
     hconcat,
     vconcat,
-    AbstractWrapper
+    AbstractWrapper,
+    make_repr
 )
 
 class TestConfig(unittest.TestCase):
@@ -596,3 +597,108 @@ class TestConfig(unittest.TestCase):
             "initStrategy": "auto"
         })
 
+    def test_config_to_python_with_data_objects(self):
+        vc = VitessceConfig()
+
+        class MockWrapperA(AbstractWrapper):
+            def __init__(self, name, **kwargs):
+                super().__init__(**kwargs)
+                self._repr = make_repr(locals())
+                self.name = name
+            def convert_and_save(self, dataset_uid, obj_i):
+                def get_molecules(base_url):
+                    return {
+                        "url": f"{base_url}/molecules",
+                        "type": "molecules",
+                        "fileType": "molecules.json"
+                    }
+                def get_cells(base_url):
+                    return {
+                        "url": f"{base_url}/cells",
+                        "type": "cells",
+                        "fileType": "cells.json"
+                    }
+                self.file_def_creators += [get_molecules, get_cells]
+
+        class MockWrapperB(AbstractWrapper):
+            def __init__(self, name, **kwargs):
+                super().__init__(**kwargs)
+                self._repr = make_repr(locals())
+                self.name = name
+            def convert_and_save(self, dataset_uid, obj_i):
+                def get_cell_sets(base_url):
+                    return {
+                        "url": f"{base_url}/cell-sets",
+                        "type": "cell-sets",
+                        "fileType": "cell-sets.json"
+                    }
+                self.file_def_creators += [get_cell_sets]
+
+        dataset = vc.add_dataset(name='My Object Dataset').add_object(
+            obj=MockWrapperA("Experiment A")
+        ).add_object(
+            obj=MockWrapperB("Experiment B")
+        )
+
+        vc.add_view(dataset, cm.SPATIAL, x=1, y=2, w=3, h=4, mapping="PCA").set_props(title="My spatial plot")
+
+        vc_dict = vc.to_dict(base_url="http://localhost:8000")
+        print(vc_dict)
+        
+        classes_to_import, code_block = vc.to_python()
+        
+        reconstructed_vc = eval(code_block)
+        reconstructed_vc_dict = reconstructed_vc.to_dict(base_url="http://localhost:8000")
+
+        self.assertEqual(set(classes_to_import), {"VitessceConfig", "MockWrapperA", "MockWrapperB"})
+        print(reconstructed_vc_dict)
+        self.assertEqual(reconstructed_vc_dict, {
+            "version": "1.0.0",
+            "name": "",
+            "description": "",
+            "datasets": [
+                {
+                    'uid': 'A',
+                    'name': 'My Object Dataset',
+                    'files': [
+                        {
+                            "url": "http://localhost:8000/molecules",
+                            "type": "molecules",
+                            "fileType": "molecules.json"
+                        },
+                        {
+                            "url": "http://localhost:8000/cells",
+                            "type": "cells",
+                            "fileType": "cells.json"
+                        },
+                        {
+                            "url": "http://localhost:8000/cell-sets",
+                            "type": "cell-sets",
+                            "fileType": "cell-sets.json"
+                        }
+                    ]
+                },
+            ],
+            'coordinationSpace': {
+                'dataset': {
+                    'A': 'A'
+                },
+                "embeddingType": {
+                    "A": "PCA"
+                }
+            },
+            "layout": [
+                {
+                    "component": "spatial",
+                    "coordinationScopes": {
+                        'dataset': 'A',
+                        "embeddingType": "A"
+                    },
+                    "x": 1, "y": 2, "w": 3, "h": 4,
+                    "props": {
+                        "title": "My spatial plot"
+                    },
+                }
+            ],
+            "initStrategy": "auto"
+        })

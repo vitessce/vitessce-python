@@ -12,3 +12,4 @@ Widget examples
    notebooks/0.5-widget_shortcut
    notebooks/0.6-widget_from_dict
    notebooks/0.7-widget_pbmc_remote
+   notebooks/0.8-widget_imaging_segmentation

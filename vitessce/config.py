@@ -612,7 +612,7 @@ class VitessceConfig:
         :returns: The dataset object.
         :rtype: VitessceConfigDataset or None
         """
-        if ct.DATASET.value in self.config["coordinationSpace"].keys():
+        if ct.DATASET.value in self.config["coordinationSpace"]:
             for scope_name, dataset_scope in self.config["coordinationSpace"][ct.DATASET.value].items():
                 if scope_name == query_scope_name:
                     return self.get_dataset_by_uid(dataset_scope.c_value)

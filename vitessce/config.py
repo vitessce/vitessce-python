@@ -350,9 +350,7 @@ class VitessceConfigView:
         :returns: The coordination scope name.
         :rtype: str or None
         """
-        if c_type in self.view["coordinationScopes"]:
-            return self.view["coordinationScopes"][c_type]
-        return None
+        return self.view["coordinationScopes"].get(c_type)
     
     def use_coordination(self, *c_scopes):
         """

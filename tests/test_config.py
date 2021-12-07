@@ -1,5 +1,6 @@
 import json
 import unittest
+import ast
 
 from vitessce import (
     VitessceConfig,
@@ -644,15 +645,20 @@ class TestConfig(unittest.TestCase):
             file_type=ft.CELLS_JSON,
             data_type=dt.CELLS
         )
-
         vc.add_view(dataset, cm.SPATIAL, x=1, y=2, w=3, h=4, mapping="PCA").set_props(title="My spatial plot")
+        base_url = "http://localhost:8000"
         
         classes_to_import, code_block = vc.to_python()
-
         self.assertEqual(classes_to_import, ['VitessceConfig', 'VitessceConfigDatasetFile'])
         
+        # Evaluate the code string directly
         reconstructed_vc = eval(code_block)
-        base_url = "http://localhost:8000"
-
-        
         self.assertEqual(vc.to_dict(base_url=base_url), reconstructed_vc.to_dict(base_url=base_url))
+
+        # Convert code string to an AST and back before evaluation
+        if hasattr(ast, 'unparse'):
+            # Unparse added in Python 3.9
+            ast_reconstructed_vc = eval(ast.unparse(ast.parse(code_block)))
+            self.assertEqual(vc.to_dict(base_url=base_url), ast_reconstructed_vc.to_dict(base_url=base_url))
+        else:
+            ast.parse(code_block)

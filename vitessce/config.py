@@ -22,7 +22,7 @@ from .export import (
     export_to_s3,
     export_to_files,
 )
-from .repr import make_repr
+from .repr import make_repr, make_params_repr
 
 def _get_next_scope(prev_scopes):
     chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
@@ -67,7 +67,7 @@ class VitessceConfigDatasetFile:
         :type options: Extra options to pass to the file loader class.
         :type options: dict or list or None
         """
-        self._repr = make_repr(locals(), class_name='VitessceConfigDatasetFile', params_only=False)
+        self._repr = make_repr(locals(), class_name='VitessceConfigDatasetFile')
         self.file = {
             "url": url,
             "type": data_type,
@@ -92,7 +92,7 @@ class VitessceConfigDataset:
         :param str uid: A unique identifier for this dataset.
         :param str name: A name for this dataset.
         """
-        self._repr = make_repr(locals(), class_name='VitessceConfigDataset', params_only=True)
+        self._repr = make_params_repr({ "uid": uid, "name": name })
         self.dataset = {
             "uid": uid,
             "name": name,
@@ -328,7 +328,7 @@ class VitessceConfigView:
         }
     
     def _to_py_repr(self):
-        return make_repr({
+        return make_params_repr({
             "component": self.view["component"],
             "coordination_scopes": {
                 c_type: c_scope
@@ -339,7 +339,7 @@ class VitessceConfigView:
             "y": self.view["y"],
             "w": self.view["w"],
             "h": self.view["h"]
-        }, class_name='VitessceConfigView', params_only=True)
+        })
     
     def get_coordination_scope(self, c_type):
         """
@@ -419,7 +419,7 @@ class VitessceConfigView:
                 **self.view["props"],
                 **kwargs
             }
-        else:
+        elif len(kwargs) > 0:
             self.view["props"] = kwargs
         return self
     
@@ -459,11 +459,11 @@ class VitessceConfigCoordinationScope:
         self.c_value = c_value
     
     def _to_py_repr(self):
-        return make_repr({
+        return make_params_repr({
             "c_type": self.c_type,
             "c_scope": self.c_scope,
             "c_value": self.c_value,
-        }, class_name='VitessceConfigCoordinationScope', params_only=True)
+        })
     
     def set_value(self, c_value):
         """
@@ -539,11 +539,11 @@ class VitessceConfig:
             self.config["description"] = description
 
     def _to_py_repr(self):
-        return make_repr({
+        return make_params_repr({
             "name": self.config["name"],
             "description": self.config["description"],
             "schema_version": self.config["version"],
-        }, class_name = 'VitessceConfig', params_only=True)
+        })
 
     def add_dataset(self, name="", uid=None, files=None, objs=None):
         """
@@ -926,7 +926,7 @@ class VitessceConfig:
                 dataset_uid = None
             extra_params = ""
             if vcv.get_props() is not None:
-                extra_params = ", " + make_repr({ "props": vcv.get_props() }, params_only=True)
+                extra_params = ", " + make_params_repr({ "props": vcv.get_props() })
             dataset_val = repr(dataset_uid)
             code_block += f'.{self.add_view.__name__}(dataset={dataset_val}, {vcv._to_py_repr()}{extra_params})'
 

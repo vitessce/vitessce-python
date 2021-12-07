@@ -1,7 +1,10 @@
+import sys
+import inspect
 import json
 import black
 from uuid import uuid4
 from collections import OrderedDict
+
 
 from .constants import (
     CoordinationType as ct,
@@ -580,7 +583,7 @@ class VitessceConfig:
 
         if files is not None and type(files) is list:
             for obj in files:
-                vcd.add_file(obj)
+                vcd._add_file(obj)
         if objs is not None and type(objs) is list:
             for obj in objs:
                 vcd.add_object(obj)
@@ -910,7 +913,10 @@ class VitessceConfig:
             vcd_obj_list_contents = ', '.join([ repr(f) for f in vcd._get_objects() ])
             code_block += f'.{self.add_dataset.__name__}({vcd._to_py_repr()}, files=[{vcd_file_list_contents}], objs=[{vcd_obj_list_contents}])'
             for obj in vcd._get_objects():
-                classes_to_import[obj.__class__.__name__] = True
+                if "vitessce" in sys.modules and obj.__class__.__name__ in dict(inspect.getmembers(sys.modules["vitessce"])):
+                    classes_to_import[obj.__class__.__name__] = True
+            if len(vcd._get_files()) > 0:
+                classes_to_import[VitessceConfigDatasetFile.__name__] = True
         for c_type, c_obj in self.config["coordinationSpace"].items():
             if c_type != ct.DATASET.value:
                 for c_scope_name, c_scope in c_obj.items():

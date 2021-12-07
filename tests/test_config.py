@@ -3,6 +3,7 @@ import unittest
 
 from vitessce import (
     VitessceConfig,
+    VitessceConfigDatasetFile,
     CoordinationType as ct,
     Component as cm,
     DataType as dt,
@@ -638,14 +639,20 @@ class TestConfig(unittest.TestCase):
             obj=MockWrapperA("Experiment A")
         ).add_object(
             obj=MockWrapperB("Experiment B")
+        ).add_file(
+            url="http://example.com/my_cells.json",
+            file_type=ft.CELLS_JSON,
+            data_type=dt.CELLS
         )
 
         vc.add_view(dataset, cm.SPATIAL, x=1, y=2, w=3, h=4, mapping="PCA").set_props(title="My spatial plot")
         
         classes_to_import, code_block = vc.to_python()
+
+        self.assertEqual(classes_to_import, ['VitessceConfig', 'VitessceConfigDatasetFile'])
         
         reconstructed_vc = eval(code_block)
         base_url = "http://localhost:8000"
 
-        self.assertEqual(classes_to_import, ['VitessceConfig', 'MockWrapperA', 'MockWrapperB'])
+        
         self.assertEqual(vc.to_dict(base_url=base_url), reconstructed_vc.to_dict(base_url=base_url))

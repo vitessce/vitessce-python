@@ -693,9 +693,7 @@ class VitessceConfig:
             et_scope.set_value(mapping)
             vcv.use_coordination(et_scope)
 
-        if props is not None:
-            assert type(props) == dict
-            vcv.set_props(**props)
+        vcv.set_props(**(props or {}))
 
         self.config["layout"].append(vcv)
         if self._return_self:

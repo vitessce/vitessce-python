@@ -657,8 +657,8 @@ class VitessceConfig:
             v1 = vc.add_view(my_dataset, cm.SPATIAL)
             v2 = vc.add_view(my_dataset, cm.SCATTERPLOT, mapping="X_umap")
         """
-        assert type(dataset) == VitessceConfigDataset or type(dataset) == str
-        assert type(component) == str or type(component) == cm
+        assert type(dataset) in [VitessceConfigDataset, str]
+        assert type(component) in [str, cm]
 
         if type(dataset) == str:
             dataset_uid = dataset

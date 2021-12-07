@@ -927,10 +927,7 @@ class VitessceConfig:
             extra_params = ""
             if vcv.get_props() is not None:
                 extra_params = ", " + make_repr({ "props": vcv.get_props() }, params_only=True)
-            if dataset_uid is None:
-                dataset_val = 'None'
-            else:
-                dataset_val = f'"{dataset_uid}"'
+            dataset_val = repr(dataset_uid)
             code_block += f'.{self.add_view.__name__}(dataset={dataset_val}, {vcv._to_py_repr()}{extra_params})'
 
         formatted_code_block = black.format_str(code_block, mode=black.FileMode())

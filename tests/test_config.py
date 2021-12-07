@@ -641,62 +641,11 @@ class TestConfig(unittest.TestCase):
         )
 
         vc.add_view(dataset, cm.SPATIAL, x=1, y=2, w=3, h=4, mapping="PCA").set_props(title="My spatial plot")
-
-        vc_dict = vc.to_dict(base_url="http://localhost:8000")
         
         classes_to_import, code_block = vc.to_python()
         
         reconstructed_vc = eval(code_block)
-        reconstructed_vc_dict = reconstructed_vc.to_dict(base_url="http://localhost:8000")
+        base_url = "http://localhost:8000"
 
-        self.assertEqual(set(classes_to_import), {"VitessceConfig", "MockWrapperA", "MockWrapperB"})
-        self.assertEqual(reconstructed_vc_dict, {
-            "version": "1.0.4",
-            "name": "",
-            "description": "",
-            "datasets": [
-                {
-                    'uid': 'A',
-                    'name': 'My Object Dataset',
-                    'files': [
-                        {
-                            "url": "http://localhost:8000/molecules",
-                            "type": "molecules",
-                            "fileType": "molecules.json"
-                        },
-                        {
-                            "url": "http://localhost:8000/cells",
-                            "type": "cells",
-                            "fileType": "cells.json"
-                        },
-                        {
-                            "url": "http://localhost:8000/cell-sets",
-                            "type": "cell-sets",
-                            "fileType": "cell-sets.json"
-                        }
-                    ]
-                },
-            ],
-            'coordinationSpace': {
-                'dataset': {
-                    'A': 'A'
-                },
-                "embeddingType": {
-                    "A": "PCA"
-                }
-            },
-            "layout": [
-                {
-                    "component": "spatial",
-                    "coordinationScopes": {
-                        'dataset': 'A',
-                        "embeddingType": "A"
-                    },
-                    "x": 1, "y": 2, "w": 3, "h": 4,
-                    "props": {
-                        "title": "My spatial plot"
-                    },
-                }
-            ],
-            "initStrategy": "auto"
-        })
+        self.assertEqual(classes_to_import, ['VitessceConfig', 'MockWrapperA', 'MockWrapperB'])
+        self.assertEqual(vc.to_dict(base_url=base_url), reconstructed_vc.to_dict(base_url=base_url))

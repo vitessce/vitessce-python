@@ -1,6 +1,7 @@
 import json
 import black
 from uuid import uuid4
+from collections import OrderedDict
 
 from .constants import (
     CoordinationType as ct,
@@ -892,7 +893,8 @@ class VitessceConfig:
         :returns: (A list of classes from the vitessce package used in the code block, The formatted code block)
         :rtype: (list[str], str)
         """
-        classes_to_import = {self.__class__.__name__}
+        classes_to_import = OrderedDict()
+        classes_to_import[self.__class__.__name__] = True
         code_block = f'{self.__class__.__name__}({self._to_py_repr()}, return_self=True)'
 
         for vcd in self.config["datasets"]:
@@ -900,7 +902,7 @@ class VitessceConfig:
             code_block += f'.{self.add_dataset.__name__}({vcd._to_py_repr()}, files=[{vcd_file_list_contents}])'
             for file_or_obj in vcd._get_files_and_objs():
                 try:
-                    classes_to_import.add(file_or_obj.__class__.__name__)
+                    classes_to_import[file_or_obj.__class__.__name__] = True
                 except KeyError:
                     pass
         for c_type, c_obj in self.config["coordinationSpace"].items():

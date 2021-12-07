@@ -430,9 +430,7 @@ class VitessceConfigView:
         :returns: The props.
         :rtype: dict or None
         """
-        if "props" in self.view.keys():
-            return self.view["props"]
-        return None
+        return self.view.get("props")
     
     def to_dict(self):
         return self.view

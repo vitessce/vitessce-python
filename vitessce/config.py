@@ -167,7 +167,11 @@ class VitessceConfigDataset:
         else:
             file_type_str = file_type.value
 
-        self.dataset["files"].append(VitessceConfigDatasetFile(url=url, data_type=data_type_str, file_type=file_type_str, options=options))
+        self._add_file(VitessceConfigDatasetFile(url=url, data_type=data_type_str, file_type=file_type_str, options=options))
+        return self
+    
+    def _add_file(self, obj):
+        self.dataset["files"].append(obj)
         return self
     
     def add_object(self, obj):
@@ -180,24 +184,27 @@ class VitessceConfigDataset:
         :returns: Self, to allow function chaining.
         :rtype: VitessceConfigDataset
         """
-        if type(obj) is VitessceConfigDatasetFile:
-            self.dataset["files"].append(obj)
-        else:
-            obj.convert_and_save(self.dataset["uid"], len(self.objs))
-            self.objs.append(obj)
+        obj.convert_and_save(self.dataset["uid"], len(self.objs))
+        self.objs.append(obj)
         return self
     
-    def _get_files_and_objs(self):
+    def _get_files(self):
         """
         Get a list of files and data objects associated with this dataset.
 
         :returns: The list of files and datasets.
-        :rtype: list of VitessceConfigDatasetFile and AbstractWrapper instances
+        :rtype: list of VitessceConfigDatasetFile
         """
-        return [
-            *self.dataset["files"],
-            *self.objs
-        ]
+        return self.dataset["files"]
+    
+    def _get_objects(self):
+        """
+        Get a list of data objects associated with this dataset.
+
+        :returns: The list of data objects.
+        :rtype: list of AbstractWrapper instances
+        """
+        return self.objs
 
     def to_dict(self, base_url=None):
         obj_file_defs = []
@@ -323,7 +330,11 @@ class VitessceConfigView:
     def _to_py_repr(self):
         return make_repr({
             "component": self.view["component"],
-            "coordination_scopes": dict([ (c_type, c_scope) for c_type, c_scope in self.view["coordinationScopes"].items() if c_type != ct.DATASET.value ]),
+            "coordination_scopes": {
+                c_type: c_scope
+                for c_type, c_scope in self.view["coordinationScopes"].items()
+                if c_type != ct.DATASET.value
+            },
             "x": self.view["x"],
             "y": self.view["y"],
             "w": self.view["w"],
@@ -538,7 +549,7 @@ class VitessceConfig:
             "schema_version": self.config["version"],
         }, class_name = 'VitessceConfig', params_only=True)
 
-    def add_dataset(self, name="", uid=None, files=None):
+    def add_dataset(self, name="", uid=None, files=None, objs=None):
         """
         Add a dataset to the config.
 
@@ -573,6 +584,9 @@ class VitessceConfig:
 
         if files is not None and type(files) is list:
             for obj in files:
+                vcd.add_file(obj)
+        if objs is not None and type(objs) is list:
+            for obj in objs:
                 vcd.add_object(obj)
         if self._return_self:
             return self
@@ -898,13 +912,11 @@ class VitessceConfig:
         code_block = f'{self.__class__.__name__}({self._to_py_repr()}, return_self=True)'
 
         for vcd in self.config["datasets"]:
-            vcd_file_list_contents = ', '.join([ repr(f) for f in vcd._get_files_and_objs() ])
-            code_block += f'.{self.add_dataset.__name__}({vcd._to_py_repr()}, files=[{vcd_file_list_contents}])'
-            for file_or_obj in vcd._get_files_and_objs():
-                try:
-                    classes_to_import[file_or_obj.__class__.__name__] = True
-                except KeyError:
-                    pass
+            vcd_file_list_contents = ', '.join([ repr(f) for f in vcd._get_files() ])
+            vcd_obj_list_contents = ', '.join([ repr(f) for f in vcd._get_objects() ])
+            code_block += f'.{self.add_dataset.__name__}({vcd._to_py_repr()}, files=[{vcd_file_list_contents}], objs=[{vcd_obj_list_contents}])'
+            for obj in vcd._get_objects():
+                classes_to_import[obj.__class__.__name__] = True
         for c_type, c_obj in self.config["coordinationSpace"].items():
             if c_type != ct.DATASET.value:
                 for c_scope_name, c_scope in c_obj.items():

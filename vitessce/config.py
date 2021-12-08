@@ -958,7 +958,7 @@ class VitessceConfig:
         """
         # TODO: Validate the incoming config.
 
-        vc = VitessceConfig(name=config["name"], description=config["description"])
+        vc = VitessceConfig(name=config["name"], description=config["description"], schema_version=config["version"])
 
         # Add each dataset from the incoming config.
         for d in config["datasets"]:
@@ -967,18 +967,19 @@ class VitessceConfig:
                 new_file = new_dataset.add_file(
                     url=f["url"],
                     data_type=f["type"],
-                    file_type=f["fileType"]
+                    file_type=f["fileType"],
+                    options=f.get("options")
                 )
-        
-        for c_type in config['coordinationSpace'].keys():
-            if c_type != ct.DATASET.value:
-                c_obj = config['coordinationSpace'][c_type]
-                vc.config['coordinationSpace'][c_type] = {}
-                for c_scope_name, c_scope_value in c_obj.items():
-                    scope = VitessceConfigCoordinationScope(c_type, c_scope_name)
-                    scope.set_value(c_scope_value)
-                    vc.config['coordinationSpace'][c_type][c_scope_name] = scope
-        
+        if 'coordinationSpace' in config:
+            for c_type in config['coordinationSpace'].keys():
+                if c_type != ct.DATASET.value:
+                    c_obj = config['coordinationSpace'][c_type]
+                    vc.config['coordinationSpace'][c_type] = {}
+                    for c_scope_name, c_scope_value in c_obj.items():
+                        scope = VitessceConfigCoordinationScope(c_type, c_scope_name)
+                        scope.set_value(c_scope_value)
+                        vc.config['coordinationSpace'][c_type][c_scope_name] = scope
+            
         for c in config['layout']:
             c_coord_scopes = c['coordinationScopes'] if 'coordinationScopes' in c.keys() else {}
             new_view = VitessceConfigView(c['component'], c_coord_scopes, c['x'], c['y'], c['w'], c['h'])

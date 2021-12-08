@@ -64,15 +64,16 @@ class VitessceConfigDatasetFile:
         """
         Not meant to be instantiated directly, but instead created and returned by the ``VitessceConfigDataset.add_file()`` method.
 
-        :param str url: A URL to this file. Can be a localhost URL or a remote URL.
+        :param url: A URL to this file. Can be a localhost URL or a remote URL.
+        :type url: str or None
         :param str data_type: A data type.
         :param str file_type: A file type.
-        :type options: Extra options to pass to the file loader class.
+        :param options: Extra options to pass to the file loader class.
         :type options: dict or list or None
         """
         self._repr = make_repr(locals(), class_name='VitessceConfigDatasetFile')
         self.file = {
-            "url": url,
+            **({ "url": url } if url is not None else {}),
             "type": data_type,
             "fileType": file_type,
             **({ "options": options } if options is not None else {})

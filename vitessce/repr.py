@@ -51,7 +51,7 @@ def make_repr(init_locals):
 def make_params_repr(args):
     '''
     >>> print(make_params_repr({ "uid": 1, "name": "My Dataset"}))
-    "uid=1, name='My Dataset'"
+    uid=1, name='My Dataset'
     '''
     params = ', '.join([f'{k}={repr(v)}' for k, v in args.items()])
     return params

@@ -71,7 +71,7 @@ class VitessceConfigDatasetFile:
         :param options: Extra options to pass to the file loader class.
         :type options: dict or list or None
         """
-        self._repr = make_repr(locals(), class_name='VitessceConfigDatasetFile')
+        self._repr = make_repr(locals())
         self.file = {
             **({ "url": url } if url is not None else {}),
             "type": data_type,
@@ -96,7 +96,6 @@ class VitessceConfigDataset:
         :param str uid: A unique identifier for this dataset.
         :param str name: A name for this dataset.
         """
-        self._repr = make_params_repr({ "uid": uid, "name": name })
         self.dataset = {
             "uid": uid,
             "name": name,
@@ -105,7 +104,10 @@ class VitessceConfigDataset:
         self.objs = []
     
     def _to_py_repr(self):
-        return self._repr
+        return {
+            "uid": self.dataset["uid"],
+            "name": self.dataset["name"]
+        }
     
     def get_name(self):
         """
@@ -332,18 +334,23 @@ class VitessceConfigView:
         }
     
     def _to_py_repr(self):
-        return make_params_repr({
+        params_dict = {
             "component": self.view["component"],
-            "coordination_scopes": {
-                c_type: c_scope
-                for c_type, c_scope in self.view["coordinationScopes"].items()
-                if c_type != ct.DATASET.value
-            },
             "x": self.view["x"],
             "y": self.view["y"],
             "w": self.view["w"],
             "h": self.view["h"]
-        })
+        }
+        # Only include coordination_scopes if there are coordination scopes other than
+        # the coorindation scope for the 'dataset' coordination type.
+        non_dataset_coordination_scopes = {
+            c_type: c_scope
+            for c_type, c_scope in self.view["coordinationScopes"].items()
+            if c_type != ct.DATASET.value
+        }
+        if len(non_dataset_coordination_scopes) > 0:
+            params_dict["coordination_scopes"] = non_dataset_coordination_scopes
+        return params_dict
     
     def get_coordination_scope(self, c_type):
         """
@@ -463,11 +470,11 @@ class VitessceConfigCoordinationScope:
         self.c_value = c_value
     
     def _to_py_repr(self):
-        return make_params_repr({
+        return {
             "c_type": self.c_type,
             "c_scope": self.c_scope,
             "c_value": self.c_value,
-        })
+        }
     
     def set_value(self, c_value):
         """
@@ -543,11 +550,11 @@ class VitessceConfig:
             self.config["description"] = description
 
     def _to_py_repr(self):
-        return make_params_repr({
+        return {
             "name": self.config["name"],
             "description": self.config["description"],
             "schema_version": self.config["version"],
-        })
+        }
 
     def add_dataset(self, name="", uid=None, files=None, objs=None):
         """
@@ -907,12 +914,18 @@ class VitessceConfig:
         """
         classes_to_import = OrderedDict()
         classes_to_import[self.__class__.__name__] = True
-        code_block = f'{self.__class__.__name__}({self._to_py_repr()}, return_self=True)'
+        code_block = f'{self.__class__.__name__}({make_params_repr(self._to_py_repr())}, return_self=True)'
 
         for vcd in self.config["datasets"]:
             vcd_file_list_contents = ', '.join([ repr(f) for f in vcd._get_files() ])
             vcd_obj_list_contents = ', '.join([ repr(f) for f in vcd._get_objects() ])
-            code_block += f'.{self.add_dataset.__name__}({vcd._to_py_repr()}, files=[{vcd_file_list_contents}], objs=[{vcd_obj_list_contents}])'
+            add_dataset_func = self.add_dataset.__name__
+            add_dataset_params = ', '.join([
+                make_params_repr(vcd._to_py_repr()),
+                *([f'files=[{vcd_file_list_contents}]'] if len(vcd._get_files()) > 0 else []),
+                *([f'objs=[{vcd_obj_list_contents}]'] if len(vcd._get_objects()) > 0 else [])
+            ])
+            code_block += f'.{add_dataset_func}({add_dataset_params})'
             for obj in vcd._get_objects():
                 if "vitessce" in sys.modules and obj.__class__.__name__ in dict(inspect.getmembers(sys.modules["vitessce"])):
                     classes_to_import[obj.__class__.__name__] = True
@@ -921,22 +934,29 @@ class VitessceConfig:
         for c_type, c_obj in self.config["coordinationSpace"].items():
             if c_type != ct.DATASET.value:
                 for c_scope_name, c_scope in c_obj.items():
-                    code_block += f'.{self.set_coordination_value.__name__}({c_scope._to_py_repr()})'
+                    set_coordination_func = self.set_coordination_value.__name__
+                    set_coordination_params = make_params_repr(c_scope._to_py_repr())
+                    code_block += f'.{set_coordination_func}({set_coordination_params})'
 
         for vcv in self.config["layout"]:
             dataset_for_view = self.get_dataset_by_coordination_scope_name(vcv.get_coordination_scope(ct.DATASET.value))
             if dataset_for_view is not None:
                 dataset_uid = dataset_for_view.get_uid()
-            elif len(self.config["datasets"]) == 1:
+            elif len(self.config["datasets"]) >= 1:
                 dataset_uid = self.config["datasets"][0].get_uid()
+                if len(self.config["datasets"]) > 1:
+                    print("Warning: Ambiguous mapping from views to datasets. Using first element in the datasets array.")
             else:
-                dataset_uid = None
-            extra_params = ""
+                raise ValueError("At least one dataset must be present in the config before adding a view.")
+            add_view_params_dict = {
+                "dataset": dataset_uid,
+                **vcv._to_py_repr(),
+            }
             if vcv.get_props() is not None:
-                extra_params = ", " + make_params_repr({ "props": vcv.get_props() })
-            dataset_val = repr(dataset_uid)
-            code_block += f'.{self.add_view.__name__}(dataset={dataset_val}, {vcv._to_py_repr()}{extra_params})'
-
+                add_view_params_dict["props"] = vcv.get_props()
+            add_view_func = self.add_view.__name__
+            add_view_params = make_params_repr(add_view_params_dict)
+            code_block += f'.{add_view_func}({add_view_params})'
         formatted_code_block = black.format_str(code_block, mode=black.FileMode())
         return list(classes_to_import), formatted_code_block
 

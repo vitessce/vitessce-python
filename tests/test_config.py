@@ -636,16 +636,18 @@ class TestConfig(unittest.TestCase):
                     }
                 self.file_def_creators += [get_cell_sets]
 
-        dataset = vc.add_dataset(name='My Object Dataset').add_object(
+        dataset_a = vc.add_dataset(name='My First Dataset').add_object(
             obj=MockWrapperA("Experiment A")
-        ).add_object(
-            obj=MockWrapperB("Experiment B")
         ).add_file(
             url="http://example.com/my_cells.json",
             file_type=ft.CELLS_JSON,
             data_type=dt.CELLS
         )
-        vc.add_view(dataset, cm.SPATIAL, x=1, y=2, w=3, h=4, mapping="PCA").set_props(title="My spatial plot")
+        dataset_b = vc.add_dataset(name='My Second Dataset').add_object(
+            obj=MockWrapperB("Experiment B")
+        )
+        vc.add_view(dataset_a, cm.SPATIAL, x=0, y=0, w=3, h=3).set_props(title="My spatial plot")
+        vc.add_view(dataset_b, cm.SCATTERPLOT, x=3, y=0, w=3, h=3, mapping="PCA").set_props(title="My scatterplot")
         base_url = "http://localhost:8000"
         
         classes_to_import, code_block = vc.to_python()

@@ -436,7 +436,7 @@ class VitessceConfigView:
         :returns: Self, to allow chaining.
         :rtype: VitessceConfigView
         """
-        if "props" in self.view.keys():
+        if "props" in self.view:
             self.view["props"].update(kwargs)
         else:
             self.view["props"] = kwargs
@@ -567,8 +567,11 @@ class VitessceConfig:
         Add a dataset to the config.
 
         :param str name: A name for this dataset.
-        :param str uid: A unique identifier for this dataset. Optional. If None, will be automatically generated.
-        :param list files: Optional. A list of VitessceConfigDatasetFile instances and/or AbstractWrapper instances.
+        :param str uid: A unique identifier for this dataset. Optional. If None, one will be automatically generated.
+        :param files: A list of VitessceConfigDatasetFile instances. optional.
+        :type files: list or None
+        :param objs: A list of AbstractWrapper instances. Optional.
+        :type objs: list or None
 
         :returns: The instance for the new dataset.
         :rtype: VitessceConfigDataset

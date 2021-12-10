@@ -544,12 +544,12 @@ class AnnDataWrapper(AbstractWrapper):
     def auto_view_config(self, vc):
         dataset = vc.add_dataset().add_object(self)
         mapping_name = self._mappings_obsm_names[0] if (self._mappings_obsm_names is not None) else self._mappings_obsm[0].split('/')[-1]
-        scatterplot = vc.add_view(dataset, cm.SCATTERPLOT, mapping=mapping_name)
-        cell_sets = vc.add_view(dataset, cm.CELL_SETS)
-        genes = vc.add_view(dataset, cm.GENES)
-        heatmap = vc.add_view(dataset, cm.HEATMAP)
+        scatterplot = vc.add_view(cm.SCATTERPLOT, dataset=dataset, mapping=mapping_name)
+        cell_sets = vc.add_view(cm.CELL_SETS, dataset=dataset)
+        genes = vc.add_view(cm.GENES, dataset=dataset)
+        heatmap = vc.add_view(cm.HEATMAP, dataset=dataset)
         if self._spatial_polygon_obsm  is not None or self._spatial_centroid_obsm is not None:
-            spatial = vc.add_view(dataset, cm.SPATIAL)
+            spatial = vc.add_view(cm.SPATIAL, dataset=dataset)
             vc.layout((scatterplot | spatial) / (heatmap | (cell_sets / genes)))
         else:
             vc.layout((scatterplot | (cell_sets / genes)) / heatmap)
@@ -801,8 +801,8 @@ class SnapWrapper(AbstractWrapper):
 
     def auto_view_config(self, vc):
         dataset = vc.add_dataset().add_object(self)
-        genomic_profiles = vc.add_view(dataset, cm.GENOMIC_PROFILES)
-        scatter = vc.add_view(dataset, cm.SCATTERPLOT, mapping = "UMAP")
-        cell_sets = vc.add_view(dataset, cm.CELL_SETS)
+        genomic_profiles = vc.add_view(cm.GENOMIC_PROFILES, dataset=dataset)
+        scatter = vc.add_view(cm.SCATTERPLOT, dataset=dataset, mapping="UMAP")
+        cell_sets = vc.add_view(cm.CELL_SETS, dataset=dataset)
 
         vc.layout(genomic_profiles / (scatter | cell_sets))

@@ -1125,13 +1125,28 @@ class VitessceConfig:
 
 class VitessceChainableConfig(VitessceConfig):
     """
-    A class to represent a Vitessce view config, where the methods add_dataset, add_view, and set_coordination_value return self (the config instance). This class inherits from VitessceConfig.
+    A class to represent a Vitessce view config, where the methods ``add_dataset``, ``add_view``, and ``set_coordination_value`` return self (the config instance). This class inherits from ``VitessceConfig``.
     """
+    def __init__(self, **kwargs):
+        """
+        Construct a Vitessce view config object.
+
+        :param \*\*kwargs:  Takes the same arguments as the constructor on the ``VitessceConfig`` class.
+
+        .. code-block:: python
+            :emphasize-lines: 3
+            
+            from vitessce import VitessceChainableConfig
+
+            vc = VitessceChainableConfig(name='My Config')
+        """
+        super().__init__(**kwargs)
+
     def add_dataset(self, **kwargs):
         """
         Add a dataset to this config.
 
-        :param \*\*kwargs: Takes the same arguments as the add_dataset method on the VitessceConfig class.
+        :param \*\*kwargs: Takes the same arguments as the ``add_dataset`` method on the ``VitessceConfig`` class.
         
         :returns: The config instance.
         :rtype: VitessceChainableConfig
@@ -1143,8 +1158,8 @@ class VitessceChainableConfig(VitessceConfig):
         """
         Add a view to this config.
         
-        :param component: Takes the same arguments as the add_view method on the VitessceConfig class.
-        :param \*\*kwargs: Takes the same arguments as the add_view method on the VitessceConfig class.
+        :param component: Takes the same arguments as the ``add_view`` method on the ``VitessceConfig`` class.
+        :param \*\*kwargs: Takes the same arguments as the ``add_view`` method on the ``VitessceConfig`` class.
         
         :returns: The config instance.
         :rtype: VitessceChainableConfig
@@ -1156,9 +1171,9 @@ class VitessceChainableConfig(VitessceConfig):
         """
         Add a coordination value to this config.
 
-        :param c_type: Takes the same arguments as the set_coordination_value method on the VitessceConfig class.
-        :param c_scope: Takes the same arguments as the set_coordination_value method on the VitessceConfig class.
-        :param c_value: Takes the same arguments as the set_coordination_value method on the VitessceConfig class.
+        :param c_type: Takes the same arguments as the ``set_coordination_value`` method on the ``VitessceConfig`` class.
+        :param c_scope: Takes the same arguments as the ``set_coordination_value`` method on the ``VitessceConfig`` class.
+        :param c_value: Takes the same arguments as the ``set_coordination_value`` method on the ``VitessceConfig`` class.
         
         :returns: The config instance.
         :rtype: VitessceChainableConfig

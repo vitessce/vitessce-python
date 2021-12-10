@@ -5,6 +5,7 @@ from ._version import __version__
 from .widget import VitessceWidget
 from .config import (
     VitessceConfig,
+    VitessceChainableConfig,
     VitessceConfigDatasetFile,
     hconcat,
     vconcat,

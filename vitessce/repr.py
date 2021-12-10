@@ -1,6 +1,6 @@
 import inspect
 
-def make_repr(init_locals):
+def make_repr(init_locals, class_def=None):
     '''
     >>> from .wrappers import MultiImageWrapper
     >>> orig = MultiImageWrapper('IMAGE_WRAPPERS', foo='bar')
@@ -16,6 +16,8 @@ def make_repr(init_locals):
         clazz = init_locals.pop('__class__')  # Requires superclass to be initialized.
     elif 'self' in init_locals and hasattr(init_locals['self'], '__class__'):
         clazz = init_locals["self"].__class__
+    elif class_def is not None:
+        clazz = class_def
     else:
         raise ValueError("make_repr could not locate the class definition")
     

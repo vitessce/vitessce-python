@@ -4,6 +4,7 @@ import ast
 
 from vitessce import (
     VitessceConfig,
+    VitessceChainableConfig,
     VitessceConfigDatasetFile,
     CoordinationType as ct,
     Component as cm,
@@ -111,7 +112,7 @@ class TestConfig(unittest.TestCase):
         vc = VitessceConfig()
         my_dataset = vc.add_dataset(name='My Dataset')
 
-        my_view = vc.add_view(my_dataset, cm.SPATIAL)
+        my_view = vc.add_view(cm.SPATIAL, dataset=my_dataset)
 
         vc_dict = vc.to_dict()
         vc_json = json.dumps(vc_dict)
@@ -151,7 +152,7 @@ class TestConfig(unittest.TestCase):
         vc = VitessceConfig()
         my_dataset = vc.add_dataset(name='My Dataset')
 
-        my_view = vc.add_view(my_dataset, cm.SCATTERPLOT, mapping="X_umap")
+        my_view = vc.add_view(cm.SCATTERPLOT, dataset=my_dataset, mapping="X_umap")
 
         vc_dict = vc.to_dict()
         vc_json = json.dumps(vc_dict)
@@ -195,7 +196,7 @@ class TestConfig(unittest.TestCase):
         vc = VitessceConfig()
         my_dataset = vc.add_dataset(name='My Dataset')
 
-        my_view = vc.add_view(my_dataset, cm.SCATTERPLOT)
+        my_view = vc.add_view(cm.SCATTERPLOT, dataset=my_dataset)
 
         et_scope, ez_scope, ex_scope, ey_scope = vc.add_coordination(ct.EMBEDDING_TYPE, ct.EMBEDDING_ZOOM, ct.EMBEDDING_TARGET_X, ct.EMBEDDING_TARGET_Y)
         my_view.use_coordination(et_scope, ez_scope, ex_scope, ey_scope)
@@ -338,7 +339,7 @@ class TestConfig(unittest.TestCase):
     def test_config_set_layout_single_view(self):
         vc = VitessceConfig()
         my_dataset = vc.add_dataset(name='My Dataset')
-        my_view = vc.add_view(my_dataset, cm.SPATIAL)
+        my_view = vc.add_view(cm.SPATIAL, dataset=my_dataset)
         vc.layout(my_view)
 
         vc_dict = vc.to_dict()
@@ -378,9 +379,9 @@ class TestConfig(unittest.TestCase):
     def test_config_set_layout_multi_view(self):
         vc = VitessceConfig()
         my_dataset = vc.add_dataset(name='My Dataset')
-        v1 = vc.add_view(my_dataset, cm.SPATIAL)
-        v2 = vc.add_view(my_dataset, cm.SPATIAL)
-        v3 = vc.add_view(my_dataset, cm.SPATIAL)
+        v1 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
+        v2 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
+        v3 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
 
         vc.layout(hconcat(v1, vconcat(v2, v3)))
 
@@ -441,9 +442,9 @@ class TestConfig(unittest.TestCase):
     def test_config_set_layout_multi_view_magic(self):
         vc = VitessceConfig()
         my_dataset = vc.add_dataset(name='My Dataset')
-        v1 = vc.add_view(my_dataset, cm.SPATIAL)
-        v2 = vc.add_view(my_dataset, cm.SPATIAL)
-        v3 = vc.add_view(my_dataset, cm.SPATIAL)
+        v1 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
+        v2 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
+        v3 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
 
         vc.layout(v1 | (v2 / v3))
 
@@ -646,12 +647,12 @@ class TestConfig(unittest.TestCase):
         dataset_b = vc.add_dataset(name='My Second Dataset').add_object(
             obj=MockWrapperB("Experiment B")
         )
-        vc.add_view(dataset_a, cm.SPATIAL, x=0, y=0, w=3, h=3).set_props(title="My spatial plot")
-        vc.add_view(dataset_b, cm.SCATTERPLOT, x=3, y=0, w=3, h=3, mapping="PCA").set_props(title="My scatterplot")
+        vc.add_view(cm.SPATIAL, dataset=dataset_a, x=0, y=0, w=3, h=3).set_props(title="My spatial plot")
+        vc.add_view(cm.SCATTERPLOT, dataset=dataset_b, x=3, y=0, w=3, h=3, mapping="PCA").set_props(title="My scatterplot")
         base_url = "http://localhost:8000"
         
         classes_to_import, code_block = vc.to_python()
-        self.assertEqual(classes_to_import, ['VitessceConfig', 'VitessceConfigDatasetFile'])
+        self.assertEqual(classes_to_import, ['VitessceChainableConfig', 'VitessceConfigDatasetFile'])
         
         # Evaluate the code string directly
         reconstructed_vc = eval(code_block)

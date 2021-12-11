@@ -10,6 +10,7 @@ from .wrappers import (
     OmeTiffWrapper,
     MultiImageWrapper,
     AnnDataWrapper,
+    MuDataWrapper,
     SnapWrapper,
 )
 from .entities import (

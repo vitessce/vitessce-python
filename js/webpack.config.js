@@ -2,6 +2,7 @@ const path = require('path');
 const fs = require('fs');
 const version = require('./package.json').version;
 const PnpWebpackPlugin = require('pnp-webpack-plugin');
+const webpack = require('webpack');
 
 const mode = 'development';
 process.env.NODE_ENV = mode;
@@ -147,5 +148,8 @@ module.exports = [
         externals: ['@jupyter-widgets/base'],
         resolve,
         resolveLoader,
+        plugins: [
+          new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 }),
+        ],
     },
 ];

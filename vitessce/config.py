@@ -954,7 +954,8 @@ class VitessceConfig:
             dataset_for_view = self.get_dataset_by_coordination_scope_name(vcv.get_coordination_scope(ct.DATASET.value))
             if dataset_for_view is not None:
                 dataset_uid = dataset_for_view.get_uid()
-            elif len(self.config["datasets"]) >= 1:
+            elif len(self.config["datasets"]) == 1:
+                # If there is only one dataset available, assume it is the dataset for this view.
                 dataset_uid = self.config["datasets"][0].get_uid()
             else:
                 raise ValueError("At least one dataset must be present in the config before adding a view.")
@@ -1011,6 +1012,8 @@ class VitessceConfig:
             
         for c in config['layout']:
             c_coord_scopes = c['coordinationScopes'] if 'coordinationScopes' in c.keys() else {}
+            if len(config["datasets"]) > 1 and ct.DATASET.value not in c_coord_scopes:
+                raise ValueError("Multiple datasets are present, so every view must have an explicit dataset coordination scope.")
             new_view = VitessceConfigView(c['component'], c_coord_scopes, c['x'], c['y'], c['w'], c['h'])
             if 'props' in c.keys():
                 new_view.set_props(**c['props'])

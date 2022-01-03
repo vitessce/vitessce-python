@@ -502,7 +502,7 @@ class TestConfig(unittest.TestCase):
             "initStrategy": "auto"
         })
 
-    def test_load_config(self):
+    def test_config_from_dict(self):
         vc = VitessceConfig.from_dict({
             "version": "1.0.4",
             "name": "Test name",
@@ -600,6 +600,63 @@ class TestConfig(unittest.TestCase):
             "initStrategy": "auto"
         })
 
+    def test_config_from_dict_raises_error_if_dataset_ambiguous(self):
+        with self.assertRaises(ValueError):
+            VitessceConfig.from_dict({
+                "version": "1.0.4",
+                "name": "Test name",
+                "description": "Test description",
+                "datasets": [
+                    {
+                        'uid': 'A',
+                        'name': 'My First Dataset',
+                        'files': [
+                            {
+                                'url': 'http://cells-1.json',
+                                'type': 'cells',
+                                'fileType': 'cells.json'
+                            }
+                        ]
+                    },
+                    {
+                        'uid': 'B',
+                        'name': 'My Second Dataset',
+                        'files': [
+                            {
+                                'url': 'http://cells-2.json',
+                                'type': 'cells',
+                                'fileType': 'cells.json'
+                            }
+                        ]
+                    }
+                ],
+                'coordinationSpace': {
+                    'dataset': {
+                        'A': 'A'
+                    },
+                    'spatialZoom': {
+                        'ABC': 11
+                    },
+                },
+                "layout": [
+                    {
+                        "component": "spatial",
+                        "props": {
+                            "cellRadius": 50
+                        },
+                        "coordinationScopes": {
+                            "spatialZoom": 'ABC'
+                        },
+                        "x": 5,
+                        "y": 0,
+                        "w": 4,
+                        "h": 4
+                    },
+                ],
+                "initStrategy": "auto"
+            })
+        
+ 
     def test_config_to_python_with_data_objects(self):
         vc = VitessceConfig()
 

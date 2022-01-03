@@ -373,7 +373,7 @@ class OmeTiffWrapper(AbstractWrapper):
 
 
 class AnnDataWrapper(AbstractWrapper):
-    def __init__(self, adata=None, adata_url=None, expression_matrix=None, matrix_gene_var_filter=None, gene_var_filter=None, cell_set_obs=None, cell_set_obs_names=None, spatial_centroid_obsm=None, spatial_polygon_obsm=None, mappings_obsm=None, mappings_obsm_names=None, mappings_obsm_dims=None, request_init=None, factors_obs=None, **kwargs):
+    def __init__(self, adata=None, adata_url=None, expression_matrix=None, peak_matrix=None, matrix_peak_var_filter=None, matrix_gene_var_filter=None, gene_var_filter=None, cell_set_obs=None, cell_set_obs_names=None, spatial_centroid_obsm=None, spatial_polygon_obsm=None, mappings_obsm=None, mappings_obsm_names=None, mappings_obsm_dims=None, request_init=None, factors_obs=None, **kwargs):
         """
         Wrap an AnnData object by creating an instance of the ``AnnDataWrapper`` class.
 

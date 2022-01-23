@@ -1,10 +1,10 @@
 import sys
 import inspect
 import json
+import copy as copy_module
 import black
 from uuid import uuid4
 from collections import OrderedDict
-
 
 from .constants import (
     CoordinationType as ct,
@@ -1147,8 +1147,13 @@ class VitessceChainableConfig(VitessceConfig):
             vc = VitessceChainableConfig(name='My Config')
         """
         super().__init__(**kwargs)
-
-    def add_dataset(self, **kwargs):
+    
+    def __copy__(self):
+        new_vc = VitessceChainableConfig(name=self.config["name"], description=self.config["description"], schema_version=self.config["version"])
+        new_vc.config = self.config.copy()
+        return new_vc
+    
+    def add_dataset(self, copy=True, **kwargs):
         """
         Add a dataset to this config.
 
@@ -1157,10 +1162,13 @@ class VitessceChainableConfig(VitessceConfig):
         :returns: The config instance.
         :rtype: VitessceChainableConfig
         """
+        if copy:
+            new_vc = copy_module.copy(self)
+            return new_vc.add_dataset(copy=False, **kwargs)
         super().add_dataset(**kwargs)
         return self
     
-    def add_view(self, component, **kwargs):
+    def add_view(self, component, copy=True, **kwargs):
         """
         Add a view to this config.
         
@@ -1170,10 +1178,13 @@ class VitessceChainableConfig(VitessceConfig):
         :returns: The config instance.
         :rtype: VitessceChainableConfig
         """
+        if copy:
+            new_vc = copy_module.copy(self)
+            return new_vc.add_view(component, copy=False, **kwargs)
         super().add_view(component, **kwargs)
         return self
     
-    def set_coordination_value(self, c_type, c_scope, c_value):
+    def set_coordination_value(self, c_type, c_scope, c_value, copy=True):
         """
         Add a coordination value to this config.
 
@@ -1184,5 +1195,8 @@ class VitessceChainableConfig(VitessceConfig):
         :returns: The config instance.
         :rtype: VitessceChainableConfig
         """
+        if copy:
+            new_vc = copy_module.copy(self)
+            return new_vc.set_coordination_value(c_type, c_scope, c_value, copy=False)
         super().set_coordination_value(c_type, c_scope, c_value)
         return self

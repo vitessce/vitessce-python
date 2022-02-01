@@ -1,9 +1,6 @@
 # Module version
-version_info = (0, 1, 0, 'alpha', 11)
-
-# Module version stage suffix map
-_specifier_ = {'alpha': 'a', 'beta': 'b', 'candidate': 'rc', 'final': ''}
+py_version_info = (1, 0, 4)
+js_version_info = (0, 1, 9)
 
 # Module version accessible using vitessce.__version__
-__version__ = '%s.%s.%s%s'%(version_info[0], version_info[1], version_info[2],
-  '' if version_info[3]=='final' else _specifier_[version_info[3]]+str(version_info[4]))
+__version__ = '%s.%s.%s' % (py_version_info[0], py_version_info[1], py_version_info[2])

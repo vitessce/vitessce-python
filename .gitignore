@@ -14,6 +14,9 @@ __pycache__/
 
 # Compiled javascript
 vitessce/static/
+vitessce/nbextension/
+vitessce/labextension/
+
 
 # Created by jupyter labextension install
 js/yarn.lock

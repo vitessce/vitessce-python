@@ -11,7 +11,6 @@ cd docs/notebooks
 conda env create -f environment.yml
 conda activate vitessce-jupyter-examples
 pip install -e ../..
-jupyter labextension install @jupyter-widgets/jupyterlab-manager
 jupyter labextension install ../../js
 ```
 

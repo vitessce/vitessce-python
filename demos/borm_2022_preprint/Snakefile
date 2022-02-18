@@ -1,0 +1,79 @@
+from pathlib import Path
+
+# Directory / file constants
+SRC_DIR = Path("src")
+DATA_DIR = Path("data")
+RAW_DIR = DATA_DIR / "raw"
+PROCESSED_DIR = DATA_DIR / "processed"
+
+# URL constants
+MOLECULES_PARQUET_URL = "https://storage.googleapis.com/linnarsson-lab-eel/EEL_methods_paper_data/211026_04_20_01_LBEXP20210718_EEL_Mouse_448_2_data_summary_simple_plotting_cleaned_global_stitched.parquet"
+POLYGON_CSV_URL = "https://storage.googleapis.com/linnarsson-lab-eel/EEL_methods_paper_data/Outside_polygon_Mouse_448.csv"
+GENE_COLORS_PKL_URL = "https://storage.googleapis.com/linnarsson-lab-eel/EEL_methods_paper_data/Mouse_448_color_dict_final.pkl"
+GENE_ARRAY_PKL_URL = "https://storage.googleapis.com/linnarsson-lab-eel/EEL_methods_paper_data/unique_genes_Mouse.pkl"
+
+# Rules
+rule all:
+    input: (PROCESSED_DIR / "borm_2022.h5ad.zarr")
+
+# Convert the raw AnnData .h5ad file to a processed AnnData .zarr store.
+rule convert_to_zarr:
+    input:
+        molecules=(RAW_DIR / "molecule_locations.parquet"),
+        polygon=(RAW_DIR / "polygon.csv"),
+        gene_colors=(RAW_DIR / "gene_colors.pkl"),
+        gene_array=(RAW_DIR / "gene_array.pkl")
+    output:
+        directory(PROCESSED_DIR / "borm_2022.h5ad.zarr")
+    params:
+        script=(SRC_DIR / "convert_to_zarr.py")
+    shell:
+        '''
+        python {params.script} \
+            -im {input.molecules} \
+            -ip {input.polygon} \
+            -igc {input.gene_colors} \
+            -iga {input.gene_array} \
+            -o {output}
+        '''
+
+# Download raw data.
+rule download_molecules:
+    output:
+        (RAW_DIR / "molecule_locations.parquet")
+    params:
+        file_url=MOLECULES_PARQUET_URL
+    shell:
+        '''
+        curl -L -o {output} {params.file_url}
+        '''
+
+rule download_polygon:
+    output:
+        (RAW_DIR / "polygon.csv")
+    params:
+        file_url=POLYGON_CSV_URL
+    shell:
+        '''
+        curl -L -o {output} {params.file_url}
+        '''
+
+rule download_gene_colors:
+    output:
+        (RAW_DIR / "gene_colors.pkl")
+    params:
+        file_url=GENE_COLORS_PKL_URL
+    shell:
+        '''
+        curl -L -o {output} {params.file_url}
+        '''
+
+rule download_gene_array:
+    output:
+        (RAW_DIR / "gene_array.pkl")
+    params:
+        file_url=GENE_ARRAY_PKL_URL
+    shell:
+        '''
+        curl -L -o {output} {params.file_url}
+        '''

@@ -56,9 +56,9 @@
     "        ]\n",
     " )\n",
     ")\n",
-    "spatial = vc.add_view(dataset, cm.SPATIAL)\n",
-    "status = vc.add_view(dataset, cm.STATUS)\n",
-    "lc = vc.add_view(dataset, cm.LAYER_CONTROLLER)\n",
+    "spatial = vc.add_view(cm.SPATIAL, dataset=dataset)\n",
+    "status = vc.add_view(cm.STATUS, dataset=dataset)\n",
+    "lc = vc.add_view(cm.LAYER_CONTROLLER, dataset=dataset)\n",
     "vc.layout(spatial | (lc / status));"
    ]
   },

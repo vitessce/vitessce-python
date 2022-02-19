@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Welcome to vitessce’s documentation! &mdash; vitessce  documentation</title>
+  <title>Getting Started &mdash; vitessce  documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/stylesheet.css" type="text/css" />
@@ -20,7 +20,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Getting Started" href="getting_started.html" /> 
+    <link rel="next" title="Widget examples" href="widget_examples.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -38,8 +38,8 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul>
-<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="widget_examples.html">Widget examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="data_examples.html">Data preparation examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api_config.html">View config API</a></li>
@@ -61,9 +61,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="#" class="icon icon-home"></a> &raquo;</li>
-      <li>Welcome to vitessce’s documentation!</li>
+      <li>Getting Started</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+              <a href="https://github.com/vitessce/vitessce-python/blob/master/docs/index.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
   </ul>
   <hr/>
@@ -95,67 +95,67 @@
     text-align: unset;
 }
 </style>
-<p><a class="reference external" href="https://github.com/vitessce/vitessce-python"><img alt="Stars" src="https://img.shields.io/github/stars/vitessce/vitessce-python?logo=GitHub&amp;color=green" /></a> <a class="reference external" href="https://pypi.org/project/vitessce"><img alt="PyPI" src="https://img.shields.io/pypi/v/vitessce.svg" /></a></p>
-<section id="welcome-to-vitessce-s-documentation">
-<h1>Welcome to vitessce’s documentation!<a class="headerlink" href="#welcome-to-vitessce-s-documentation" title="Permalink to this headline"></a></h1>
 <p>Vitessce is a visual integration tool for exploration of spatial single-cell experiments.
 To learn more about the features of Vitessce, please visit our <a class="reference external" href="http://vitessce.io">core docs</a>.</p>
-<div class="toctree-wrapper compound">
+<section id="getting-started">
+<h1>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline"></a></h1>
+<p>The <code class="docutils literal notranslate"><span class="pre">vitessce</span></code> Python package includes:</p>
+<ul class="simple">
+<li><p><strong>Vitessce as a Jupyter Widget</strong></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="getting_started.html#installation">Installation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="getting_started.html#widget-compatibility">Widget Compatibility</a></li>
-<li class="toctree-l2"><a class="reference internal" href="getting_started.html#optional-dependencies">Optional dependencies</a></li>
+<li><p>Use Vitessce directly within Jupyter Notebook or Jupyter Lab as an interactive widget</p></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="widget_examples.html">Widget examples</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/widget_brain.html">Visualization of single-cell RNA seq data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/widget_genomic_profiles.html">Visualization of genomic profiles</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/widget_imaging.html">Visualization of Multi-Modal Imaging Data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/widget_pbmc.html">Visualization of 3k PBMC reference</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/widget_loom.html">Visualization of a Loom file</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/widget_shortcut.html">The from_object shortcut</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/widget_from_dict.html">Using an existing view config dict</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/widget_pbmc_remote.html">Visualization of 3k PBMC reference from Remote Zarr Store</a></li>
+<li><p><strong>View config API</strong></p>
+<ul>
+<li><p>Create and edit Vitessce configurations using Python object-oriented syntax</p></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="data_examples.html">Data preparation examples</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/data_export_s3.html">Export data to AWS S3</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/data_export_files.html">Export data to local files</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/data_conversion.html">Convert data manually</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="api_config.html">View config API</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api_config.html#module-vitessce.config">vitessce.config</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api_config.html#module-vitessce.constants">vitessce.constants</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="api_data.html">Data preparation APIs</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api_data.html#module-vitessce.wrappers">vitessce.wrappers</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api_data.html#module-vitessce.export">vitessce.export</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="screenshots.html">Screenshots</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="screenshots.html#visualization-of-snatac-seq-data">Visualization of snATAC-seq data</a></li>
+<li><p><strong>Data preparation</strong></p>
+<ul>
+<li><p>Use our data conversion wrapper classes to process data stored in common single-cell file types including AnnData and SnapATAC.</p></li>
 </ul>
 </li>
 </ul>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline"></a></h2>
+<p>Installation requires Python 3.8 or greater. Install from <a class="reference external" href="https://pypi.org/project/vitessce">PyPI</a>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install vitessce
+</pre></div>
 </div>
 </section>
+<section id="widget-compatibility">
+<h2>Widget Compatibility<a class="headerlink" href="#widget-compatibility" title="Permalink to this headline"></a></h2>
+<p>The Vitessce widget is compatible with the following interactive Python platforms:</p>
+<ul class="simple">
+<li><p>JupyterLab <code class="docutils literal notranslate"><span class="pre">&gt;=3.0.0</span></code></p></li>
+<li><p>Jupyter Notebook (classic) <code class="docutils literal notranslate"><span class="pre">&gt;=1.0.0</span></code></p></li>
+</ul>
+</section>
+<section id="optional-dependencies">
+<h2>Optional dependencies<a class="headerlink" href="#optional-dependencies" title="Permalink to this headline"></a></h2>
+<p>The following dependencies are optional, and only required when using certain features.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">jupyter-server-proxy&gt;=1.5.2</span></code> - Required for using the widget through a proxy (e.g. a cloud notebook service like Binder). See widget parameter <code class="docutils literal notranslate"><span class="pre">proxy</span></code>.</p></li>
+</ul>
+<div class="toctree-wrapper compound">
+</div>
 <section id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline"></a></h1>
+<h3>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline"></a></h3>
 <ul class="simple">
 <li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
 <li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
 <li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
 </ul>
 </section>
+</section>
+</section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="getting_started.html" class="btn btn-neutral float-right" title="Getting Started" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="widget_examples.html" class="btn btn-neutral float-right" title="Widget examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

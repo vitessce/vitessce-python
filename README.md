@@ -1,8 +1,11 @@
 # vitessce-python
 
+[![PyPI](https://img.shields.io/pypi/v/vitessce)](https://pypi.org/project/vitessce)
+[![Vitessce JS dependency version](https://img.shields.io/badge/dynamic/json.svg?url=https%3A%2F%2Fraw.githubusercontent.com%2Fvitessce%2Fvitessce-python%2Fmaster%2Fjs%2Fpackage.json&label=vitessce&query=$.dependencies.vitessce&colorB=blue)](https://github.com/vitessce/vitessce/blob/master/CHANGELOG.md)
+[![docs](https://img.shields.io/badge/docs-📖-57B4E9.svg)](https://vitessce.github.io/vitessce-python/)
+
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/vitessce/vitessce-python/master?filepath=docs/notebooks/widget_pbmc.ipynb)
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/vitessce/vitessce-python/blob/master/docs/notebooks/widget_on_colab.ipynb)
-
 
 
 Python API and Jupyter widget facilitating interactive visualization of spatial single-cell data with [Vitessce](https://github.com/vitessce/vitessce).

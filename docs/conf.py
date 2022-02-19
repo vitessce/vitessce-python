@@ -76,6 +76,13 @@ html_css_files = [
     'stylesheet.css',
 ]
 
+html_context = {
+  'display_github': True,
+  'github_user': 'vitessce',
+  'github_repo': 'vitessce-python',
+  'github_version': 'master/docs/',
+}
+
 autoclass_content = 'both'
 
 def linkcode_resolve(domain, info):
@@ -97,7 +104,7 @@ def linkcode_resolve(domain, info):
     except Exception as e:
         print(str(e))
         filename = info['module'].replace('.', '/') + '.py'
-    return "https://github.com/vitessce/vitessce-jupyter/blob/master/%s" % filename
+    return f"https://github.com/{html_context['github_user']}/{html_context['github_repo']}/blob/master/{filename}"
 
 
 # -- Options for intersphinx -------------------------------------------------

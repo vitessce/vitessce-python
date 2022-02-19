@@ -14,13 +14,14 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: 14
+          registry-url: https://registry.npmjs.org/
       - uses: conda-incubator/setup-miniconda@v2
         with:
-          activate-environment: vitessce-jupyter-dev
+          activate-environment: vitessce-python-dev
           environment-file: environment.yml
-          python-version: 3.8
           auto-activate-base: false
-      - run: |
+      - name: conda list
+        run: |
           conda info
           conda list
       - name: Install vitessce
@@ -31,3 +32,20 @@ jobs:
       - name: Run doctests
         working-directory: ./vitessce
         run: pytest --doctest-modules
+      - name: NPM CI
+        working-directory: ./js
+        run: npm ci && npm run clean
+        shell: /bin/bash -e {0}
+        env:
+          NPM_CONFIG_USERCONFIG: /home/runner/work/_temp/.npmrc
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+      - name: Build nbextension
+        working-directory: ./js
+        run: npm run build:nbextension
+        shell: /bin/bash -e {0}
+        env:
+          NPM_CONFIG_USERCONFIG: /home/runner/work/_temp/.npmrc
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+      - name: Build labextension
+        working-directory: ./js
+        run: jupyter labextension build .

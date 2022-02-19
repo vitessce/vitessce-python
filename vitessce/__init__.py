@@ -3,7 +3,13 @@ import sys
 from ._version import __version__
 
 from .widget import VitessceWidget
-from .config import VitessceConfig, hconcat, vconcat
+from .config import (
+    VitessceConfig,
+    VitessceChainableConfig,
+    VitessceConfigDatasetFile,
+    hconcat,
+    vconcat,
+)
 from .constants import CoordinationType, Component, DataType, FileType
 from .wrappers import (
     AbstractWrapper,
@@ -21,6 +27,7 @@ from .export import (
     export_to_s3,
     export_to_files,
 )
+from .repr import make_repr
 
 try:
     if "google.colab" in sys.modules:

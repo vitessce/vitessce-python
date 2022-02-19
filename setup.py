@@ -61,7 +61,8 @@ setup_args = dict(
         'scipy>=1.2.1',
         'negspy>=0.2.24',
         'generate-tiff-offsets>=0.1.7',
-        'pandas>=1.1.2'
+        'pandas>=1.1.2',
+        'black>=21.11b1'
     ],
     packages=find_packages(),
     zip_safe=False,

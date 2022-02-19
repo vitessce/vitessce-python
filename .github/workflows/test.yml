@@ -16,10 +16,11 @@ jobs:
           node-version: 14
       - uses: conda-incubator/setup-miniconda@v2
         with:
-          activate-environment: vitessce-jupyter-dev
+          activate-environment: vitessce-python-dev
           environment-file: environment.yml
           auto-activate-base: false
-      - run: |
+      - name: conda list
+        run: |
           conda info
           conda list
       - name: Install vitessce

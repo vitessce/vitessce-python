@@ -19,3 +19,4 @@ jupyter labextension install ../../js
 ```sh
 jupyter lab
 ```
+

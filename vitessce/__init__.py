@@ -2,7 +2,11 @@ import sys
 
 from ._version import __version__
 
-from .widget import VitessceWidget
+try:
+    from .widget import VitessceWidget
+except ImportError:
+    pass
+
 from .config import (
     VitessceConfig,
     VitessceChainableConfig,

@@ -67,7 +67,7 @@ setup_args = dict(
         'widget': [
             'hypercorn>=0.11.0',
         ]
-    }
+    },
     packages=find_packages(),
     zip_safe=False,
     cmdclass=cmdclass,

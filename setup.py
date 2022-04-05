@@ -54,7 +54,6 @@ setup_args = dict(
         'ipywidgets>=7.6.0',
         'hypercorn>=0.11.0',
         'ujson>=4.0.1',
-        'aiofiles>=0.6.0',
         'starlette==0.14.0',
         'zarr>=2.5.0',
         'numcodecs>=0.5.7',

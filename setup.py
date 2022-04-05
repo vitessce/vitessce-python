@@ -52,7 +52,6 @@ setup_args = dict(
     include_package_data=True,
     install_requires=[
         'ipywidgets>=7.6.0',
-        'hypercorn>=0.11.0',
         'ujson>=4.0.1',
         'aiofiles>=0.6.0',
         'starlette==0.14.0',
@@ -64,6 +63,11 @@ setup_args = dict(
         'pandas>=1.1.2',
         'black>=21.11b1'
     ],
+    extras_require={
+        'widget': [
+            'hypercorn>=0.11.0',
+        ]
+    }
     packages=find_packages(),
     zip_safe=False,
     cmdclass=cmdclass,

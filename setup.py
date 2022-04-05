@@ -20,7 +20,9 @@ log.info('setup.py entered')
 log.info('$PATH=%s' % os.environ['PATH'])
 
 name = 'vitessce'
-LONG_DESCRIPTION = 'Jupyter widget facilitating interactive visualization of spatial single-cell data with Vitessce'
+
+with open("README.md", "r") as fh:
+    LONG_DESCRIPTION = fh.read()
 
 # Get vitessce version
 version = get_version(pjoin(name, '_version.py'))
@@ -49,6 +51,7 @@ setup_args = dict(
     version=version,
     description='Jupyter widget facilitating interactive visualization of spatial single-cell data with Vitessce',
     long_description=LONG_DESCRIPTION,
+    long_description_content_type="text/markdown",
     include_package_data=True,
     install_requires=[
         'ipywidgets>=7.6.0',

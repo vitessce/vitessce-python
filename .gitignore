@@ -9,6 +9,7 @@ tests/data/*
 !tests/data/test.ome.tif
 ./notebooks/
 docs/notebooks/data/
+pip-wheel-metadata/
 
 # Compiled javascript
 vitessce/static/

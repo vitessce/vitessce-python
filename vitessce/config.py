@@ -17,10 +17,14 @@ from .wrappers import (
     AnnDataWrapper,
     SnapWrapper,
 )
-from .widget import (
-    VitessceWidget,
-    launch_vitessce_io,
-)
+try:
+    from .widget import (
+        VitessceWidget,
+        launch_vitessce_io,
+    )
+except ImportError:
+    pass
+
 from .export import (
     export_to_s3,
     export_to_files,

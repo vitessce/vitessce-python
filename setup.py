@@ -53,7 +53,7 @@ setup_args = dict(
     install_requires=[
         'ujson>=4.0.1',
         'aiofiles>=0.6.0',
-        'starlette==0.14.0'
+        'starlette==0.14.0',
         'zarr>=2.5.0',
         'numcodecs>=0.5.7',
         'scipy>=1.2.1',

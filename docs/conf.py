@@ -77,13 +77,14 @@ html_css_files = [
 ]
 
 html_context = {
-  'display_github': True,
-  'github_user': 'vitessce',
-  'github_repo': 'vitessce-python',
-  'github_version': 'master/docs/',
+    'display_github': True,
+    'github_user': 'vitessce',
+    'github_repo': 'vitessce-python',
+    'github_version': 'master/docs/',
 }
 
 autoclass_content = 'both'
+
 
 def linkcode_resolve(domain, info):
     def find_source():

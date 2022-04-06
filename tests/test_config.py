@@ -16,6 +16,7 @@ from vitessce import (
     make_repr
 )
 
+
 class TestConfig(unittest.TestCase):
 
     def test_config_creation(self):
@@ -32,7 +33,7 @@ class TestConfig(unittest.TestCase):
             "layout": [],
             "initStrategy": "auto"
         })
-    
+
     def test_config_add_dataset(self):
         vc = VitessceConfig()
         my_dataset = vc.add_dataset(name='My Dataset')
@@ -59,19 +60,19 @@ class TestConfig(unittest.TestCase):
             "layout": [],
             "initStrategy": "auto"
         })
-    
+
     def test_config_add_dataset_add_files(self):
         vc = VitessceConfig()
         my_dataset = (vc.add_dataset(name='My Chained Dataset')
-            .add_file(
-                url="http://example.com/cells.json",
-                data_type=dt.CELLS,
-                file_type=ft.CELLS_JSON,
-            ).add_file(
-                url="http://example.com/cell_sets.json",
-                data_type=dt.CELL_SETS,
-                file_type=ft.CELL_SETS_JSON,
-            )
+                      .add_file(
+            url="http://example.com/cells.json",
+            data_type=dt.CELLS,
+            file_type=ft.CELLS_JSON,
+        ).add_file(
+            url="http://example.com/cell_sets.json",
+            data_type=dt.CELL_SETS,
+            file_type=ft.CELL_SETS_JSON,
+        )
         )
 
         vc_dict = vc.to_dict()
@@ -107,7 +108,7 @@ class TestConfig(unittest.TestCase):
             "layout": [],
             "initStrategy": "auto"
         })
-    
+
     def test_config_add_spatial_view(self):
         vc = VitessceConfig()
         my_dataset = vc.add_dataset(name='My Dataset')
@@ -147,12 +148,13 @@ class TestConfig(unittest.TestCase):
             ],
             "initStrategy": "auto"
         })
-    
+
     def test_config_add_scatterplot_view_with_mapping(self):
         vc = VitessceConfig()
         my_dataset = vc.add_dataset(name='My Dataset')
 
-        my_view = vc.add_view(cm.SCATTERPLOT, dataset=my_dataset, mapping="X_umap")
+        my_view = vc.add_view(
+            cm.SCATTERPLOT, dataset=my_dataset, mapping="X_umap")
 
         vc_dict = vc.to_dict()
         vc_json = json.dumps(vc_dict)
@@ -191,14 +193,15 @@ class TestConfig(unittest.TestCase):
             ],
             "initStrategy": "auto"
         })
-    
+
     def test_config_add_scatterplot_view_with_embedding_coordinations(self):
         vc = VitessceConfig()
         my_dataset = vc.add_dataset(name='My Dataset')
 
         my_view = vc.add_view(cm.SCATTERPLOT, dataset=my_dataset)
 
-        et_scope, ez_scope, ex_scope, ey_scope = vc.add_coordination(ct.EMBEDDING_TYPE, ct.EMBEDDING_ZOOM, ct.EMBEDDING_TARGET_X, ct.EMBEDDING_TARGET_Y)
+        et_scope, ez_scope, ex_scope, ey_scope = vc.add_coordination(
+            ct.EMBEDDING_TYPE, ct.EMBEDDING_ZOOM, ct.EMBEDDING_TARGET_X, ct.EMBEDDING_TARGET_Y)
         my_view.use_coordination(et_scope, ez_scope, ex_scope, ey_scope)
 
         et_scope.set_value("X_pca")
@@ -263,6 +266,7 @@ class TestConfig(unittest.TestCase):
             def __init__(self, name, **kwargs):
                 super().__init__(**kwargs)
                 self.name = name
+
             def convert_and_save(self, dataset_uid, obj_i):
                 def get_molecules(base_url):
                     return {
@@ -270,6 +274,7 @@ class TestConfig(unittest.TestCase):
                         "type": "molecules",
                         "fileType": "molecules.json"
                     }
+
                 def get_cells(base_url):
                     return {
                         "url": f"{base_url}/cells",
@@ -282,6 +287,7 @@ class TestConfig(unittest.TestCase):
             def __init__(self, name, **kwargs):
                 super().__init__(**kwargs)
                 self.name = name
+
             def convert_and_save(self, dataset_uid, obj_i):
                 def get_cell_sets(base_url):
                     return {
@@ -335,7 +341,7 @@ class TestConfig(unittest.TestCase):
             "layout": [],
             "initStrategy": "auto"
         })
-    
+
     def test_config_set_layout_single_view(self):
         vc = VitessceConfig()
         my_dataset = vc.add_dataset(name='My Dataset')
@@ -438,7 +444,7 @@ class TestConfig(unittest.TestCase):
             ],
             "initStrategy": "auto"
         })
-    
+
     def test_config_set_layout_multi_view_magic(self):
         vc = VitessceConfig()
         my_dataset = vc.add_dataset(name='My Dataset')
@@ -547,7 +553,7 @@ class TestConfig(unittest.TestCase):
         })
 
         my_second_dataset = vc.add_dataset(name='My Second Dataset')
-        
+
         vc_dict = vc.to_dict()
         vc_json = json.dumps(vc_dict)
 
@@ -655,8 +661,7 @@ class TestConfig(unittest.TestCase):
                 ],
                 "initStrategy": "auto"
             })
-        
- 
+
     def test_config_to_python_with_data_objects(self):
         vc = VitessceConfig()
 
@@ -665,6 +670,7 @@ class TestConfig(unittest.TestCase):
                 super().__init__(**kwargs)
                 self._repr = make_repr(locals())
                 self.name = name
+
             def convert_and_save(self, dataset_uid, obj_i):
                 def get_molecules(base_url):
                     return {
@@ -672,6 +678,7 @@ class TestConfig(unittest.TestCase):
                         "type": "molecules",
                         "fileType": "molecules.json"
                     }
+
                 def get_cells(base_url):
                     return {
                         "url": f"{base_url}/cells",
@@ -685,6 +692,7 @@ class TestConfig(unittest.TestCase):
                 super().__init__(**kwargs)
                 self._repr = make_repr(locals())
                 self.name = name
+
             def convert_and_save(self, dataset_uid, obj_i):
                 def get_cell_sets(base_url):
                     return {
@@ -704,21 +712,26 @@ class TestConfig(unittest.TestCase):
         dataset_b = vc.add_dataset(name='My Second Dataset').add_object(
             obj=MockWrapperB("Experiment B")
         )
-        vc.add_view(cm.SPATIAL, dataset=dataset_a, x=0, y=0, w=3, h=3).set_props(title="My spatial plot")
-        vc.add_view(cm.SCATTERPLOT, dataset=dataset_b, x=3, y=0, w=3, h=3, mapping="PCA").set_props(title="My scatterplot")
+        vc.add_view(cm.SPATIAL, dataset=dataset_a, x=0, y=0,
+                    w=3, h=3).set_props(title="My spatial plot")
+        vc.add_view(cm.SCATTERPLOT, dataset=dataset_b, x=3, y=0, w=3,
+                    h=3, mapping="PCA").set_props(title="My scatterplot")
         base_url = "http://localhost:8000"
-        
+
         classes_to_import, code_block = vc.to_python()
-        self.assertEqual(classes_to_import, ['VitessceChainableConfig', 'VitessceConfigDatasetFile'])
-        
+        self.assertEqual(classes_to_import, [
+                         'VitessceChainableConfig', 'VitessceConfigDatasetFile'])
+
         # Evaluate the code string directly
         reconstructed_vc = eval(code_block)
-        self.assertEqual(vc.to_dict(base_url=base_url), reconstructed_vc.to_dict(base_url=base_url))
+        self.assertEqual(vc.to_dict(base_url=base_url),
+                         reconstructed_vc.to_dict(base_url=base_url))
 
         # Convert code string to an AST and back before evaluation
         if hasattr(ast, 'unparse'):
             # Unparse added in Python 3.9
             ast_reconstructed_vc = eval(ast.unparse(ast.parse(code_block)))
-            self.assertEqual(vc.to_dict(base_url=base_url), ast_reconstructed_vc.to_dict(base_url=base_url))
+            self.assertEqual(vc.to_dict(base_url=base_url),
+                             ast_reconstructed_vc.to_dict(base_url=base_url))
         else:
             ast.parse(code_block)

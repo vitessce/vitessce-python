@@ -24,6 +24,7 @@ import socket
 MAX_PORT_TRIES = 1000
 DEFAULT_PORT = 8000
 
+
 def run_server_loop(app, port):
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
@@ -33,12 +34,15 @@ def run_server_loop(app, port):
 
     # As of Hypercorn 0.11.0, need to explicitly set signal handlers to a no-op
     # (otherwise it will try to set signal handlers assuming it is on the main thread which throws an error)
-    loop.run_until_complete(serve(app, config, shutdown_trigger=lambda: asyncio.Future()))
+    loop.run_until_complete(
+        serve(app, config, shutdown_trigger=lambda: asyncio.Future()))
     loop.close()
+
 
 def is_port_in_use(port):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         return s.connect_ex(('localhost', port)) == 0
+
 
 def get_base_url_and_port(port, next_port, proxy=False, base_url=None):
     if port is None:
@@ -51,35 +55,41 @@ def get_base_url_and_port(port, next_port, proxy=False, base_url=None):
             port_tries += 1
     else:
         use_port = port
-    
+
     if base_url is None:
         if proxy:
             if importlib.util.find_spec('jupyter_server_proxy') is None:
-                raise ValueError("To use the widget through a proxy, jupyter-server-proxy must be installed.")
+                raise ValueError(
+                    "To use the widget through a proxy, jupyter-server-proxy must be installed.")
             base_url = f"proxy/{use_port}"
         else:
             base_url = f"http://localhost:{use_port}"
-    
+
     return base_url, use_port, next_port
+
 
 def serve_routes(routes, use_port):
     if len(routes) > 0:
         middleware = [
-            Middleware(CORSMiddleware, allow_origins=['*'], allow_methods=["OPTIONS", "GET"], allow_headers=['Range'])
+            Middleware(CORSMiddleware, allow_origins=[
+                       '*'], allow_methods=["OPTIONS", "GET"], allow_headers=['Range'])
         ]
         app = Starlette(debug=True, routes=routes, middleware=middleware)
-        
+
         t = Thread(target=run_server_loop, args=(app, use_port))
         t.start()
         time.sleep(1)
 
+
 def launch_vitessce_io(config, theme='light', port=None, base_url=None, open=True):
     import webbrowser
-    base_url, use_port, _ = get_base_url_and_port(port, DEFAULT_PORT, base_url=base_url)
+    base_url, use_port, _ = get_base_url_and_port(
+        port, DEFAULT_PORT, base_url=base_url)
     config_dict = config.to_dict(base_url=base_url)
     routes = config.get_routes()
     serve_routes(routes, use_port)
-    vitessce_url = f"http://vitessce.io/?theme={theme}&url=data:," + quote_plus(json.dumps(config_dict))
+    vitessce_url = f"http://vitessce.io/?theme={theme}&url=data:," + quote_plus(
+        json.dumps(config_dict))
     if open:
         webbrowser.open(vitessce_url)
     return vitessce_url
@@ -104,10 +114,12 @@ class VitessceWidget(widgets.DOMWidget):
     _model_module = Unicode('vitessce-jupyter').tag(sync=True)
 
     # Version of the front-end module containing widget view
-    _view_module_version = Unicode('^%s.%s.%s' % (js_version_info[0], js_version_info[1], js_version_info[2])).tag(sync=True)
+    _view_module_version = Unicode('^%s.%s.%s' % (
+        js_version_info[0], js_version_info[1], js_version_info[2])).tag(sync=True)
     # Version of the front-end module containing widget model
-    _model_module_version = Unicode('^%s.%s.%s' % (js_version_info[0], js_version_info[1], js_version_info[2])).tag(sync=True)
-    
+    _model_module_version = Unicode('^%s.%s.%s' % (
+        js_version_info[0], js_version_info[1], js_version_info[2])).tag(sync=True)
+
     # Widget specific property.
     # Widget properties are defined as traitlets. Any property tagged with `sync=True`
     # is automatically synced to the frontend *any* time it changes in Python.
@@ -139,15 +151,17 @@ class VitessceWidget(widgets.DOMWidget):
             vw = vc.widget()
             vw
         """
-        
-        base_url, use_port, VitessceWidget.next_port = get_base_url_and_port(port, VitessceWidget.next_port, proxy=proxy)
+
+        base_url, use_port, VitessceWidget.next_port = get_base_url_and_port(
+            port, VitessceWidget.next_port, proxy=proxy)
         config_dict = config.to_dict(base_url=base_url)
         routes = config.get_routes()
 
-        super(VitessceWidget, self).__init__(config=config_dict, height=height, theme=theme, proxy=proxy)
-        
+        super(VitessceWidget, self).__init__(
+            config=config_dict, height=height, theme=theme, proxy=proxy)
+
         serve_routes(routes, use_port)
-            
+
     def _get_coordination_value(self, coordination_type, coordination_scope):
         obj = self.config['coordinationSpace'][coordination_type]
         obj_scopes = list(obj.keys())
@@ -155,16 +169,18 @@ class VitessceWidget(widgets.DOMWidget):
             if coordination_scope in obj_scopes:
                 return obj[coordination_scope]
             else:
-                raise ValueError(f"The specified coordination scope '{coordination_scope}' could not be found for the coordination type '{coordination_type}'. Known coordination scopes are {obj_scopes}")
+                raise ValueError(
+                    f"The specified coordination scope '{coordination_scope}' could not be found for the coordination type '{coordination_type}'. Known coordination scopes are {obj_scopes}")
         else:
             if len(obj_scopes) == 1:
                 auto_coordination_scope = obj_scopes[0]
                 return obj[auto_coordination_scope]
             elif len(obj_scopes) > 1:
-                raise ValueError(f"The coordination scope could not be automatically determined because multiple coordination scopes exist for the coordination type '{coordination_type}'. Please specify one of {obj_scopes} using the scope parameter.")
+                raise ValueError(
+                    f"The coordination scope could not be automatically determined because multiple coordination scopes exist for the coordination type '{coordination_type}'. Please specify one of {obj_scopes} using the scope parameter.")
             else:
-                raise ValueError(f"No coordination scopes were found for the coordination type '{coordination_type}'.")
-    
+                raise ValueError(
+                    f"No coordination scopes were found for the coordination type '{coordination_type}'.")
+
     def get_cell_selection(self, scope=None):
         return self._get_coordination_value('cellSelection', scope)
-

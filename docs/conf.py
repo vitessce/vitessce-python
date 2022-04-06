@@ -6,7 +6,6 @@ from os.path import join
 
 import vitessce
 
-import sphinx_rtd_theme
 import nbclean
 
 # Configuration file for the Sphinx documentation builder.

@@ -1,6 +1,3 @@
-from os.path import join
-
-import zarr
 from anndata import AnnData
 from scipy.sparse import coo_matrix
 from scipy.io import mmwrite

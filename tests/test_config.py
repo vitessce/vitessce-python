@@ -4,8 +4,6 @@ import ast
 
 from vitessce import (
     VitessceConfig,
-    VitessceChainableConfig,
-    VitessceConfigDatasetFile,
     CoordinationType as ct,
     Component as cm,
     DataType as dt,

@@ -1,9 +1,7 @@
 import sys
 import inspect
-import json
 import copy as copy_module
 import black
-from uuid import uuid4
 from collections import OrderedDict
 
 from .constants import (
@@ -13,10 +11,6 @@ from .constants import (
     FileType as ft
 )
 
-from .wrappers import (
-    AnnDataWrapper,
-    SnapWrapper,
-)
 from .widget import (
     VitessceWidget,
     launch_vitessce_io,

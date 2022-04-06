@@ -1,25 +1,21 @@
 import os
 from os.path import join
 import tempfile
-import shutil
 import math
 import json
 
 import numpy as np
 import pandas as pd
 import zarr
-from numcodecs import Zlib
 from scipy import sparse
-from scipy.sparse import csr_matrix
 from scipy.sparse import coo_matrix
 from generate_tiff_offsets import get_offsets
 
-from starlette.responses import JSONResponse, UJSONResponse
+from starlette.responses import UJSONResponse
 from starlette.routing import Route, Mount
 from starlette.staticfiles import StaticFiles
 
 from .constants import (
-    CoordinationType as ct,
     Component as cm,
     DataType as dt,
     FileType as ft,

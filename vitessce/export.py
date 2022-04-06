@@ -1,10 +1,9 @@
 import json
 import os
 from os.path import join
-import tempfile
 from shutil import copyfile
 
-from starlette.routing import Route, Mount
+from starlette.routing import Mount
 from starlette.staticfiles import StaticFiles
 
 from .wrappers import JsonRoute

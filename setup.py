@@ -54,7 +54,6 @@ setup_args = dict(
         'ipywidgets>=7.6.0',
         'hypercorn>=0.11.0',
         'ujson>=4.0.1',
-        'aiofiles>=0.6.0',
         'starlette==0.14.0',
         'zarr>=2.5.0',
         'numcodecs>=0.5.7',
@@ -62,7 +61,13 @@ setup_args = dict(
         'negspy>=0.2.24',
         'generate-tiff-offsets>=0.1.7',
         'pandas>=1.1.2',
-        'black>=21.11b1'
+        'black>=21.11b1',
+
+        # aiofiles is not explicitly referenced in our code,
+        # but it is an implicit dependency of starlette==0.14.0.
+        # https://github.com/encode/starlette/issues/49
+        # Upgrading starlette will remove this dependency.
+        'aiofiles>=0.6.0'
     ],
     packages=find_packages(),
     zip_safe=False,

@@ -21,6 +21,7 @@ from vitessce import (
     SnapWrapper,
 )
 
+
 class TestWrappers(unittest.TestCase):
 
     def setUp(self):
@@ -61,24 +62,29 @@ class TestWrappers(unittest.TestCase):
                 ],
             }
         })
-    
+
     def test_anndata(self):
         adata = read_h5ad(join('data', 'test.h5ad'))
-        w = AnnDataWrapper(adata, cell_set_obs=['CellType'], mappings_obsm=['X_umap'], mappings_obsm_names=['UMAP'])
+        w = AnnDataWrapper(adata, cell_set_obs=['CellType'], mappings_obsm=[
+                           'X_umap'], mappings_obsm_names=['UMAP'])
 
         cells_creator = w.make_cells_file_def_creator('A', 0)
-        cells = cells_creator( 'http://localhost:8000')
-        self.assertEqual(cells, {'type': 'cells', 'fileType': 'anndata-cells.zarr', 'url': 'http://localhost:8000/A/0/anndata.zarr', 'options': { "mappings": { 'UMAP': { 'dims': [0, 1], 'key': 'obsm/X_umap' } } } })
+        cells = cells_creator('http://localhost:8000')
+        self.assertEqual(cells, {'type': 'cells', 'fileType': 'anndata-cells.zarr', 'url': 'http://localhost:8000/A/0/anndata.zarr',
+                                 'options': {"mappings": {'UMAP': {'dims': [0, 1], 'key': 'obsm/X_umap'}}}})
 
         cell_sets_creator = w.make_cell_sets_file_def_creator('A', 0)
-        cell_sets = cell_sets_creator( 'http://localhost:8000')
-        self.assertEqual(cell_sets, {'type': 'cell-sets', 'fileType': 'anndata-cell-sets.zarr', 'url': 'http://localhost:8000/A/0/anndata.zarr', 'options': [{'groupName': 'CellType', 'setName': 'obs/CellType'}]})
+        cell_sets = cell_sets_creator('http://localhost:8000')
+        self.assertEqual(cell_sets, {'type': 'cell-sets', 'fileType': 'anndata-cell-sets.zarr',
+                                     'url': 'http://localhost:8000/A/0/anndata.zarr', 'options': [{'groupName': 'CellType', 'setName': 'obs/CellType'}]})
 
     def test_snaptools(self):
         mtx = mmread(join('data', 'test.snap.mtx'))
-        barcodes_df = pd.read_csv(join('data', 'test.snap.barcodes.txt'), header=None)
+        barcodes_df = pd.read_csv(
+            join('data', 'test.snap.barcodes.txt'), header=None)
         bins_df = pd.read_csv(join('data', 'test.snap.bins.txt'), header=None)
-        clusters_df = pd.read_csv(join('data', 'test.snap.clusters.csv'), index_col=0)
+        clusters_df = pd.read_csv(
+            join('data', 'test.snap.clusters.csv'), index_col=0)
 
         zarr_filepath = join('data', 'test_out.snap.multivec.zarr')
 
@@ -88,25 +94,25 @@ class TestWrappers(unittest.TestCase):
         z = zarr.open(zarr_filepath, mode='r')
 
         self.assertEqual(z['chromosomes/chr1/5000'].shape, (4, 49792))
-        self.assertEqual(z['chromosomes/chr1/5000'][:,0].sum(), 0)
-        self.assertEqual(z['chromosomes/chr1/5000'][:,1].sum(), 0)
-        self.assertEqual(z['chromosomes/chr1/5000'][:,2].sum(), 7)
-        self.assertEqual(z['chromosomes/chr1/5000'][:,3].sum(), 7)
-        self.assertEqual(z['chromosomes/chr1/5000'][:,4].sum(), 0)
-        self.assertEqual(z['chromosomes/chr1/5000'][0,:].sum(), 17)
-        self.assertEqual(z['chromosomes/chr1/10000'][0,:].sum(), 17)
-        self.assertEqual(z['chromosomes/chr1/5000'][:,2].sum(), 7)
-        self.assertEqual(z['chromosomes/chr2/5000'][:,0].sum(), 0)
-        self.assertEqual(z['chromosomes/chr2/5000'][:,1].sum(), 0)
-        self.assertEqual(z['chromosomes/chr2/10000'][:,0].sum(), 0)
-        self.assertEqual(z['chromosomes/chr2/5000'][:,2].sum(), 4)
-        self.assertEqual(z['chromosomes/chr2/5000'][:,3].sum(), 9)
-        self.assertEqual(z['chromosomes/chr2/10000'][:,1].sum(), 13)
-        self.assertEqual(z['chromosomes/chr3/5000'][:,3].sum(), 9)
+        self.assertEqual(z['chromosomes/chr1/5000'][:, 0].sum(), 0)
+        self.assertEqual(z['chromosomes/chr1/5000'][:, 1].sum(), 0)
+        self.assertEqual(z['chromosomes/chr1/5000'][:, 2].sum(), 7)
+        self.assertEqual(z['chromosomes/chr1/5000'][:, 3].sum(), 7)
+        self.assertEqual(z['chromosomes/chr1/5000'][:, 4].sum(), 0)
+        self.assertEqual(z['chromosomes/chr1/5000'][0, :].sum(), 17)
+        self.assertEqual(z['chromosomes/chr1/10000'][0, :].sum(), 17)
+        self.assertEqual(z['chromosomes/chr1/5000'][:, 2].sum(), 7)
+        self.assertEqual(z['chromosomes/chr2/5000'][:, 0].sum(), 0)
+        self.assertEqual(z['chromosomes/chr2/5000'][:, 1].sum(), 0)
+        self.assertEqual(z['chromosomes/chr2/10000'][:, 0].sum(), 0)
+        self.assertEqual(z['chromosomes/chr2/5000'][:, 2].sum(), 4)
+        self.assertEqual(z['chromosomes/chr2/5000'][:, 3].sum(), 9)
+        self.assertEqual(z['chromosomes/chr2/10000'][:, 1].sum(), 13)
+        self.assertEqual(z['chromosomes/chr3/5000'][:, 3].sum(), 9)
         self.assertEqual(z['chromosomes/chr3/5000'][:].sum(), 9)
         self.assertEqual(z['chromosomes/chr18/5000'][:].sum(), 8)
 
         cells_json = w.create_cells_json()
         self.assertEqual(len(cells_json), 6)
-        self.assertEqual(cells_json['AAACATCGAGTACAAGACAGCAGA'], { 'mappings': { 'UMAP': [4.43, 1.64] } })
-        
+        self.assertEqual(cells_json['AAACATCGAGTACAAGACAGCAGA'], {
+                         'mappings': {'UMAP': [4.43, 1.64]}})

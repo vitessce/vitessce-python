@@ -11,7 +11,11 @@ from vitessce import (
     hconcat,
     vconcat,
     AbstractWrapper,
-    make_repr
+    make_repr,
+
+    # Neither of these is in the source code, but they do appear in code which is eval'd.
+    VitessceChainableConfig,  # noqa: F401
+    VitessceConfigDatasetFile,  # noqa: F401
 )
 
 

@@ -54,9 +54,10 @@ In this repository, there are multiple conda environments for different purposes
 - `vitessce-jupyter-examples` (defined in [docs/notebooks/environment.yml](./docs/notebooks/environment.yml)) is used for running the example notebooks in the `docs/notebooks/` directory (see [`docs/notebooks/README.md`](./docs/notebooks#readme) for more information)
 - `vitessce-jupyter-binder` (defined in [binder/environment.yml](./binder/environment.yml)) is the environment used by Binder upon opening notebooks from this repository
 
-## Testing
+## Linting and testing
 
 ```sh
+flake8
 cd tests
 python -m unittest
 ```

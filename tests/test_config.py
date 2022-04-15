@@ -2,10 +2,8 @@ import json
 import unittest
 import ast
 
-from vitessce import (
+from vitessce import (  # noqa: F401
     VitessceConfig,
-    VitessceChainableConfig,
-    VitessceConfigDatasetFile,
     CoordinationType as ct,
     Component as cm,
     DataType as dt,
@@ -13,7 +11,11 @@ from vitessce import (
     hconcat,
     vconcat,
     AbstractWrapper,
-    make_repr
+    make_repr,
+
+    # Neither of these is in the source code, but they do appear in code which is eval'd.
+    VitessceChainableConfig,  
+    VitessceConfigDatasetFile,
 )
 
 

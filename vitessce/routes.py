@@ -1,7 +1,6 @@
 
 from starlette.responses import StreamingResponse
 from pathlib import Path
-from .constants import DataType as dt
 
 # Adapted from https://gist.github.com/tombulled/712fd8e19ed0618c5f9f7d5f5f543782
 

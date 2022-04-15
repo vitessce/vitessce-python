@@ -5,7 +5,6 @@ import zarr
 from anndata import read_h5ad
 from scipy.io import mmread
 import pandas as pd
-import numpy as np
 
 from create_test_data import (
     create_test_anndata_file,

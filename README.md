@@ -31,7 +31,7 @@ For a development installation (requires NodeJS and NPM),
     $ cd vitessce-python
     $ conda env create -f environment.yml
     $ conda activate vitessce-python-dev
-    $ pip install -e .
+    $ pip install -e ".[dev]"
     $ jupyter nbextension install --py --symlink --overwrite --sys-prefix vitessce
     $ jupyter nbextension enable --py --sys-prefix vitessce
 

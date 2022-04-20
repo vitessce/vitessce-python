@@ -57,7 +57,7 @@ extras_require ={
         'sphinx==4.2.0',
         'sphinx-rtd-theme==1.0.0',
         'nbclean==0.3.2',
-        'nbsphinx==0.2.13',
+        'nbsphinx==0.8.8',
     ],
 }
 

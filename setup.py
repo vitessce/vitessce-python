@@ -46,6 +46,23 @@ cmdclass['jsdeps'] = combine_commands(
     install_npm(js_dir, npm=['npm'], build_cmd='build'), ensure_targets(jstargets),
 )
 
+
+extras_require ={
+    'testing': [
+        'pytest>=6.2.4',
+        'anndata==0.7.8',
+        'loompy>=3.0.6',
+    ],
+    'docs': [
+        'sphinx==4.2.0',
+        'sphinx-rtd-theme==1.0.0',
+        'nbclean==0.3.2',
+        'nbsphinx==0.2.13',
+    ],
+}
+
+extras_require['dev'] = ['jupyter_server==1.11.0'] + extras_require['testing'] + extras_require['docs']
+
 setup_args = dict(
     name=name,
     version=version,
@@ -63,6 +80,7 @@ setup_args = dict(
         'scipy>=1.2.1',
         'negspy>=0.2.24',
         'generate-tiff-offsets>=0.1.7',
+        'numpy>=1.21.2',
         'pandas>=1.1.2',
         'black>=21.11b1',
 
@@ -72,6 +90,7 @@ setup_args = dict(
         # Upgrading starlette will remove this dependency.
         'aiofiles>=0.6.0'
     ],
+    extras_require=extras_require,
     packages=find_packages(),
     zip_safe=False,
     cmdclass=cmdclass,

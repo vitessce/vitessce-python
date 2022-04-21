@@ -19,7 +19,7 @@ jobs:
       # How should they be shared here? Install everything?
       - name: Install docs dependencies
         run: |
-          pip install sphinx==4.2.0 sphinx-rtd-theme==1.0.0 nbclean==0.3.2 nbsphinx==0.8.8 pandoc==2.14.2
+          pip install sphinx==4.2.0 sphinx-rtd-theme==1.0.0 nbclean==0.3.2 nbsphinx==0.8.8 pandoc==2.1
           pip install -e .
       - name: Build documentation
         run: make html

@@ -13,7 +13,9 @@ jobs:
           architecture: 'x64'
       # TODO: Dependencies come from environment.yml.
       # How should they be shared here? Install everything?
-      - run: |
-        pip install sphinx==4.2.0 sphinx-rtd-theme==1.0.0 nbclean==0.3.2 nbsphinx==0.8.8
-        pip install -e .
-      - run: make html
+      - name: Install docs dependencies
+        run: |
+          pip install sphinx==4.2.0 sphinx-rtd-theme==1.0.0 nbclean==0.3.2 nbsphinx==0.8.8
+          pip install -e .
+      - name: Build documentation
+        run: make html

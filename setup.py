@@ -61,7 +61,11 @@ extras_require ={
     ],
 }
 
-extras_require['dev'] = ['jupyter_server==1.11.0'] + extras_require['testing'] + extras_require['docs']
+extras_require['dev'] = [
+    'jupyter_server==1.11.0',
+    'traitlets==4.3.3',
+    'markupsafe==2.0.1',
+] + extras_require['testing'] + extras_require['docs']
 
 setup_args = dict(
     name=name,

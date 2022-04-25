@@ -65,6 +65,7 @@ extras_require ={
 }
 
 extras_require['dev'] = [
+    'jupyterlab==3.1.14',
     'jupyter_server==1.11.0',
     'traitlets==4.3.3',
     'markupsafe==2.0.1',

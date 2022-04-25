@@ -38,13 +38,14 @@ The Vitessce widget is compatible with the following interactive Python platform
 * Jupyter Notebook (classic) ``>=1.0.0``
 
 
-Optional dependencies
+Installation with optional dependencies
 ---------------------
 
-The following dependencies are optional, and only required when using certain features.
+To use the widget through a proxy (e.g. a cloud notebook service like Binder). See widget parameter ``proxy``.
 
-* ``jupyter-server-proxy>=1.5.2`` - Required for using the widget through a proxy (e.g. a cloud notebook service like Binder). See widget parameter ``proxy``.
+.. code-block:: bash
 
+    pip install vitessce[proxy]
 
 
 .. toctree::

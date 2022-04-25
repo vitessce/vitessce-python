@@ -45,7 +45,7 @@ jobs:
         working-directory: ./js
         run: jupyter labextension build .
       - name: Install vitessce
-        run: pip install -e .[testing]
+        run: pip install -e .[testing,docs]
       - name: Run tests
         working-directory: ./tests
         run: python -m unittest

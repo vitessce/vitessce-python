@@ -1,11 +1,11 @@
-name: Test
+name: Test JS
 
 on: [push, pull_request]
 
 jobs:
-  test:
+  test_js:
     runs-on: ubuntu-18.04
-    name: Build and test
+    name: Test JS bundles
     defaults:
       run:
         shell: bash -l {0}
@@ -18,29 +18,16 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: '3.8'
-          architecture: 'x64'
       - name: Install vitessce
-        run: pip install -e .[testing,dev]
-      - name: Run unittests
-        working-directory: ./tests
-        run: python -m unittest
-      - name: Run doctests
-        working-directory: ./vitessce
-        run: pytest --doctest-modules
+        run: pip install -e .[dev]
       - name: NPM CI
         working-directory: ./js
         run: npm ci && npm run clean
         shell: /bin/bash -e {0}
-        env:
-          NPM_CONFIG_USERCONFIG: /home/runner/work/_temp/.npmrc
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
       - name: Build nbextension
         working-directory: ./js
         run: npm run build:nbextension
         shell: /bin/bash -e {0}
-        env:
-          NPM_CONFIG_USERCONFIG: /home/runner/work/_temp/.npmrc
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
       - name: Build labextension
         working-directory: ./js
         run: jupyter labextension build .

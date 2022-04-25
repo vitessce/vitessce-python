@@ -14,19 +14,20 @@ jobs:
         shell: bash -l {0}
     steps:
       - uses: actions/checkout@v2
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pandoc
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+          architecture: 'x64'
+      - name: Install vitessce
+        run: pip install -e .[dev]
       - uses: actions/setup-node@v1
         with:
           node-version: 14
           registry-url: https://registry.npmjs.org/
-      - uses: conda-incubator/setup-miniconda@v2
-        with:
-          activate-environment: vitessce-python-dev
-          environment-file: environment.yml
-          auto-activate-base: false
-      - name: conda list
-        run: |
-          conda info
-          conda list
       - name: NPM CI
         working-directory: ./js
         run: npm ci && npm run clean
@@ -44,8 +45,6 @@ jobs:
       - name: Build labextension
         working-directory: ./js
         run: jupyter labextension build .
-      - name: Install vitessce
-        run: pip install -e .[testing,docs]
       - name: Run tests
         working-directory: ./tests
         run: python -m unittest

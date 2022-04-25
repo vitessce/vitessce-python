@@ -15,17 +15,12 @@ jobs:
         with:
           node-version: 14
           registry-url: https://registry.npmjs.org/
-      - uses: conda-incubator/setup-miniconda@v2
+      - uses: actions/setup-python@v2
         with:
-          activate-environment: vitessce-python-dev
-          environment-file: environment.yml
-          auto-activate-base: false
-      - name: conda list
-        run: |
-          conda info
-          conda list
+          python-version: '3.8'
+          architecture: 'x64'
       - name: Install vitessce
-        run: pip install -e .[testing]
+        run: pip install -e .[testing,dev]
       - name: Run unittests
         working-directory: ./tests
         run: python -m unittest

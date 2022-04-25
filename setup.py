@@ -60,8 +60,8 @@ extras_require ={
         'nbsphinx==0.8.8',
     ],
     'proxy': [
-        'jupyter-server-proxy>=1.5.2',
-    ],
+        'jupyter-server-proxy>=1.5.2'
+    ]
 }
 
 extras_require['dev'] = [
@@ -80,6 +80,10 @@ setup_args = dict(
     long_description_content_type="text/markdown",
     include_package_data=True,
     install_requires=[
+        'ipywidgets>=7.6.0',
+        'hypercorn>=0.11.0',
+        'ujson>=4.0.1',
+        'starlette==0.14.0',
         'zarr>=2.5.0',
         'numcodecs>=0.5.7',
         'scipy>=1.2.1',
@@ -88,15 +92,12 @@ setup_args = dict(
         'numpy>=1.21.2',
         'pandas>=1.1.2',
         'black>=21.11b1',
-        'ipywidgets>=7.6.0',
-        'hypercorn>=0.11.0',
-        'ujson>=4.0.1',
-        'starlette==0.14.0',
+
         # aiofiles is not explicitly referenced in our code,
         # but it is an implicit dependency of starlette==0.14.0.
         # https://github.com/encode/starlette/issues/49
         # Upgrading starlette will remove this dependency.
-        'aiofiles>=0.6.0',
+        'aiofiles>=0.6.0'
     ],
     extras_require=extras_require,
     packages=find_packages(),

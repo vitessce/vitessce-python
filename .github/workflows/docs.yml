@@ -1,0 +1,19 @@
+name: Docs build
+
+on: [push, pull_request]
+
+jobs:
+  docs_build:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pandoc
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+          architecture: 'x64'
+      - run: pip install -e .[docs]
+      - run: make html

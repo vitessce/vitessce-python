@@ -41,11 +41,11 @@ The Vitessce widget is compatible with the following interactive Python platform
 Installation with optional dependencies
 ---------------------
 
-To use the widget through a proxy (e.g. a cloud notebook service like Binder). See widget parameter ``proxy``.
+To allow the widget to serve data through a proxy (e.g. a cloud notebook service like Binder), the extra dependency `jupyter-server-proxy` must be installed. See widget parameter ``proxy``.
 
 .. code-block:: bash
 
-    pip install vitessce[proxy]
+    pip install vitessce[all]
 
 
 .. toctree::

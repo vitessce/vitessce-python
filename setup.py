@@ -43,7 +43,8 @@ data_files_spec = [
 
 cmdclass = create_cmdclass('jsdeps', data_files_spec=data_files_spec)
 cmdclass['jsdeps'] = combine_commands(
-    install_npm(js_dir, npm=['npm'], build_cmd='build'), ensure_targets(jstargets),
+    install_npm(js_dir, npm=['npm'],
+                build_cmd='build'), ensure_targets(jstargets),
 )
 
 

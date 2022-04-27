@@ -1,13 +1,13 @@
 import json
 import os
 from os.path import join
-import tempfile
 from shutil import copyfile
 
-from starlette.routing import Route, Mount
+from starlette.routing import Mount
 from starlette.staticfiles import StaticFiles
 
 from .wrappers import JsonRoute
+
 
 def export_to_s3(config, s3, bucket_name, prefix=''):
     """
@@ -17,12 +17,13 @@ def export_to_s3(config, s3, bucket_name, prefix=''):
     :type s3: boto3.resource
     :param str bucket_name: The name of the bucket to which to upload.
     :param str prefix: The prefix path for the bucket keys (think subdirectory).
-    
+
     :returns: The config as a dict, with S3 urls filled in.
     :rtype: dict
     """
-    
-    base_url = f"https://{bucket_name}.s3.amazonaws.com" + ("/" + prefix if len(prefix) > 0 else "")
+
+    base_url = f"https://{bucket_name}.s3.amazonaws.com" + \
+        ("/" + prefix if len(prefix) > 0 else "")
     bucket = s3.Bucket(bucket_name)
     config_dict = config.to_dict(base_url=base_url)
     routes = config.get_routes()
@@ -32,7 +33,7 @@ def export_to_s3(config, s3, bucket_name, prefix=''):
         key = (prefix + "/" if len(prefix) > 0 else "") + route_path
 
         print(f"Uploading {bucket_name}:{key}")
-        
+
         if type(route) == JsonRoute:
             if route not in uploaded_routes:
                 data_json = route.data_json
@@ -46,10 +47,12 @@ def export_to_s3(config, s3, bucket_name, prefix=''):
                     static_dir = route_app.directory
                     for root, dirs, files in os.walk(static_dir):
                         for filename in files:
-                            file_key = key + join(root, filename)[len(static_dir):]
+                            file_key = key + \
+                                join(root, filename)[len(static_dir):]
                             bucket.upload_file(join(root, filename), file_key)
-    
+
     return config_dict
+
 
 def export_to_files(config, base_url, out_dir='.'):
     """
@@ -57,17 +60,17 @@ def export_to_files(config, base_url, out_dir='.'):
     :type config: VitessceConfig
     :param str out_dir: The path to the output directory. By default, the current directory.
     :param str base_url: The URL on which the files will be served.
-    
+
     :returns: The config as a dict, with urls filled in.
     :rtype: dict
     """
-    
+
     config_dict = config.to_dict(base_url=base_url)
     routes = config.get_routes()
     for route in routes:
         route_path = route.path[1:]
         out_path = join(out_dir, route_path)
-        
+
         if type(route) == JsonRoute:
             data_json = route.data_json
             os.makedirs(os.path.dirname(out_path), exist_ok=True)
@@ -80,8 +83,9 @@ def export_to_files(config, base_url, out_dir='.'):
 
                 for root, dirs, files in os.walk(static_dir):
                     for filename in files:
-                        file_key = out_path + join(root, filename)[len(static_dir):]
+                        file_key = out_path + \
+                            join(root, filename)[len(static_dir):]
                         os.makedirs(os.path.dirname(file_key), exist_ok=True)
                         copyfile(join(root, filename), file_key)
-    
+
     return config_dict

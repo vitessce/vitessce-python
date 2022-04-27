@@ -48,11 +48,23 @@ cmdclass['jsdeps'] = combine_commands(
 )
 
 
-extras_require ={
+extras_require = {
+    'jupyter': [
+        # Required for developing jupyter extensions.
+        'jupyterlab==3.1.14',
+        'jupyter_server==1.11.0',
+        # Traitlets and markupsafe versions need to be pinned.
+        # Reference: https://github.com/vitessce/vitessce-python/pull/143#discussion_r854340283
+        'traitlets==4.3.3',
+        'markupsafe==2.0.1',
+    ],
     'testing': [
         'pytest>=6.2.4',
         'anndata==0.7.8',
         'loompy>=3.0.6',
+    ],
+    'linting': [
+        'flake8==3.8.4',
     ],
     'docs': [
         'sphinx==4.2.0',
@@ -60,13 +72,16 @@ extras_require ={
         'nbclean==0.3.2',
         'nbsphinx==0.8.8',
     ],
+    'proxy': [
+        'jupyter-server-proxy>=1.5.2'
+    ]
 }
 
-extras_require['dev'] = [
-    'jupyter_server==1.11.0',
-    'traitlets==4.3.3',
-    'markupsafe==2.0.1',
-] + extras_require['testing'] + extras_require['docs']
+# Option for user to install all runtime deps.
+extras_require['all'] = extras_require['proxy']
+
+# Option for developers to install all runtime deps + all development deps.
+extras_require['dev'] = extras_require['all'] + extras_require['jupyter'] + extras_require['testing'] + extras_require['linting'] + extras_require['docs']
 
 setup_args = dict(
     name=name,

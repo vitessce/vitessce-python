@@ -1,0 +1,33 @@
+name: Test JS
+
+on: [push, pull_request]
+
+jobs:
+  test_js:
+    runs-on: ubuntu-18.04
+    name: Test JS bundles
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 14
+          registry-url: https://registry.npmjs.org/
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+      - name: Install vitessce
+        run: pip install -e .[dev]
+      - name: NPM CI
+        working-directory: ./js
+        run: npm ci && npm run clean
+        shell: /bin/bash -e {0}
+      - name: Build nbextension
+        working-directory: ./js
+        run: npm run build:nbextension
+        shell: /bin/bash -e {0}
+      - name: Build labextension
+        working-directory: ./js
+        run: jupyter labextension build .

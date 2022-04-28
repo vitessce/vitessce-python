@@ -23,9 +23,9 @@ jobs:
           python-version: '3.8'
       - name: Install vitessce
         run: pip install -e .[dev]
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v3
         with:
-          node-version: 14
+          node-version: 16
           registry-url: https://registry.npmjs.org/
       - name: NPM CI
         working-directory: ./js

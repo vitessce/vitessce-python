@@ -12,14 +12,10 @@ jobs:
         with:
           python-version: '3.6'
       - name: Install vitessce
-        run: pip install -e .
-
-      # For now, just confirm that it can be installed.
-      # 3.6 support may only be needed for the short term, so may not be worth splitting tests.
-
+        run: pip install -e .[testing]
       - name: Run unittests
         working-directory: ./tests
-        run: python -m unittest
+        run: python -m unittest test_config.py
       - name: Run doctests
         working-directory: ./vitessce
         run: pytest --doctest-modules ./config.py ./repr.py

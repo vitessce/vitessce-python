@@ -6,7 +6,7 @@ from shutil import copyfile
 from starlette.routing import Mount
 from starlette.staticfiles import StaticFiles
 
-from .wrappers import JsonRoute
+from .routes import JsonRoute
 
 
 def export_to_s3(config, s3, bucket_name, prefix=''):

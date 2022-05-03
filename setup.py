@@ -91,7 +91,7 @@ extras_require = {
         # Upgrading starlette will remove this dependency.
         'aiofiles>=0.6.0',
 
-        # These are used in wrapper classes, are not compatible with Python 3.6:
+        # These are used in wrapper classes, and are not compatible with Python 3.6:
         'numpy>=1.21.2',  # Last compatible version is 1.19.5
         'generate-tiff-offsets>=0.1.7',  # Last compatible version is 2020.9.3
     ]

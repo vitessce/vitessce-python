@@ -12,15 +12,17 @@ from .config import (
 
 from .repr import make_repr
 
+from .constants import CoordinationType, Component, DataType, FileType
+
+from .wrappers import AbstractWrapper
+
 try:
     # We're trying to support config generation in Python 3.6 environments,
     # and so we allow installation without all of the dependencies that the widget requires.
     # The imports below will fail in that case, and corresponding globals will be undefined.
 
     from .widget import VitessceWidget
-    from .constants import CoordinationType, Component, DataType, FileType
     from .wrappers import (
-        AbstractWrapper,
         OmeTiffWrapper,
         MultiImageWrapper,
         AnnDataWrapper,

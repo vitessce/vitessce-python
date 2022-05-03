@@ -20,6 +20,6 @@ jobs:
       # - name: Run unittests
       #   working-directory: ./tests
       #   run: python -m unittest
-      # - name: Run doctests
-      #   working-directory: ./vitessce
-      #   run: pytest --doctest-modules
+      - name: Run doctests
+        working-directory: ./vitessce
+        run: pytest --doctest-modules ./config.py ./repr.py

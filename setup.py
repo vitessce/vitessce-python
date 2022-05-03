@@ -66,6 +66,9 @@ extras_require = {
         'anndata==0.7.8',
         'loompy>=3.0.6',
     ],
+    'linting': [
+        'flake8==3.8.4',
+    ],
     'docs': [
         'sphinx==4.2.0',
         'sphinx-rtd-theme==1.0.0',

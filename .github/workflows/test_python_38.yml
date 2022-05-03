@@ -1,4 +1,4 @@
-name: Test Python
+name: Test Python 3.8
 
 on: [push, pull_request]
 

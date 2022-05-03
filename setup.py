@@ -97,9 +97,6 @@ extras_require = {
     ]
 }
 
-extras_require['docs'] += extras_require['notebook']
-extras_require['testing'] += extras_require['notebook']
-
 # Option for user to install all runtime deps.
 extras_require['all'] = extras_require['proxy']
 

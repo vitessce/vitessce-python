@@ -229,7 +229,6 @@ class OmeTiffWrapper(AbstractWrapper):
 
             async def response_func(req):
                 return UJSONResponse(offsets)
-
             routes = [
                 Route(self._get_route_str(dataset_uid, obj_i, self._get_img_filename(
                 )), lambda req: range_repsonse(req, self._img_path)),

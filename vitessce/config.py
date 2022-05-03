@@ -1144,7 +1144,7 @@ class VitessceConfig:
 
             config_dict = vc.export(to="S3")
         """
-        from .export import (export_to_s3, export_to_files)
+        from .export import (export_to_s3, export_to_files)  # TODO: Move import back to top when this is factored out.
         if to == "S3":
             return export_to_s3(self, *args, **kwargs)
         elif to == "files":

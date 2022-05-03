@@ -11,10 +11,6 @@ from .constants import (
     FileType as ft
 )
 
-from .widget import (
-    VitessceWidget,
-    launch_vitessce_io,
-)
 from .export import (
     export_to_s3,
     export_to_files,
@@ -1101,6 +1097,7 @@ class VitessceConfig:
             vw = vc.widget()
             vw
         """
+        from .widget import VitessceWidget  # TODO: Move import back to top when this is factored out.
         return VitessceWidget(self, **kwargs)
 
     def web_app(self, **kwargs):
@@ -1127,6 +1124,7 @@ class VitessceConfig:
             vc.layout(v1)
             vc.web_app()
         """
+        from .widget import launch_vitessce_io  # TODO: Move import back to top when this is factored out.
         return launch_vitessce_io(self, **kwargs)
 
     def export(self, to, *args, **kwargs):

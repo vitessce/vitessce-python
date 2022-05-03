@@ -35,7 +35,7 @@ try:
         export_to_s3,
         export_to_files,
     )
-except ImportError as e:
+except ModuleNotFoundError as e:
     from sys import version_info
     if version_info >= (3, 7):
         raise e

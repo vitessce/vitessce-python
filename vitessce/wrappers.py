@@ -220,20 +220,15 @@ class OmeTiffWrapper(AbstractWrapper):
             return []
         else:
             # TODO: Move imports back to top when this is factored out.
-            from .routes import range_repsonse
+            from .routes import range_repsonse, JsonRoute
             from generate_tiff_offsets import get_offsets
-            from starlette.routing import Route
             from starlette.responses import UJSONResponse
+            from starlette.routing import Route
 
             offsets = get_offsets(self._img_path)
 
             async def response_func(req):
                 return UJSONResponse(offsets)
-
-            class JsonRoute(Route):
-                def __init__(self, path, endpoint, data_json):
-                    super().__init__(path, endpoint)
-                    self.data_json = data_json
 
             routes = [
                 Route(self._get_route_str(dataset_uid, obj_i, self._get_img_filename(

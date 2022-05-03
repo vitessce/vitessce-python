@@ -2,7 +2,6 @@ import sys
 
 from ._version import __version__
 
-from .widget import VitessceWidget
 from .config import (
     VitessceConfig,
     VitessceChainableConfig,
@@ -10,24 +9,37 @@ from .config import (
     hconcat,
     vconcat,
 )
-from .constants import CoordinationType, Component, DataType, FileType
-from .wrappers import (
-    AbstractWrapper,
-    OmeTiffWrapper,
-    MultiImageWrapper,
-    AnnDataWrapper,
-    SnapWrapper,
-)
-from .entities import (
-    CellSets,
-    Cells,
-    Molecules,
-)
-from .export import (
-    export_to_s3,
-    export_to_files,
-)
+
 from .repr import make_repr
+
+try:
+    # We're trying to support config generation in Python 3.6 environments,
+    # and so we allow installation without all of the dependencies that the widget requires.
+    # The imports below will fail in that case, and corresponding globals will be undefined.
+
+    from .widget import VitessceWidget
+    from .constants import CoordinationType, Component, DataType, FileType
+    from .wrappers import (
+        AbstractWrapper,
+        OmeTiffWrapper,
+        MultiImageWrapper,
+        AnnDataWrapper,
+        SnapWrapper,
+    )
+    from .entities import (
+        CellSets,
+        Cells,
+        Molecules,
+    )
+    from .export import (
+        export_to_s3,
+        export_to_files,
+    )
+except ImportError as e:
+    from sys import version_info
+    if version_info >= (3, 7):
+        raise e
+    # If version < 3.7, these exports just aren't available
 
 try:
     if "google.colab" in sys.modules:

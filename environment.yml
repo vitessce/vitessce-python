@@ -1,9 +1,4 @@
 name: vitessce-python-dev
-channels:
- - bioconda
- - conda-forge
 dependencies:
  - python==3.8
  - pip
- - pip:
-   - build==0.1.0

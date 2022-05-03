@@ -49,6 +49,9 @@ cmdclass['jsdeps'] = combine_commands(
 
 
 extras_require = {
+    'building': [
+        'build==0.1.0',
+    ],
     'jupyter': [
         # Required for developing jupyter extensions.
         'jupyterlab==3.1.14',
@@ -81,7 +84,7 @@ extras_require = {
 extras_require['all'] = extras_require['proxy']
 
 # Option for developers to install all runtime deps + all development deps.
-extras_require['dev'] = extras_require['all'] + extras_require['jupyter'] + extras_require['testing'] + extras_require['linting'] + extras_require['docs']
+extras_require['dev'] = sum(extras_require.values(), [])
 
 setup_args = dict(
     name=name,

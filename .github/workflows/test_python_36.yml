@@ -1,4 +1,4 @@
-name: Test Python 3.6
+name: Test Python 3.6 (install only)
 
 on: [push, pull_request]
 

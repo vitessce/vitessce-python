@@ -91,11 +91,14 @@ extras_require = {
         # Upgrading starlette will remove this dependency.
         'aiofiles>=0.6.0',
 
-        # These don't work in Python 3.6:
+        # These are used in wrapper classes, are not compatible with Python 3.6:
         'numpy>=1.21.2',  # Last compatible version is 1.19.5
         'generate-tiff-offsets>=0.1.7',  # Last compatible version is 2020.9.3
     ]
 }
+
+extras_require['docs'] += extras_require['notebook']
+extras_require['testing'] += extras_require['notebook']
 
 # Option for user to install all runtime deps.
 extras_require['all'] = extras_require['proxy']
@@ -115,8 +118,6 @@ setup_args = dict(
         'numcodecs>=0.5.7',
         'scipy>=1.2.1',
         'negspy>=0.2.24',
-        # 'generate-tiff-offsets>=0.1.7',
-        # 'numpy>=1.21.2',
         'pandas>=1.1.2',
         'black>=21.11b1',
     ],

@@ -12,7 +12,7 @@ jobs:
         with:
           python-version: '3.8'
       - name: Install vitessce
-        run: pip install -e .[testing]
+        run: pip install -e .[testing] .[notebook]
       - name: Run unittests
         working-directory: ./tests
         run: python -m unittest

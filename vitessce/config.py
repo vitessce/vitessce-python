@@ -11,10 +11,6 @@ from .constants import (
     FileType as ft
 )
 
-from .export import (
-    export_to_s3,
-    export_to_files,
-)
 from .repr import make_repr, make_params_repr
 
 
@@ -1148,6 +1144,7 @@ class VitessceConfig:
 
             config_dict = vc.export(to="S3")
         """
+        from .export import (export_to_s3, export_to_files)
         if to == "S3":
             return export_to_s3(self, *args, **kwargs)
         elif to == "files":

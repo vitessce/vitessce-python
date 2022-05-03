@@ -93,6 +93,7 @@ class AbstractWrapper:
             out_dir = self._get_out_dir(dataset_uid, obj_i)
             # TODO: Move imports back to top when this is factored out.
             from starlette.staticfiles import StaticFiles
+            from starlette.routing import Mount
             return [Mount(self._get_route_str(dataset_uid, obj_i),
                           app=StaticFiles(directory=out_dir, html=False))]
         return []
@@ -233,7 +234,7 @@ class OmeTiffWrapper(AbstractWrapper):
                 def __init__(self, path, endpoint, data_json):
                     super().__init__(path, endpoint)
                     self.data_json = data_json
-                    
+
             routes = [
                 Route(self._get_route_str(dataset_uid, obj_i, self._get_img_filename(
                 )), lambda req: range_repsonse(req, self._img_path)),

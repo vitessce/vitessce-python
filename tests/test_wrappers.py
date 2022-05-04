@@ -24,6 +24,7 @@ from pathlib import Path
 
 data_path = Path('tests/data')
 
+
 class TestWrappers(unittest.TestCase):
 
     def setUp(self):
@@ -39,7 +40,7 @@ class TestWrappers(unittest.TestCase):
         )
 
     def test_ome_tiff(self):
-        w = OmeTiffWrapper(img_path="tests/data/test.ome.tif", name="Test")
+        w = OmeTiffWrapper(img_path=data_path / 'test.ome.tif', name="Test")
 
         raster_file_def_creator = w.make_raster_file_def_creator(
             "A",

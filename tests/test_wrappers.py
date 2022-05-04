@@ -1,5 +1,4 @@
 import unittest
-from os.path import join
 
 import zarr
 from anndata import read_h5ad

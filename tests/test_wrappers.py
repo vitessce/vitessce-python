@@ -6,7 +6,7 @@ from anndata import read_h5ad
 from scipy.io import mmread
 import pandas as pd
 
-from create_test_data import (
+from .create_test_data import (
     create_test_anndata_file,
     create_test_loom_file,
     create_test_ometiff_file,
@@ -24,19 +24,19 @@ from vitessce import (
 class TestWrappers(unittest.TestCase):
 
     def setUp(self):
-        create_test_anndata_file(join('data', 'test.h5ad'))
-        create_test_loom_file(join('data', 'test.loom'))
-        create_test_ometiff_file(join('data', 'test.ome.tif'))
-        create_test_omezarr_store(join('data', 'test.ome.zarr'))
+        create_test_anndata_file(join('tests', 'data', 'test.h5ad'))
+        create_test_loom_file(join('tests', 'data', 'test.loom'))
+        create_test_ometiff_file(join('tests', 'data', 'test.ome.tif'))
+        create_test_omezarr_store(join('tests', 'data', 'test.ome.zarr'))
         create_test_snaptools_files(
-            join('data', 'test.snap.mtx'),
-            join('data', 'test.snap.bins.txt'),
-            join('data', 'test.snap.barcodes.txt'),
-            join('data', 'test.snap.clusters.csv'),
+            join('tests', 'data', 'test.snap.mtx'),
+            join('tests', 'data', 'test.snap.bins.txt'),
+            join('tests', 'data', 'test.snap.barcodes.txt'),
+            join('tests', 'data', 'test.snap.clusters.csv'),
         )
 
     def test_ome_tiff(self):
-        w = OmeTiffWrapper(img_path="data/test.ome.tif", name="Test")
+        w = OmeTiffWrapper(img_path="tests/data/test.ome.tif", name="Test")
 
         raster_file_def_creator = w.make_raster_file_def_creator(
             "A",
@@ -63,7 +63,7 @@ class TestWrappers(unittest.TestCase):
         })
 
     def test_anndata(self):
-        adata = read_h5ad(join('data', 'test.h5ad'))
+        adata = read_h5ad(join('tests', 'data', 'test.h5ad'))
         w = AnnDataWrapper(adata, cell_set_obs=['CellType'], mappings_obsm=[
                            'X_umap'], mappings_obsm_names=['UMAP'])
 
@@ -78,14 +78,15 @@ class TestWrappers(unittest.TestCase):
                                      'url': 'http://localhost:8000/A/0/anndata.zarr', 'options': [{'groupName': 'CellType', 'setName': 'obs/CellType'}]})
 
     def test_snaptools(self):
-        mtx = mmread(join('data', 'test.snap.mtx'))
+        mtx = mmread(join('tests', 'data', 'test.snap.mtx'))
         barcodes_df = pd.read_csv(
-            join('data', 'test.snap.barcodes.txt'), header=None)
-        bins_df = pd.read_csv(join('data', 'test.snap.bins.txt'), header=None)
+            join('tests', 'data', 'test.snap.barcodes.txt'), header=None)
+        bins_df = pd.read_csv(
+            join('tests', 'data', 'test.snap.bins.txt'), header=None)
         clusters_df = pd.read_csv(
-            join('data', 'test.snap.clusters.csv'), index_col=0)
+            join('tests', 'data', 'test.snap.clusters.csv'), index_col=0)
 
-        zarr_filepath = join('data', 'test_out.snap.multivec.zarr')
+        zarr_filepath = join('tests', 'data', 'test_out.snap.multivec.zarr')
 
         w = SnapWrapper(mtx, barcodes_df, bins_df, clusters_df)
         w.create_genomic_multivec_zarr(zarr_filepath)

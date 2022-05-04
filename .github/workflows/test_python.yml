@@ -14,8 +14,7 @@ jobs:
       - name: Install vitessce
         run: pip install -e .[testing]
       - name: Run unittests
-        working-directory: ./tests
-        run: python -m unittest
+        run: pytest tests
       - name: Run doctests
         working-directory: ./vitessce
         run: pytest --doctest-modules

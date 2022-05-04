@@ -22,6 +22,7 @@ from vitessce import (
 
 from pathlib import Path
 
+
 data_path = Path('tests/data')
 
 class TestWrappers(unittest.TestCase):

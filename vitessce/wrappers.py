@@ -9,11 +9,6 @@ import pandas as pd
 import zarr
 from scipy import sparse
 from scipy.sparse import coo_matrix
-from generate_tiff_offsets import get_offsets
-
-from starlette.responses import UJSONResponse
-from starlette.routing import Route, Mount
-from starlette.staticfiles import StaticFiles
 
 from .constants import (
     Component as cm,
@@ -21,16 +16,9 @@ from .constants import (
     FileType as ft,
 )
 from .entities import Cells, CellSets, GenomicProfiles
-from .routes import range_repsonse
 from .repr import make_repr
 
 VAR_CHUNK_SIZE = 10
-
-
-class JsonRoute(Route):
-    def __init__(self, path, endpoint, data_json):
-        super().__init__(path, endpoint)
-        self.data_json = data_json
 
 
 class AbstractWrapper:
@@ -103,6 +91,9 @@ class AbstractWrapper:
         """
         if not self.is_remote:
             out_dir = self._get_out_dir(dataset_uid, obj_i)
+            # TODO: Move imports back to top when this is factored out.
+            from starlette.staticfiles import StaticFiles
+            from starlette.routing import Mount
             return [Mount(self._get_route_str(dataset_uid, obj_i),
                           app=StaticFiles(directory=out_dir, html=False))]
         return []
@@ -228,6 +219,12 @@ class OmeTiffWrapper(AbstractWrapper):
         if self.is_remote:
             return []
         else:
+            # TODO: Move imports back to top when this is factored out.
+            from .routes import range_repsonse, JsonRoute
+            from generate_tiff_offsets import get_offsets
+            from starlette.responses import UJSONResponse
+            from starlette.routing import Route
+
             offsets = get_offsets(self._img_path)
 
             async def response_func(req):

@@ -1,0 +1,17 @@
+name: Test Python 3.6 (partial)
+
+on: [push, pull_request]
+
+jobs:
+  test_python:
+    runs-on: ubuntu-18.04
+    name: Test Python code
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.6'
+      - name: Install vitessce
+        run: pip install -e .[testing]
+      - name: Run tests
+        run: pytest # TODO: exclude doctests except for: --doctest-modules ./config.py ./repr.py

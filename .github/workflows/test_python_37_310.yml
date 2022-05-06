@@ -1,4 +1,4 @@
-name: Test Python
+name: Test Python 3.8
 
 on: [push, pull_request]
 
@@ -6,12 +6,15 @@ jobs:
   test_python:
     runs-on: ubuntu-18.04
     name: Test Python code
+    strategy:
+      matrix:
+        version: ['3.7', '3.10']
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
-          python-version: '3.8'
+          python-version: ${{ matrix.version }}
       - name: Install vitessce
-        run: pip install -e .[testing]
+        run: pip install -e .[testing,notebook]
       - name: Run tests
         run: pytest

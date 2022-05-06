@@ -1,4 +1,4 @@
-name: Test Python
+name: Test Python 3.6 (partial)
 
 on: [push, pull_request]
 
@@ -6,19 +6,16 @@ jobs:
   test_python:
     runs-on: ubuntu-18.04
     name: Test Python code
-    strategy:
-      matrix:
-        version: ['3.7', '3.10']
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
-          python-version: ${{ matrix.version }}
+          python-version: '3.6'
       - name: Install vitessce
         run: pip install -e .[testing]
       - name: Run unittests
         working-directory: ./tests
-        run: python -m unittest
+        run: python -m unittest test_config.py
       - name: Run doctests
         working-directory: ./vitessce
-        run: pytest --doctest-modules
+        run: pytest --doctest-modules ./config.py ./repr.py

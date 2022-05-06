@@ -77,6 +77,23 @@ extras_require = {
     ],
     'proxy': [
         'jupyter-server-proxy>=1.5.2'
+    ],
+    'notebook': [
+        # Needed only for notebook use:
+        'ipywidgets>=7.6.0',
+        'hypercorn>=0.11.0',
+        'ujson>=4.0.1',
+        'starlette==0.14.0',
+
+        # aiofiles is not explicitly referenced in our code,
+        # but it is an implicit dependency of starlette==0.14.0.
+        # https://github.com/encode/starlette/issues/49
+        # Upgrading starlette will remove this dependency.
+        'aiofiles>=0.6.0',
+
+        # These are used in wrapper classes, and are not compatible with Python 3.6:
+        'numpy>=1.21.2',  # Last compatible version is 1.19.5
+        'generate-tiff-offsets>=0.1.7',  # Last compatible version is 2020.9.3
     ]
 }
 
@@ -94,24 +111,12 @@ setup_args = dict(
     long_description_content_type="text/markdown",
     include_package_data=True,
     install_requires=[
-        'ipywidgets>=7.6.0',
-        'hypercorn>=0.11.0',
-        'ujson>=4.0.1',
-        'starlette==0.14.0',
         'zarr>=2.5.0',
         'numcodecs>=0.5.7',
         'scipy>=1.2.1',
         'negspy>=0.2.24',
-        'generate-tiff-offsets>=0.1.7',
-        'numpy>=1.21.2',
         'pandas>=1.1.2',
         'black>=21.11b1',
-
-        # aiofiles is not explicitly referenced in our code,
-        # but it is an implicit dependency of starlette==0.14.0.
-        # https://github.com/encode/starlette/issues/49
-        # Upgrading starlette will remove this dependency.
-        'aiofiles>=0.6.0'
     ],
     extras_require=extras_require,
     packages=find_packages(),

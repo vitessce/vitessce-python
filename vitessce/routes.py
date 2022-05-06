@@ -1,4 +1,5 @@
 
+from starlette.routing import Route
 from starlette.responses import StreamingResponse
 from pathlib import Path
 
@@ -57,3 +58,9 @@ def range_repsonse(request, file_path):
         **headers,
     })
     return response
+
+
+class JsonRoute(Route):
+    def __init__(self, path, endpoint, data_json):
+        super().__init__(path, endpoint)
+        self.data_json = data_json

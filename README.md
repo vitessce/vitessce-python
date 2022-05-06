@@ -58,8 +58,7 @@ In this repository, there are multiple conda environments for different purposes
 
 ```sh
 flake8
-cd tests
-python -m unittest
+pytest
 ```
 
 

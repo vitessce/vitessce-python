@@ -724,7 +724,7 @@ def test_config_to_python_with_data_objects():
     assert vc.to_dict(base_url=base_url) == reconstructed_vc.to_dict(base_url=base_url)
 
     # Convert code string to an AST and back before evaluation
-    if hasattr(ast, 'unparse'):
+    if hasattr(ast, 'unparse'):  # pragma: no cover
         # Unparse added in Python 3.9
         ast_reconstructed_vc = eval(ast.unparse(ast.parse(code_block)))
         assert vc.to_dict(base_url=base_url) == ast_reconstructed_vc.to_dict(base_url=base_url)

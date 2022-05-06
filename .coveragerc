@@ -1,0 +1,8 @@
+[run]
+omit =
+    vitessce/config.py
+    vitessce/entities.py
+    vitessce/export.py
+    vitessce/routes.py
+    vitessce/widget.py
+    vitessce/wrappers.py

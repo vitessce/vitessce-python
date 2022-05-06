@@ -17,11 +17,11 @@ def make_repr(init_locals, class_def=None):
         # Requires superclass to be initialized.
         clazz = init_locals.pop('__class__')
     elif 'self' in init_locals and hasattr(init_locals['self'], '__class__'):
-        clazz = init_locals["self"].__class__
+        clazz = init_locals["self"].__class__  # pragma: no cover
     elif class_def is not None:
         clazz = class_def
     else:
-        raise ValueError("make_repr could not locate the class definition")
+        raise ValueError("make_repr could not locate the class definition")  # pragma: no cover
 
     # Remove self from locals.
     if 'self' in init_locals:

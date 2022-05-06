@@ -37,7 +37,7 @@ try:
         export_to_s3,
         export_to_files,
     )
-except ModuleNotFoundError as e:
+except ModuleNotFoundError as e:  # pragma: no cover
     from sys import version_info
     if version_info >= (3, 7):
         raise e
@@ -45,15 +45,15 @@ except ModuleNotFoundError as e:
     # In the long term, probably best to drop partial support for 3.6, when it's no longer needed.
 
 try:
-    if "google.colab" in sys.modules:
+    if "google.colab" in sys.modules:  # pragma: no cover
         from google.colab import output
 
         output.enable_custom_widget_manager()
-except ImportError:
+except ImportError:  # pragma: no cover
     pass
 
 
-def _jupyter_labextension_paths():
+def _jupyter_labextension_paths():  # pragma: no cover
     """Called by Jupyter Lab Server to detect if it is a valid labextension and
     to install the widget
 
@@ -72,7 +72,7 @@ def _jupyter_labextension_paths():
     }]
 
 
-def _jupyter_nbextension_paths():
+def _jupyter_nbextension_paths():  # pragma: no cover
     """Called by Jupyter Notebook Server to detect if it is a valid nbextension and
     to install the widget
 

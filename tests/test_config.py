@@ -728,5 +728,5 @@ def test_config_to_python_with_data_objects():
         # Unparse added in Python 3.9
         ast_reconstructed_vc = eval(ast.unparse(ast.parse(code_block)))
         assert vc.to_dict(base_url=base_url) == ast_reconstructed_vc.to_dict(base_url=base_url)
-    else:
+    else:  # pragma: no cover
         ast.parse(code_block)

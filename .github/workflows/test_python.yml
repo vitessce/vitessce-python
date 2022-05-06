@@ -1,11 +1,10 @@
-name: Test Python 3.8
+name: Test Python
 
 on: [push, pull_request]
 
 jobs:
   test_python:
     runs-on: ubuntu-18.04
-    name: Test Python code
     strategy:
       matrix:
         version: ['3.7', '3.10']

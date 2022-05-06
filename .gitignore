@@ -1,7 +1,4 @@
-<<<<<<< HEAD
 .coverage
-=======
->>>>>>> master
 pip-wheel-metadata/
 *.egg-info/
 .ipynb_checkpoints/

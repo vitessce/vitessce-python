@@ -65,7 +65,8 @@ extras_require = {
         'pytest>=6.2.4',
         'anndata==0.7.8',
         'loompy>=3.0.6',
-        'coverage>=6.3.2'
+        # TODO: Enable when 3.6 support is dropped.
+        # 'coverage>=6.3.2'
     ],
     'linting': [
         'flake8==3.8.4',

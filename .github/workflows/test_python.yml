@@ -16,4 +16,6 @@ jobs:
       - name: Install vitessce
         run: pip install -e .[testing,notebook]
       - name: Run tests
-        run: pytest
+        run: coverage run --module pytest
+      - name: Report coverage
+        run: coverage report --show-missing --fail-under 100

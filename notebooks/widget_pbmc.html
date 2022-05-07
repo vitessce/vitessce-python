@@ -18,7 +18,7 @@
         <script src="../_static/doctools.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "document", "processHtmlClass": "math|output_area"}}</script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -302,7 +302,7 @@ div.nboutput.container div.output_area > div[class^='highlight']{
 }
 
 /* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
-.prompt a.copybtn {
+.prompt .copybtn {
     display: none;
 }
 
@@ -371,8 +371,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">join</span>
 <span class="kn">from</span> <span class="nn">urllib.request</span> <span class="kn">import</span> <span class="n">urlretrieve</span>
 <span class="kn">from</span> <span class="nn">anndata</span> <span class="kn">import</span> <span class="n">read_h5ad</span>
@@ -395,8 +394,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">adata_filepath</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="s2">&quot;pbmc3k_final.h5ad&quot;</span><span class="p">)</span>
 <span class="n">urlretrieve</span><span class="p">(</span><span class="s1">&#39;https://seurat.nygenome.org/pbmc3k_final.h5ad&#39;</span><span class="p">,</span> <span class="n">adata_filepath</span><span class="p">)</span>
 </pre></div>
@@ -410,8 +408,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">adata</span> <span class="o">=</span> <span class="n">read_h5ad</span><span class="p">(</span><span class="n">adata_filepath</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata</span> <span class="o">=</span> <span class="n">read_h5ad</span><span class="p">(</span><span class="n">adata_filepath</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -423,8 +420,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">vc</span> <span class="o">=</span> <span class="n">VitessceConfig</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;PBMC Reference&#39;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">vc</span> <span class="o">=</span> <span class="n">VitessceConfig</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;PBMC Reference&#39;</span><span class="p">)</span>
 <span class="n">dataset</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">add_dataset</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;PBMC 3k&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">add_object</span><span class="p">(</span><span class="n">AnnDataWrapper</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">cell_set_obs</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;leiden&quot;</span><span class="p">],</span> <span class="n">cell_set_obs_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Leiden&quot;</span><span class="p">],</span> <span class="n">mappings_obsm</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;X_umap&quot;</span><span class="p">,</span> <span class="s2">&quot;X_pca&quot;</span><span class="p">],</span> <span class="n">mappings_obsm_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;UMAP&quot;</span><span class="p">,</span> <span class="s2">&quot;PCA&quot;</span><span class="p">],</span> <span class="n">expression_matrix</span><span class="o">=</span><span class="s2">&quot;X&quot;</span><span class="p">))</span>
 
 <span class="n">umap</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">cm</span><span class="o">.</span><span class="n">SCATTERPLOT</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span> <span class="n">mapping</span><span class="o">=</span><span class="s2">&quot;UMAP&quot;</span><span class="p">)</span>
@@ -445,8 +441,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">vw</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">widget</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">vw</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">widget</span><span class="p">()</span>
 <span class="n">vw</span>
 </pre></div>
 </div>

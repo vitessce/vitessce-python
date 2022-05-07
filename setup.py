@@ -72,8 +72,12 @@ extras_require = {
     'docs': [
         'sphinx==4.2.0',
         'sphinx-rtd-theme==1.0.0',
-        'nbclean==0.3.2',
         'nbsphinx==0.8.8',
+        'nbclean==0.3.2',
+        # nbconvert and jinja2 versions need to be pinned.
+        # Reference: https://github.com/vitessce/vitessce-python/issues/152
+        'nbconvert==5.6.1',
+        'jinja2==3.0.3',
     ],
     'proxy': [
         'jupyter-server-proxy>=1.5.2'

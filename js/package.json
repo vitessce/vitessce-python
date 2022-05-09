@@ -1,6 +1,6 @@
 {
   "name": "vitessce-jupyter",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "Jupyter widget facilitating interactive visualization of spatial single-cell data with Vitessce",
   "author": "Mark Keller",
   "main": "dist/index.js",

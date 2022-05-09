@@ -26,7 +26,7 @@ Installation requires Python 3.8 or greater. Install from `PyPI <https://pypi.or
 
 .. code-block:: bash
 
-    pip install vitessce
+    pip install vitessce[all]
 
 
 Widget Compatibility
@@ -36,16 +36,6 @@ The Vitessce widget is compatible with the following interactive Python platform
 
 * JupyterLab ``>=3.0.0``
 * Jupyter Notebook (classic) ``>=1.0.0``
-
-
-Installation with optional dependencies
----------------------
-
-To allow the widget to serve data through a proxy (e.g. a cloud notebook service like Binder), the extra dependency `jupyter-server-proxy` must be installed. See widget parameter ``proxy``.
-
-.. code-block:: bash
-
-    pip install vitessce[all]
 
 
 .. toctree::

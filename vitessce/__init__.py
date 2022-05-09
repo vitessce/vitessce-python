@@ -38,11 +38,9 @@ try:
         export_to_files,
     )
 except ModuleNotFoundError as e:
-    from sys import version_info
-    if version_info >= (3, 7):
-        raise e
-    # TODO: If version < 3.7, these exports just aren't available.
-    # In the long term, probably best to drop partial support for 3.6, when it's no longer needed.
+    from warnings import warn
+    warn('Some functionality not available because notebook dependencies are missing')
+
 
 try:
     if "google.colab" in sys.modules:

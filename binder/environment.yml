@@ -15,4 +15,4 @@ dependencies:
  - pip:
    - loompy
    - scanpy
-   - vitessce
+   - vitessce[all]

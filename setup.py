@@ -102,7 +102,7 @@ extras_require = {
 }
 
 # Option for user to install all runtime deps.
-extras_require['all'] = extras_require['proxy']
+extras_require['all'] = extras_require['proxy'] + extras_require['notebook']
 
 # Option for developers to install all runtime deps + all development deps.
 extras_require['dev'] = sum(extras_require.values(), [])

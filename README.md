@@ -15,7 +15,7 @@ Python API and Jupyter widget facilitating interactive visualization of spatial 
 
 To install with pip:
 
-    $ pip install vitessce
+    $ pip install vitessce[all]
 
 ## Getting started
 
@@ -51,8 +51,8 @@ You then need to refresh the JupyterLab page when your javascript changes.
 In this repository, there are multiple conda environments for different purposes:
 
 - `vitessce-python-dev` (defined in [environment.yml](./environment.yml)) is used for the development of the `vitessce` package itself
-- `vitessce-jupyter-examples` (defined in [docs/notebooks/environment.yml](./docs/notebooks/environment.yml)) is used for running the example notebooks in the `docs/notebooks/` directory (see [`docs/notebooks/README.md`](./docs/notebooks#readme) for more information)
-- `vitessce-jupyter-binder` (defined in [binder/environment.yml](./binder/environment.yml)) is the environment used by Binder upon opening notebooks from this repository
+- `vitessce-python-notebooks` (defined in [docs/notebooks/environment.yml](./docs/notebooks/environment.yml)) is used for running the example notebooks in the `docs/notebooks/` directory (see [`docs/notebooks/README.md`](./docs/notebooks#readme) for more information)
+- `vitessce-python-binder` (defined in [binder/environment.yml](./binder/environment.yml)) is the environment used by Binder upon opening notebooks from this repository
 
 ## Linting and testing
 

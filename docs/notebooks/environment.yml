@@ -17,4 +17,5 @@ dependencies:
    - loompy>=3.0.6
    - scikit-misc>=0.1.3
    - muon>=0.1.1
+   - mudata==0.1.2
    - leidenalg

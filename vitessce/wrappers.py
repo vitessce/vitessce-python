@@ -636,14 +636,14 @@ class MuDataWrapper(AbstractWrapper):
                 self._mdata.mod[self._atac_mod].X = self._mdata.mod[self._atac_mod].X.todense()
             self._mdata.mod[self._rna_mod].write_zarr(rna_zarr_filepath, chunks=[self._mdata.mod[self._rna_mod].shape[0], VAR_CHUNK_SIZE])
             self._mdata.mod[self._atac_mod].write_zarr(atac_zarr_filepath, chunks=[self._mdata.mod[self._atac_mod].shape[0], VAR_CHUNK_SIZE])
-        
+
         cells_file_creator = self.make_cells_file_def_creator(dataset_uid, obj_i)
         cell_sets_file_creator = self.make_cell_sets_file_def_creator(dataset_uid, obj_i)
         expression_matrix_file_creator = self.make_expression_matrix_file_def_creator(dataset_uid, obj_i)
-        
+
         self.file_def_creators += [cells_file_creator, cell_sets_file_creator, expression_matrix_file_creator] 
         self.routes += self.get_out_dir_route(dataset_uid, obj_i)
-    
+
     def get_rna_zarr_path(self, dataset_uid, obj_i):
         out_dir = self._get_out_dir(dataset_uid, obj_i)
         zarr_filepath = join(out_dir, self.rna_zarr_folder)
@@ -659,13 +659,13 @@ class MuDataWrapper(AbstractWrapper):
             return self._mdata_url
         else:
             return self._get_url(base_url, dataset_uid, obj_i, self.rna_zarr_folder)
-    
+
     def get_atac_zarr_url(self, base_url="", dataset_uid="", obj_i=""):
         if self.is_remote:
             return self._mdata_url
         else:
             return self._get_url(base_url, dataset_uid, obj_i, self.atac_zarr_folder)
-    
+
     def make_cells_file_def_creator(self, dataset_uid, obj_i):
         def get_cells(base_url):
             options = {}
@@ -731,7 +731,7 @@ class MuDataWrapper(AbstractWrapper):
                 }
                 if self._request_init is not None:
                     obj_file_def['requestInit'] = self._request_init
-                
+
                 return obj_file_def
             return None
         return get_cell_sets
@@ -753,11 +753,11 @@ class MuDataWrapper(AbstractWrapper):
                 }
                 if self._request_init is not None:
                     obj_file_def['requestInit'] = self._request_init
-                
+
                 return obj_file_def
             return None
         return get_expression_matrix
-    
+
     def auto_view_config(self, vc):
         dataset = vc.add_dataset().add_object(self)
         mapping_name = self._mappings_obsm_names[0] if (self._mappings_obsm_names is not None) else self._mappings_obsm[0].split('/')[-1]
@@ -765,7 +765,7 @@ class MuDataWrapper(AbstractWrapper):
         cell_sets = vc.add_view(dataset, cm.CELL_SETS)
         genes = vc.add_view(dataset, cm.GENES)
         heatmap = vc.add_view(dataset, cm.HEATMAP)
-        if self._spatial_polygon_obsm  is not None or self._spatial_centroid_obsm is not None:
+        if self._spatial_polygon_obsm is not None or self._spatial_centroid_obsm is not None:
             spatial = vc.add_view(dataset, cm.SPATIAL)
             vc.layout((scatterplot | spatial) / (heatmap | (cell_sets / genes)))
         else:

@@ -1,8 +1,11 @@
 # vitessce-python
 
+[![PyPI](https://img.shields.io/pypi/v/vitessce)](https://pypi.org/project/vitessce)
+[![Vitessce JS dependency version](https://img.shields.io/badge/dynamic/json.svg?url=https%3A%2F%2Fraw.githubusercontent.com%2Fvitessce%2Fvitessce-python%2Fmaster%2Fjs%2Fpackage.json&label=vitessce&query=$.dependencies.vitessce&colorB=blue)](https://github.com/vitessce/vitessce/blob/master/CHANGELOG.md)
+[![docs](https://img.shields.io/badge/docs-📖-57B4E9.svg)](https://vitessce.github.io/vitessce-python/)
+
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/vitessce/vitessce-python/master?filepath=docs/notebooks/widget_pbmc.ipynb)
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/vitessce/vitessce-python/blob/master/docs/notebooks/widget_on_colab.ipynb)
-
 
 
 Python API and Jupyter widget facilitating interactive visualization of spatial single-cell data with [Vitessce](https://github.com/vitessce/vitessce).
@@ -12,7 +15,7 @@ Python API and Jupyter widget facilitating interactive visualization of spatial 
 
 To install with pip:
 
-    $ pip install vitessce
+    $ pip install vitessce[all]
 
 ## Getting started
 
@@ -27,8 +30,8 @@ For a development installation (requires NodeJS and NPM),
     $ git clone https://github.com/vitessce/vitessce-python.git
     $ cd vitessce-python
     $ conda env create -f environment.yml
-    $ conda activate vitessce-jupyter-dev
-    $ pip install -e .
+    $ conda activate vitessce-python-dev
+    $ pip install -e ".[dev]"
     $ jupyter nbextension install --py --symlink --overwrite --sys-prefix vitessce
     $ jupyter nbextension enable --py --sys-prefix vitessce
 
@@ -47,15 +50,15 @@ You then need to refresh the JupyterLab page when your javascript changes.
 
 In this repository, there are multiple conda environments for different purposes:
 
-- `vitessce-jupyter-dev` (defined in [environment.yml](./environment.yml)) is used for the development of the `vitessce` package itself
-- `vitessce-jupyter-examples` (defined in [docs/notebooks/environment.yml](./docs/notebooks/environment.yml)) is used for running the example notebooks in the `docs/notebooks/` directory (see [`docs/notebooks/README.md`](./docs/notebooks#readme) for more information)
-- `vitessce-jupyter-binder` (defined in [binder/environment.yml](./binder/environment.yml)) is the environment used by Binder upon opening notebooks from this repository
+- `vitessce-python-dev` (defined in [environment.yml](./environment.yml)) is used for the development of the `vitessce` package itself
+- `vitessce-python-notebooks` (defined in [docs/notebooks/environment.yml](./docs/notebooks/environment.yml)) is used for running the example notebooks in the `docs/notebooks/` directory (see [`docs/notebooks/README.md`](./docs/notebooks#readme) for more information)
+- `vitessce-python-binder` (defined in [binder/environment.yml](./binder/environment.yml)) is the environment used by Binder upon opening notebooks from this repository
 
-## Testing
+## Linting and testing
 
 ```sh
-cd tests
-python -m unittest
+flake8
+pytest
 ```
 
 

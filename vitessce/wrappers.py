@@ -380,7 +380,7 @@ class OmeTiffWrapper(AbstractWrapper):
 
 
 class AnnDataWrapper(AbstractWrapper):
-    def __init__(self, adata=None, adata_url=None, expression_matrix=None, matrix_gene_var_filter=None, gene_var_filter=None, cell_set_obs=None, cell_set_obs_names=None, spatial_centroid_obsm=None, spatial_polygon_obsm=None, mappings_obsm=None, mappings_obsm_names=None, mappings_obsm_dims=None, request_init=None, factors_obs=None, **kwargs):
+    def __init__(self, adata=None, adata_url=None, expression_matrix=None, matrix_gene_var_filter=None, gene_var_filter=None, cell_set_obs=None, cell_set_obs_names=None, spatial_centroid_obsm=None, spatial_polygon_obsm=None, mappings_obsm=None, mappings_obsm_names=None, mappings_obsm_dims=None, request_init=None, factors_obs=None, gene_alias=None, **kwargs):
         """
         Wrap an AnnData object by creating an instance of the ``AnnDataWrapper`` class.
 
@@ -399,6 +399,7 @@ class AnnDataWrapper(AbstractWrapper):
         :param list[str] mappings_obsm_names: Overriding names like `['UMAP', 'PCA'] for displaying above scatterplots
         :param list[str] mappings_obsm_dims: Dimensions along which to get data for the scatterplot, like [[0, 1], [4, 5]] where [0, 1] is just the normal x and y but [4, 5] could be comparing the third and fourth principal components, for example.
         :param dict request_init: options to be passed along with every fetch request from the browser, like { "header": { "Authorization": "Bearer dsfjalsdfa1431" } }
+        param str gene_alias: A column name of gene names with which to display instead of the standard index in `var` of the AnnData store.
         :param \\*\\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
         """
         super().__init__(**kwargs)
@@ -544,6 +545,8 @@ class AnnDataWrapper(AbstractWrapper):
                     options["geneFilter"] = self._gene_var_filter
                 if self._matrix_gene_var_filter is not None:
                     options["matrixGeneFilter"] = self._matrix_gene_var_filter
+                if self._gene_alias is not None:
+                    options["geneAlias"] = self._gene_alias
                 obj_file_def = {
                     "type": dt.EXPRESSION_MATRIX.value,
                     "fileType": ft.ANNDATA_EXPRESSION_MATRIX_ZARR.value,

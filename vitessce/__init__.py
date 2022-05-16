@@ -1,4 +1,5 @@
 import sys
+from warnings import warn
 
 from ._version import __version__
 
@@ -16,31 +17,41 @@ from .constants import CoordinationType, Component, DataType, FileType
 
 from .wrappers import AbstractWrapper
 
-try:
-    # We're trying to support config generation in Python 3.6 environments,
-    # and so we allow installation without all of the dependencies that the widget requires.
-    # The imports below will fail in that case, and corresponding globals will be undefined.
 
+# We're trying to support config generation in Python 3.6 environments,
+# and so we allow installation without all of the dependencies that the widget requires.
+# The imports below will fail in that case, and corresponding globals will be undefined.
+try:
     from .widget import VitessceWidget
+except ModuleNotFoundError as e:
+    warn(f'Extra installs are necessary to use widgets: {e}')
+
+try:
     from .wrappers import (
         OmeTiffWrapper,
         MultiImageWrapper,
         AnnDataWrapper,
         SnapWrapper,
     )
+except ModuleNotFoundError as e:
+    warn(f'Extra installs are necessary to use wrappers: {e}')
+
+try:
     from .entities import (
         CellSets,
         Cells,
         Molecules,
     )
+except ModuleNotFoundError as e:
+    warn(f'Extra installs are necessary to use entities: {e}')
+
+try:
     from .export import (
         export_to_s3,
         export_to_files,
     )
 except ModuleNotFoundError as e:
-    from warnings import warn
-    warn('Some functionality not available because notebook dependencies are missing')
-
+    warn(f'Extra installs are necessary to use exports: {e}')
 
 try:
     if "google.colab" in sys.modules:

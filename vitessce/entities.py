@@ -264,7 +264,6 @@ class GenomicProfiles():
         :param int profile_index: The index of this profile among the list of profiles.
         """
         chromosomes_group = self.chromosomes_group
-        num_profiles = self.num_profiles
         resolutions = self.resolutions
         resolution_exps = [(2**x) for x in range(len(resolutions))]
 
@@ -272,7 +271,6 @@ class GenomicProfiles():
         # Fill in the data for this cluster and chromosome at each resolution.
         for resolution, resolution_exp in zip(resolutions, resolution_exps):
             arr_len = math.ceil(chr_len / resolution)
-            chr_shape = (num_profiles, arr_len)
 
             # Pad the array of values with zeros if necessary before reshaping.
             padding_len = resolution_exp - (values.shape[0] % resolution_exp)

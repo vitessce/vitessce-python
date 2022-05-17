@@ -431,6 +431,7 @@ class AnnDataWrapper(AbstractWrapper):
             "obsm/" + i for i in mappings_obsm] if mappings_obsm is not None else mappings_obsm
         self._mappings_obsm_dims = mappings_obsm_dims
         self._request_init = request_init
+        self._gene_alias = gene_alias
 
     def convert_and_save(self, dataset_uid, obj_i):
         # Only create out-directory if needed

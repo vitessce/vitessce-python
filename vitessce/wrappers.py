@@ -771,7 +771,6 @@ class SnapWrapper(AbstractWrapper):
                 cluster_df = in_clusters_df.loc[in_clusters_df["cluster"]
                                                 == cluster_id]
                 cluster_cell_ids = cluster_df.index.values.tolist()
-                cluster_num_cells = len(cluster_cell_ids)
                 cluster_cells_tf = (
                     in_barcodes_df[0].isin(cluster_cell_ids)).values
 

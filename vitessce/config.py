@@ -1012,7 +1012,7 @@ class VitessceConfig:
         for d in config["datasets"]:
             new_dataset = vc.add_dataset(uid=d["uid"], name=d["name"])
             for f in d["files"]:
-                new_file = new_dataset.add_file(
+                new_dataset.add_file(
                     url=f.get("url"),
                     data_type=f["type"],
                     file_type=f["fileType"],

@@ -1102,7 +1102,7 @@ class VitessceConfig:
 
         :param str theme: The theme name, either "light" or "dark". By default, "auto", which selects light or dark based on operating system preferences.
         :param int port: The port to use when serving data objects on localhost. By default, 8000.
-        :param base_url: If the web app is being accessed remotely (i.e. the data is being served from a remote machine), specify the base URL here. If serving and accessing the data on the same machine, keep as None to use a localhost URL. 
+        :param base_url: If the web app is being accessed remotely (i.e. the data is being served from a remote machine), specify the base URL here. If serving and accessing the data on the same machine, keep as None to use a localhost URL.
         :type base_url: str or None
         :param bool open: Should the browser be opened to the web app URL? By default, True.
 

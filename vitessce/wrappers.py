@@ -24,7 +24,7 @@ VAR_CHUNK_SIZE = 10
 class AbstractWrapper:
     """
     An abstract class that can be extended when
-    implementing custom dataset object wrapper classes. 
+    implementing custom dataset object wrapper classes.
     """
 
     def __init__(self, **kwargs):

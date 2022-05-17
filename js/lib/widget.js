@@ -128,7 +128,7 @@ export class VitessceView extends DOMWidgetView {
             this._render(this.model, this),
             this.el,
         );
-        
+
         setTimeout(() => {
           window.dispatchEvent(new Event('resize'));
         }, 500);

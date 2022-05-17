@@ -32,12 +32,15 @@ def make_repr(init_locals, class_def=None):
 
     # Remove redundant constructor parameters (when the value equals the default value).
     for k, v in inspect.signature(clazz).parameters.items():
+        if k not in init_locals:
+            continue
         try:
-            if k in init_locals and init_locals[k] == v.default:
-                del init_locals[k]
-        except:
+            is_default = init_locals[k] == v.default
+        except Exception:
             # Equality comparison may not be implemented for the value object.
             pass
+        if is_default:
+            del init_locals[k]
 
     # Convert the kwargs dict to named args.
     if 'kwargs' in init_locals:

@@ -866,8 +866,8 @@ class VitessceConfig:
                 for i in range(num_views):
                     _layout(
                         views[i],
-                        x_min +(w /num_views) *i,
-                        x_min +(w /num_views) *(i +1),
+                        x_min + (w / num_views) * i,
+                        x_min + (w / num_views) * (i + 1),
                         y_min,
                         y_max
                     )
@@ -879,8 +879,8 @@ class VitessceConfig:
                         views[i],
                         x_min,
                         x_max,
-                        y_min +(h /num_views) *i,
-                        y_min +(h /num_views) *(i +1),
+                        y_min + (h / num_views) * i,
+                        y_min + (h / num_views) * (i + 1),
                     )
 
         # Recursively set the values (x,y,w,h) for each view.

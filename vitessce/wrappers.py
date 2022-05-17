@@ -638,13 +638,13 @@ class SnapWrapper(AbstractWrapper):
 
         def convert_bin_name_to_chr_start(bin_name):
             try:
-                return int(bin_name[bin_name.index(':') +1:bin_name.index('-')])
+                return int(bin_name[bin_name.index(':') + 1:bin_name.index('-')])
             except ValueError:
                 return np.nan
 
         def convert_bin_name_to_chr_end(bin_name):
             try:
-                return int(bin_name[bin_name.index('-') +1:])
+                return int(bin_name[bin_name.index('-') + 1:])
             except ValueError:
                 return np.nan
 
@@ -709,7 +709,7 @@ class SnapWrapper(AbstractWrapper):
             # We will join the input bins onto this dataframe to determine which bins are missing.
             chr_bins_gt_df = pd.DataFrame()
             chr_bins_gt_df["chr_start"] = np.arange(0, math.ceil(
-                chr_len /starting_resolution)) * starting_resolution
+                chr_len / starting_resolution)) * starting_resolution
             chr_bins_gt_df["chr_end"] = chr_bins_gt_df["chr_start"] + \
                 starting_resolution
             chr_bins_gt_df["chr_start"] = chr_bins_gt_df["chr_start"] + 1

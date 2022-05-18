@@ -32,8 +32,10 @@ def make_repr(init_locals, class_def=None):
 
     # Remove redundant constructor parameters (when the value equals the default value).
     for k, v in inspect.signature(clazz).parameters.items():
+        if k not in init_locals:
+            continue
         try:
-            if k in init_locals and init_locals[k] == v.default:
+            if init_locals[k] == v.default:
                 del init_locals[k]
         except NotImplementedError:
             # Equality comparison may not be implemented for the value object.

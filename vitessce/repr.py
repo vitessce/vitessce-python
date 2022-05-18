@@ -34,12 +34,16 @@ def make_repr(init_locals, class_def=None):
     for k, v in inspect.signature(clazz).parameters.items():
         if k not in init_locals:
             continue
+
         try:
-            if init_locals[k] == v.default:
-                del init_locals[k]
+            is_default = init_locals[k] == v.default
         except NotImplementedError:
             # Equality comparison may not be implemented for the value object.
-            pass
+            is_default = False
+
+        try:
+            if is_default:
+                del init_locals[k]
         except ValueError:
             # TODO: Is this also expected?
             # ValueError('The truth value of a DataFrame is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().')

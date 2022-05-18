@@ -211,7 +211,7 @@ class GenomicProfiles():
         chrom_name_to_cumsum = dict(zip(chromosomes, chroms_cumsum_arr))
 
         # Prepare to fill in resolutions datasets.
-        resolutions = [starting_resolution *(2**x) for x in range(16)]
+        resolutions = [starting_resolution * (2 ** x) for x in range(16)]
 
         chromosomes_group = f.create_group("chromosomes")
         for chr_name, chr_len in chrom_name_to_length.items():

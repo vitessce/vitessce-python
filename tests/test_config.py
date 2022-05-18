@@ -13,7 +13,7 @@ from vitessce import (  # noqa: F401
     make_repr,
 
     # Neither of these is in the source code, but they do appear in code which is eval'd.
-    VitessceChainableConfig,  
+    VitessceChainableConfig,
     VitessceConfigDatasetFile,
 )
 

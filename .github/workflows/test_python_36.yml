@@ -16,4 +16,4 @@ jobs:
       - name: Run tests
         run: pytest --ignore=tests/test_wrappers.py --ignore=tests/test_entities.py --ignore=vitessce/export.py --ignore=vitessce/routes.py --ignore=vitessce/widget.py
         # For now, add to the ignore list if anything else breaks on 3.6.
-        # In the long run, we aren't going to support 3.6. 
+        # In the long run, we aren't going to support 3.6.

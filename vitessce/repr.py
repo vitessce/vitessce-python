@@ -35,8 +35,12 @@ def make_repr(init_locals, class_def=None):
         try:
             if k in init_locals and init_locals[k] == v.default:
                 del init_locals[k]
-        except:
+        except NotImplementedError:
             # Equality comparison may not be implemented for the value object.
+            pass
+        except ValueError:
+            # TODO: Is this also expected?
+            # ValueError('The truth value of a DataFrame is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().')
             pass
 
     # Convert the kwargs dict to named args.

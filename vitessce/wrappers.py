@@ -399,7 +399,7 @@ class AnnDataWrapper(AbstractWrapper):
         :param list[str] mappings_obsm_names: Overriding names like `['UMAP', 'PCA'] for displaying above scatterplots
         :param list[str] mappings_obsm_dims: Dimensions along which to get data for the scatterplot, like [[0, 1], [4, 5]] where [0, 1] is just the normal x and y but [4, 5] could be comparing the third and fourth principal components, for example.
         :param dict request_init: options to be passed along with every fetch request from the browser, like { "header": { "Authorization": "Bearer dsfjalsdfa1431" } }
-        param str gene_alias: A column name of gene names with which to display instead of the standard index in `var` of the AnnData store.
+        :param str gene_alias: The name of a column containing gene names, instead of the default index in `var` of the AnnData store.
         :param \\*\\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
         """
         super().__init__(**kwargs)

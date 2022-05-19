@@ -523,7 +523,7 @@ class VitessceConfig:
     A class to represent a Vitessce view config.
     """
 
-    def __init__(self, name=None, description=None, schema_version="1.0.4"):
+    def __init__(self, name=None, description=None, schema_version="1.0.7"):
         """
         Construct a Vitessce view config object.
 

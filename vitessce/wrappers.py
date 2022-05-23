@@ -572,10 +572,11 @@ class AnnDataWrapper(AbstractWrapper):
         heatmap = vc.add_view(cm.HEATMAP, dataset=dataset)
         if self._spatial_polygon_obsm is not None or self._spatial_centroid_obsm is not None:
             spatial = vc.add_view(cm.SPATIAL, dataset=dataset)
-            vc.layout((scatterplot | spatial) /
-                      (heatmap | (cell_sets / genes)))
+            vc.layout((scatterplot | spatial)
+                      / (heatmap | (cell_sets / genes)))
         else:
-            vc.layout((scatterplot | (cell_sets / genes)) / heatmap)
+            vc.layout((scatterplot | (cell_sets / genes))
+                      / heatmap)
 
 
 class SnapWrapper(AbstractWrapper):
@@ -775,7 +776,6 @@ class SnapWrapper(AbstractWrapper):
                 cluster_df = in_clusters_df.loc[in_clusters_df["cluster"]
                                                 == cluster_id]
                 cluster_cell_ids = cluster_df.index.values.tolist()
-                cluster_num_cells = len(cluster_cell_ids)
                 cluster_cells_tf = (
                     in_barcodes_df[0].isin(cluster_cell_ids)).values
 

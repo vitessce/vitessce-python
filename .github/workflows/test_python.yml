@@ -17,7 +17,11 @@ jobs:
         run: pip install -e .[testing,notebook]
       - name: TODO - When 3.6 is dropped, just install the normal way.
         run: pip install coverage
-      - name: Run tests
-        run: coverage run --module pytest
-      - name: Report coverage
-        run: coverage report --show-missing --fail-under 100
+      - name: Run tests and report coverage with omits
+        run: |
+          coverage run --rcfile .coveragerc_omit --module pytest && \
+          coverage report --show-missing --fail-under 100
+      - name: Run tests and report coverage without omits
+        run: |
+          coverage run --rcfile .coveragerc_real --module pytest && \
+          coverage report --show-missing

@@ -165,7 +165,7 @@ class VitessceWidget(widgets.DOMWidget):
     def _get_coordination_value(self, coordination_type, coordination_scope):
         obj = self.config['coordinationSpace'][coordination_type]
         obj_scopes = list(obj.keys())
-        if coordination_scope != None:
+        if coordination_scope is not None:
             if coordination_scope in obj_scopes:
                 return obj[coordination_scope]
             else:

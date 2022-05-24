@@ -9,8 +9,8 @@ Some of the example notebooks rely on external single-cell data analysis package
 ```sh
 cd docs/notebooks
 conda env create -f environment.yml
-conda activate vitessce-jupyter-examples
-pip install -e ../..
+conda activate vitessce-python-notebooks
+pip install -e "../..[dev]"
 jupyter labextension install ../../js
 ```
 

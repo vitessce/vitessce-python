@@ -200,18 +200,16 @@ class GenomicProfiles():
 
         chromosomes = [str(chr_name) for chr_name in nc.get_chromorder(
             assembly)[:25]]  # TODO: should more than chr1-chrM be used?
-        num_chromosomes = len(chromosomes)
         chroms_length_arr = np.array(
             [nc.get_chrominfo(assembly).chrom_lengths[x] for x in chromosomes], dtype="i8")
         chroms_cumsum_arr = np.concatenate(
             (np.array([0]), np.cumsum(chroms_length_arr)))
 
-        chromosomes_set = set(chromosomes)
         chrom_name_to_length = dict(zip(chromosomes, chroms_length_arr))
         chrom_name_to_cumsum = dict(zip(chromosomes, chroms_cumsum_arr))
 
         # Prepare to fill in resolutions datasets.
-        resolutions = [starting_resolution *(2**x) for x in range(16)]
+        resolutions = [starting_resolution * (2 ** x) for x in range(16)]
 
         chromosomes_group = f.create_group("chromosomes")
         for chr_name, chr_len in chrom_name_to_length.items():
@@ -266,7 +264,6 @@ class GenomicProfiles():
         :param int profile_index: The index of this profile among the list of profiles.
         """
         chromosomes_group = self.chromosomes_group
-        num_profiles = self.num_profiles
         resolutions = self.resolutions
         resolution_exps = [(2**x) for x in range(len(resolutions))]
 
@@ -274,13 +271,11 @@ class GenomicProfiles():
         # Fill in the data for this cluster and chromosome at each resolution.
         for resolution, resolution_exp in zip(resolutions, resolution_exps):
             arr_len = math.ceil(chr_len / resolution)
-            chr_shape = (num_profiles, arr_len)
 
             # Pad the array of values with zeros if necessary before reshaping.
             padding_len = resolution_exp - (values.shape[0] % resolution_exp)
             if values.shape[0] % resolution_exp > 0:
                 values = np.concatenate((values, np.zeros((padding_len,))))
-            num_tiles = chr_shape[1]
             # Reshape to be able to sum every `resolution_exp` number of values.
             arr = np.reshape(values, (-1, resolution_exp)).sum(axis=-1)
 

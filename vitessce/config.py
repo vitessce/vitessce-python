@@ -523,7 +523,7 @@ class VitessceConfig:
     A class to represent a Vitessce view config.
     """
 
-    def __init__(self, name=None, description=None, schema_version="1.0.4"):
+    def __init__(self, name=None, description=None, schema_version="1.0.7"):
         """
         Construct a Vitessce view config object.
 
@@ -866,8 +866,8 @@ class VitessceConfig:
                 for i in range(num_views):
                     _layout(
                         views[i],
-                        x_min +(w /num_views) *i,
-                        x_min +(w /num_views) *(i +1),
+                        x_min + (w / num_views) * i,
+                        x_min + (w / num_views) * (i + 1),
                         y_min,
                         y_max
                     )
@@ -879,8 +879,8 @@ class VitessceConfig:
                         views[i],
                         x_min,
                         x_max,
-                        y_min +(h /num_views) *i,
-                        y_min +(h /num_views) *(i +1),
+                        y_min + (h / num_views) * i,
+                        y_min + (h / num_views) * (i + 1),
                     )
 
         # Recursively set the values (x,y,w,h) for each view.
@@ -1012,7 +1012,7 @@ class VitessceConfig:
         for d in config["datasets"]:
             new_dataset = vc.add_dataset(uid=d["uid"], name=d["name"])
             for f in d["files"]:
-                new_file = new_dataset.add_file(
+                new_dataset.add_file(
                     url=f.get("url"),
                     data_type=f["type"],
                     file_type=f["fileType"],
@@ -1102,7 +1102,7 @@ class VitessceConfig:
 
         :param str theme: The theme name, either "light" or "dark". By default, "auto", which selects light or dark based on operating system preferences.
         :param int port: The port to use when serving data objects on localhost. By default, 8000.
-        :param base_url: If the web app is being accessed remotely (i.e. the data is being served from a remote machine), specify the base URL here. If serving and accessing the data on the same machine, keep as None to use a localhost URL. 
+        :param base_url: If the web app is being accessed remotely (i.e. the data is being served from a remote machine), specify the base URL here. If serving and accessing the data on the same machine, keep as None to use a localhost URL.
         :type base_url: str or None
         :param bool open: Should the browser be opened to the web app URL? By default, True.
 

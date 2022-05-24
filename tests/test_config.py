@@ -13,7 +13,7 @@ from vitessce import (  # noqa: F401
     make_repr,
 
     # Neither of these is in the source code, but they do appear in code which is eval'd.
-    VitessceChainableConfig,  
+    VitessceChainableConfig,
     VitessceConfigDatasetFile,
 )
 
@@ -23,7 +23,7 @@ def test_config_creation():
     vc_dict = vc.to_dict()
 
     assert vc_dict == {
-        "version": "1.0.4",
+        "version": "1.0.7",
         "name": "",
         "description": "",
         "datasets": [],
@@ -40,7 +40,7 @@ def test_config_add_dataset():
     vc_dict = vc.to_dict()
 
     assert vc_dict == {
-        "version": "1.0.4",
+        "version": "1.0.7",
         "name": "",
         "description": "",
         "datasets": [
@@ -75,7 +75,7 @@ def test_config_add_dataset_add_files():
     vc_dict = vc.to_dict()
 
     assert vc_dict == {
-        "version": "1.0.4",
+        "version": "1.0.7",
         "name": "",
         "description": "",
         "datasets": [
@@ -115,7 +115,7 @@ def test_config_add_spatial_view():
     vc_dict = vc.to_dict()
 
     assert vc_dict == {
-        "version": "1.0.4",
+        "version": "1.0.7",
         "name": "",
         "description": "",
         "datasets": [
@@ -156,7 +156,7 @@ def test_config_add_scatterplot_view_with_mapping():
     vc_dict = vc.to_dict()
 
     assert vc_dict == {
-        "version": "1.0.4",
+        "version": "1.0.7",
         "name": "",
         "description": "",
         "datasets": [
@@ -209,7 +209,7 @@ def test_config_add_scatterplot_view_with_embedding_coordinations():
     vc_dict = vc.to_dict()
 
     assert vc_dict == {
-        "version": "1.0.4",
+        "version": "1.0.7",
         "name": "",
         "description": "",
         "datasets": [
@@ -303,7 +303,7 @@ def test_config_add_dataset_add_objects():
     vc_dict = vc.to_dict(base_url="http://localhost:8000")
 
     assert vc_dict == {
-        "version": "1.0.4",
+        "version": "1.0.7",
         "name": "",
         "description": "",
         "datasets": [
@@ -348,7 +348,7 @@ def test_config_set_layout_single_view():
     vc_dict = vc.to_dict()
 
     assert vc_dict == {
-        "version": "1.0.4",
+        "version": "1.0.7",
         "name": "",
         "description": "",
         "datasets": [
@@ -391,7 +391,7 @@ def test_config_set_layout_multi_view():
     vc_dict = vc.to_dict()
 
     assert vc_dict == {
-        "version": "1.0.4",
+        "version": "1.0.7",
         "name": "",
         "description": "",
         "datasets": [
@@ -454,7 +454,7 @@ def test_config_set_layout_multi_view_magic():
     vc_dict = vc.to_dict()
 
     assert vc_dict == {
-        "version": "1.0.4",
+        "version": "1.0.7",
         "name": "",
         "description": "",
         "datasets": [
@@ -507,7 +507,7 @@ def test_config_set_layout_multi_view_magic():
 
 def test_config_from_dict():
     vc = VitessceConfig.from_dict({
-        "version": "1.0.4",
+        "version": "1.0.7",
         "name": "Test name",
         "description": "Test description",
         "datasets": [
@@ -554,7 +554,7 @@ def test_config_from_dict():
     vc_dict = vc.to_dict()
 
     assert vc_dict == {
-        "version": "1.0.4",
+        "version": "1.0.7",
         "name": "Test name",
         "description": "Test description",
         "datasets": [
@@ -606,7 +606,7 @@ def test_config_from_dict():
 def test_config_from_dict_raises_error_if_dataset_ambiguous():
     with pytest.raises(ValueError):
         VitessceConfig.from_dict({
-            "version": "1.0.4",
+            "version": "1.0.7",
             "name": "Test name",
             "description": "Test description",
             "datasets": [

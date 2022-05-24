@@ -38,8 +38,7 @@ jobs:
         working-directory: ./js
         run: jupyter labextension build .
       - name: Run tests
-        working-directory: ./tests
-        run: python -m unittest
+        run: pytest
       - name: Build a binary wheel and a source tarball
         run: >-
           python -m

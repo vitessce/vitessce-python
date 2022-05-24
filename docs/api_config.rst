@@ -1,7 +1,7 @@
 View config API
 ###############
 
-The ``VitessceConfig`` class provides functionality for 
+The ``VitessceConfig`` class provides functionality for
 creating view configs using a pythonic syntax, with
 support for exporting to dict or JSON format.
 

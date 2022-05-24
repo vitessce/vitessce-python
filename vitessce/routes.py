@@ -11,8 +11,10 @@ def ranged(file, start=0, end=None, block_size=65535):
     file.seek(start)
 
     while True:
-        data_length = min(block_size, end - start -
-                          consumed) if end else block_size
+        data_length = (
+            min(block_size, end - start - consumed)
+            if end else block_size
+        )
         if data_length <= 0:
             break
         data = file.read(data_length)

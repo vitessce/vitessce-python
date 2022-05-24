@@ -23,7 +23,7 @@ from .wrappers import AbstractWrapper
 # The imports below will fail in that case, and corresponding globals will be undefined.
 try:
     from .widget import VitessceWidget
-except ModuleNotFoundError as e:
+except ModuleNotFoundError as e:  # pragma: no cover
     warn(f'Extra installs are necessary to use widgets: {e}')
 
 try:
@@ -33,7 +33,7 @@ try:
         AnnDataWrapper,
         SnapWrapper,
     )
-except ModuleNotFoundError as e:
+except ModuleNotFoundError as e:  # pragma: no cover
     warn(f'Extra installs are necessary to use wrappers: {e}')
 
 try:
@@ -42,7 +42,7 @@ try:
         Cells,
         Molecules,
     )
-except ModuleNotFoundError as e:
+except ModuleNotFoundError as e:  # pragma: no cover
     warn(f'Extra installs are necessary to use entities: {e}')
 
 try:
@@ -50,7 +50,7 @@ try:
         export_to_s3,
         export_to_files,
     )
-except ModuleNotFoundError as e:
+except ModuleNotFoundError as e:  # pragma: no cover
     warn(f'Extra installs are necessary to use exports: {e}')
 
 try:

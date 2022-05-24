@@ -1,11 +1,10 @@
-name: Test Python 3.8
+name: Test Python
 
 on: [push, pull_request]
 
 jobs:
   test_python:
     runs-on: ubuntu-18.04
-    name: Test Python code
     strategy:
       matrix:
         version: ['3.7', '3.10']
@@ -16,5 +15,13 @@ jobs:
           python-version: ${{ matrix.version }}
       - name: Install vitessce
         run: pip install -e .[testing,notebook]
-      - name: Run tests
-        run: pytest
+      - name: TODO - When 3.6 is dropped, just install the normal way.
+        run: pip install coverage
+      - name: Run tests and report coverage with omits
+        run: |
+          coverage run --rcfile .coveragerc_omit --module pytest && \
+          coverage report --show-missing --fail-under 100
+      - name: Run tests and report coverage without omits
+        run: |
+          coverage run --rcfile .coveragerc_real --module pytest && \
+          coverage report --show-missing

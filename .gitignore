@@ -1,3 +1,4 @@
+.coverage
 pip-wheel-metadata/
 *.egg-info/
 .ipynb_checkpoints/
@@ -10,6 +11,7 @@ tests/data/*
 !tests/data/test.ome.tif
 ./notebooks/
 docs/notebooks/data/
+.coverage
 
 # Compiled javascript
 vitessce/static/

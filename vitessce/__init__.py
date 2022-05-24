@@ -23,7 +23,7 @@ from .wrappers import AbstractWrapper
 # The imports below will fail in that case, and corresponding globals will be undefined.
 try:
     from .widget import VitessceWidget
-except ModuleNotFoundError as e:
+except ModuleNotFoundError as e:  # pragma: no cover
     warn(f'Extra installs are necessary to use widgets: {e}')
 
 try:
@@ -33,7 +33,7 @@ try:
         AnnDataWrapper,
         SnapWrapper,
     )
-except ModuleNotFoundError as e:
+except ModuleNotFoundError as e:  # pragma: no cover
     warn(f'Extra installs are necessary to use wrappers: {e}')
 
 try:
@@ -42,7 +42,7 @@ try:
         Cells,
         Molecules,
     )
-except ModuleNotFoundError as e:
+except ModuleNotFoundError as e:  # pragma: no cover
     warn(f'Extra installs are necessary to use entities: {e}')
 
 try:
@@ -50,19 +50,19 @@ try:
         export_to_s3,
         export_to_files,
     )
-except ModuleNotFoundError as e:
+except ModuleNotFoundError as e:  # pragma: no cover
     warn(f'Extra installs are necessary to use exports: {e}')
 
 try:
-    if "google.colab" in sys.modules:
+    if "google.colab" in sys.modules:  # pragma: no cover
         from google.colab import output
 
         output.enable_custom_widget_manager()
-except ImportError:
+except ImportError:  # pragma: no cover
     pass
 
 
-def _jupyter_labextension_paths():
+def _jupyter_labextension_paths():  # pragma: no cover
     """Called by Jupyter Lab Server to detect if it is a valid labextension and
     to install the widget
 
@@ -81,7 +81,7 @@ def _jupyter_labextension_paths():
     }]
 
 
-def _jupyter_nbextension_paths():
+def _jupyter_nbextension_paths():  # pragma: no cover
     """Called by Jupyter Notebook Server to detect if it is a valid nbextension and
     to install the widget
 

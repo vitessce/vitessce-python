@@ -148,7 +148,7 @@ def create_test_anndata_file(h5ad_path):
     obsm = {"X_umap": np.array([[0, 1] for c in obs_index_arr])}
     try:
         from anndata import AnnData
-    except ModuleNotFoundError:
+    except ModuleNotFoundError:  # pragma: no cover
         # TODO: When we don't need backward compatibility, move import back to top.
         return
     adata = AnnData(X, var=var_df, obs=obs_df, obsm=obsm)

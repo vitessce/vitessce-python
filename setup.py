@@ -65,8 +65,7 @@ extras_require = {
         'pytest>=6.2.4',
         'anndata==0.7.8',
         'loompy>=3.0.6',
-        # TODO: Enable when 3.6 support is dropped.
-        # 'coverage>=6.3.2'
+        'coverage>=6.3.2'
     ],
     'linting': [
         'flake8==3.8.4',
@@ -95,11 +94,7 @@ extras_require = {
         # but it is an implicit dependency of starlette==0.14.0.
         # https://github.com/encode/starlette/issues/49
         # Upgrading starlette will remove this dependency.
-        'aiofiles>=0.6.0',
-
-        # These are used in wrapper classes, and are not compatible with Python 3.6:
-        'numpy>=1.21.2',  # Last compatible version is 1.19.5
-        'generate-tiff-offsets>=0.1.7',  # Last compatible version is 2020.9.3
+        'aiofiles>=0.6.0'
     ]
 }
 
@@ -123,6 +118,8 @@ setup_args = dict(
         'negspy>=0.2.24',
         'pandas>=1.1.2',
         'black>=21.11b1',
+        'numpy>=1.21.2',
+        'generate-tiff-offsets>=0.1.7',
     ],
     extras_require=extras_require,
     packages=find_packages(),

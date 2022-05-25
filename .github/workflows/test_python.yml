@@ -15,8 +15,6 @@ jobs:
           python-version: ${{ matrix.version }}
       - name: Install vitessce
         run: pip install -e .[testing,notebook]
-      - name: TODO - When 3.6 is dropped, just install the normal way.
-        run: pip install coverage
       - name: Run tests and report coverage with omits
         run: |
           coverage run --rcfile .coveragerc_omit --module pytest && \

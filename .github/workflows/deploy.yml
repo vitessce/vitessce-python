@@ -13,6 +13,8 @@ jobs:
         shell: bash -l {0}
     steps:
       - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
       - name: Install system dependencies
         run: |
           sudo apt-get update

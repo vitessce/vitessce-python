@@ -28,7 +28,10 @@ jobs:
           registry-url: https://registry.npmjs.org/
       - name: NPM CI
         working-directory: ./js
-        run: npm ci && npm run clean
+        run: |
+          npm install -g npm@6.14.6
+          npm ci
+          npm run clean
         shell: /bin/bash -e {0}
       - name: Build nbextension
         working-directory: ./js

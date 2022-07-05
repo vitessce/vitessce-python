@@ -4,11 +4,10 @@ from enum import Enum
 
 
 class DocEnum(Enum):
-    def __new__(cls, value, doc=None):
+    def __new__(cls, value, doc):
         self = object.__new__(cls)
         self._value_ = value
-        if doc is not None:
-            self.__doc__ = doc
+        self.__doc__ = doc
         return self
 
 

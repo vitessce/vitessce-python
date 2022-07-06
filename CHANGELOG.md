@@ -5,6 +5,7 @@
 - `VitessceConfig.to_python` method to auto-generate Python code representing a view config, intended to be used in auto-generated Jupyter notebooks
 
 ### Changed
+- Simplify CI by removing bash CLI flags.
 - Use `nvm` and `.nvmrc`.
 - Update package-lock.json; Had gotten out of sync.
 - Bump vitessce JS version to `1.1.17`

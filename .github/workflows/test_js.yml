@@ -5,9 +5,6 @@ on: [push, pull_request]
 jobs:
   test_js:
     runs-on: ubuntu-18.04
-    defaults:
-      run:
-        shell: bash -l {0}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v3
@@ -22,11 +19,9 @@ jobs:
       - name: NPM CI
         working-directory: ./js
         run: npm ci && npm run clean
-        shell: /bin/bash -e {0}
       - name: Build nbextension
         working-directory: ./js
         run: npm run build:nbextension
-        shell: /bin/bash -e {0}
       - name: Build labextension
         working-directory: ./js
         run: jupyter labextension build .

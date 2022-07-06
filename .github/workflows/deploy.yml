@@ -21,7 +21,7 @@ jobs:
         run: pip install -e .[dev]
       - uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version-file: '.nvmrc'
           registry-url: https://registry.npmjs.org/
       - name: NPM CI
         working-directory: ./js

@@ -6,6 +6,7 @@
 
 ### Changed
 - Simplify CI by removing bash CLI flags.
+- Use `nvm` and `.nvmrc`.
 - Update package-lock.json; Had gotten out of sync.
 - Bump vitessce JS version to `1.1.17`
 - Updated CHANGELOG

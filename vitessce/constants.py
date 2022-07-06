@@ -4,11 +4,10 @@ from enum import Enum
 
 
 class DocEnum(Enum):
-    def __new__(cls, value, doc=None):
+    def __new__(cls, value, doc):
         self = object.__new__(cls)
         self._value_ = value
-        if doc is not None:
-            self.__doc__ = doc
+        self.__doc__ = doc
         return self
 
 
@@ -50,7 +49,7 @@ class CoordinationType(DocEnum):
     CELL_SET_COLOR = "cellSetColor", "A mapping from cell sets to colors."
     GENE_FILTER = "geneFilter", "A subset of genes to include after filtering."
     GENE_HIGHLIGHT = "geneHighlight", "A subset of genes to highlight."
-    GENE_SELECTION = "geneSelection" "A subset of genes to select."
+    GENE_SELECTION = "geneSelection", "A subset of genes to select."
     GENE_EXPRESSION_COLORMAP = "geneExpressionColormap", "The colormap to use for the gene expression scale."
     GENE_EXPRESSION_COLORMAP_RANGE = "geneExpressionColormapRange", "The range of gene expression values to map."
     CELL_COLOR_ENCODING = "cellColorEncoding", "The color encoding to use for cell entities."

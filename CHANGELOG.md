@@ -8,6 +8,7 @@
 - Update package-lock.json; Had gotten out of sync.
 - Bump vitessce JS version to `1.1.17`
 - Updated CHANGELOG
+- Fix typo in constants; Should error if the same mistake is made in the future.
 
 
 ## [1.0.4](https://pypi.org/project/vitessce/1.0.4/) - 2021-09-28

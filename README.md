@@ -39,7 +39,9 @@ When actively developing your extension for JupyterLab, run the command:
 
     $ jupyter labextension develop --overwrite vitessce
 
-Then you need to rebuild the JS when you make a code change:
+For the JS codebase, [install nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+and then run `nvm install` to get the correct version of Node. 
+To rebuild the JS when you make a code change:
 
     $ cd js
     $ npm run build

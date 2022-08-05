@@ -1,3 +1,5 @@
+.coverage
+pip-wheel-metadata/
 *.egg-info/
 .ipynb_checkpoints/
 dist/
@@ -11,6 +13,7 @@ tests/data/*
 docs/notebooks/data/
 __pycache__/
 .snakemake/
+.coverage
 
 # Compiled javascript
 vitessce/static/

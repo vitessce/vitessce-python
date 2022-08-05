@@ -1,8 +1,8 @@
 import sys
+from warnings import warn
 
 from ._version import __version__
 
-from .widget import VitessceWidget
 from .config import (
     VitessceConfig,
     VitessceChainableConfig,
@@ -10,34 +10,58 @@ from .config import (
     hconcat,
     vconcat,
 )
-from .constants import CoordinationType, Component, DataType, FileType
-from .wrappers import (
-    AbstractWrapper,
-    OmeTiffWrapper,
-    MultiImageWrapper,
-    AnnDataWrapper,
-    SnapWrapper,
-)
-from .entities import (
-    CellSets,
-    Cells,
-    Molecules,
-)
-from .export import (
-    export_to_s3,
-    export_to_files,
-)
+
 from .repr import make_repr
 
+from .constants import CoordinationType, Component, DataType, FileType
+
+from .wrappers import AbstractWrapper
+
+
+# We allow installation without all of the dependencies that the widget requires.
+# The imports below will fail in that case, and corresponding globals will be undefined.
 try:
-    if "google.colab" in sys.modules:
+    from .widget import VitessceWidget
+except ModuleNotFoundError as e:  # pragma: no cover
+    warn(f'Extra installs are necessary to use widgets: {e}')
+
+try:
+    from .wrappers import (
+        OmeTiffWrapper,
+        MultiImageWrapper,
+        AnnDataWrapper,
+        SnapWrapper,
+    )
+except ModuleNotFoundError as e:  # pragma: no cover
+    warn(f'Extra installs are necessary to use wrappers: {e}')
+
+try:
+    from .entities import (
+        CellSets,
+        Cells,
+        Molecules,
+    )
+except ModuleNotFoundError as e:  # pragma: no cover
+    warn(f'Extra installs are necessary to use entities: {e}')
+
+try:
+    from .export import (
+        export_to_s3,
+        export_to_files,
+    )
+except ModuleNotFoundError as e:  # pragma: no cover
+    warn(f'Extra installs are necessary to use exports: {e}')
+
+try:
+    if "google.colab" in sys.modules:  # pragma: no cover
         from google.colab import output
 
         output.enable_custom_widget_manager()
-except ImportError:
+except ImportError:  # pragma: no cover
     pass
 
-def _jupyter_labextension_paths():
+
+def _jupyter_labextension_paths():  # pragma: no cover
     """Called by Jupyter Lab Server to detect if it is a valid labextension and
     to install the widget
 
@@ -56,7 +80,7 @@ def _jupyter_labextension_paths():
     }]
 
 
-def _jupyter_nbextension_paths():
+def _jupyter_nbextension_paths():  # pragma: no cover
     """Called by Jupyter Notebook Server to detect if it is a valid nbextension and
     to install the widget
 

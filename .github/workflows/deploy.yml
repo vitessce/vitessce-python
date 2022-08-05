@@ -3,48 +3,37 @@ name: Deploy
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-18.04
-    name: Build, test, deploy
-    defaults:
-      run:
-        shell: bash -l {0}
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pandoc
+      - uses: actions/setup-python@v2
         with:
-          node-version: 14
+          python-version: '3.8'
+      - name: Install vitessce
+        run: pip install -e .[dev]
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
           registry-url: https://registry.npmjs.org/
-      - uses: conda-incubator/setup-miniconda@v2
-        with:
-          activate-environment: vitessce-jupyter-dev
-          environment-file: environment.yml
-          auto-activate-base: false
       - name: NPM CI
         working-directory: ./js
         run: npm ci && npm run clean
-        shell: /bin/bash -e {0}
-        env:
-          NPM_CONFIG_USERCONFIG: /home/runner/work/_temp/.npmrc
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
       - name: Build nbextension
         working-directory: ./js
         run: npm run build:nbextension
-        shell: /bin/bash -e {0}
-        env:
-          NPM_CONFIG_USERCONFIG: /home/runner/work/_temp/.npmrc
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
       - name: Build labextension
         working-directory: ./js
         run: jupyter labextension build .
-      - name: Install vitessce
-        run: pip install -e .
       - name: Run tests
-        working-directory: ./tests
-        run: python -m unittest
+        run: pytest
       - name: Build a binary wheel and a source tarball
         run: >-
           python -m
@@ -72,7 +61,6 @@ jobs:
         continue-on-error: true
         working-directory: ./js
         run: npm ci && npm publish
-        shell: /bin/bash -e {0}
         env:
           NPM_CONFIG_USERCONFIG: /home/runner/work/_temp/.npmrc
           NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}

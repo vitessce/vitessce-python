@@ -1,4 +1,4 @@
-name: vitessce-jupyter-binder
+name: vitessce-python-binder
 channels:
  - bioconda
  - conda-forge
@@ -6,7 +6,7 @@ dependencies:
  - python==3.8
  - numpy>=1.14.0
  - pandas>=1.1.2
- - anndata>=0.7.4
+ - anndata==0.7.8
  - zarr>=2.5.0
  - numcodecs>=0.7.2
  - scipy>=1.0.0
@@ -15,4 +15,4 @@ dependencies:
  - pip:
    - loompy
    - scanpy
-   - vitessce
+   - vitessce[all]

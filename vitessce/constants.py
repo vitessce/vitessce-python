@@ -1,13 +1,15 @@
 from enum import Enum
 
 # Reference: https://stackoverflow.com/a/50473952
+
+
 class DocEnum(Enum):
-    def __new__(cls, value, doc=None):
+    def __new__(cls, value, doc):
         self = object.__new__(cls)
         self._value_ = value
-        if doc is not None:
-            self.__doc__ = doc
+        self.__doc__ = doc
         return self
+
 
 class CoordinationType(DocEnum):
     """
@@ -24,8 +26,8 @@ class CoordinationType(DocEnum):
     EMBEDDING_TARGET_Z = "embeddingTargetZ", "The z-coordinate of the center of an embedding scatterplot view."
     EMBEDDING_CELL_OPACITY = 'embeddingCellOpacity', "Opacity of cells in embedding (points in scatterplot view)"
     EMBEDDING_CELL_RADIUS = 'embeddingCellRadius', "Radius of cells in embedding (points in scatterplot view)"
-    EMBEDDING_CELL_RADIUS_MODE = 'embeddingCellRadiusMode',  "Radius mode of cells in embedding (points in scatterplot view) - auto or manual"
-    EMBEDDING_CELL_OPACITY_MODE = 'embeddingCellOpacityMode',  "Opacity mode of cells in embedding (points in scatterplot view) - auto or manual"
+    EMBEDDING_CELL_RADIUS_MODE = 'embeddingCellRadiusMode', "Radius mode of cells in embedding (points in scatterplot view) - auto or manual"
+    EMBEDDING_CELL_OPACITY_MODE = 'embeddingCellOpacityMode', "Opacity mode of cells in embedding (points in scatterplot view) - auto or manual"
     SPATIAL_ZOOM = "spatialZoom", "The zoom level of a spatial view."
     SPATIAL_ROTATION_X = 'spatialRotationX', "The x rotation of a 3d spatial view."
     SPATIAL_ROTATION_Y = 'spatialRotationY', "The y rotation of a 3d spatial view."
@@ -47,7 +49,7 @@ class CoordinationType(DocEnum):
     CELL_SET_COLOR = "cellSetColor", "A mapping from cell sets to colors."
     GENE_FILTER = "geneFilter", "A subset of genes to include after filtering."
     GENE_HIGHLIGHT = "geneHighlight", "A subset of genes to highlight."
-    GENE_SELECTION = "geneSelection" "A subset of genes to select."
+    GENE_SELECTION = "geneSelection", "A subset of genes to select."
     GENE_EXPRESSION_COLORMAP = "geneExpressionColormap", "The colormap to use for the gene expression scale."
     GENE_EXPRESSION_COLORMAP_RANGE = "geneExpressionColormapRange", "The range of gene expression values to map."
     CELL_COLOR_ENCODING = "cellColorEncoding", "The color encoding to use for cell entities."
@@ -60,6 +62,7 @@ class CoordinationType(DocEnum):
     GENOMIC_TARGET_X = "genomicTargetX", "The x-coordinate of the center of a higlass view."
     GENOMIC_TARGET_Y = "genomicTargetY", "The y-coordinate of the center of a higlass view."
     ADDITIONAL_CELL_SETS = "additionalCellSets", "User-defined cell sets."
+
 
 class Component(DocEnum):
     """
@@ -77,6 +80,7 @@ class Component(DocEnum):
     GENES = "genes", "The gene list selector."
     CELL_SET_EXPRESSION = "cellSetExpression", "Expression levels are displayed by cell set"
 
+
 class DataType(DocEnum):
     """
     An enum type representing the type of data contained in a file.
@@ -88,6 +92,7 @@ class DataType(DocEnum):
     NEIGHBORHOODS = "neighborhoods", "The spatial cell neighborhoods data type."
     RASTER = "raster", "The raster (i.e. imaging) data type."
     GENOMIC_PROFILES = "genomic-profiles", "The genomic profiles data type, used by HiGlass 1D quantitative tracks."
+
 
 class FileType(DocEnum):
     """

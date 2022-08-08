@@ -14,6 +14,9 @@ jobs:
         with:
           activate-environment: vitessce-python-demos
           environment-file: demos/environment.yml
+          python-version: 3.8
+          use-mamba: true
+          mamba-version: "*"
           auto-activate-base: false
       - run: |
           conda info

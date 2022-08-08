@@ -1,10 +1,8 @@
 import argparse
-
-from anndata import AnnData
 import scanpy as sc
 import numpy as np
-import pandas as pd
 import scipy.cluster
+
 
 def create_zarr(output_path):
     adata = sc.datasets.visium_sge(sample_id="V1_Human_Lymph_Node", include_hires_tiff=True)
@@ -33,7 +31,6 @@ def create_zarr(output_path):
     sc.tl.umap(adata)
     sc.tl.leiden(adata, key_added="clusters")
 
-
     # Hierarchical clustering of genes for optimal gene ordering
     X_hvg_arr = adata[:, adata.var['highly_variable']].X.toarray()
     X_hvg_index = adata[:, adata.var['highly_variable']].var.copy().index
@@ -42,7 +39,6 @@ def create_zarr(output_path):
 
     # Get the hierarchy-based ordering of genes.
     num_cells = adata.obs.shape[0]
-    num_genes = adata.var.shape[0]
     highly_var_index_ordering = scipy.cluster.hierarchy.leaves_list(Z)
     highly_var_genes = X_hvg_index.values[highly_var_index_ordering].tolist()
 
@@ -51,7 +47,7 @@ def create_zarr(output_path):
 
     def get_orig_index(gene_id):
         return all_genes.index(gene_id)
-    
+
     var_index_ordering = list(map(get_orig_index, highly_var_genes)) + list(map(get_orig_index, not_var_genes))
 
     # Create a new *ordered* gene expression dataframe.
@@ -76,6 +72,7 @@ def create_zarr(output_path):
     adata.uns['spatial']['V1_Human_Lymph_Node']['images']['lowres'] = np.transpose(img_lowres, (2, 0, 1))
 
     adata.write_zarr(output_path)
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

@@ -5,42 +5,48 @@ S3 = S3RemoteProvider()
 
 BUCKET_VERSION = "0.0.32"
 BUCKET_NAME = "vitessce-data"
-BUCKET = PosixPath(BUCKET_NAME) / BUCKET_VERSION / "master_release"
+BUCKET = PosixPath(BUCKET_NAME) / BUCKET_VERSION / "main"
 
-DATA_DIR = Path("data")
-PROCESSED_DIR = DATA_DIR / "processed"
+include: "./common.smk"
 
-subworkflow habib_2017:
+# All subworkflows listed here will be
+# executed as part of the 'all' rule
+# in this snakefile.
+subworkflow habib_2017_nature_methods:
     workdir:
         "habib_2017_nature_methods"
-    snakefile:
-        "habib_2017_nature_methods/Snakefile"
 
-subworkflow human_intestine_2020:
-    workdir:
-        "human_intestine_2020_hubmap"
-    snakefile:
-        "human_intestine_2020_hubmap/Snakefile"
-
-subworkflow human_lymph_node_10x:
+subworkflow human_lymph_node_10x_visium:
     workdir:
         "human_lymph_node_10x_visium"
-    snakefile:
-        "human_lymph_node_10x_visium/Snakefile"
+
+
+# Only access workflow._subworkflows after all
+# subworkflows have been defined above.
+SUBWORKFLOW_KEYS = workflow._subworkflows.keys()
 
 rule all:
     input:
-        habib_2017=habib_2017(str(PROCESSED_DIR / "habib_2017.h5ad.zarr")),
-        human_intestine_2020=human_intestine_2020(str(PROCESSED_DIR / "human_intestine_2020_hubmap.genomic-profiles.zarr")),
-        human_lymph_node_10x=human_lymph_node_10x(str(PROCESSED_DIR / "human_lymph_node_10x.h5ad.zarr")),
+        in_files=[
+            # TODO: use config.yml .output here
+            globals()[subworkflow_key](str(PROCESSED_DIR / f"{subworkflow_key}.h5ad.zarr"))
+            for subworkflow_key
+            in SUBWORKFLOW_KEYS
+        ]
     params:
+        should_upload=config.get("upload"),
         # This should be in output: https://github.com/snakemake/snakemake/issues/870
-        habib_2017=S3.remote(str(BUCKET / "habib_2017" / "habib_2017.h5ad.zarr")),
-        human_intestine_2020=S3.remote(str(BUCKET / "human_intestine_2020_hubmap")),
-        human_lymph_node_10x=S3.remote(str(BUCKET / "human_lymph_node_10x" / "human_lymph_node_10x.h5ad.zarr")),
-    shell:
-        """
-        aws s3 cp --recursive {input.habib_2017} s3://{params.habib_2017} && \
-        aws s3 cp --recursive $(dirname {input.human_intestine_2020}) s3://{params.human_intestine_2020} && \
-        aws s3 cp --recursive {input.human_lymph_node_10x} s3://{params.human_lymph_node_10x}
-        """
+        out_files=[
+            S3.remote(str(BUCKET / subworkflow_key / f"{subworkflow_key}.h5ad.zarr"))
+            for subworkflow_key
+            in SUBWORKFLOW_KEYS
+        ]
+    run:
+        if str2bool(params.should_upload):
+            print("Uploading")
+            for in_file, out_file in zip(input.in_files, params.out_files):
+                shell(f"aws s3 cp --recursive {in_file} s3://{out_file}")
+        else:
+            print("Not uploading. To upload, use snakemake --config upload=true")
+            for in_file, out_file in zip(input.in_files, params.out_files):
+                shell(f"echo \"{in_file} s3://{out_file}\"")

@@ -12,11 +12,23 @@ Set up the `vitessce-python-demos` environment using conda.
 cd demos
 conda env create -f environment.yml
 conda activate vitessce-python-demos
-pip install -e ..
+pip install -e "..[testing]"
 ```
 
 ### Run
 
 ```sh
 snakemake -j 1
+```
+
+### Serve data locally
+
+```sh
+http-server --cors='*' --port 8000 .
+```
+
+### Run and deploy
+
+```sh
+snakemake -j 1 --config upload=true
 ```

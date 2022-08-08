@@ -41,6 +41,7 @@ def create_zarr(output_path):
     Z = scipy.cluster.hierarchy.linkage(X_hvg_arr.T, method="average", optimal_ordering=True)
 
     # Get the hierarchy-based ordering of genes.
+    num_cells = adata.obs.shape[0]
     num_genes = adata.var.shape[0]
     highly_var_index_ordering = scipy.cluster.hierarchy.leaves_list(Z)
     highly_var_genes = X_hvg_index.values[highly_var_index_ordering].tolist()
@@ -59,6 +60,13 @@ def create_zarr(output_path):
 
     adata.obsm['spatial'] = adata.obsm['spatial'].astype('uint16')
     adata.obsm['xy'] = np.stack((adata.obs['array_col'].values, adata.obs['array_row'].values), axis=-1).astype('uint16')
+
+    def to_diamond(x, y, r):
+        return np.array([[x, y + r], [x + r, y], [x, y - r], [x - r, y]])
+    adata.obsm['segmentations'] = np.zeros((num_cells, 4, 2), dtype=np.dtype('uint16'))
+    radius = 50
+    for i in range(num_cells):
+        adata.obsm['segmentations'][i, :, :] = to_diamond(adata.obsm['spatial'][i, 0], adata.obsm['spatial'][i, 1], radius)
 
     # Need to convert images from interleaved to non-interleaved (color axis should be first).
     img_hires = adata.uns['spatial']['V1_Human_Lymph_Node']['images']['hires']

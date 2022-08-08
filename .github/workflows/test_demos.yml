@@ -1,4 +1,4 @@
-name: Test the demo data processing scripts
+name: Demo data dry-run
 
 on: [push, pull_request]
 

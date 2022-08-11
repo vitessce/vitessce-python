@@ -2,7 +2,7 @@ include: "../common.smk"
 configfile: "config.yml"
 
 # URL constants
-H5AD_URL = "https://covid19.cog.sanger.ac.uk/habib17.processed.h5ad"
+H5AD_URL = "https://zenodo.org/record/6120249/files/COMBAT-CITESeq-EXPRESSION-ATLAS.h5ad?download=1"
 
 # Rules
 rule all:
@@ -12,9 +12,9 @@ rule all:
 # Convert the raw AnnData .h5ad file to a processed AnnData .zarr store.
 rule convert_h5ad_to_zarr:
     input:
-        (RAW_DIR / "habib17.processed.h5ad")
+        (RAW_DIR / "COMBAT-CITESeq-EXPRESSION-ATLAS.h5ad")
     output:
-        directory(PROCESSED_DIR / "habib_2017_nature_methods.h5ad.zarr")
+        directory(PROCESSED_DIR / "combat_2022_cell.h5ad.zarr")
     params:
         script=(SRC_DIR / "convert_h5ad_to_zarr.py")
     shell:
@@ -27,11 +27,11 @@ rule convert_h5ad_to_zarr:
 # Download AnnData .h5ad file containing single-cell data.
 rule download_data:
     output:
-        (RAW_DIR / "habib17.processed.h5ad")
+        (RAW_DIR / "COMBAT-CITESeq-EXPRESSION-ATLAS.h5ad")
     params:
         file_url=H5AD_URL
     shell:
         '''
-        curl -L -o {output} {params.file_url}
+        curl -L --retry 999 --retry-delay 3 -C - -o {output} {params.file_url}
         '''
 

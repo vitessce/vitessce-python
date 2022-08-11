@@ -1,0 +1,49 @@
+include: "../common.smk"
+configfile: "config.yml"
+
+# URL constants
+BASE_URL = "https://s3.amazonaws.com/vitessce-data/0.0.31/master_release/linnarsson/linnarsson"
+
+
+# Rules
+rule all:
+    input:
+        config['output']
+
+# Convert the old JSON files to simpler CSV and JSON formats.
+rule convert_to_csv:
+    input:
+        cells=(RAW_DIR / "cells.json"),
+        cell_sets=(RAW_DIR / "cell-sets.json"),
+        raster=(RAW_DIR / "raster.json"),
+        molecules=(RAW_DIR / "molecules.json"),
+        expression_matrix=(RAW_DIR / "clusters.json")
+    output:
+        cells=(PROCESSED_DIR / "codeluppi_2018_nature_methods.cells.csv"),
+        segmentations=(PROCESSED_DIR / "codeluppi_2018_nature_methods.cells.segmentations.json"),
+        matrix=(PROCESSED_DIR / "codeluppi_2018_nature_methods.cells.matrix.csv"),
+        molecules=(PROCESSED_DIR / "codeluppi_2018_nature_methods.molecules.csv")
+    params:
+        script=(SRC_DIR / "convert_to_csv.py")
+    shell:
+        '''
+        python {params.script} \
+            -ic {input.cells} \
+            -ics {input.cell_sets} \
+            -ir {input.raster} \
+            -im {input.molecules} \
+            -iem {input.expression_matrix} \
+            -oc {output.cells} \
+            -ocs {output.segmentations} \
+            -ocm {output.matrix} \
+            -om {output.molecules}
+        '''
+
+# Download original JSON files.
+rule download_file:
+    output:
+        (RAW_DIR / "{prefix}.json")
+    shell:
+        '''
+        curl -L -o {output} {BASE_URL}.{wildcards.prefix}.json
+        '''

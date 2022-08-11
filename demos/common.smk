@@ -9,3 +9,6 @@ PROCESSED_DIR = DATA_DIR / "processed"
 # Helper functions
 def str2bool(v):
   return v is not None and v.lower() in ("yes", "true", "t", "1")
+
+def flatten(l):
+  return [item for sublist in l for item in sublist]

@@ -14,6 +14,7 @@ docs/notebooks/data/
 __pycache__/
 .snakemake/
 .coverage
+demos/*/data/
 
 # Compiled javascript
 vitessce/static/

@@ -99,8 +99,8 @@
       "B": null
     },
     "featureValueColormapRange": {
-      "A": [0, 0.5],
-      "B": [0, 0.5]
+      "A": [0, 0.05],
+      "B": [0, 0.05]
     }
   },
   "layout": [{

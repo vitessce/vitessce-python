@@ -4,7 +4,7 @@ import yaml
 
 S3 = S3RemoteProvider()
 
-BUCKET_VERSION = "0.0.32"
+BUCKET_VERSION = "0.0.33"
 BUCKET_NAME = "vitessce-data"
 BUCKET = PosixPath(BUCKET_NAME) / BUCKET_VERSION / "main"
 

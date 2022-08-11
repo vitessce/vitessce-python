@@ -46,5 +46,6 @@ Then,
 - Specify the output filenames in the `output` list in `./{new_demo_dir}/config.yml`
 - Fill in the Snakefile in `./{new_demo_dirname}/Snakefile`
 - Write a test Vitessce configuration in `./{new_demo_dirname}/vitessce.json`
+- Test the demo by running the Vitessce frontend locally and navigating to `http://localhost:3000/?url=http://localhost:8000/{new_demo_dir}/vitessce.json`
 
 See existing demo Snakefiles and scripts for examples.

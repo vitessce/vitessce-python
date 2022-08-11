@@ -14,8 +14,6 @@ rule all:
 rule convert_to_csv:
     input:
         cells=(RAW_DIR / "cells.json"),
-        cell_sets=(RAW_DIR / "cell-sets.json"),
-        raster=(RAW_DIR / "raster.json"),
         molecules=(RAW_DIR / "molecules.json"),
         expression_matrix=(RAW_DIR / "clusters.json")
     output:
@@ -29,8 +27,6 @@ rule convert_to_csv:
         '''
         python {params.script} \
             -ic {input.cells} \
-            -ics {input.cell_sets} \
-            -ir {input.raster} \
             -im {input.molecules} \
             -iem {input.expression_matrix} \
             -oc {output.cells} \

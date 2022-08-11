@@ -32,3 +32,19 @@ http-server --cors='*' --port 8000 .
 ```sh
 snakemake -j 1 --config upload=true
 ```
+
+### Add a new demo
+
+To add a new demo, run
+
+```sh
+./create_demo.sh {new_demo_dirname}
+```
+
+Then,
+- Add a subworkflow entry to the main demos workflow in `./Snakefile`
+- Specify the output filenames in the `output` list in `./{new_demo_dir}/config.yml`
+- Fill in the Snakefile in `./{new_demo_dirname}/Snakefile`
+- Write a test Vitessce configuration in `./{new_demo_dirname}/vitessce.json`
+
+See existing demo Snakefiles and scripts for examples.

@@ -4,7 +4,7 @@ configfile: "config.yml"
 # Rules
 rule all:
     input:
-        config['output']
+        [ (PROCESSED_DIR / f) for f in config['output'] ]
         #(PROCESSED_DIR / "human_lymph_node_10x_visium.ome.zarr"),
 
 # Convert the raw AnnData .h5ad file to a processed AnnData .zarr store.

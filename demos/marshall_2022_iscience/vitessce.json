@@ -1,13 +1,13 @@
 {
   "version": "1.0.15",
-  "name": "Habib et al., 2017 Nature Methods",
+  "name": "Marshall et al., 2022 iScience",
   "description": "",
   "datasets": [{
-    "uid": "339952f4-a47f-46dc-9228-18ba2ca256f2",
-    "name": "339952f4-a47f-46dc-9228-18ba2ca256f2",
+    "uid": "marshall_2022",
+    "name": "marshall_2022",
     "files": [{
       "fileType": "anndata.zarr",
-      "url": "http://localhost:8000/habib_2017_nature_methods/data/processed/habib_2017_nature_methods.h5ad.zarr",
+      "url": "http://localhost:8000/marshall_2022_iscience/data/processed/marshall_2022_iscience.h5ad.zarr",
       "coordinationValues": {
         "obsType": "cell",
         "featureType": "gene",
@@ -22,10 +22,21 @@
         "obsEmbedding": {
           "path": "obsm/X_umap"
         },
-        "obsSets": [{
-          "name": "Cell Type",
-          "path": "obs/CellType"
-        }]
+        "obsLocations": {
+          "path": "obsm/X_spatial"
+        },
+        "obsSegmentations": {
+          "path": "obsm/X_segmentations"
+        },
+        "obsSets": [
+          {
+            "name": "Cell Type",
+            "path": "obs/cell_type"
+          }
+        ],
+        "featureLabels": {
+          "path": "var/feature_name"
+        }
       }
     }]
   }],
@@ -42,6 +53,14 @@
     },
     "featureValueType": {
       "A": "expression"
+    },
+    "featureValueColormapRange": {
+      "A": [0.0, 0.1]
+    },
+    "spatialSegmentationLayer": {
+      "A": {
+        "opacity": 1, "radius": 50, "visible": true, "stroked": false
+      }
     }
   },
   "layout": [{
@@ -76,25 +95,39 @@
         "embeddingType": "UMAP",
         "obsType": "A",
         "featureType": "A",
-        "featureValueType": "A"
+        "featureValueType": "A",
+        "featureValueColormapRange": "A"
       },
       "uid": "C"
     },
     {
-      "component": "heatmap",
+      "component": "spatial",
       "h": 4,
-      "w": 8,
+      "w": 4,
       "x": 0,
       "y": 4,
       "coordinationScopes": {
         "obsType": "A",
         "featureType": "A",
-        "featureValueType": "A"
+        "featureValueType": "A",
+        "spatialSegmentationLayer": "A",
+        "featureValueColormapRange": "A"
       },
-      "props": {
-        "transpose": false
+      "uid": "E"
+    },
+    {
+      "component": "layerController",
+      "h": 4,
+      "w": 4,
+      "x": 4,
+      "y": 4,
+      "coordinationScopes": {
+        "obsType": "A",
+        "featureType": "A",
+        "featureValueType": "A",
+        "spatialSegmentationLayer": "A"
       },
-      "uid": "D"
+      "uid": "F"
     },
     {
       "component": "featureList",
@@ -103,9 +136,10 @@
       "x": 8,
       "y": 4,
       "coordinationScopes": {
+        "obsType": "A",
         "featureType": "A"
       },
-      "uid": "E"
+      "uid": "G"
     },
     {
       "component": "description",
@@ -113,7 +147,7 @@
       "w": 2,
       "x": 10,
       "y": 4,
-      "uid": "F"
+      "uid": "H"
     }
   ]
 }

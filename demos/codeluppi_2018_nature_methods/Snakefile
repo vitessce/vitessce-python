@@ -1,14 +1,12 @@
 include: "../common.smk"
 configfile: "config.yml"
 
-# URL constants
 BASE_URL = "https://s3.amazonaws.com/vitessce-data/0.0.31/master_release/linnarsson/linnarsson"
 
 
-# Rules
 rule all:
     input:
-        config['output']
+        [ (PROCESSED_DIR / f) for f in config['output'] ]
 
 # Convert the old JSON files to simpler CSV and JSON formats.
 rule convert_to_csv:
@@ -32,6 +30,27 @@ rule convert_to_csv:
             -oc {output.cells} \
             -ocs {output.segmentations} \
             -ocm {output.matrix} \
+            -om {output.molecules}
+        '''
+
+rule convert_to_zarr:
+    input:
+        cells=(RAW_DIR / "cells.json"),
+        molecules=(RAW_DIR / "molecules.json"),
+        expression_matrix=(RAW_DIR / "clusters.json")
+    output:
+        cells=directory(PROCESSED_DIR / "codeluppi_2018_nature_methods.cells.h5ad.zarr"),
+        molecules=directory(PROCESSED_DIR / "codeluppi_2018_nature_methods.molecules.h5ad.zarr")
+    params:
+        script=(SRC_DIR / "convert_to_zarr.py")
+    shell:
+        '''
+        python {params.script} \
+            -ic {input.cells} \
+            -im {input.molecules} \
+            -iem {input.expression_matrix} \
+            -oc {output.cells} \
+            -oc {output.cells} \
             -om {output.molecules}
         '''
 

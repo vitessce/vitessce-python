@@ -1,0 +1,57 @@
+include: "../common.smk"
+configfile: "config.yml"
+
+# https://zenodo.org/record/6578047
+
+# cellxgene portal AWS URLs expire in one week.
+# May need to get new URLs from https://cellxgene.cziscience.com/collections/8191c283-0816-424b-9b61-c3e1d6258a77
+
+# All-snRNA-Spatial multi-omic map of human myocardial infarction
+SN_RNA_URL = "https://corpora-data-prod.s3.amazonaws.com/1c739a3e-c3f5-49d5-98e0-73975e751201/local.h5ad?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIATLYQ5N5XW6MG3RXV%2F20220811%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220811T155214Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEPX%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCICTgYHlxoB8UXfnd0JipV9aeHRyjPga2nVs%2BY%2F%2Boi5SkAiEA0wjEQRzs8gMgUlXVbN8N6ic3qLeNP9R5SkuTvQav4F8q6wMIXhABGgwyMzE0MjY4NDY1NzUiDKhpyntz3Eqdlj2yFyrIA0%2BokeSqbrTZG1JYoOYkJ5aPunYWh0eRqHX%2Bbcj1trFnqWQ%2FK%2FuAlfgRplgfU6DMpK7pcEKnYheI55Nkd%2FzW7JQTZFJHFZVY5ZeuA2%2FIG%2Fcl2cDinZz1bnijqAoI2N3RoihZwuPceiCr26F4uGBhesfzQtSgphPodmjUxX6%2FMu9nmA5IeRxxJAyjSKb%2BA6fyH4LC4RH%2FBLamelnlsQfviw%2BKLeKIuz0YG1kTJNKRo8Is8zOljxP7VIDf8pQFy52f%2BNJYBj015leYtsRBKvuQktMqkCAv6Gretw9TWUAYAjCVoS1onU0XyEfX9w2dYRJ6jInsUixyeAYNsNwFwkOJg33fD5NPeFmmH%2BHbYE2d82z7LZh%2BAEPMxXWaFtGSyP0Hbsjqf9w5bEFebyO%2FjHbnJC8gZxuB5s3FwoK1kbGYLctigaJS1V6sF3prwgbVszqcg0IzlQEIY51ymWOFWQ9kJacyrmwpJM%2BskKh4rv%2FG9fzcyuwv4sDxK2gmVmAQx9j7u8V3CJv%2FdQQTs1Ej6hmgwIHwlqWMQ8%2FjMXmXo3WY9Uts%2FS4op8QVnV1xMrKEXEEPSL2QuiNGk9iEJSEYm9ua0yCzveCcgu8I6DC%2F%2BNOXBjqlAa2wP63Bsreh2%2FeJH0iosJHoNU0A9lbgj%2FqTb0xU3uT9ltDX8%2FxvnKxQwnquxBmoU66Kdub9XZGsXMSgiiQ25aMDTtceJH7hM06XNqybBaKcF3XQoYu9klqHib5oX8mtRqUhr6YnSoTSe9YHDcXyXqhajPU%2BMtjP4KEpOLwphzUf1Tkh3Xh4FxJUAYIOiV2OoBhm%2Bz7snsh8DvHNaCfJ%2BN9lte4t1g%3D%3D&X-Amz-Signature=6cc71f7a07e6c71c7e739b499dc3c74c07388fd42d07568243b50473689e4189"
+# All-snATAC-Spatial multi-omic map of human myocardial infarction
+SN_ATAC_URL = "https://corpora-data-prod.s3.amazonaws.com/72a69193-d84a-42f6-98a3-d7ef0ec0c381/local.h5ad?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIATLYQ5N5XU64OVNV3%2F20220811%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220811T155321Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEPX%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQDOSOk%2Fk%2BEtmVg%2Bq1OodOlyl%2FNhOkZ4u5hyqnHJr%2F6PVAIgX3YgL67OfUppHiG4nsQdSuB%2Fy%2FinOfmRIGz0gO5CDNcq6wMIXhABGgwyMzE0MjY4NDY1NzUiDCxz60hPL12co7bUrirIAyPSabbL%2BCAhrltfuxuYJu9duVKeSZ6r9qQt0liX%2BVN0Ycx2APBzOqkZ0IbhpykyUD%2Fv2vmv4VHLe6WZuC7wvDqWiyirQ%2BHXJ6ftMZlm1sd82OCawik6sHI6nFfwJ7Bg9adNbxjsgF3PLHpLoggYUHakTueUFB%2BPCC%2BS%2BRktwGx0abBDAA6JMGSyRUsetCtwkXvJ3eJ1HeUkCCcB49mgcO1BkC%2FVW1pQQO7Bp6BXfhV6GOVg%2B8pAExbClKOoQl%2BWPFqiNe3BbnLcpSIM7daUIBWlsmgOVaXc6nARIR8Pc2Z7ugNVEAGOu708h%2FxHkJI4QT7ljOfV448bKcnQEenbi9ntbZUJ0n0F6JiZ7C6RXloAx3nsenlgkjuTyHDFQXR3ffo7ZAmWbGeovvJwtpghEv4A%2BJ687Ciss7QT5neZV4OggHLKe40y5UNUahhuaTmgDODyrSQlcuVltJoTtFp4OWeyI55r%2BWcOPGs6BSlFpsnSzUao7EScD%2FsQvDkzaxAsIlZKQQdJBPMoDlObEcFCLOqqrUqQq4ZD9nC2qIITesZZ71dWklL4opLBKdYlyQ32QV29o2MNOOlCfpurdwa5EYTE2BeJ7MpQ0jCS%2B9OXBjqlAbSazUWM%2FDJodChkIzssH1EUbCZI80h5rM7b6SUD%2FimfxAS6TmhYXY953uLjSTpOC%2FBV7qKD2PD4Vxvvzf4vkxqnig9yiSwrq%2BT9TNwNwRJFMATSXqkB7Dxrk%2F2T4GyNbrAkizJ3NsurmyuCBR7oVPhFyNqyc7Wq0WFC1Wn1SQYCFmIWznpOY3phshYt3snwAIgd9GtxDHucMZsLZfYl8t2195xOMA%3D%3D&X-Amz-Signature=dd3736a2459e4e3654bc4d19f50d493a6664b413aa296f45efcc02101f2606e4"
+
+rule all:
+    input:
+        [ (PROCESSED_DIR / f) for f in config['output'] ]
+
+
+rule convert_to_zarr:
+    input:
+        rna=(RAW_DIR / "rna.h5ad"),
+        atac=(RAW_DIR / "atac.h5ad")
+    output:
+        rna=directory(PROCESSED_DIR / "kuppe_2022_nature.rna.h5ad.zarr"),
+        atac=directory(PROCESSED_DIR / "kuppe_2022_nature.atac.h5ad.zarr")
+    params:
+        script=(SRC_DIR / "convert_to_zarr.py")
+    shell:
+        '''
+        python {params.script} \
+            -ir {input.rna} \
+            -ia {input.atac} \
+            -or {output.rna} \
+            -oa {output.atac}
+        '''
+
+
+# Download raw h5ad files.
+rule download_rna:
+    output:
+        (RAW_DIR / "rna.h5ad")
+    params:
+        file_url=SN_RNA_URL
+    shell:
+        '''
+        curl -L --retry 999 --retry-delay 3 -C - -o {output} "{params.file_url}"
+        '''
+
+rule download_atac:
+    output:
+        (RAW_DIR / "atac.h5ad")
+    params:
+        file_url=SN_ATAC_URL
+    shell:
+        '''
+        curl -L --retry 999 --retry-delay 3 -C - -o {output} "{params.file_url}"
+        '''

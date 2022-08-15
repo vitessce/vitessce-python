@@ -16,7 +16,7 @@ configfile: "config.yml"
 
 rule all:
     input:
-        config['output']
+        [ (PROCESSED_DIR / f) for f in config['output'] ]
 EOF
 
 cat << EOF > "./$1/config.yml"

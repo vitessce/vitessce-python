@@ -1,22 +1,23 @@
 include: "../common.smk"
 configfile: "config.yml"
 
-# URL constants
+# https://www.covid19cellatlas.org/index.healthy.html#habib17
+
 H5AD_URL = "https://covid19.cog.sanger.ac.uk/habib17.processed.h5ad"
 
 # Rules
 rule all:
     input:
-        config['output']
+        [ (PROCESSED_DIR / f) for f in config['output'] ]
 
 # Convert the raw AnnData .h5ad file to a processed AnnData .zarr store.
-rule convert_h5ad_to_zarr:
+rule convert_to_zarr:
     input:
         (RAW_DIR / "habib17.processed.h5ad")
     output:
         directory(PROCESSED_DIR / "habib_2017_nature_methods.h5ad.zarr")
     params:
-        script=(SRC_DIR / "convert_h5ad_to_zarr.py")
+        script=(SRC_DIR / "convert_to_zarr.py")
     shell:
         '''
         python {params.script} \

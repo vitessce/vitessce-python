@@ -1,0 +1,41 @@
+include: "../common.smk"
+configfile: "config.yml"
+
+# https://doi.org/10.1016/j.isci.2022.104097
+
+# cellxgene portal AWS URLs expire in one week.
+# May need to get new URLs from https://cellxgene.cziscience.com/collections/8e880741-bf9a-4c8e-9227-934204631d2a
+
+# High Resolution Slide-seqV2 Spatial Transcriptomics Enables Discovery of Disease-Specific Cell Neighborhoods and Pathways
+
+# Spatial transcriptomics in the healthy human kidney: Puck_200903_13
+H5AD_URL = "https://corpora-data-prod.s3.amazonaws.com/88b7da92-178d-4f27-bc18-b0165b256c67/local.h5ad?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIATLYQ5N5X322MS2XN%2F20220811%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220811T190727Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEPv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIBrJfgGJH4sQ64fVRr3Ki1ume872PxIh45%2BypqwNIJkvAiEA5uVBj2z1KbMqFfng3mYF3%2F9LVqCvMNNqfRxm3OmMvxcq6wMIZBABGgwyMzE0MjY4NDY1NzUiDFdMc3mrNAw%2BSmmgEirIAxlal7WGTyvX%2B1KtsOm4jnagtkfSpZd8Wrfrpr4AHXs0pJECP8rWmuUYdD%2F9IeDXqQeNHu8lPJcdG5LgSHU%2B4qLa%2FtDJbKM5QZDdpoNCoPZKs6HPBnQkgOppAZNK6NjIpNn8EhwjTSYDTRNW%2Baf%2B6yBfunVHONU70vS7S2IjKM9D9M4vGzAHOUjwpu%2Bqwc%2BriBCYWJF7oi3C%2BQqph6DUcFFKS0RfzxYl%2BsERQPtR%2FN2fqPb17ddftGgDpW6luDAO9BPbFnGvLTRMvJJTyHysCOzA%2Bfda1Sq8ItXZUtpLLLA%2Bl2NfWQyI2wQ6b0U3%2FKL5UvztJPxsXwtL2eScjgM8q%2FPeFmRCmSS8hs7KH3wOn9Mi7oxWMNQuNAdSHE47q%2Fl8rem8ElhPLSI7wqdrLeiHPsCAUcDhBpGWz1vKTgD9vsnaIjBcrGxLBSmz2rH2yiUaQ9QsJvIjjdHOWlzHDMBA1VTHtwQadgQ3gQ4JsBebqRBkce5zAvQWy8aBmgzvEPNVBqsVo6yf73hzVFvwC7y4lmauCZYrBzsZmdTC%2BT7fsZjGPai8Y44%2BdUZoxpMYCXRjU1TOaBguzVBmJSSjN%2BQl0na6lETE82ECVTCVmNWXBjqlAUtuRYh6hpTOZpN9lGRESOl2KLjhJn1DJy1xJNYoR8nXcfy1KnqOJsys3kajdJCyG5X8rQpSRiM142JfW3QrRw2M7mzSdM9D6MzMlyJOoUsZoF%2Bosn8cwaTYGsBSB4jPywm6gcmiMr8vfr%2BPA2GHOAyEBqzH9tD2siORSmhp8u0wqdfwa%2Ba12EdJJ1CiHe%2BngzK%2FqfSxctHROZ4ltJqZVunW2fWKvQ%3D%3D&X-Amz-Signature=e9760eb2afb0b4e557be2b07b0998ce306049e6e63f7c2f6c8aa1007ad52b2b2"
+
+rule all:
+    input:
+        [ (PROCESSED_DIR / f) for f in config['output'] ]
+
+rule convert_to_zarr:
+    input:
+        (RAW_DIR / "marshall_2022_iscience.h5ad")
+    output:
+        directory(PROCESSED_DIR / "marshall_2022_iscience.h5ad.zarr")
+    params:
+        script=(SRC_DIR / "convert_to_zarr.py")
+    shell:
+        '''
+        python {params.script} \
+            -i {input} \
+            -o {output}
+        '''
+
+# Download raw h5ad file.
+rule download_rna:
+    output:
+        (RAW_DIR / "marshall_2022_iscience.h5ad")
+    params:
+        file_url=H5AD_URL
+    shell:
+        '''
+        curl -L -o {output} "{params.file_url}"
+        '''

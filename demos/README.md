@@ -49,3 +49,5 @@ Then,
 - Test the demo by running the Vitessce frontend locally and navigating to `http://localhost:3000/?url=http://localhost:8000/{new_demo_dir}/vitessce.json`
 
 See existing demo Snakefiles and scripts for examples.
+
+Be sure to add comments (either in the demo-specific Snakefile or README.md file) about where raw file URLs were obtained.

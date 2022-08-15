@@ -29,6 +29,18 @@ subworkflow human_lymph_node_10x_visium:
     workdir:
         "human_lymph_node_10x_visium"
 
+subworkflow kuppe_2022_nature:
+    workdir:
+        "kuppe_2022_nature"
+
+subworkflow marshall_2022_iscience:
+    workdir:
+        "marshall_2022_iscience"
+
+subworkflow meta_2022_azimuth:
+    workdir:
+        "meta_2022_azimuth"
+
 
 # Only access workflow._subworkflows after all
 # subworkflows have been defined above.

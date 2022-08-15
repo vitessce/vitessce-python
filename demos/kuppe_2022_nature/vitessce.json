@@ -1,0 +1,214 @@
+{
+  "version": "1.0.15",
+  "name": "Kuppe et al., 2022 Nature",
+  "description": "Kuppe et al., 2022 Nature",
+  "datasets": [{
+    "uid": "kuppe_2022_nature",
+    "name": "kuppe_2022_nature",
+    "files": [
+      {
+        "fileType": "obsSets.anndata.zarr",
+        "url": "http://localhost:8000/kuppe_2022_nature/data/processed/kuppe_2022_nature.joint.h5ad.zarr",
+        "coordinationValues": {
+          "obsType": "cell"
+        },
+        "options": [
+          {
+            "name": "Cell Type",
+            "path": "obs/cell_type"
+          },
+          {
+            "name": "Development Stage",
+            "path": "obs/development_stage"
+          },
+          {
+            "name": "Disease",
+            "path": "obs/disease"
+          },
+          {
+            "name": "Sex",
+            "path": "obs/sex"
+          }
+        ]
+      },
+      {
+        "fileType": "anndata.zarr",
+        "url": "http://localhost:8000/kuppe_2022_nature/data/processed/kuppe_2022_nature.rna.h5ad.zarr",
+        "coordinationValues": {
+          "obsType": "cell",
+          "featureType": "gene",
+          "featureValueType": "expression"
+        },
+        "options": {
+          "obsFeatureMatrix": {
+            "path": "X"
+          },
+          "featureLabels": {
+            "path": "var/feature_name"
+          },
+          "obsEmbedding": [
+            {
+              "path": "obsm/X_umap",
+              "embeddingType": "RNA-UMAP"
+            },
+            {
+              "path": "obsm/X_pca",
+              "embeddingType": "RNA-PCA"
+            }
+          ]
+        }
+      },
+      {
+        "fileType": "anndata.zarr",
+        "url": "http://localhost:8000/kuppe_2022_nature/data/processed/kuppe_2022_nature.atac.h5ad.zarr",
+        "coordinationValues": {
+          "obsType": "cell",
+          "featureType": "peak",
+          "featureValueType": "count"
+        },
+        "options": {
+          "obsFeatureMatrix": {
+            "path": "X"
+          },
+          "featureLabels": {
+            "path": "var/feature_name"
+          },
+          "obsEmbedding": [
+            {
+              "path": "obsm/X_umap",
+              "embeddingType": "ATAC-UMAP"
+            }
+          ]
+        }
+      }
+    ]
+  }],
+  "initStrategy": "auto",
+  "coordinationSpace": {
+    "embeddingType": {
+      "RNA_UMAP": "RNA-UMAP",
+      "RNA_PCA": "RNA-PCA",
+      "ATAC_UMAP": "ATAC-UMAP"
+    },
+    "obsType": {
+      "A": "cell"
+    },
+    "featureType": {
+      "A": "gene",
+      "B": "peak"
+    },
+    "featureValueType": {
+      "A": "expression",
+      "B": "count"
+    },
+    "featureSelection": {
+      "A": null,
+      "B": null
+    },
+    "obsColorEncoding": {
+      "A": "cellSetSelection",
+      "B": "cellSetSelection"
+    },
+    "featureValueColormapRange": {
+      "A": [0, 0.1],
+      "B": [0, 0.1]
+    },
+    "embeddingObsSetLabelsVisible": {
+      "A": true
+    }
+  },
+  "layout": [{
+      "component": "obsSets",
+      "h": 4,
+      "w": 4,
+      "x": 4,
+      "y": 0,
+      "coordinationScopes": {
+        "obsType": "A",
+        "obsColorEncoding": "A"
+      },
+      "uid": "A"
+    },
+    {
+      "component": "obsSetSizes",
+      "h": 4,
+      "w": 4,
+      "x": 8,
+      "y": 0,
+      "coordinationScopes": {
+        "obsType": "A"
+      },
+      "uid": "B"
+    },
+    {
+      "component": "scatterplot",
+      "h": 4,
+      "w": 4,
+      "x": 0,
+      "y": 0,
+      "coordinationScopes": {
+        "embeddingType": "RNA_UMAP",
+        "obsType": "A",
+        "featureType": "A",
+        "featureValueType": "A",
+        "featureSelection": "A",
+        "obsColorEncoding": "A",
+        "featureValueColormapRange": "A",
+        "embeddingObsSetLabelsVisible": "A"
+      },
+      "uid": "C"
+    },
+    {
+      "component": "scatterplot",
+      "h": 4,
+      "w": 4,
+      "x": 0,
+      "y": 4,
+      "coordinationScopes": {
+        "embeddingType": "ATAC_UMAP",
+        "obsType": "A",
+        "featureType": "B",
+        "featureValueType": "B",
+        "featureSelection": "B",
+        "obsColorEncoding": "B",
+        "featureValueColormapRange": "B",
+        "embeddingObsSetLabelsVisible": "A"
+      },
+      "uid": "D"
+    },
+    {
+      "component": "featureList",
+      "h": 4,
+      "w": 2,
+      "x": 4,
+      "y": 4,
+      "coordinationScopes": {
+        "featureType": "A",
+        "featureSelection": "A",
+        "obsColorEncoding": "A"
+      },
+      "uid": "E"
+    },
+    {
+      "component": "featureList",
+      "h": 4,
+      "w": 2,
+      "x": 6,
+      "y": 4,
+      "coordinationScopes": {
+        "featureType": "B",
+        "featureSelection": "B",
+        "obsColorEncoding": "B"
+      },
+      "uid": "F"
+    },
+    {
+      "component": "description",
+      "h": 4,
+      "w": 4,
+      "x": 8,
+      "y": 4,
+      "uid": "G"
+    }
+  ]
+}

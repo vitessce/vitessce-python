@@ -22,7 +22,8 @@ rule convert_to_zarr:
         atac=(RAW_DIR / "atac.h5ad")
     output:
         rna=directory(PROCESSED_DIR / "kuppe_2022_nature.rna.h5ad.zarr"),
-        atac=directory(PROCESSED_DIR / "kuppe_2022_nature.atac.h5ad.zarr")
+        atac=directory(PROCESSED_DIR / "kuppe_2022_nature.atac.h5ad.zarr"),
+        joint=directory(PROCESSED_DIR / "kuppe_2022_nature.joint.h5ad.zarr")
     params:
         script=(SRC_DIR / "convert_to_zarr.py")
     shell:
@@ -31,7 +32,8 @@ rule convert_to_zarr:
             -ir {input.rna} \
             -ia {input.atac} \
             -or {output.rna} \
-            -oa {output.atac}
+            -oa {output.atac} \
+            -oj {output.joint}
         '''
 
 

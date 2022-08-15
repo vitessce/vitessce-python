@@ -11,19 +11,32 @@ SN_RNA_URL = "https://corpora-data-prod.s3.amazonaws.com/1c739a3e-c3f5-49d5-98e0
 # All-snATAC-Spatial multi-omic map of human myocardial infarction
 SN_ATAC_URL = "https://corpora-data-prod.s3.amazonaws.com/72a69193-d84a-42f6-98a3-d7ef0ec0c381/local.h5ad?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIATLYQ5N5XU64OVNV3%2F20220811%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220811T155321Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEPX%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQDOSOk%2Fk%2BEtmVg%2Bq1OodOlyl%2FNhOkZ4u5hyqnHJr%2F6PVAIgX3YgL67OfUppHiG4nsQdSuB%2Fy%2FinOfmRIGz0gO5CDNcq6wMIXhABGgwyMzE0MjY4NDY1NzUiDCxz60hPL12co7bUrirIAyPSabbL%2BCAhrltfuxuYJu9duVKeSZ6r9qQt0liX%2BVN0Ycx2APBzOqkZ0IbhpykyUD%2Fv2vmv4VHLe6WZuC7wvDqWiyirQ%2BHXJ6ftMZlm1sd82OCawik6sHI6nFfwJ7Bg9adNbxjsgF3PLHpLoggYUHakTueUFB%2BPCC%2BS%2BRktwGx0abBDAA6JMGSyRUsetCtwkXvJ3eJ1HeUkCCcB49mgcO1BkC%2FVW1pQQO7Bp6BXfhV6GOVg%2B8pAExbClKOoQl%2BWPFqiNe3BbnLcpSIM7daUIBWlsmgOVaXc6nARIR8Pc2Z7ugNVEAGOu708h%2FxHkJI4QT7ljOfV448bKcnQEenbi9ntbZUJ0n0F6JiZ7C6RXloAx3nsenlgkjuTyHDFQXR3ffo7ZAmWbGeovvJwtpghEv4A%2BJ687Ciss7QT5neZV4OggHLKe40y5UNUahhuaTmgDODyrSQlcuVltJoTtFp4OWeyI55r%2BWcOPGs6BSlFpsnSzUao7EScD%2FsQvDkzaxAsIlZKQQdJBPMoDlObEcFCLOqqrUqQq4ZD9nC2qIITesZZ71dWklL4opLBKdYlyQ32QV29o2MNOOlCfpurdwa5EYTE2BeJ7MpQ0jCS%2B9OXBjqlAbSazUWM%2FDJodChkIzssH1EUbCZI80h5rM7b6SUD%2FimfxAS6TmhYXY953uLjSTpOC%2FBV7qKD2PD4Vxvvzf4vkxqnig9yiSwrq%2BT9TNwNwRJFMATSXqkB7Dxrk%2F2T4GyNbrAkizJ3NsurmyuCBR7oVPhFyNqyc7Wq0WFC1Wn1SQYCFmIWznpOY3phshYt3snwAIgd9GtxDHucMZsLZfYl8t2195xOMA%3D%3D&X-Amz-Signature=dd3736a2459e4e3654bc4d19f50d493a6664b413aa296f45efcc02101f2606e4"
 
+# Visium-GT_IZ_P9-Spatial multi-omic map of human myocardial infarction
+VISIUM_GT_IZ_P9_URL = "https://corpora-data-prod.s3.amazonaws.com/6476d8b6-1ad0-47b3-b243-846a08007311/local.h5ad?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIATLYQ5N5XR3VAADCX%2F20220815%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220815T202518Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEFgaCXVzLXdlc3QtMiJGMEQCIDCn08MGaD5bi65tyfunLDtTMkZgqGu%2FFue24CmOELe1AiBdwC5E4xCe609j9AMJSoxDSi0flES7hqVmqJXQ0Ntr%2Bir0AwjB%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAEaDDIzMTQyNjg0NjU3NSIM4qlJKWmMUoDZsdaDKsgDuaqpbKzCL2DqnKhba36wTOpIWUXAOES%2FFQmDNrYprxazN7ew1HMaXI8OqYu2HuqFzpUakeD8FeIizObyxT0H70WK8tO7EZ%2BNoSu%2B2PDVRnYBI8%2FaJ2Yl0qsoV%2F0HLHDuWSx0y5DaAZuLtWt5ZnDmTUZPJH%2Bk2XEm3nAPeh9K33OnIleKTRf5bX%2FhS0wypAN51pRPZ187%2F7rab%2FMEH%2BbJu08h5Vl7KMlIM9YhL%2BCUkOSxMAsa7T3RiUNt%2FfPqzp%2Fnh68rINbL0JxoKTo%2FB%2F1679rW6Npo6M0cEMW3358jSXbfwXooy3KmX1Oe%2FhX%2BvKuRJyeR%2B0t1Q93x00AMZHsx9YmdnldIv%2FevMYq35j0uFcgY1UXusuAbTFSpB4ybnT8QvMQj9cx5EVPESvCUZpT3Wma12MvMjzaXldrTfp8rLgQ2yCGtTuZRIG1OVgmAjtjzM2Y7W8NtGccf9I20RhHXn9hS8rczH0G7pUoEhS%2Fncf1trKODyH4LX%2Fn9HT2MTZDCPozIFbyTR2Y0nmGOV93cH%2FPOgpYOJfr3O3T0aZlauxkrlKd2VGxbXN3Hn4Lt0t2Tb8m6eBoFAJ9jcsDTs1LcD5Xbf4aI%2FARSMNbP6ZcGOqYBpvvleA0ReNAEvP1jvl2WR1pBKC3ad5GI25zAOaevakL29%2By1V8ZX9dBvsh4rv87MFGDBe6MDzMH4OrJyO%2Flokwkrz9whCMMzTtk0GFlxXW%2FR8S1KhTJi39iTywEEZE6wtUgv8EGfCfV19CZF83gK2EZLgd%2FD72h%2F9t4J8VKQjw6JH3OnZu5sjJn5c%2F5pJWczrFasB5HHh8FsKKMfac5CiPtdh2sLOA%3D%3D&X-Amz-Signature=edc102c5ddb5d3e736a45e72e0693cc4122169ec37b73746cdc0c1a0af76e26e"
+
+# https://zenodo.org/record/6580069
+VISIUM_GT_IZ_P9_TAR_URL = "https://zenodo.org/record/6580069/files/10X_Visium_ACH0012.tar.gz?download=1"
+
+IMG_DIR = (RAW_DIR / "ACH0012" / "outs" / "Volumes" / "RicoData2" / "MI_project" / "MI_revisions" / "HCA_submission" / "spatial" / "ACH0012" / "outs" / "spatial")
+
 rule all:
     input:
-        [ (PROCESSED_DIR / f) for f in config['output'] ]
+        [ (PROCESSED_DIR / f) for f in config['output'] ],
+        (IMG_DIR / "tissue_hires_image.png")
 
 
 rule convert_to_zarr:
     input:
         rna=(RAW_DIR / "rna.h5ad"),
-        atac=(RAW_DIR / "atac.h5ad")
+        atac=(RAW_DIR / "atac.h5ad"),
+        visium_adata=(RAW_DIR / "visium_gt_iz_p9.h5ad"),
+        visium_img=(IMG_DIR / "tissue_hires_image.png"),
+        visium_csv=(IMG_DIR / "tissue_positions_list.csv")
     output:
         rna=directory(PROCESSED_DIR / "kuppe_2022_nature.rna.h5ad.zarr"),
         atac=directory(PROCESSED_DIR / "kuppe_2022_nature.atac.h5ad.zarr"),
-        joint=directory(PROCESSED_DIR / "kuppe_2022_nature.joint.h5ad.zarr")
+        joint=directory(PROCESSED_DIR / "kuppe_2022_nature.joint.h5ad.zarr"),
+        visium=directory(PROCESSED_DIR / "kuppe_2022_nature.visium.h5ad.zarr")
     params:
         script=(SRC_DIR / "convert_to_zarr.py")
     shell:
@@ -31,13 +44,60 @@ rule convert_to_zarr:
         python {params.script} \
             -ir {input.rna} \
             -ia {input.atac} \
+            -iva {input.visium_adata} \
+            -ivi {input.visium_img} \
+            -ivc {input.visium_csv} \
             -or {output.rna} \
             -oa {output.atac} \
-            -oj {output.joint}
+            -oj {output.joint} \
+            -ov {output.visium}
         '''
 
+rule unzip:
+    input:
+        (RAW_DIR / "ACH0012" / "outs" / "spatial_ACH0012_spatial.zip")
+    params:
+        out_dir=(RAW_DIR / "ACH0012" / "outs")
+    output:
+        (IMG_DIR / "tissue_hires_image.png"),
+        (IMG_DIR / "tissue_positions_list.csv")
+    shell:
+        '''
+        unzip -o {input} -d {params.out_dir}
+        '''
+
+rule untar:
+    input:
+        (RAW_DIR / "10X_Visium_ACH0012.tar.gz")
+    output:
+        (RAW_DIR / "ACH0012" / "outs" / "spatial_ACH0012_spatial.zip")
+    shell:
+        '''
+        tar -xvzf {input} -C {RAW_DIR}
+        '''
+
+# Download image
+rule download_visium_gt_iz_p9_tar:
+    output:
+        (RAW_DIR / "10X_Visium_ACH0012.tar.gz")
+    params:
+        file_url=VISIUM_GT_IZ_P9_TAR_URL
+    shell:
+        '''
+        curl -L --retry 999 --retry-delay 3 -C - -o {output} "{params.file_url}"
+        '''
 
 # Download raw h5ad files.
+rule download_visium_gt_iz_p9:
+    output:
+        (RAW_DIR / "visium_gt_iz_p9.h5ad")
+    params:
+        file_url=VISIUM_GT_IZ_P9_URL
+    shell:
+        '''
+        curl -L --retry 999 --retry-delay 3 -C - -o {output} "{params.file_url}"
+        '''
+
 rule download_rna:
     output:
         (RAW_DIR / "rna.h5ad")

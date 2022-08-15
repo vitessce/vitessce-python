@@ -1,7 +1,7 @@
 {
   "version": "1.0.15",
   "name": "Marshall et al., 2022 iScience",
-  "description": "",
+  "description": "Marshall et al., 2022 iScience",
   "datasets": [{
     "uid": "marshall_2022",
     "name": "marshall_2022",

@@ -1,6 +1,7 @@
 {
   "version": "1.0.15",
   "name": "10x visium human lymph node",
+  "description": "10x visium human lymph node",
   "initStrategy": "auto",
   "datasets": [
     {

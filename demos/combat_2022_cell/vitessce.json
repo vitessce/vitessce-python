@@ -1,7 +1,7 @@
 {
   "version": "1.0.15",
   "name": "COMBAT 2022 Cell",
-  "description": "",
+  "description": "COMBAT 2022 Cell",
   "datasets": [{
     "uid": "a",
     "name": "CITE-Seq",

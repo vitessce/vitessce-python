@@ -16,6 +16,7 @@ dependencies:
  - scipy
  - snakemake>=6.0
  - pyyaml
+ - imageio
  - pip
  - pip:
    - loompy>=3.0.6
@@ -23,3 +24,4 @@ dependencies:
    - networkx
    - obonet
    - leidenalg
+   - ome-zarr==0.2.1

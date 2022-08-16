@@ -71,7 +71,7 @@ def convert_to_csv(args):
 
     m_adata = AnnData(X=None, obs=m_obs_df, var=m_var_df)
     m_adata.obsm['X_spatial'] = molecules_df[['X', 'Y']].values.astype(np.dtype('<u4'))
-    
+
     # Write outputs
     c_adata.write_zarr(args.output_cells)
     m_adata.write_zarr(args.output_molecules)

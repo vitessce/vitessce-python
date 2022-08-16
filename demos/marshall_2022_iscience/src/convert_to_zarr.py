@@ -11,10 +11,10 @@ def to_uint8(arr):
     max_along_genes = arr.max(axis=0)
     range_per_gene = max_along_genes - min_along_genes
     ratio_per_gene = 255.0 / range_per_gene
-    
+
     norm_along_genes_arr = np.multiply(
-      (arr - np.tile(min_along_genes, (num_cells, 1))),
-      np.tile(ratio_per_gene, (num_cells, 1))
+        (arr - np.tile(min_along_genes, (num_cells, 1))),
+        np.tile(ratio_per_gene, (num_cells, 1))
     )
     return norm_along_genes_arr.astype(np.dtype('uint8'))
 
@@ -39,11 +39,10 @@ def convert_h5ad_to_zarr(input_path, output_path):
     sc.pp.scale(adata_hvg, max_value=3)
 
     adata.obsm['X_hvg'] = to_uint8(adata_hvg.X)
-    
 
     def to_diamond(x, y, r):
         return np.array([[x, y + r], [x + r, y], [x, y - r], [x - r, y]])
-    
+
     num_cells = adata.obs.shape[0]
     adata.obsm['X_spatial'] = adata.obsm['X_spatial'].astype(np.dtype('uint16'))
     adata.obsm['X_segmentations'] = np.zeros((num_cells, 4, 2), dtype=np.dtype('uint16'))

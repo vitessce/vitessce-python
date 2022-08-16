@@ -11,7 +11,7 @@ def to_uint8(arr):
 
 def convert_h5ad_to_zarr(input_path, output_path):
     adata = read_h5ad(input_path)
-    
+
     adata.X = to_uint8(adata.X)
 
     adata.write_zarr(output_path)

@@ -8,7 +8,6 @@ import zarr
 from ome_zarr.writer import write_image
 
 
-
 def to_uint8(arr):
     arr *= 255.0 / arr.max()
     arr = arr.astype(np.dtype('uint8')).todense()
@@ -18,7 +17,7 @@ def to_uint8(arr):
 def process_h5ad_files(args):
 
     img_arr = imageio.imread(args.input_visium_img)
-    img_arr = np.transpose(img_arr, axes=(2, 1, 0)) # xyc to cyx
+    img_arr = np.transpose(img_arr, axes=(2, 1, 0))  # xyc to cyx
 
     visium_df = pd.read_csv(args.input_visium_csv, header=None)
     visium_df = visium_df.rename(columns={
@@ -41,10 +40,10 @@ def process_h5ad_files(args):
 
     z_root = zarr.open_group(args.output_visium_ome)
     write_image(
-        image = img_arr,
-        group = z_root,
-        axes = "cyx",
-        omero = {
+        image=img_arr,
+        group=z_root,
+        axes="cyx",
+        omero={
             "name": "GT_IZ_P9",
             "version": "0.3",
             "rdefs": {},
@@ -66,7 +65,7 @@ def process_h5ad_files(args):
                 }
             ]
         },
-        chunks = (1, 256, 256)
+        chunks=(1, 256, 256)
     )
 
     visium_adata = read_h5ad(args.input_visium_adata)
@@ -92,7 +91,7 @@ def process_h5ad_files(args):
         atac_adata.obs[joint_cols],
         visium_adata.obs[joint_cols]
     ])
-    
+
     joint_adata = AnnData(obs=joint_obs_df)
     joint_adata.write_zarr(args.output_joint)
 
@@ -113,7 +112,6 @@ def process_h5ad_files(args):
         visium_adata.obsm['segmentations'][i, :, :] = to_diamond(visium_adata.obsm['X_spatial'][i, 0], visium_adata.obsm['X_spatial'][i, 1], radius)
 
     visium_adata.write_zarr(args.output_visium_adata)
-
 
 
 if __name__ == '__main__':

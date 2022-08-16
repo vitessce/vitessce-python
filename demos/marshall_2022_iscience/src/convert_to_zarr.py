@@ -5,7 +5,6 @@ import scanpy as sc
 
 
 def to_uint8(arr):
-    num_genes = arr.shape[1]
     num_cells = arr.shape[0]
     min_along_genes = arr.min(axis=0)
     max_along_genes = arr.max(axis=0)

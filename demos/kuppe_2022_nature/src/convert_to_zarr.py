@@ -1,5 +1,4 @@
 import argparse
-import scanpy as sc
 import numpy as np
 import pandas as pd
 from anndata import read_h5ad, AnnData
@@ -12,6 +11,20 @@ def to_uint8(arr):
     arr *= 255.0 / arr.max()
     arr = arr.astype(np.dtype('uint8')).todense()
     return arr
+
+
+def to_uint8_norm(arr):
+    num_cells = arr.shape[0]
+    min_along_genes = arr.min(axis=0)
+    max_along_genes = arr.max(axis=0)
+    range_per_gene = max_along_genes - min_along_genes
+    ratio_per_gene = 255.0 / range_per_gene
+
+    norm_along_genes_arr = np.multiply(
+        (arr - np.tile(min_along_genes, (num_cells, 1))),
+        np.tile(ratio_per_gene, (num_cells, 1))
+    )
+    return norm_along_genes_arr.astype(np.dtype('uint8'))
 
 
 def process_h5ad_files(args):
@@ -81,6 +94,7 @@ def process_h5ad_files(args):
 
     rna_adata.X = to_uint8(rna_adata.X)
     atac_adata.X = to_uint8(atac_adata.X)
+    visium_adata.X = to_uint8_norm(visium_adata.X.todense())
 
     rna_adata.obsm['X_umap'] = rna_adata.obsm['X_umap'].astype('<f4')
     atac_adata.obsm['X_umap'] = atac_adata.obsm['X_umap'].astype('<f4')
@@ -100,16 +114,23 @@ def process_h5ad_files(args):
 
     # Visium processing
     num_cells = visium_adata.obs.shape[0]
-    visium_adata.obsm['X_spatial'] = visium_adata.obsm['X_spatial'].astype('<f4')
-    visium_adata.obsm['xy'] = visium_adata.obs[['X', 'Y']].values.astype('<u2')
+    visium_adata.obsm['spatial'] = visium_adata.obsm['X_spatial'].astype('<f4')
+    visium_adata.obsm['xy'] = visium_adata.obs[['X', 'Y']].values.astype('<f4')
+
+    scale_factor = 0.20319009
+    visium_adata.obsm['xy_scaled'] = visium_adata.obsm['xy'] * scale_factor
 
     # Create segmentations
     def to_diamond(x, y, r):
         return np.array([[x, y + r], [x + r, y], [x, y - r], [x - r, y]])
     visium_adata.obsm['segmentations'] = np.zeros((num_cells, 4, 2), dtype=np.dtype('<f4'))
-    radius = 50
+    visium_adata.obsm['xy_segmentations'] = np.zeros((num_cells, 4, 2), dtype=np.dtype('<f4'))
+    visium_adata.obsm['xy_segmentations_scaled'] = np.zeros((num_cells, 4, 2), dtype=np.dtype('<f4'))
+    radius = 35
     for i in range(num_cells):
-        visium_adata.obsm['segmentations'][i, :, :] = to_diamond(visium_adata.obsm['X_spatial'][i, 0], visium_adata.obsm['X_spatial'][i, 1], radius)
+        visium_adata.obsm['segmentations'][i, :, :] = to_diamond(visium_adata.obsm['spatial'][i, 0], visium_adata.obsm['spatial'][i, 1], radius)
+        visium_adata.obsm['xy_segmentations'][i, :, :] = to_diamond(visium_adata.obsm['xy'][i, 0], visium_adata.obsm['xy'][i, 1], radius)
+        visium_adata.obsm['xy_segmentations_scaled'][i, :, :] = to_diamond(visium_adata.obsm['xy_scaled'][i, 0], visium_adata.obsm['xy_scaled'][i, 1], radius * scale_factor)
 
     visium_adata.write_zarr(args.output_visium_adata)
 

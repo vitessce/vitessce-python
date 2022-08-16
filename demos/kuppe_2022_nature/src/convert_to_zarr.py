@@ -3,9 +3,10 @@ import scanpy as sc
 import numpy as np
 import pandas as pd
 from anndata import read_h5ad, AnnData
-import imageio
+import imageio.v2 as imageio
 import zarr
-import ome_zarr
+from ome_zarr.writer import write_image
+
 
 
 def to_uint8(arr):
@@ -16,17 +17,68 @@ def to_uint8(arr):
 
 def process_h5ad_files(args):
 
-    visium_img = imageio.imread(args.visium_img)
-    visium_df = pd.read_csv(args.visium_csv)
+    img_arr = imageio.imread(args.input_visium_img)
+    img_arr = np.transpose(img_arr, axes=(2, 1, 0)) # xyc to cyx
 
-    # TODO: write visium_img to OME-Zarr
+    visium_df = pd.read_csv(args.input_visium_csv, header=None)
+    visium_df = visium_df.rename(columns={
+        0: "spot_id",
+        4: "X",
+        5: "Y"
+    })
+
+    visium_df = visium_df.set_index('spot_id')
+
+    # Write img_arr to OME-Zarr
     # https://github.com/vitessce/vitessceR/blob/main/R/data_to_zarr.R#L146
-    # TODO: add the tissue_positions_list columns to visium_adata.obs
+
+    default_window = {
+        "start": 0,
+        "min": 0,
+        "max": 255,
+        "end": 255
+    }
+
+    z_root = zarr.open_group(args.output_visium_ome)
+    write_image(
+        image = img_arr,
+        group = z_root,
+        axes = "cyx",
+        omero = {
+            "name": "GT_IZ_P9",
+            "version": "0.3",
+            "rdefs": {},
+            "channels": [
+                {
+                    "label": "R",
+                    "color": "FF0000",
+                    "window": default_window
+                },
+                {
+                    "label": "G",
+                    "color": "00FF00",
+                    "window": default_window
+                },
+                {
+                    "label": "B",
+                    "color": "0000FF",
+                    "window": default_window
+                }
+            ]
+        },
+        chunks = (1, 256, 256)
+    )
+
+    visium_adata = read_h5ad(args.input_visium_adata)
+
+    # Add the tissue_positions_list columns to visium_adata.obs
+    visium_adata.obs['X'] = visium_adata.obs.apply(lambda row: visium_df.at[row.name, 'X'], axis='columns')
+    visium_adata.obs['Y'] = visium_adata.obs.apply(lambda row: visium_df.at[row.name, 'Y'], axis='columns')
+
     # TODO: use scale factors from scalefactors_json.json in the OME-Zarr?
 
     rna_adata = read_h5ad(args.input_rna)
     atac_adata = read_h5ad(args.input_atac)
-    visium_adata = read_h5ad(args.input_visium_adata)
 
     rna_adata.X = to_uint8(rna_adata.X)
     atac_adata.X = to_uint8(atac_adata.X)
@@ -50,6 +102,7 @@ def process_h5ad_files(args):
     # Visium processing
     num_cells = visium_adata.obs.shape[0]
     visium_adata.obsm['X_spatial'] = visium_adata.obsm['X_spatial'].astype('<f4')
+    visium_adata.obsm['xy'] = visium_adata.obs[['X', 'Y']].values.astype('<u2')
 
     # Create segmentations
     def to_diamond(x, y, r):
@@ -59,7 +112,7 @@ def process_h5ad_files(args):
     for i in range(num_cells):
         visium_adata.obsm['segmentations'][i, :, :] = to_diamond(visium_adata.obsm['X_spatial'][i, 0], visium_adata.obsm['X_spatial'][i, 1], radius)
 
-    visium_adata.write_zarr(args.output_visium)
+    visium_adata.write_zarr(args.output_visium_adata)
 
 
 
@@ -122,11 +175,18 @@ if __name__ == '__main__':
         help='Output joint RNA+ATAC zarr store'
     )
     parser.add_argument(
-        '-ov',
-        '--output_visium',
+        '-ova',
+        '--output_visium_adata',
         type=str,
         required=True,
-        help='Output visium h5ad file'
+        help='Output visium h5ad zarr store'
+    )
+    parser.add_argument(
+        '-ovo',
+        '--output_visium_ome',
+        type=str,
+        required=True,
+        help='Output visium OME zarr store'
     )
     args = parser.parse_args()
     process_h5ad_files(args)

@@ -63,6 +63,12 @@ flake8
 pytest
 ```
 
+### Formatting
+
+```sh
+autopep8 --in-place --aggressive ./path/to/file.py
+```
+
 
 ## Documentation
 

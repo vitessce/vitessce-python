@@ -57,20 +57,26 @@ Note that the name of `new_demo_dir` should match the intended key in `https://g
 
 ### Render all Vitessce config templates
 
+To use the same configuration for both development (with localhost file URLs) and production/testing (with AWS/GCP file URLs), we write them as Jinja2 templates in the `vitessce.template.json` files where `{{ base_url }}` and `{{ base_url_gcp }}` are replaced at template render time.
+
+We can render the template to `vitessce.local.json` and `vitessce.remote.json` using the following commands:
+
 ```sh
 snakemake fill_templates -j 1
 ```
+
+Be sure to re-run after making changes to `vitessce.template.json`.
 
 #### Render an individual template
 
 Local:
 
 ```sh
-python fill_template.py -d codeluppi-2018 -t local
+python fill_template.py -d codeluppi-2018 -t local > ./codeluppi-2018/vitessce.local.json
 ```
 
 Remote:
 
 ```sh
-python fill_template.py -d codeluppi-2018 -t remote -v 0.0.33
+python fill_template.py -d codeluppi-2018 -t remote -v 0.0.33 > ./codeluppi-2018/vitessce.remote.json
 ```

@@ -1,2 +1,3 @@
 output:
-- codeluppi-2018-via-zarr.h5ad.zarr
+- codeluppi_2018_nature_methods.cells.h5ad.zarr
+- codeluppi_2018_nature_methods.molecules.h5ad.zarr

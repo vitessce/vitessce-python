@@ -33,27 +33,6 @@ rule convert_to_csv:
             -om {output.molecules}
         '''
 
-rule convert_to_zarr:
-    input:
-        cells=(RAW_DIR / "cells.json"),
-        molecules=(RAW_DIR / "molecules.json"),
-        expression_matrix=(RAW_DIR / "clusters.json")
-    output:
-        cells=directory(PROCESSED_DIR / "codeluppi_2018_nature_methods.cells.h5ad.zarr"),
-        molecules=directory(PROCESSED_DIR / "codeluppi_2018_nature_methods.molecules.h5ad.zarr")
-    params:
-        script=(SRC_DIR / "convert_to_zarr.py")
-    shell:
-        '''
-        python {params.script} \
-            -ic {input.cells} \
-            -im {input.molecules} \
-            -iem {input.expression_matrix} \
-            -oc {output.cells} \
-            -oc {output.cells} \
-            -om {output.molecules}
-        '''
-
 # Download original JSON files.
 rule download_file:
     output:

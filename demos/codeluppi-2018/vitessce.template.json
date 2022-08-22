@@ -163,7 +163,7 @@
     },
     "spatialSegmentationLayer": {
       "A": {
-        "opacity": 1, "radius": 50, "visible": true, "stroked": false
+        "opacity": 1, "radius": 0, "visible": true, "stroked": false
       }
     },
     "spatialPointLayer": {

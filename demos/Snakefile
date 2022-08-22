@@ -27,6 +27,10 @@ subworkflow combat_2022:
     workdir:
         "combat-2022"
 
+subworkflow eng_2019:
+    workdir:
+        "eng-2019"
+
 subworkflow habib_2017:
     workdir:
         "habib-2017"

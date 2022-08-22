@@ -9,9 +9,9 @@
       "files": [
         {
           "fileType": "anndata.zarr",
-          "url": "http://localhost:8000/human_lymph_node_10x_visium/data/processed/human_lymph_node_10x_visium.h5ad.zarr",
+          "url": "{{ base_url }}/human_lymph_node_10x_visium.h5ad.zarr",
           "coordinationValues": {
-            "obsType": "cell",
+            "obsType": "spot",
             "featureType": "gene",
             "featureValueType": "expression"
           },
@@ -51,7 +51,7 @@
             "images": [
               {
                 "name": "H and E Image",
-                "url": "http://localhost:8000/human_lymph_node_10x_visium/data/processed/human_lymph_node_10x_visium.h5ad.zarr/uns/spatial/V1_Human_Lymph_Node/images/hires",
+                "url": "{{ base_url_gcp }}/human_lymph_node_10x_visium.h5ad.zarr/uns/spatial/V1_Human_Lymph_Node/images/hires",
                 "type": "zarr",
                 "metadata": {
                   "isPyramid": false,
@@ -89,6 +89,9 @@
     }
   ],
   "coordinationSpace": {
+    "obsType": {
+      "A": "spot"
+    },
     "spatialSegmentationLayer": {
       "A": { "radius": 65, "stroked": true, "visible": true, "opacity": 1 }
     },
@@ -166,6 +169,7 @@
     {
       "component": "spatial",
       "coordinationScopes": {
+        "obsType": "A",
         "spatialImageLayer": "A",
         "spatialSegmentationLayer": "A",
         "spatialZoom": "A",
@@ -178,6 +182,7 @@
     {
       "component": "spatial",
       "coordinationScopes": {
+        "obsType": "A",
         "spatialImageLayer": "A",
         "spatialSegmentationLayer": "A",
         "spatialZoom": "A",
@@ -191,6 +196,7 @@
     {
       "component": "heatmap",
       "coordinationScopes": {
+        "obsType": "A",
         "obsColorEncoding": "A"
       },
       "props": {
@@ -201,6 +207,7 @@
     {
       "component": "layerController",
       "coordinationScopes": {
+        "obsType": "A",
         "spatialImageLayer": "A",
         "spatialSegmentationLayer": "A"
       },
@@ -212,6 +219,7 @@
     {
       "component": "obsSets",
       "coordinationScopes": {
+        "obsType": "A",
         "obsColorEncoding": "A"
       },
       "x": 2, "y": 6, "w": 2, "h": 6
@@ -219,6 +227,7 @@
     {
       "component": "featureList",
       "coordinationScopes": {
+        "obsType": "A",
         "obsColorEncoding": "B",
         "featureSelection": "A"
       },

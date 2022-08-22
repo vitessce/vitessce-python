@@ -1,15 +1,15 @@
 {
   "version": "1.0.15",
   "name": "Marshall et al., 2022 iScience",
-  "description": "Marshall et al., 2022 iScience",
+  "description": "Marshall et al., 2022 iScience: High Resolution Slide-seqV2 Spatial Transcriptomics Enables Discovery of Disease-Specific Cell Neighborhoods and Pathways. Spatial transcriptomics in the healthy human kidney: Puck_200903_13",
   "datasets": [{
     "uid": "marshall_2022",
     "name": "marshall_2022",
     "files": [{
       "fileType": "anndata.zarr",
-      "url": "http://localhost:8000/marshall_2022_iscience/data/processed/marshall_2022_iscience.h5ad.zarr",
+      "url": "{{ base_url }}/marshall_2022_iscience.h5ad.zarr",
       "coordinationValues": {
-        "obsType": "cell",
+        "obsType": "bead",
         "featureType": "gene",
         "featureValueType": "expression",
         "embeddingType": "UMAP"
@@ -30,7 +30,7 @@
         },
         "obsSets": [
           {
-            "name": "Cell Type",
+            "name": "Bead Type",
             "path": "obs/cell_type"
           }
         ],
@@ -46,7 +46,7 @@
       "UMAP": "UMAP"
     },
     "obsType": {
-      "A": "cell"
+      "A": "bead"
     },
     "featureType": {
       "A": "gene"

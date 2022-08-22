@@ -8,7 +8,7 @@
     "files": [
       {
         "fileType": "obsSets.anndata.zarr",
-        "url": "http://localhost:8000/kuppe_2022_nature/data/processed/kuppe_2022_nature.joint.h5ad.zarr",
+        "url": "{{ base_url }}/kuppe_2022_nature.joint.h5ad.zarr",
         "coordinationValues": {
           "obsType": "cell"
         },
@@ -33,11 +33,11 @@
       },
       {
         "fileType": "anndata.zarr",
-        "url": "http://localhost:8000/kuppe_2022_nature/data/processed/kuppe_2022_nature.rna.h5ad.zarr",
+        "url": "{{ base_url }}/kuppe_2022_nature.rna.h5ad.zarr",
         "coordinationValues": {
           "obsType": "cell",
-          "featureType": "(snRNA) gene",
-          "featureValueType": "expression"
+          "featureType": "gene",
+          "featureValueType": "transcript count"
         },
         "options": {
           "obsFeatureMatrix": {
@@ -60,11 +60,11 @@
       },
       {
         "fileType": "anndata.zarr",
-        "url": "http://localhost:8000/kuppe_2022_nature/data/processed/kuppe_2022_nature.atac.h5ad.zarr",
+        "url": "{{ base_url }}/kuppe_2022_nature.atac.h5ad.zarr",
         "coordinationValues": {
           "obsType": "cell",
-          "featureType": "(snATAC mapped peak) gene",
-          "featureValueType": "count"
+          "featureType": "gene",
+          "featureValueType": "mapped peak count"
         },
         "options": {
           "obsFeatureMatrix": {
@@ -83,11 +83,11 @@
       },
       {
         "fileType": "anndata.zarr",
-        "url": "http://localhost:8000/kuppe_2022_nature/data/processed/kuppe_2022_nature.visium.h5ad.zarr",
+        "url": "{{ base_url }}/kuppe_2022_nature.visium.h5ad.zarr",
         "coordinationValues": {
-          "obsType": "cell",
-          "featureType": "(visium) gene",
-          "featureValueType": "expression"
+          "obsType": "spot",
+          "featureType": "gene",
+          "featureValueType": "detection count"
         },
         "options": {
           "obsLocations": {
@@ -101,12 +101,30 @@
           },
           "featureLabels": {
             "path": "var/feature_name"
-          }
+          },
+          "obsSets": [
+            {
+              "name": "Spot Type",
+              "path": "obs/cell_type"
+            },
+            {
+              "name": "Development Stage",
+              "path": "obs/development_stage"
+            },
+            {
+              "name": "Disease",
+              "path": "obs/disease"
+            },
+            {
+              "name": "Sex",
+              "path": "obs/sex"
+            }
+          ]
         }
       },
       {
         "fileType": "image.ome-zarr",
-        "url": "http://localhost:8000/kuppe_2022_nature/data/processed/kuppe_2022_nature.visium.ome.zarr"
+        "url": "{{ base_url_gcp }}/kuppe_2022_nature.visium.ome.zarr"
       }
     ]
   }],
@@ -118,27 +136,30 @@
       "ATAC_UMAP": "snATAC UMAP"
     },
     "obsType": {
-      "A": "cell"
+      "A": "cell",
+      "B": "spot"
     },
     "featureType": {
-      "A": "(snRNA) gene",
-      "B": "(snATAC mapped peak) gene",
-      "C": "(visium) gene"
+      "A": "gene"
     },
     "featureValueType": {
-      "A": "expression",
-      "B": "count",
-      "C": "expression"
+      "A": "transcript count",
+      "B": "mapped peak count",
+      "C": "detection count"
     },
     "featureSelection": {
-      "A": null,
-      "B": null,
-      "C": null
+      "A": null
     },
     "obsColorEncoding": {
-      "A": "cellSetSelection",
-      "B": "cellSetSelection",
-      "C": "cellSetSelection"
+      "A": "cellSetSelection"
+    },
+    "obsSetSelection": {
+      "A": null,
+      "B": null
+    },
+    "obsSetColor": {
+      "A": null,
+      "B": null
     },
     "featureValueColormapRange": {
       "A": [0, 0.1],
@@ -204,17 +225,34 @@
       "A": { "radius": 65, "stroked": true, "visible": true, "opacity": 1 }
     }
   },
-  "layout": [{
+  "layout": [
+    {
       "component": "obsSets",
-      "h": 4,
-      "w": 2,
-      "x": 0,
+      "h": 2,
+      "w": 3,
+      "x": 3,
       "y": 4,
       "coordinationScopes": {
         "obsType": "A",
-        "obsColorEncoding": "A"
+        "obsColorEncoding": "A",
+        "obsSetSelection": "A",
+        "obsSetColor": "A"
       },
-      "uid": "A"
+      "uid": "A-cell"
+    },
+    {
+      "component": "obsSets",
+      "h": 2,
+      "w": 3,
+      "x": 3,
+      "y": 6,
+      "coordinationScopes": {
+        "obsType": "B",
+        "obsColorEncoding": "A",
+        "obsSetSelection": "B",
+        "obsSetColor": "B"
+      },
+      "uid": "A-spot"
     },
     {
       "component": "spatial",
@@ -223,13 +261,15 @@
       "x": 8,
       "y": 0,
       "coordinationScopes": {
-        "obsType": "A",
-        "featureType": "C",
+        "obsType": "B",
+        "obsColorEncoding": "A",
+        "obsSetColor": "B",
+        "obsSetSelection": "B",
+        "featureType": "A",
         "featureValueType": "C",
         "spatialSegmentationLayer": "A",
         "spatialImageLayer": "A",
-        "featureSelection": "C",
-        "obsColorEncoding": "C"
+        "featureSelection": "A"
       },
       "uid": "B"
     },
@@ -246,6 +286,8 @@
         "featureValueType": "A",
         "featureSelection": "A",
         "obsColorEncoding": "A",
+        "obsSetColor": "A",
+        "obsSetSelection": "A",
         "featureValueColormapRange": "A",
         "embeddingObsSetLabelsVisible": "A"
       },
@@ -260,10 +302,12 @@
       "coordinationScopes": {
         "embeddingType": "ATAC_UMAP",
         "obsType": "A",
-        "featureType": "B",
+        "featureType": "A",
         "featureValueType": "B",
-        "featureSelection": "B",
-        "obsColorEncoding": "B",
+        "featureSelection": "A",
+        "obsColorEncoding": "A",
+        "obsSetColor": "A",
+        "obsSetSelection": "A",
         "featureValueColormapRange": "B",
         "embeddingObsSetLabelsVisible": "A"
       },
@@ -272,8 +316,8 @@
     {
       "component": "featureList",
       "h": 4,
-      "w": 2,
-      "x": 2,
+      "w": 3,
+      "x": 6,
       "y": 4,
       "coordinationScopes": {
         "featureType": "A",
@@ -283,49 +327,23 @@
       "uid": "E"
     },
     {
-      "component": "featureList",
-      "h": 4,
-      "w": 2,
-      "x": 6,
-      "y": 4,
-      "coordinationScopes": {
-        "featureType": "B",
-        "featureSelection": "B",
-        "obsColorEncoding": "B"
-      },
-      "uid": "F"
-    },
-    {
-      "component": "featureList",
-      "h": 4,
-      "w": 2,
-      "x": 10,
-      "y": 4,
-      "coordinationScopes": {
-        "featureType": "C",
-        "featureSelection": "C",
-        "obsColorEncoding": "C"
-      },
-      "uid": "G"
-    },
-    {
       "component": "description",
       "h": 4,
-      "w": 2,
-      "x": 4,
+      "w": 3,
+      "x": 0,
       "y": 4,
       "uid": "H"
     },
     {
       "component": "layerController",
       "coordinationScopes": {
-        "obsType": "A",
+        "obsType": "B",
         "spatialSegmentationLayer": "A",
         "spatialImageLayer": "A"
       },
       "h": 4,
-      "w": 2,
-      "x": 8,
+      "w": 3,
+      "x": 9,
       "y": 4,
       "uid": "I"
     }

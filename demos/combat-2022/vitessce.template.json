@@ -1,14 +1,14 @@
 {
   "version": "1.0.15",
   "name": "COMBAT 2022 Cell",
-  "description": "COMBAT 2022 Cell",
+  "description": "COMBAT Consortium, 2022 Cell: COVID-19 Multi-omic Blood Atlas",
   "datasets": [{
     "uid": "a",
     "name": "CITE-Seq",
     "files": [
       {
         "fileType": "obsEmbedding.anndata.zarr",
-        "url": "http://localhost:8000/combat_2022_cell/data/processed/combat_2022_cell.h5ad.zarr",
+        "url": "{{ base_url }}/combat_2022_cell.h5ad.zarr",
         "coordinationValues": {
           "obsType": "cell",
           "embeddingType": "UMAP"
@@ -19,7 +19,7 @@
       },
       {
         "fileType": "obsSets.anndata.zarr",
-        "url": "http://localhost:8000/combat_2022_cell/data/processed/combat_2022_cell.h5ad.zarr",
+        "url": "{{ base_url }}/combat_2022_cell.h5ad.zarr",
         "coordinationValues": {
           "obsType": "cell"
         },
@@ -36,7 +36,7 @@
       },
       {
         "fileType": "obsFeatureMatrix.anndata.zarr",
-        "url": "http://localhost:8000/combat_2022_cell/data/processed/combat_2022_cell.h5ad.zarr",
+        "url": "{{ base_url }}/combat_2022_cell.h5ad.zarr",
         "coordinationValues": {
           "obsType": "cell",
           "featureType": "gene",
@@ -49,7 +49,7 @@
       },
       {
         "fileType": "obsFeatureMatrix.anndata.zarr",
-        "url": "http://localhost:8000/combat_2022_cell/data/processed/combat_2022_cell.h5ad.zarr",
+        "url": "{{ base_url }}/combat_2022_cell.h5ad.zarr",
         "coordinationValues": {
           "obsType": "cell",
           "featureType": "antibody",

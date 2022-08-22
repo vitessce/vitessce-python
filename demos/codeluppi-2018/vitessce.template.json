@@ -9,54 +9,92 @@
       "name": "Codeluppi",
       "files": [
         {
-          "fileType": "anndata.zarr",
-          "url": "http://localhost:8000/codeluppi_2018_nature_methods/data/processed/codeluppi_2018_nature_methods.cells.h5ad.zarr",
+          "fileType": "obsSegmentations.json",
+          "url": "{{ base_url }}/codeluppi_2018_nature_methods.cells.segmentations.json",
+          "coordinationValues": {
+            "obsType": "cell"
+          }
+        },
+        {
+          "fileType": "obsLocations.csv",
+          "url": "{{ base_url }}/codeluppi_2018_nature_methods.cells.csv",
           "options": {
-            "obsFeatureMatrix": {
-              "path": "X"
-            },
-            "obsSegmentations": {
-              "path": "obsm/X_segmentations"
-            },
-            "obsLocations": {
-              "path": "obsm/X_spatial"
-            },
-            "obsEmbedding": [
-              {
-                "path": "obsm/X_pca",
-                "embeddingType": "PCA"
-              },
-              {
-                "path": "obsm/X_tsne",
-                "embeddingType": "t-SNE"
-              }
-            ],
+            "obsIndex": "cell_id",
+            "obsLocations": ["X", "Y"]
+          },
+          "coordinationValues": {
+            "obsType": "cell"
+          }
+        },
+        {
+          "fileType": "obsEmbedding.csv",
+          "url": "{{ base_url }}/codeluppi_2018_nature_methods.cells.csv",
+          "options": {
+            "obsIndex": "cell_id",
+            "obsEmbedding": ["PCA_1", "PCA_2"]
+          },
+          "coordinationValues": {
+            "obsType": "cell",
+            "embeddingType": "PCA"
+          }
+        },
+        {
+          "fileType": "obsEmbedding.csv",
+          "url": "{{ base_url }}/codeluppi_2018_nature_methods.cells.csv",
+          "options": {
+            "obsIndex": "cell_id",
+            "obsEmbedding": ["TSNE_1", "TSNE_2"]
+          },
+          "coordinationValues": {
+            "obsType": "cell",
+            "embeddingType": "t-SNE"
+          }
+        },
+        {
+          "fileType": "obsSets.csv",
+          "url": "{{ base_url }}/codeluppi_2018_nature_methods.cells.csv",
+          "options": {
+            "obsIndex": "cell_id",
             "obsSets": [
               {
                 "name": "Cell Type",
-                "path": ["obs/Cluster", "obs/Subcluster"]
+                "column": ["Cluster", "Subcluster"]
               }
             ]
           },
           "coordinationValues": {
-            "obsType": "cell",
-            "featureType": "gene",
-            "featureValueType": "expression"
+            "obsType": "cell"
           }
         },
         {
-          "fileType": "anndata.zarr",
-          "url": "http://localhost:8000/codeluppi_2018_nature_methods/data/processed/codeluppi_2018_nature_methods.molecules.h5ad.zarr",
+          "fileType": "obsLocations.csv",
+          "url": "{{ base_url }}/codeluppi_2018_nature_methods.molecules.csv",
           "options": {
-            "obsLocations": {
-              "path": "obsm/X_spatial"
-            },
-            "obsLabels": {
-              "path": "obs/Gene"
-            }
+            "obsIndex": "molecule_id",
+            "obsLocations": ["X", "Y"]
           },
           "coordinationValues": {
             "obsType": "molecule"
+          }
+        },
+        {
+          "fileType": "obsLabels.csv",
+          "url": "{{ base_url }}/codeluppi_2018_nature_methods.molecules.csv",
+          "options": {
+            "obsIndex": "molecule_id",
+            "obsLabels": "Gene"
+          },
+          "coordinationValues": {
+            "obsType": "molecule"
+          }
+        },
+        {
+          "fileType": "obsFeatureMatrix.csv",
+          "url": "{{ base_url }}/codeluppi_2018_nature_methods.cells.matrix.csv",
+          "coordinationValues": {
+            "obsType": "cell",
+            "featureType": "gene",
+            "featureValueType": "expression"
           }
         },
         {

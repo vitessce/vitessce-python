@@ -18,7 +18,7 @@ pip install -e "..[testing]"
 ### Run
 
 ```sh
-snakemake -j 1
+snakemake -j 1 --rerun-triggers mtime
 ```
 
 ### Serve data locally
@@ -44,10 +44,33 @@ To add a new demo, run
 Then,
 - Add a subworkflow entry to the main demos workflow in `./Snakefile`
 - Specify the output filenames in the `output` list in `./{new_demo_dir}/config.yml`
-- Fill in the Snakefile in `./{new_demo_dirname}/Snakefile`
-- Write a test Vitessce configuration in `./{new_demo_dirname}/vitessce.json`
+- Fill in the Snakefile in `./{new_demo_dir}/Snakefile`
+- Write a test Vitessce configuration in `./{new_demo_dir}/vitessce.template.json`
 - Test the demo by running the Vitessce frontend locally and navigating to `http://localhost:3000/?url=http://localhost:8000/{new_demo_dir}/vitessce.json`
 
 See existing demo Snakefiles and scripts for examples.
 
 Be sure to add comments (either in the demo-specific Snakefile or README.md file) about where raw file URLs were obtained.
+
+Note that the name of `new_demo_dir` should match the intended key in `https://github.com/vitessce/vitessce/blob/main/src/demo/configs.js`, as this key can then be used in the documentation to point to the data processing scripts for each demo.
+
+
+### Render all Vitessce config templates
+
+```sh
+snakemake fill_templates -j 1
+```
+
+#### Render an individual template
+
+Local:
+
+```sh
+python fill_template.py -d codeluppi-2018 -t local
+```
+
+Remote:
+
+```sh
+python fill_template.py -d codeluppi-2018 -t remote -v 0.0.33
+```

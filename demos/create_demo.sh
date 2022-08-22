@@ -4,13 +4,16 @@ set -o pipefail
 
 (( $# == 1 )) || die "Requires one argument, the demo name; Instead got $#."
 
-mkdir "./$1"
-mkdir "./$1/src"
-touch "./$1/Snakefile"
-touch "./$1/config.yml"
-touch "./$1/vitessce.json"
+SUBWORKFLOW_DIR=$1
+SUBWORKFLOW_KEY=${SUBWORKFLOW_DIR//-/_}
 
-cat << EOF > "./$1/Snakefile"
+mkdir "./$SUBWORKFLOW_DIR"
+mkdir "./$SUBWORKFLOW_DIR/src"
+touch "./$SUBWORKFLOW_DIR/Snakefile"
+touch "./$SUBWORKFLOW_DIR/config.yml"
+touch "./$SUBWORKFLOW_DIR/vitessce.template.json"
+
+cat << EOF > "./$SUBWORKFLOW_DIR/Snakefile"
 include: "../common.smk"
 configfile: "config.yml"
 
@@ -19,15 +22,17 @@ rule all:
         [ (PROCESSED_DIR / f) for f in config['output'] ]
 EOF
 
-cat << EOF > "./$1/config.yml"
+cat << EOF > "./$SUBWORKFLOW_DIR/config.yml"
 output:
 - $1.h5ad.zarr
 EOF
 
+
+
 cat << EOF
 Add the following to the main demos Snakefile:
 
-subworkflow $1:
+subworkflow $SUBWORKFLOW_KEY:
     workdir:
-        "$1"
+        "$SUBWORKFLOW_DIR"
 EOF

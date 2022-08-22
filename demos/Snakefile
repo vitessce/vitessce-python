@@ -1,6 +1,8 @@
 from pathlib import Path, PosixPath
 from snakemake.remote.S3 import RemoteProvider as S3RemoteProvider
 import yaml
+import os
+from pprint import pprint
 
 S3 = S3RemoteProvider()
 
@@ -13,41 +15,47 @@ include: "./common.smk"
 # All subworkflows listed here will be
 # executed as part of the 'all' rule
 # in this snakefile.
-subworkflow codeluppi_2018_nature_methods:
+subworkflow codeluppi_2018:
     workdir:
-        "codeluppi_2018_nature_methods"
-        
-subworkflow combat_2022_cell:
-    workdir:
-        "combat_2022_cell"
+        "codeluppi-2018"
 
-subworkflow habib_2017_nature_methods:
+subworkflow codeluppi_2018_via_zarr:
     workdir:
-        "habib_2017_nature_methods"
+        "codeluppi-2018-via-zarr"
+        
+subworkflow combat_2022:
+    workdir:
+        "combat-2022"
+
+subworkflow habib_2017:
+    workdir:
+        "habib-2017"
 
 subworkflow human_lymph_node_10x_visium:
     workdir:
-        "human_lymph_node_10x_visium"
+        "human-lymph-node-10x-visium"
 
-subworkflow kuppe_2022_nature:
+subworkflow kuppe_2022:
     workdir:
-        "kuppe_2022_nature"
+        "kuppe-2022"
 
-subworkflow marshall_2022_iscience:
+subworkflow marshall_2022:
     workdir:
-        "marshall_2022_iscience"
+        "marshall-2022"
 
 subworkflow meta_2022_azimuth:
     workdir:
-        "meta_2022_azimuth"
+        "meta-2022-azimuth"
 
+# End subworkflow list.
 
 # Only access workflow._subworkflows after all
 # subworkflows have been defined above.
 SUBWORKFLOW_KEYS = workflow._subworkflows.keys()
+SUBWORKFLOW_DIRS = dict(zip(SUBWORKFLOW_KEYS, [ v._workdir for v in workflow._subworkflows.values() ]))
 
 def get_subworkflow_outputs(subworkflow_key):
-    with open(Path(subworkflow_key) / "config.yml") as f:
+    with open(Path(SUBWORKFLOW_DIRS[subworkflow_key]) / "config.yml") as f:
         subworkflow_config = yaml.load(f, Loader=yaml.SafeLoader)
         return subworkflow_config['output']
 
@@ -67,7 +75,7 @@ rule all:
         # This should be in output: https://github.com/snakemake/snakemake/issues/870
         out_files=[
             [
-                S3.remote(str(BUCKET / subworkflow_key / subworkflow_output))
+                S3.remote(str(BUCKET / SUBWORKFLOW_DIRS[subworkflow_key] / subworkflow_output))
                 for subworkflow_output
                 in get_subworkflow_outputs(subworkflow_key)
             ]
@@ -78,8 +86,24 @@ rule all:
         if str2bool(params.should_upload):
             print("Uploading")
             for in_file, out_file in zip(input.in_files, flatten(params.out_files)):
-                shell(f"aws s3 cp --recursive {in_file} s3://{out_file}")
+                if os.path.isdir(in_file):
+                    shell(f"aws s3 cp --recursive {in_file} s3://{out_file}")
+                else:
+                    shell(f"aws s3 cp {in_file} s3://{out_file}")
         else:
             print("Not uploading. To upload, use snakemake --config upload=true")
             for in_file, out_file in zip(input.in_files, flatten(params.out_files)):
                 shell(f"echo \"{in_file} s3://{out_file}\"")
+
+rule fill_templates:
+    params:
+        subworkflow_dirs=[
+            SUBWORKFLOW_DIRS[subworkflow_key]
+            for subworkflow_key
+            in SUBWORKFLOW_KEYS
+        ]
+    run:
+        for subworkflow_dir in params.subworkflow_dirs:
+            if os.path.exists(os.path.join(subworkflow_dir, 'vitessce.template.json')):
+                shell(f"python fill_template.py -d {subworkflow_dir} -t local > {os.path.join(subworkflow_dir, 'vitessce.local.json')}")
+                shell(f"python fill_template.py -d {subworkflow_dir} -t remote -v {BUCKET_VERSION} > {os.path.join(subworkflow_dir, 'vitessce.remote.json')}")

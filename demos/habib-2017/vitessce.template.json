@@ -7,7 +7,7 @@
     "name": "339952f4-a47f-46dc-9228-18ba2ca256f2",
     "files": [{
       "fileType": "anndata.zarr",
-      "url": "http://localhost:8000/habib_2017_nature_methods/data/processed/habib_2017_nature_methods.h5ad.zarr",
+      "url": "{{ base_url }}/habib_2017_nature_methods.h5ad.zarr",
       "coordinationValues": {
         "obsType": "cell",
         "featureType": "gene",

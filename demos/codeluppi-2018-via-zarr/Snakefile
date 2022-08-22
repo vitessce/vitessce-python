@@ -1,0 +1,6 @@
+include: "../common.smk"
+configfile: "config.yml"
+
+rule all:
+    input:
+        [ (PROCESSED_DIR / f) for f in config['output'] ]

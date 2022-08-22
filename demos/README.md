@@ -18,7 +18,7 @@ pip install -e "..[testing]"
 ### Run
 
 ```sh
-snakemake -j 1 --rerun-triggers mtime
+snakemake --cores all --rerun-triggers mtime
 ```
 
 ### Serve data locally
@@ -30,7 +30,7 @@ http-server --cors='*' --port 8000 .
 ### Run and deploy
 
 ```sh
-snakemake -j 1 --config upload=true
+snakemake --cores all --rerun-triggers mtime --config upload=true
 ```
 
 ### Add a new demo

@@ -51,6 +51,10 @@ subworkflow meta_2022_azimuth:
     workdir:
         "meta-2022-azimuth"
 
+subworkflow wang_2018:
+    workdir:
+        "wang-2018"
+
 # End subworkflow list.
 
 # Only access workflow._subworkflows after all

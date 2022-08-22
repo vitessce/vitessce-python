@@ -1,7 +1,7 @@
 {
   "version": "1.0.15",
   "name": "Habib et al., 2017 Nature Methods",
-  "description": "Habib et al., 2017 Nature Methods",
+  "description": "Archived frozen adult human post-mortem brain tissue profiled by snRNA-seq (DroNc-seq)",
   "datasets": [{
     "uid": "339952f4-a47f-46dc-9228-18ba2ca256f2",
     "name": "339952f4-a47f-46dc-9228-18ba2ca256f2",

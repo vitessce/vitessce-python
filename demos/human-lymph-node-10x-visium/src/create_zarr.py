@@ -2,9 +2,11 @@ import argparse
 import scanpy as sc
 import numpy as np
 import scipy.cluster
+import zarr
+from ome_zarr.writer import write_image
 
 
-def create_zarr(output_path):
+def create_zarr(output_adata, output_img):
     adata = sc.datasets.visium_sge(sample_id="V1_Human_Lymph_Node", include_hires_tiff=True)
 
     # Reference: https://scanpy-tutorials.readthedocs.io/en/latest/spatial/basic-analysis.html
@@ -54,36 +56,83 @@ def create_zarr(output_path):
     adata = adata[:, var_index_ordering].copy()
     adata.obsm["X_hvg"] = adata[:, adata.var['highly_variable']].X.copy()
 
-    adata.obsm['spatial'] = adata.obsm['spatial'].astype('uint16')
-    adata.obsm['xy'] = np.stack((adata.obs['array_col'].values, adata.obs['array_row'].values), axis=-1).astype('uint16')
+    scale_factor = 1/5.87
+    adata.obsm['spatial'] = (adata.obsm['spatial'] * scale_factor).astype('<f4')
 
     def to_diamond(x, y, r):
         return np.array([[x, y + r], [x + r, y], [x, y - r], [x - r, y]])
     adata.obsm['segmentations'] = np.zeros((num_cells, 4, 2), dtype=np.dtype('uint16'))
-    radius = 50
+    radius = 10
     for i in range(num_cells):
         adata.obsm['segmentations'][i, :, :] = to_diamond(adata.obsm['spatial'][i, 0], adata.obsm['spatial'][i, 1], radius)
 
+    adata.write_zarr(output_adata)
+
+    # Write img_arr to OME-Zarr
+    # https://github.com/vitessce/vitessceR/blob/main/R/data_to_zarr.R#L146
+
     # Need to convert images from interleaved to non-interleaved (color axis should be first).
     img_hires = adata.uns['spatial']['V1_Human_Lymph_Node']['images']['hires']
-    img_lowres = adata.uns['spatial']['V1_Human_Lymph_Node']['images']['lowres']
+    img_arr = np.transpose(img_hires, (2, 0, 1))
+    img_arr *= 255.0
+    img_arr = img_arr.astype(np.dtype('uint8'))
 
-    adata.uns['spatial']['V1_Human_Lymph_Node']['images']['hires'] = np.transpose(img_hires, (2, 0, 1))
-    adata.uns['spatial']['V1_Human_Lymph_Node']['images']['lowres'] = np.transpose(img_lowres, (2, 0, 1))
+    default_window = {
+        "start": 0,
+        "min": 0,
+        "max": 255,
+        "end": 255
+    }
 
-    adata.write_zarr(output_path)
+    z_root = zarr.open_group(output_img)
+    write_image(
+        image=img_arr,
+        group=z_root,
+        axes="cyx",
+        omero={
+            "name": "H & E Image",
+            "version": "0.3",
+            "rdefs": {},
+            "channels": [
+                {
+                    "label": "R",
+                    "color": "FF0000",
+                    "window": default_window
+                },
+                {
+                    "label": "G",
+                    "color": "00FF00",
+                    "window": default_window
+                },
+                {
+                    "label": "B",
+                    "color": "0000FF",
+                    "window": default_window
+                }
+            ]
+        },
+        chunks=(1, 256, 256)
+    )
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '-o',
-        '--output',
+        '-oa',
+        '--output_adata',
         type=str,
         required=True,
-        help='Output Zarr store'
+        help='Output AnnData-Zarr store'
+    )
+    parser.add_argument(
+        '-oi',
+        '--output_img',
+        type=str,
+        required=True,
+        help='Output OME-Zarr store'
     )
     args = parser.parse_args()
     create_zarr(
-        args.output
+        args.output_adata,
+        args.output_img
     )

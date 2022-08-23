@@ -45,45 +45,8 @@
           }
         },
         {
-          "fileType": "image.raster.json",
-          "options": {
-            "schemaVersion": "0.0.2",
-            "images": [
-              {
-                "name": "H and E Image",
-                "url": "{{ base_url_gcp }}/human_lymph_node_10x_visium.h5ad.zarr/uns/spatial/V1_Human_Lymph_Node/images/hires",
-                "type": "zarr",
-                "metadata": {
-                  "isPyramid": false,
-                  "transform": {
-                    "scale": 5.87,
-                    "translate": { "x": 0, "y": 0 }
-                  },
-                  "dimensions": [
-                    {
-                      "field": "channel",
-                      "type": "nominal",
-                      "values": [
-                        "R",
-                        "G",
-                        "B"
-                      ]
-                    },
-                    {
-                      "field": "y",
-                      "type": "quantitative",
-                      "values": null
-                    },
-                    {
-                      "field": "x",
-                      "type": "quantitative",
-                      "values": null
-                    }
-                  ]
-                }
-              }
-            ]
-          }
+          "fileType": "image.ome-zarr",
+          "url": "{{ base_url_gcp }}/human_lymph_node_10x_visium.ome.zarr"
         }
       ]
     }
@@ -106,7 +69,7 @@
           "domainType": "Min/Max",
           "channels": [
             {
-              "selection": { "channel": 0 },
+              "selection": { "c": 0 },
               "color": [
                 255,
                 0,
@@ -115,11 +78,11 @@
               "visible": true,
               "slider": [
                 0,
-                1
+                255
               ]
             },
             {
-              "selection": { "channel": 1 },
+              "selection": { "c": 1 },
               "color": [
                 0,
                 255,
@@ -128,11 +91,11 @@
               "visible": true,
               "slider": [
                 0,
-                1
+                255
               ]
             },
             {
-              "selection": { "channel": 2 },
+              "selection": { "c": 2 },
               "color": [
                 0,
                 0,
@@ -141,7 +104,7 @@
               "visible": true,
               "slider": [
                 0,
-                1
+                255
               ]
             }
           ]
@@ -153,13 +116,13 @@
       "B": "geneSelection"
     },
     "spatialZoom": {
-      "A": -4.455728265917529
+      "A": -2.598
     },
     "spatialTargetX": {
-      "A": 4975.310550270499
+      "A": 1008.88
     },
     "spatialTargetY": {
-      "A": 5678.288421953778
+      "A": 1004.69
     },
     "featureSelection": {
       "A": ["CR2"]

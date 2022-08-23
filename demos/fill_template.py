@@ -15,7 +15,7 @@ def render_json(dir_name, version_str, url_type, port):
         'remote': f'https://s3.amazonaws.com/vitessce-data/{version_str}/main/{dir_name}'
     }
     BASE_URL_GCP = {
-        'local': f'http://localhost:{port}/{dir_name}/data/processed/',
+        'local': f'http://localhost:{port}/{dir_name}/data/processed',
         'remote': f'https://vitessce-data.storage.googleapis.com/{version_str}/main/{dir_name}'
     }
 

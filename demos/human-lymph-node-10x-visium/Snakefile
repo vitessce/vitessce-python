@@ -10,12 +10,14 @@ rule all:
 # Convert the raw AnnData .h5ad file to a processed AnnData .zarr store.
 rule create_zarr:
     output:
-        directory(PROCESSED_DIR / "human_lymph_node_10x_visium.h5ad.zarr")
+        adata=directory(PROCESSED_DIR / "human_lymph_node_10x_visium.h5ad.zarr"),
+        img=directory(PROCESSED_DIR / "human_lymph_node_10x_visium.ome.zarr")
     params:
         script=(SRC_DIR / "create_zarr.py")
     shell:
         '''
         python {params.script} \
-            -o {output}
+            -oa {output.adata} \
+            -oi {output.img}
         '''
 

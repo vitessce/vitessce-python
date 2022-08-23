@@ -27,12 +27,6 @@ snakemake --cores all --rerun-triggers mtime
 http-server --cors='*' --port 8000 .
 ```
 
-### Run and deploy
-
-```sh
-snakemake --cores all --rerun-triggers mtime --config upload=true
-```
-
 ### Add a new demo
 
 To add a new demo, run
@@ -79,4 +73,20 @@ Remote:
 
 ```sh
 python fill_template.py -d codeluppi-2018 -t remote -v 0.0.33 > ./codeluppi-2018/vitessce.remote.json
+```
+
+### Configure AWS and Google Cloud CLIs
+
+Install `aws` CLI and add to your PATH ([reference](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-linux.html)).
+
+Install `gcloud` and `gsutil` and add to your PATH ([reference](https://cloud.google.com/storage/docs/gsutil_install#linux)).
+
+Configure the AWS CLI by setting AWS environment variables ([reference](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html)) or running `aws configure`  ([reference](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html)).
+
+Configure the Google Cloud CLI by running `gcloud auth login` ([reference](https://cloud.google.com/sdk/gcloud/reference/auth/login)).
+
+### Run and deploy
+
+```sh
+snakemake --cores all --rerun-triggers mtime --config upload=true
 ```

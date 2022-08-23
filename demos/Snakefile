@@ -1,10 +1,14 @@
 from pathlib import Path, PosixPath
-from snakemake.remote.S3 import RemoteProvider as S3RemoteProvider
 import yaml
 import os
 from pprint import pprint
 
-S3 = S3RemoteProvider()
+# Remote providers should be used, but cloud files are
+# not working as outputs: https://github.com/snakemake/snakemake/issues/870
+# from snakemake.remote.S3 import RemoteProvider as S3RemoteProvider
+# from snakemake.remote.GS import RemoteProvider as GSRemoteProvider
+# S3 = S3RemoteProvider()
+# GS = GSRemoteProvider()
 
 BUCKET_VERSION = "0.0.33"
 BUCKET_NAME = "vitessce-data"
@@ -80,10 +84,9 @@ rule all:
         ]
     params:
         should_upload=config.get("upload"),
-        # This should be in output: https://github.com/snakemake/snakemake/issues/870
         out_files=[
             [
-                S3.remote(str(BUCKET / SUBWORKFLOW_DIRS[subworkflow_key] / subworkflow_output))
+                str(BUCKET / SUBWORKFLOW_DIRS[subworkflow_key] / subworkflow_output)
                 for subworkflow_output
                 in get_subworkflow_outputs(subworkflow_key)
             ]
@@ -95,13 +98,19 @@ rule all:
             print("Uploading")
             for in_file, out_file in zip(input.in_files, flatten(params.out_files)):
                 if os.path.isdir(in_file):
-                    shell(f"aws s3 cp --recursive {in_file} s3://{out_file}")
+                    if is_aws(out_file):
+                        shell(f"aws s3 sync {in_file} s3://{out_file}")
+                    else:
+                        shell(f"gsutil -m rsync -r {in_file} gs://{out_file}")
                 else:
                     shell(f"aws s3 cp {in_file} s3://{out_file}")
         else:
             print("Not uploading. To upload, use snakemake --config upload=true")
             for in_file, out_file in zip(input.in_files, flatten(params.out_files)):
-                shell(f"echo \"{in_file} s3://{out_file}\"")
+                if is_aws(out_file):
+                    shell(f"echo \"{in_file} s3://{out_file}\"")
+                else:
+                    shell(f"echo \"{in_file} gs://{out_file}\"")
 
 rule fill_templates:
     params:

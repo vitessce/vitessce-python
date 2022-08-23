@@ -12,3 +12,6 @@ def str2bool(v):
 
 def flatten(l):
   return [item for sublist in l for item in sublist]
+
+def is_aws(output_path):
+  return not output_path.endswith('.ome.zarr')

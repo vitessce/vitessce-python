@@ -5,8 +5,8 @@
   "public": true,
   "datasets": [
     {
-      "uid": "dries-2019",
-      "name": "Dries 2019",
+      "uid": "eng-2019",
+      "name": "Eng 2019",
       "files": [
         {
           "fileType": "obsEmbedding.csv",

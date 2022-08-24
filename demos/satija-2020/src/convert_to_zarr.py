@@ -41,7 +41,7 @@ def clean_gexp(adata):
         data=gexp_norm_arr
     )
     adata.X = gexp_norm_df.values
-    
+
     # Sort by selecting along the gene axis of the AnnData object
     adata_sorted = adata[:, leaf_list].copy()
     adata.X = adata.X.astype(np.dtype('uint8'))
@@ -62,7 +62,6 @@ def generate_json_files(
     adata.obs[COLUMNS.ANNOTATION.value] = adata.obs.apply(lambda row: annotation_df.at[row.name, COLUMNS.ANNOTATION.value], axis='columns')
 
     adata.obs[COLUMNS.PREDICTION_SCORE.value] = adata.obs.apply(lambda row: annotation_df.at[row.name, COLUMNS.PREDICTION_SCORE.value], axis='columns')
-
 
     # Remove annotations with NaN prediction scores
     not_nan_cells = pd.notna(adata.obs[COLUMNS.PREDICTION_SCORE.value])
@@ -90,7 +89,7 @@ def generate_json_files(
 
     # Round prediction score for labels.
     adata.obs[COLUMNS.PREDICTION_SCORE.value] = adata.obs[COLUMNS.PREDICTION_SCORE.value].apply(lambda val: '{:.2g}'.format(val))
-    
+
     adata = clean_gexp(adata)
     adata.write_zarr(output_cells)
 

@@ -204,7 +204,7 @@ def remove_any_from_dict_levels(v):
     >>> new_h
     {'type b': {'type c': ['cell 1', 'cell 2', 'cell 3']}}
     '''
-    if type(v) is dict:
+    if isinstance(v, dict):
         keys = list(v.keys())
         if len(keys) == 1 and keys[0] == "any":
             # Return the value associated with the "any" property,

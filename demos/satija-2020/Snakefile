@@ -1,0 +1,92 @@
+include: "../common.smk"
+configfile: "config.yml"
+
+# URL constants
+CELL_ANNOTATIONS_URL = "https://vitessce-data.s3.amazonaws.com/source-data/satija/annotations_spleen_0721.csv"
+CELLS_URL = "https://vitessce-data.s3.amazonaws.com/source-data/satija/uf-processed.tar.xz"
+CL_OBO_URL = "https://vitessce-data.s3.amazonaws.com/source-data/satija/cl.obo"
+
+GLOBUS_ID = '2dca1bf5832a4102ba780e9e54f6c350'
+
+# Rules
+rule all:
+    input:
+        [ (PROCESSED_DIR / f) for f in config['output'] ]
+
+rule convert_to_zarr:
+    input:
+        cells_h5ad=(RAW_DIR / "uf-processed" / GLOBUS_ID / "cluster_marker_genes.h5ad"),
+        annotations_csv=(RAW_DIR / "annotations_spleen" / f"{GLOBUS_ID}.csv"),
+        cl_obo=(RAW_DIR / "cl.obo")
+    output:
+        cells=directory(PROCESSED_DIR / "satija_2020.h5ad.zarr"),
+        cell_sets=(PROCESSED_DIR / "satija_2020.cell-sets.json")
+    params:
+        script=(SRC_DIR / "convert_to_zarr.py")
+    shell:
+        '''
+        python {params.script} \
+            -ic {input.cells_h5ad} \
+            -ia {input.annotations_csv} \
+            -ico {input.cl_obo} \
+            -oc {output.cells} \
+            -ocs {output.cell_sets}
+        '''
+
+rule split_annotation_csv:
+    input:
+        (RAW_DIR / "annotations_spleen.csv")
+    output:
+        (RAW_DIR / "annotations_spleen" / "{globus_id}.csv")
+    params:
+        script=(SRC_DIR / "split_annotation_csv.py")
+    shell:
+        '''
+        python {params.script} \
+            -i {input} \
+            -o {output} \
+            -gid {wildcards.globus_id}
+        '''
+
+# Download CSV file containing cell type annotations.
+rule download_cell_annotations_data:
+    output:
+        (RAW_DIR / "annotations_spleen.csv")
+    params:
+        file_url=CELL_ANNOTATIONS_URL
+    shell:
+        '''
+        curl -L -o {output} {params.file_url}
+        '''
+
+# Extract contents of the TAR file.
+rule untar_cells_data:
+    input:
+        (RAW_DIR / "uf-processed.tar.xz")
+    output:
+        (RAW_DIR / "uf-processed" / GLOBUS_ID / "cluster_marker_genes.h5ad")
+    shell:
+        '''
+        tar -xvf {input} -C {RAW_DIR}
+        '''
+
+# Download TAR file containing UMAP clustering data.
+rule download_cells_data:
+    output:
+        (RAW_DIR / "uf-processed.tar.xz")
+    params:
+        file_url=CELLS_URL
+    shell:
+        '''
+        curl -L -o {output} {params.file_url}
+        '''
+
+rule download_cl_obo:
+    output:
+        (RAW_DIR / "cl.obo")
+    params:
+        file_url=CL_OBO_URL
+    shell:
+        '''
+        curl -L -o {output} {params.file_url}
+        '''

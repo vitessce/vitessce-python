@@ -55,6 +55,14 @@ subworkflow meta_2022_azimuth:
     workdir:
         "meta-2022-azimuth"
 
+subworkflow satija_2020:
+    workdir:
+        "satija-2020"
+
+subworkflow sn_atac_seq_hubmap_2020:
+    workdir:
+        "sn-atac-seq-hubmap-2020"
+
 subworkflow wang_2018:
     workdir:
         "wang-2018"

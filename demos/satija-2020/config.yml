@@ -1,0 +1,3 @@
+output:
+- satija_2020.h5ad.zarr
+- satija_2020.cell-sets.json

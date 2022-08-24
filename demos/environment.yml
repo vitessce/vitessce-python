@@ -17,11 +17,11 @@ dependencies:
  - snakemake>=6.0
  - pyyaml
  - imageio
+ - networkx==2.4
  - pip
  - pip:
    - loompy>=3.0.6
    - generate-tiff-offsets>=0.1.7
-   - networkx
-   - obonet
+   - obonet==0.2.5
    - leidenalg
    - ome-zarr==0.2.1

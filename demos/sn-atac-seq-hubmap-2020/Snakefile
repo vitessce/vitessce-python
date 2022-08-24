@@ -1,0 +1,35 @@
+include: "../common.smk"
+configfile: "config.yml"
+
+BASE_URL = "https://vitessce-data.s3.amazonaws.com/0.0.32/master_release/human_intestine_2020_hubmap/human_intestine_2020_hubmap"
+
+
+rule all:
+    input:
+        [ (PROCESSED_DIR / f) for f in config['output'] ]
+
+# Convert the old JSON files to simpler CSV formats.
+rule convert_to_csv:
+    input:
+        cells=(RAW_DIR / "cells.json"),
+        cell_sets=(RAW_DIR / "cell-sets.json")
+    output:
+        cells=(PROCESSED_DIR / "human_intestine_2020_hubmap.cells.csv")
+    params:
+        script=(SRC_DIR / "convert_to_csv.py")
+    shell:
+        '''
+        python {params.script} \
+            -ic {input.cells} \
+            -ics {input.cell_sets} \
+            -oc {output.cells}
+        '''
+
+# Download original JSON files.
+rule download_file:
+    output:
+        (RAW_DIR / "{prefix}.json")
+    shell:
+        '''
+        curl -L -o {output} {BASE_URL}.{wildcards.prefix}.json
+        '''

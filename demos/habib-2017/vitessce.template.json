@@ -16,8 +16,7 @@
       },
       "options": {
         "obsFeatureMatrix": {
-          "path": "obsm/X_hvg",
-          "featureFilterPath": "var/highly_variable"
+          "path": "X"
         },
         "obsEmbedding": {
           "path": "obsm/X_umap"
@@ -42,6 +41,9 @@
     },
     "featureValueType": {
       "A": "expression"
+    },
+    "featureValueColormapRange": {
+      "A": [0.0, 0.35]
     }
   },
   "layout": [{
@@ -76,7 +78,8 @@
         "embeddingType": "UMAP",
         "obsType": "A",
         "featureType": "A",
-        "featureValueType": "A"
+        "featureValueType": "A",
+        "featureValueColormapRange": "A"
       },
       "uid": "C"
     },
@@ -89,10 +92,11 @@
       "coordinationScopes": {
         "obsType": "A",
         "featureType": "A",
-        "featureValueType": "A"
+        "featureValueType": "A",
+        "featureValueColormapRange": "A"
       },
       "props": {
-        "transpose": false
+        "transpose": true
       },
       "uid": "D"
     },

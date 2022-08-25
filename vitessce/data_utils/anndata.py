@@ -87,9 +87,11 @@ def to_dense(arr):
 
 
 # Convert an array to uint8 dtype.
-def to_uint8(arr, norm_along="global"):
+def to_uint8(arr, norm_along=None):
     # Re-scale the gene expression values between 0 and 255 (one byte ints).
-    if norm_along == "global":
+    if norm_along is None:
+        norm_arr = arr
+    elif norm_along == "global":
         arr *= 255.0 / arr.max()
         norm_arr = arr
     elif norm_along == "var":
@@ -116,6 +118,8 @@ def to_uint8(arr, norm_along="global"):
             (arr.T - np.tile(min_along_cells, (num_genes, 1))),
             np.tile(ratio_per_cell, (num_genes, 1))
         ).T
+    else:
+        raise ValueError("to_uint8 received unknown norm_along value")
     return norm_arr.astype('u1')
 
 

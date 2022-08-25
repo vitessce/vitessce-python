@@ -68,6 +68,11 @@ class TestAnnDataUtils(unittest.TestCase):
         assert adata.var.index.values.tolist() == ['SOX10', 'LAMP5', 'RORB']
         assert adata_sorted.var.index.values.tolist() == ['LAMP5', 'SOX10', 'RORB']
 
+    def test_to_uint8(self):
+        adata = self.adata
+        norm_X = to_uint8(adata.X)
+        assert norm_X.tolist() == [[5, 4, 5], [5, 1, 5], [2, 1, 2], [4, 1, 4]]
+
     def test_to_uint8_global_norm(self):
         adata = self.adata
         norm_X = to_uint8(adata.X, norm_along="global")

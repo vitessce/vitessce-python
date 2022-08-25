@@ -22,7 +22,7 @@ def optimize_arr(arr):
         # convert to unsigned int dtype.
         if arr.min() >= 0:
             arr = arr.astype(f'<u{arr.dtype.itemsize}')
-    
+
     # Try casting to a smaller itemsize.
     if arr.dtype.kind == 'u' or arr.dtype.kind == 'i' or arr.dtype.kind == 'f':
         next_itemsizes = [4] if arr.dtype.kind == 'f' else [4, 2, 1]

@@ -2,6 +2,7 @@ import numpy as np
 import zarr
 from ome_zarr.writer import write_image
 
+
 def rgb_img_to_ome_zarr(img_arr, output_path, img_name="Image", chunks=(1, 256, 256), axes="cyx"):
     img_arr = img_arr.astype(np.dtype('uint8'))
 

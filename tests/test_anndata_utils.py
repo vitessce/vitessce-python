@@ -20,15 +20,15 @@ class TestAnnDataUtils(unittest.TestCase):
             [4.0, 1.4, 4.1],
         ])
         obs = pd.DataFrame(data=[
-            { "cell_id": "cell_1", "leiden": "Cluster 2", "bad": "_" },
-            { "cell_id": "cell_2", "leiden": "Cluster 2", "bad": "+" },
-            { "cell_id": "cell_3", "leiden": "Cluster 1", "bad": "%" },
-            { "cell_id": "cell_4", "leiden": "Cluster 5", "bad": "$" }
+            {"cell_id": "cell_1", "leiden": "Cluster 2", "bad": "_"},
+            {"cell_id": "cell_2", "leiden": "Cluster 2", "bad": "+"},
+            {"cell_id": "cell_3", "leiden": "Cluster 1", "bad": "%"},
+            {"cell_id": "cell_4", "leiden": "Cluster 5", "bad": "$"}
         ]).set_index("cell_id")
         var = pd.DataFrame(data=[
-            { "gene_id": "SOX10" },
-            { "gene_id": "LAMP5" },
-            { "gene_id": "RORB" }
+            {"gene_id": "SOX10"},
+            {"gene_id": "LAMP5"},
+            {"gene_id": "RORB"}
         ]).set_index("gene_id")
         obsm = {
             "X_umap": np.array([
@@ -52,13 +52,12 @@ class TestAnnDataUtils(unittest.TestCase):
 
         float_arr = self.adata.obsm["X_umap"]
         assert optimize_arr(float_arr).dtype.name == 'float32'
-    
+
     def test_optimize_adata(self):
         adata = self.adata
         adata_optim = optimize_adata(adata, obs_cols=['leiden'], obsm_keys=['X_umap'])
         assert list(adata_optim.obsm.keys()) == ['X_umap']
         assert adata_optim.obs.columns.values.tolist() == ['leiden']
-
 
     def test_sort_var_axis(self):
         adata = self.adata

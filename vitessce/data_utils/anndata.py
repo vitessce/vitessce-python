@@ -120,20 +120,17 @@ def to_uint8(arr, norm_along="global"):
 
 
 # Sort the var index after hierarchical clustering.
-def sort_var_axis(adata):
-    gexp_arr = to_dense(adata.X)
+def sort_var_axis(adata_X, orig_var_index):
+    gexp_arr = to_dense(adata_X)
 
     # Perform hierarchical clustering along the genes axis.
     Z = scipy.cluster.hierarchy.linkage(gexp_arr.T, method="ward")
-    labels = adata.var.index.values
 
     # Get the hierarchy-based ordering of genes.
     leaf_index_list = scipy.cluster.hierarchy.leaves_list(Z)
-    leaf_list = labels[leaf_index_list].tolist()
+    leaf_list = orig_var_index[leaf_index_list].tolist()
 
-    # Sort by selecting along the gene axis of the AnnData object
-    adata_sorted = adata[:, leaf_list].copy()
-    return adata_sorted
+    return leaf_list
 
 
 # Convert an (x, y) coordinate to a polygon (diamond) with a given radius.

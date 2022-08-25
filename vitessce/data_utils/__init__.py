@@ -4,5 +4,8 @@ from .anndata import (
     to_dense,
     to_uint8,
     sort_var_axis,
-    to_diamond
+    to_diamond,
+)
+from .ome import (
+    rgb_img_to_ome_zarr,
 )

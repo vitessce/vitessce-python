@@ -12,7 +12,8 @@ def rgb_img_to_ome_zarr(img_arr, output_path, img_name="Image", chunks=(1, 256, 
         "end": 255
     }
 
-    z_root = zarr.open_group(output_path)
+    z_root = zarr.open_group(output_path, mode="w")
+
     write_image(
         image=img_arr,
         group=z_root,

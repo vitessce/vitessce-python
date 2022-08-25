@@ -7,6 +7,7 @@ from vitessce.data_utils import (
     optimize_arr,
     optimize_adata,
     sort_var_axis,
+    to_uint8,
 )
 
 
@@ -57,6 +58,7 @@ class TestAnnDataUtils(unittest.TestCase):
         adata = self.adata
         adata_optim = optimize_adata(adata, obs_cols=['leiden'], obsm_keys=['X_umap'])
         assert list(adata_optim.obsm.keys()) == ['X_umap']
+        assert adata_optim.obsm['X_umap'].dtype.name == 'float32'
         assert adata_optim.obs.columns.values.tolist() == ['leiden']
 
     def test_sort_var_axis(self):
@@ -65,3 +67,18 @@ class TestAnnDataUtils(unittest.TestCase):
         adata_sorted = adata[:, leaf_list].copy()
         assert adata.var.index.values.tolist() == ['SOX10', 'LAMP5', 'RORB']
         assert adata_sorted.var.index.values.tolist() == ['LAMP5', 'SOX10', 'RORB']
+
+    def test_to_uint8_global_norm(self):
+        adata = self.adata
+        norm_X = to_uint8(adata.X, norm_along="global")
+        assert norm_X.tolist() == [[255, 200, 250], [250, 50, 255], [104, 50, 100], [200, 70, 205]]
+
+    def test_to_uint8_gene_norm(self):
+        adata = self.adata
+        norm_X = to_uint8(adata.X, norm_along="var")
+        assert norm_X.tolist() == [[255, 255, 246], [246, 0, 254], [0, 0, 0], [161, 33, 172]]
+
+    def test_to_uint8_cell_norm(self):
+        adata = self.adata
+        norm_X = to_uint8(adata.X, norm_along="obs")
+        assert norm_X.tolist() == [[255, 0, 231], [248, 0, 255], [255, 0, 231], [245, 0, 255]]

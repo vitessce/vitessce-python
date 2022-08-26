@@ -4,7 +4,7 @@ from vitessce.data_utils import to_uint8, optimize_adata
 
 
 def convert_h5ad_to_zarr(input_path, output_path):
-    adata = read_h5ad(input_path, backed="r+")
+    adata = read_h5ad(input_path)
 
     adata.var['is_gene_expression'] = adata.var['feature_types'] == 'Gene Expression'
     adata.var['is_antibody_capture'] = adata.var['feature_types'] == 'Antibody Capture'

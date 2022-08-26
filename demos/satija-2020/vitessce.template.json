@@ -22,7 +22,7 @@
               "path": "obsm/X_umap"
             },
             "obsFeatureMatrix": {
-              "path": "X"
+              "path": "layers/X_uint8"
             },
             "obsLabels": [
               {

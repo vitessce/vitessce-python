@@ -4,6 +4,11 @@ import numpy as np
 import scipy.cluster
 import zarr
 from ome_zarr.writer import write_image
+from vitessce.data_utils import (
+    to_diamond,
+    rgb_img_to_ome_zarr,
+    optimize_adata,
+)
 
 
 def create_zarr(output_adata, output_img):
@@ -58,61 +63,28 @@ def create_zarr(output_adata, output_img):
 
     scale_factor = 1 / 5.87
     adata.obsm['spatial'] = (adata.obsm['spatial'] * scale_factor).astype('<f4')
-
-    def to_diamond(x, y, r):
-        return np.array([[x, y + r], [x + r, y], [x, y - r], [x - r, y]])
+    
     adata.obsm['segmentations'] = np.zeros((num_cells, 4, 2), dtype=np.dtype('uint16'))
     radius = 10
     for i in range(num_cells):
         adata.obsm['segmentations'][i, :, :] = to_diamond(adata.obsm['spatial'][i, 0], adata.obsm['spatial'][i, 1], radius)
 
-    adata.write_zarr(output_adata)
-
-    # Write img_arr to OME-Zarr
-    # https://github.com/vitessce/vitessceR/blob/main/R/data_to_zarr.R#L146
-
+    # Write img_arr to OME-Zarr.
     # Need to convert images from interleaved to non-interleaved (color axis should be first).
     img_hires = adata.uns['spatial']['V1_Human_Lymph_Node']['images']['hires']
     img_arr = np.transpose(img_hires, (2, 0, 1))
+    # Convert values from [0, 1] to [0, 255].
     img_arr *= 255.0
-    img_arr = img_arr.astype(np.dtype('uint8'))
 
-    default_window = {
-        "start": 0,
-        "min": 0,
-        "max": 255,
-        "end": 255
-    }
+    rgb_img_to_ome_zarr(img_arr, output_img, axes="cyx", chunks=(1, 256, 256), img_name="H & E Image")
 
-    z_root = zarr.open_group(output_img)
-    write_image(
-        image=img_arr,
-        group=z_root,
-        axes="cyx",
-        omero={
-            "name": "H & E Image",
-            "version": "0.3",
-            "rdefs": {},
-            "channels": [
-                {
-                    "label": "R",
-                    "color": "FF0000",
-                    "window": default_window
-                },
-                {
-                    "label": "G",
-                    "color": "00FF00",
-                    "window": default_window
-                },
-                {
-                    "label": "B",
-                    "color": "0000FF",
-                    "window": default_window
-                }
-            ]
-        },
-        chunks=(1, 256, 256)
+    adata = optimize_adata(
+        adata,
+        obs_cols=["clusters"],
+        var_cols=["highly_variable"],
+        obsm_keys=["X_hvg", "spatial", "segmentations", "X_umap", "X_pca"]
     )
+    adata.write_zarr(output_adata)
 
 
 if __name__ == '__main__':

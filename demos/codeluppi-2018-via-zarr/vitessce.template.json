@@ -13,7 +13,7 @@
           "url": "{{ base_url }}/codeluppi_2018_nature_methods.cells.h5ad.zarr",
           "options": {
             "obsFeatureMatrix": {
-              "path": "X"
+              "path": "layers/X_uint8"
             },
             "obsSegmentations": {
               "path": "obsm/X_segmentations"

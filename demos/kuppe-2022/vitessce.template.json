@@ -41,7 +41,7 @@
         },
         "options": {
           "obsFeatureMatrix": {
-            "path": "X"
+            "path": "layers/X_uint8"
           },
           "featureLabels": {
             "path": "var/feature_name"
@@ -68,7 +68,7 @@
         },
         "options": {
           "obsFeatureMatrix": {
-            "path": "X"
+            "path": "layers/X_uint8"
           },
           "featureLabels": {
             "path": "var/feature_name"
@@ -97,7 +97,7 @@
             "path": "obsm/xy_segmentations_scaled"
           },
           "obsFeatureMatrix": {
-            "path": "X"
+            "path": "layers/X_uint8"
           },
           "featureLabels": {
             "path": "var/feature_name"

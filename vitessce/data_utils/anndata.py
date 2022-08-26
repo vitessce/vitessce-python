@@ -5,14 +5,16 @@ from scipy.sparse import issparse
 
 
 # Try to cast an array to a dtype that takes up less space.
-def optimize_arr(arr):
+def cast_arr(arr):
     orig_sum = np.sum(arr)
+    orig_max = np.max(arr)
+    orig_min = np.min(arr)
 
     # Try casting float to int for better downstream compression.
     if arr.dtype.kind == 'f':
         cast_arr = arr.astype(f'<i{arr.dtype.itemsize}')
         cast_sum = np.sum(cast_arr)
-        if np.abs(orig_sum - cast_sum) < 1e-4:
+        if np.abs(orig_sum - cast_sum) < 1e-2:
             arr = cast_arr
 
     # Try casting signed int to unsigned int.
@@ -27,27 +29,34 @@ def optimize_arr(arr):
         next_itemsizes = [4] if arr.dtype.kind == 'f' else [4, 2, 1]
         for next_itemsize in next_itemsizes:
             if arr.dtype.itemsize > next_itemsize:
-                cast_arr = arr.astype(f'<{arr.dtype.kind}{next_itemsize}')
-                cast_sum = np.sum(cast_arr)
-                if np.abs(orig_sum - cast_sum) < 1e-4:
-                    arr = cast_arr
-                elif arr.dtype.itemsize == 8:
+                next_dtype = np.dtype(f'<{arr.dtype.kind}{next_itemsize}')
+                next_dtype_info = np.iinfo(next_dtype) if arr.dtype.kind == 'u' or arr.dtype.kind == 'i' else np.finfo(next_dtype)
+                if next_dtype_info.min <= orig_min and next_dtype_info.max >= orig_max:
+                    arr = arr.astype(next_dtype)
+                elif arr.dtype.itemsize == 8 and (arr.dtype.kind == 'u' or arr.dtype.kind == 'i'):
                     print(f"WARNING: Not casting array with dtype {arr.dtype.name}, but Zarr.js suggests avoiding int64 and uint64")
 
     # Check for float16 usage.
     if arr.dtype.kind == 'f' and arr.dtype.itemsize == 2:
         # Zarr.js does not have a Float16Array type
         arr = arr.astype('<f4')
-
+    
     return arr
 
 
+def optimize_arr(arr):
+    return to_dense(cast_arr(to_memory(arr)))
+
+
 # Given an anndata object, optimize for usage with Vitessce
-def optimize_adata(adata, obs_cols=None, obsm_keys=None, var_cols=None, varm_keys=None):
-    if adata.X is not None:
-        new_X = to_dense(optimize_arr(adata.X))
+def optimize_adata(adata, obs_cols=None, obsm_keys=None, var_cols=None, varm_keys=None, layer_keys=None, ignore_X=False):
+    if not ignore_X:
+        if adata.X is not None:
+            new_X = optimize_arr(adata.X)
+        else:
+            new_X = adata.X
     else:
-        new_X = adata.X
+        new_X = None
     # Only keep the subset of columns required.
     if obs_cols is not None:
         new_obs = adata.obs[obs_cols]
@@ -58,24 +67,35 @@ def optimize_adata(adata, obs_cols=None, obsm_keys=None, var_cols=None, varm_key
     else:
         new_var = adata.var
     # Only keep the subset of obsm and varm items required.
-    if obsm_keys is not None:
-        new_obsm = {
-            obsm_key: optimize_arr(adata.obsm[obsm_key])
-            for obsm_key
-            in obsm_keys
-        }
-    else:
-        new_obsm = adata.obsm
-    if varm_keys is not None:
-        new_varm = {
-            varm_key: optimize_arr(adata.varm[varm_key])
-            for varm_key
-            in varm_keys
-        }
-    else:
-        new_varm = adata.varm
-    adata = AnnData(X=new_X, obs=new_obs, var=new_var, obsm=new_obsm, varm=new_varm)
+    if obsm_keys is None:
+        obsm_keys = adata.obsm.keys()
+    new_obsm = {
+        obsm_key: optimize_arr(adata.obsm[obsm_key])
+        for obsm_key
+        in obsm_keys
+    }
+    if varm_keys is None:
+        varm_keys = adata.varm.keys()
+    new_varm = {
+        varm_key: optimize_arr(adata.varm[varm_key])
+        for varm_key
+        in varm_keys
+    }
+    if layer_keys is None:
+        layer_keys = adata.layers.keys()
+    new_layers = {
+        layer_key: optimize_arr(adata.layers[layer_key])
+        for layer_key
+        in layer_keys
+    }
+    adata = AnnData(X=new_X, obs=new_obs, var=new_var, obsm=new_obsm, varm=new_varm, layers=new_layers)
     return adata
+
+
+def to_memory(arr):
+    if type(arr).__name__ == "SparseDataset":
+        return arr.to_memory()
+    return arr
 
 
 # Convert a sparse array to dense.
@@ -95,6 +115,7 @@ def to_uint8(arr, norm_along=None):
         norm_arr = arr
     elif norm_along == "var":
         # Normalize along gene axis
+        arr = to_dense(arr)
         num_cells = arr.shape[0]
         min_along_genes = arr.min(axis=0)
         max_along_genes = arr.max(axis=0)
@@ -107,6 +128,7 @@ def to_uint8(arr, norm_along=None):
         )
     elif norm_along == "obs":
         # Normalize along cell axis
+        arr = to_dense(arr)
         num_genes = arr.shape[1]
         min_along_cells = arr.min(axis=1)
         max_along_cells = arr.max(axis=1)

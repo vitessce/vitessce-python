@@ -3,12 +3,7 @@ import json
 import pandas as pd
 import numpy as np
 from anndata import AnnData
-
-
-def to_uint8(arr):
-    arr *= 255.0 / arr.max()
-    arr = arr.astype(np.dtype('uint8'))
-    return arr
+from vitessce.data_utils import to_uint8, optimize_adata
 
 
 def convert_to_csv(args):
@@ -54,23 +49,25 @@ def convert_to_csv(args):
     c_var_df = matrix_df.T[[]]
 
     c_adata = AnnData(X=matrix_df.values, obs=c_obs_df, var=c_var_df)
-    c_adata.obsm['X_tsne'] = cells_df[['TSNE_1', 'TSNE_2']].values.astype(np.dtype('<f4'))
-    c_adata.obsm['X_pca'] = cells_df[['PCA_1', 'PCA_2']].values.astype(np.dtype('<f4'))
-    c_adata.obsm['X_spatial'] = cells_df[['X', 'Y']].values.astype(np.dtype('<u4'))
-    c_adata.X = to_uint8(c_adata.X)
+    c_adata.obsm['X_tsne'] = cells_df[['TSNE_1', 'TSNE_2']].values
+    c_adata.obsm['X_pca'] = cells_df[['PCA_1', 'PCA_2']].values
+    c_adata.obsm['X_spatial'] = cells_df[['X', 'Y']].values
+    c_adata.layers['X_uint8'] = to_uint8(c_adata.X, norm_along="global")
 
     num_cells = len(cells_json.keys())
     c_adata.obsm['X_segmentations'] = np.zeros((num_cells, len(list(cells_json.values())[0]['poly']), 2))
     for i, cell_id in enumerate(c_adata.obs.index.values.tolist()):
         c_adata.obsm['X_segmentations'][i, :, :] = cells_json[cell_id]['poly']
-    c_adata.obsm['X_segmentations'] = c_adata.obsm['X_segmentations'].astype(np.dtype('<u4'))
+    c_adata.obsm['X_segmentations'] = c_adata.obsm['X_segmentations']
+    c_adata = optimize_adata(c_adata)
 
     # Molecules zarr
     m_obs_df = molecules_df[['Gene']]
     m_var_df = pd.DataFrame(index=[], columns=[], data=[])
 
     m_adata = AnnData(X=None, obs=m_obs_df, var=m_var_df)
-    m_adata.obsm['X_spatial'] = molecules_df[['X', 'Y']].values.astype(np.dtype('<u4'))
+    m_adata.obsm['X_spatial'] = molecules_df[['X', 'Y']].values
+    m_adata = optimize_adata(m_adata)
 
     # Write outputs
     c_adata.write_zarr(args.output_cells)

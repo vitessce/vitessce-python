@@ -1,6 +1,7 @@
 import argparse
 import json
 import pandas as pd
+from vitessce.data_utils import to_diamond
 
 
 def convert_to_csv(args):
@@ -18,9 +19,6 @@ def convert_to_csv(args):
     cells_df['Leiden'] = cells_df.apply(lambda row: cells_json[str(row.name)]['factors']['pleiden_clus'], axis='columns')
     cells_df['Kmeans'] = cells_df.apply(lambda row: cells_json[str(row.name)]['factors']['kmeans'], axis='columns')
     cells_df.index = cells_df.index.rename('cell_id')
-
-    def to_diamond(x, y, r):
-        return [[x, y + r], [x + r, y], [x, y - r], [x - r, y]]
 
     segmentations = dict()
     for cell_id, cell_obj in cells_json.items():

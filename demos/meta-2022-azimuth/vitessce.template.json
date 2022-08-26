@@ -16,7 +16,7 @@
       },
       "options": {
         "obsFeatureMatrix": {
-          "path": "X"
+          "path": "layers/X_uint8"
         },
         "obsEmbedding": {
           "path": "obsm/X_umap"

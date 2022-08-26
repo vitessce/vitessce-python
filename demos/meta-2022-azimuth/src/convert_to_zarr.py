@@ -1,18 +1,15 @@
 import argparse
 from anndata import read_h5ad
 import numpy as np
-
-
-def to_uint8(arr):
-    arr *= 255.0 / arr.max()
-    arr = arr.astype(np.dtype('uint8')).todense()
-    return arr
+from vitessce.data_utils import (
+    to_uint8,
+)
 
 
 def convert_h5ad_to_zarr(input_path, output_path):
     adata = read_h5ad(input_path)
 
-    adata.X = to_uint8(adata.X)
+    adata.layers['X_uint8'] = to_uint8(adata.X, norm_along="global")
 
     adata.write_zarr(output_path)
 

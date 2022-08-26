@@ -63,7 +63,6 @@ extras_require = {
     ],
     'testing': [
         'pytest>=6.2.4',
-        'anndata==0.7.8',
         'loompy>=3.0.6',
         'coverage>=6.3.2'
     ],
@@ -120,6 +119,8 @@ setup_args = dict(
         'black>=21.11b1',
         'numpy>=1.21.2',
         'generate-tiff-offsets>=0.1.7',
+        'anndata==0.7.8',
+        'ome-zarr==0.2.1',
     ],
     extras_require=extras_require,
     packages=find_packages(),

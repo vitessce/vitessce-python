@@ -70,7 +70,7 @@ def convert_to_csv(args):
     m_adata = optimize_adata(m_adata)
 
     # Write outputs
-    c_adata.write_zarr(args.output_cells)
+    c_adata.write_zarr(args.output_cells, chunks=(c_adata.shape[0], 10))
     m_adata.write_zarr(args.output_molecules)
 
 

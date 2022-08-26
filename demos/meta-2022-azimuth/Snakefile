@@ -28,7 +28,7 @@ rule convert_to_zarr:
         '''
 
 # Download raw h5ad file.
-rule download_rna:
+rule download_adata:
     output:
         (RAW_DIR / "meta.h5ad")
     params:

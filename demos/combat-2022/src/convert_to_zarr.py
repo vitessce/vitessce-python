@@ -1,6 +1,7 @@
 import argparse
 from anndata import read_h5ad
-from vitessce.data_utils import to_uint8, optimize_adata
+import numpy as np
+from vitessce.data_utils import to_uint8
 
 
 def convert_h5ad_to_zarr(input_path, output_path):
@@ -9,31 +10,10 @@ def convert_h5ad_to_zarr(input_path, output_path):
     adata.var['is_gene_expression'] = adata.var['feature_types'] == 'Gene Expression'
     adata.var['is_antibody_capture'] = adata.var['feature_types'] == 'Antibody Capture'
 
-    adata.obsm['X_gene_expression'] = adata.X[:, adata.var['is_gene_expression']]
-    adata.obsm['X_antibody_capture'] = adata.X[:, adata.var['is_antibody_capture']]
-    adata.obsm['X_gene_expression_uint8'] = to_uint8(adata.obsm['X_gene_expression'], norm_along="global")
-    adata.obsm['X_antibody_capture_uint8'] = to_uint8(adata.obsm['X_antibody_capture'], norm_along="global")
+    adata.obsm['X_gene_expression_uint8'] = to_uint8(adata[:, adata.var['is_gene_expression']].X, norm_along="global").todense()
+    adata.obsm['X_antibody_capture_uint8'] = to_uint8(adata[:, adata.var['is_antibody_capture']].X, norm_along="global").todense()
 
-    print("running optimize_adata")
-    adata = optimize_adata(
-        adata,
-        ignore_X=True,
-        obs_cols=[
-            "cell_type", "cluster",
-            "major_subset", "minor_subset",
-            "COMBAT_ID", "scRNASeq_sample_ID",
-            "GEX_region",
-            "Source", "Sex", "Age", "Hospitalstay", "TimeSinceOnset"
-        ],
-        obsm_keys=[
-            "X_gene_expression", "X_antibody_capture",
-            "X_gene_expression_uint8", "X_antibody_capture_uint8",
-            "X_umap",
-        ],
-        var_cols=["feature_types", "is_gene_expression", "is_antibody_capture", "gene_ids"],
-        layer_keys=[],
-    )
-    print("done optimize_adata")
+    adata.obsm['X_umap'] = adata.obsm['X_umap'].astype(np.dtype('<f4'))
 
     adata.write_zarr(output_path)
 

@@ -2,8 +2,6 @@ import argparse
 import json
 from anndata import read_h5ad
 import pandas as pd
-import numpy as np
-import scipy.cluster
 from vitessce.data_utils import (
     to_uint8,
     sort_var_axis,

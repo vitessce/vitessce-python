@@ -1,6 +1,5 @@
 import argparse
 from anndata import read_h5ad
-import numpy as np
 from vitessce.data_utils import (
     to_uint8,
 )

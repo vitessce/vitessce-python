@@ -3,8 +3,6 @@ import numpy as np
 import pandas as pd
 from anndata import read_h5ad, AnnData
 import imageio.v2 as imageio
-import zarr
-from ome_zarr.writer import write_image
 from vitessce.data_utils import (
     to_diamond,
     to_uint8,

@@ -1,7 +1,6 @@
 import argparse
 from anndata import read_h5ad
-import numpy as np
-from vitessce.data_utils import to_uint8, to_dense, optimize_adata
+from vitessce.data_utils import to_uint8, optimize_adata
 
 
 def convert_h5ad_to_zarr(input_path, output_path):

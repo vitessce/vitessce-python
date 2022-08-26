@@ -2,8 +2,6 @@ import argparse
 import scanpy as sc
 import numpy as np
 import scipy.cluster
-import zarr
-from ome_zarr.writer import write_image
 from vitessce.data_utils import (
     to_diamond,
     rgb_img_to_ome_zarr,

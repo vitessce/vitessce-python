@@ -62,9 +62,9 @@ def create_zarr(output_adata, output_img):
     adata.obsm["X_hvg"] = adata[:, adata.var['highly_variable']].X.copy()
 
     scale_factor = 1 / 5.87
-    adata.obsm['spatial'] = (adata.obsm['spatial'] * scale_factor).astype('<f4')
+    adata.obsm['spatial'] = (adata.obsm['spatial'] * scale_factor)
 
-    adata.obsm['segmentations'] = np.zeros((num_cells, 4, 2), dtype=np.dtype('uint16'))
+    adata.obsm['segmentations'] = np.zeros((num_cells, 4, 2))
     radius = 10
     for i in range(num_cells):
         adata.obsm['segmentations'][i, :, :] = to_diamond(adata.obsm['spatial'][i, 0], adata.obsm['spatial'][i, 1], radius)

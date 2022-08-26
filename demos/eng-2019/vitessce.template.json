@@ -36,8 +36,7 @@
           "fileType": "obsLocations.csv",
           "url": "{{ base_url }}/eng_2019_nature.cells.csv",
           "coordinationValues": {
-            "obsType": "cell",
-            "embeddingType": "UMAP"
+            "obsType": "cell"
           },
           "options": {
             "obsIndex": "cell_id",

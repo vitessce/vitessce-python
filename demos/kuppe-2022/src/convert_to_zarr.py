@@ -42,7 +42,6 @@ def process_h5ad_files(args):
     visium_adata.obs['X'] = visium_adata.obs.apply(lambda row: visium_df.at[row.name, 'X'], axis='columns')
     visium_adata.obs['Y'] = visium_adata.obs.apply(lambda row: visium_df.at[row.name, 'Y'], axis='columns')
 
-
     rna_adata = read_h5ad(args.input_rna)
     atac_adata = read_h5ad(args.input_atac)
 

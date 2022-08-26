@@ -40,7 +40,7 @@ def cast_arr(arr):
     if arr.dtype.kind == 'f' and arr.dtype.itemsize == 2:
         # Zarr.js does not have a Float16Array type
         arr = arr.astype('<f4')
-    
+
     return arr
 
 

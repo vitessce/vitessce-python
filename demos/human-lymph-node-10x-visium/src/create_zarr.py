@@ -63,7 +63,7 @@ def create_zarr(output_adata, output_img):
 
     scale_factor = 1 / 5.87
     adata.obsm['spatial'] = (adata.obsm['spatial'] * scale_factor).astype('<f4')
-    
+
     adata.obsm['segmentations'] = np.zeros((num_cells, 4, 2), dtype=np.dtype('uint16'))
     radius = 10
     for i in range(num_cells):

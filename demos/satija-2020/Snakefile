@@ -1,9 +1,20 @@
 include: "../common.smk"
 configfile: "config.yml"
 
-# URL constants
-CELL_ANNOTATIONS_URL = "https://vitessce-data.s3.amazonaws.com/source-data/satija/annotations_spleen_0721.csv"
+# From Matt Ruffalo via email on May 2, 2020: "a full set of of AnnData objects is
+# available at https://giygas.compbio.cs.cmu.edu/uf-processed.tar.xz .
+# This includes both raw Salmon output ('out.h5ad' in each directory) and
+# the results of filtering, normalization, dimensionality reduction, and
+# clustering with the Leiden algorithm ('cluster_marker_genes.h5ad' in
+# each directory)."
 CELLS_URL = "https://vitessce-data.s3.amazonaws.com/source-data/satija/uf-processed.tar.xz"
+# From Jaison Jain via email on July 17, 2020: "I have submitted the annotations
+# for our 6 spleen datasets to Mark's dropbox as he requested. They are also attached here
+# ... we filtered some cells before processing ("low-quality"-annotated cells)
+# so they did not get a prediction score. I just denoted this with NA in the csv files."
+CELL_ANNOTATIONS_URL = "https://vitessce-data.s3.amazonaws.com/source-data/satija/annotations_spleen_0721.csv"
+# Cell ontology OBO file downloaded on May 26, 2020 from
+# https://raw.githubusercontent.com/obophenotype/cell-ontology/master/cl.obo
 CL_OBO_URL = "https://vitessce-data.s3.amazonaws.com/source-data/satija/cl.obo"
 
 GLOBUS_ID = '2dca1bf5832a4102ba780e9e54f6c350'

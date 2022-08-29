@@ -48,7 +48,7 @@ rule convert_to_cells_zarr:
 
 rule convert_to_molecules_zarr:
     input:
-        hdf5=(RAW_DIR / "mRNA_coords_raw_counting.hdf5")
+        (RAW_DIR / "mRNA_coords_raw_counting.hdf5")
     output:
         directory(PROCESSED_DIR / "codeluppi_2018_nature_methods.molecules.h5ad.zarr")
     params:
@@ -56,7 +56,7 @@ rule convert_to_molecules_zarr:
     shell:
         '''
         python {params.script} \
-            -i {input.hdf5} \
+            -i {input} \
             -o {output}
         '''
 

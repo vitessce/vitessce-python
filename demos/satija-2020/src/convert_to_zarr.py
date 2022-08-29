@@ -18,7 +18,7 @@ from utils import (
 )
 
 
-def generate_json_files(
+def convert_to_zarr_and_json(
     input_cells_h5ad, input_annotations_csv, input_cl_obo_file,
     output_cells, output_cell_sets,
 ):
@@ -30,7 +30,6 @@ def generate_json_files(
     annotation_df = annotation_df.set_index(COLUMNS.CELL_ID.value)
 
     adata.obs[COLUMNS.ANNOTATION.value] = adata.obs.apply(lambda row: annotation_df.at[row.name, COLUMNS.ANNOTATION.value], axis='columns')
-
     adata.obs[COLUMNS.PREDICTION_SCORE.value] = adata.obs.apply(lambda row: annotation_df.at[row.name, COLUMNS.PREDICTION_SCORE.value], axis='columns')
 
     # Remove annotations with NaN prediction scores
@@ -43,6 +42,7 @@ def generate_json_files(
     df = df.reset_index()
 
     leiden_cell_sets = generate_leiden_cluster_cell_sets(df)
+    # The cell type annotations for this dataset are hierarchical.
     cell_type_cell_sets = generate_cell_type_cell_sets(
         df,
         input_cl_obo_file
@@ -54,6 +54,9 @@ def generate_json_files(
         cell_type_cell_sets
     )
 
+    # These hierarchical cell type annotations must be represented
+    # in a JSON format (rather than using a column-based representation
+    # like AnnData.obs) because the tree does not have a uniform height.
     with open(output_cell_sets, 'w') as f:
         json.dump(cell_sets, f, indent=1)
 
@@ -113,7 +116,7 @@ if __name__ == '__main__':
         help='Output obsSets.json file'
     )
     args = parser.parse_args()
-    generate_json_files(
+    convert_to_zarr_and_json(
         args.input_cells_h5ad,
         args.input_annotations_csv,
         args.input_cl_obo,

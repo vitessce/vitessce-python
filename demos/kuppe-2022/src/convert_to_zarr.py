@@ -1,6 +1,7 @@
 import argparse
 import numpy as np
 import pandas as pd
+import json
 from anndata import read_h5ad, AnnData
 import imageio.v2 as imageio
 from vitessce.data_utils import (
@@ -84,7 +85,8 @@ def process_h5ad_files(args):
     visium_adata.obsm['spatial'] = visium_adata.obsm['X_spatial']
     visium_adata.obsm['xy'] = visium_adata.obs[['X', 'Y']].values
 
-    scale_factor = 0.20319009
+    with open(args.input_visium_img_scalefactors) as f:
+        scale_factor = json.load(f)['tissue_hires_scalef']
     visium_adata.obsm['xy_scaled'] = visium_adata.obsm['xy'] * scale_factor
 
     # Create segmentations
@@ -133,6 +135,13 @@ if __name__ == '__main__':
     parser.add_argument(
         '-ivi',
         '--input_visium_img',
+        type=str,
+        required=True,
+        help='Input visium PNG file'
+    )
+    parser.add_argument(
+        '-ivs',
+        '--input_visium_img_scalefactors',
         type=str,
         required=True,
         help='Input visium PNG file'

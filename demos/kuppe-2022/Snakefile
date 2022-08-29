@@ -30,6 +30,7 @@ rule convert_to_zarr:
         atac=(RAW_DIR / "atac.h5ad"),
         visium_adata=(RAW_DIR / "visium_gt_iz_p9.h5ad"),
         visium_img=(IMG_DIR / "tissue_hires_image.png"),
+        visium_img_scalefactors=(IMG_DIR / "scalefactors_json.json"),
         visium_csv=(IMG_DIR / "tissue_positions_list.csv")
     output:
         rna=directory(PROCESSED_DIR / "kuppe_2022_nature.rna.h5ad.zarr"),
@@ -46,6 +47,7 @@ rule convert_to_zarr:
             -ia {input.atac} \
             -iva {input.visium_adata} \
             -ivi {input.visium_img} \
+            -ivs {input.visium_img_scalefactors} \
             -ivc {input.visium_csv} \
             -or {output.rna} \
             -oa {output.atac} \

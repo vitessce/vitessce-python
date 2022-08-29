@@ -59,6 +59,9 @@ def create_zarr(output_adata, output_img):
     adata = adata[:, var_index_ordering].copy()
     adata.obsm["X_hvg"] = adata[:, adata.var['highly_variable']].X.copy()
 
+    # Unclear what the exact scale factor is required to align
+    # the spots to the image. Through trial and error / manual binary search
+    # of values I arrived at:
     scale_factor = 1 / 5.87
     adata.obsm['spatial'] = (adata.obsm['spatial'] * scale_factor)
 

@@ -94,6 +94,8 @@ def optimize_adata(adata, obs_cols=None, obsm_keys=None, var_cols=None, varm_key
 
 def to_memory(arr):
     if type(arr).__name__ == "SparseDataset":
+        # This comes from using a backed AnnData object (e.g. read_h5ad(path, backed="r+")).
+        # Reference: https://github.com/scverse/anndata/blob/286bc7f207863964cb861f17c96ab24fe0cf72ac/anndata/_core/sparse_dataset.py#L230
         return arr.to_memory()
     return arr
 

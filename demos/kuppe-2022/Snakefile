@@ -64,7 +64,8 @@ rule unzip:
         out_dir=(RAW_DIR / "ACH0012" / "outs")
     output:
         (IMG_DIR / "tissue_hires_image.png"),
-        (IMG_DIR / "tissue_positions_list.csv")
+        (IMG_DIR / "tissue_positions_list.csv"),
+        (IMG_DIR / "scalefactors_json.json")
     shell:
         '''
         unzip -o {input} -d {params.out_dir}

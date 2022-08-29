@@ -11,6 +11,7 @@ dependencies:
  - scanpy>=1.6.0
  - jupyterlab>=3
  - zarr>=2.5.0
+ - h5py==2.10.0
  - boto3>=1.16.30
  - numcodecs>=0.7.2
  - scipy
@@ -18,6 +19,9 @@ dependencies:
  - pyyaml
  - imageio
  - networkx==2.4
+ - shapely
+ - geopandas
+ - dask-geopandas
  - pip
  - pip:
    - loompy>=3.0.6

@@ -27,14 +27,44 @@ rule convert_to_ome_zarr:
             -o {output}
         '''
 
+rule convert_to_cells_csv:
+    input:
+        directory(PROCESSED_DIR / "codeluppi_2018_nature_methods.cells.h5ad.zarr")
+    output:
+        cells=(PROCESSED_DIR / "codeluppi_2018_nature_methods.cells.csv"),
+        segmentations=(PROCESSED_DIR / "codeluppi_2018_nature_methods.cells.segmentations.json"),
+        matrix=(PROCESSED_DIR / "codeluppi_2018_nature_methods.cells.matrix.csv")
+    params:
+        script=(SRC_DIR / "convert_to_cells_csv.py")
+    shell:
+        '''
+        python {params.script} \
+            -i {input} \
+            -oc {output.cells} \
+            -os {output.segmentations} \
+            -om {output.matrix}
+        '''
+
+rule convert_to_molecules_csv:
+    input:
+        directory(PROCESSED_DIR / "codeluppi_2018_nature_methods.molecules.h5ad.zarr")
+    output:
+        (PROCESSED_DIR / "codeluppi_2018_nature_methods.molecules.csv")
+    params:
+        script=(SRC_DIR / "convert_to_molecules_csv.py")
+    shell:
+        '''
+        python {params.script} \
+            -i {input} \
+            -o {output}
+        '''
 
 rule convert_to_cells_zarr:
     input:
         loom=(RAW_DIR / "osmFISH_SScortex_mouse_all_cells.loom"),
         pkl=(RAW_DIR / "polyT_seg.pkl")
     output:
-        cells=directory(PROCESSED_DIR / "codeluppi_2018_nature_methods.cells.h5ad.zarr"),
-        segmentations=(PROCESSED_DIR / "codeluppi_2018_nature_methods.cells.segmentations.json")
+        directory(PROCESSED_DIR / "codeluppi_2018_nature_methods.cells.h5ad.zarr")
     params:
         script=(SRC_DIR / "convert_to_cells_h5ad_zarr.py")
     shell:
@@ -42,8 +72,7 @@ rule convert_to_cells_zarr:
         python {params.script} \
             -il {input.loom} \
             -ip {input.pkl} \
-            -oc {output.cells} \
-            -os {output.segmentations}
+            -o {output}
         '''
 
 rule convert_to_molecules_zarr:

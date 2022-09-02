@@ -85,7 +85,8 @@ extras_require = {
     ],
     'notebook': [
         # Needed only for notebook use:
-        'ipywidgets>=7.6.0',
+        'ipywidgets<=7.7.2',
+        'jupyterlab-widgets<=1.1.1',
         'hypercorn>=0.11.0',
         'ujson>=4.0.1',
         'starlette==0.14.0',

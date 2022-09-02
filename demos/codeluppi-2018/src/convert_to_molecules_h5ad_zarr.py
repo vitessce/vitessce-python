@@ -1,6 +1,5 @@
 import argparse
 import pandas as pd
-import numpy as np
 import h5py
 from anndata import AnnData
 from vitessce.data_utils import (

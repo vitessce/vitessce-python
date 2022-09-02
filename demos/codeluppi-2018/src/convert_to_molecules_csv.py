@@ -1,7 +1,5 @@
 import argparse
 from anndata import read_zarr
-import json
-import pandas as pd
 
 
 def convert_to_csv(args):

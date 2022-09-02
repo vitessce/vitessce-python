@@ -1,8 +1,7 @@
 import argparse
-from anndata import AnnData, read_loom
+from anndata import read_loom
 import pickle
 import numpy as np
-import pandas as pd
 import scanpy as sc
 import geopandas as gpd
 from shapely.geometry import Polygon

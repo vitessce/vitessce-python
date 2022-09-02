@@ -21,7 +21,7 @@ def convert_to_csv(args):
     segmentations = {}
     for i, cell_id in enumerate(adata.obs.index.values.tolist()):
         segmentations[cell_id] = [
-            [ int(coord) for coord in xy ]
+            [int(coord) for coord in xy]
             for xy in adata.obsm["X_segmentations"][i, :, :]
         ]
 

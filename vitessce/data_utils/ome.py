@@ -3,6 +3,7 @@ import zarr
 from ome_zarr.writer import write_image
 from .anndata import cast_arr
 
+
 def rgb_img_to_ome_zarr(img_arr, output_path, img_name="Image", chunks=(1, 256, 256), axes="cyx"):
     img_arr = img_arr.astype(np.dtype('uint8'))
 
@@ -43,6 +44,7 @@ def rgb_img_to_ome_zarr(img_arr, output_path, img_name="Image", chunks=(1, 256, 
         },
         chunks=chunks
     )
+
 
 def multiplex_img_to_ome_zarr(img_arr, channel_names, output_path, img_name="Image", chunks=(1, 256, 256), axes="cyx", channel_colors=None):
     img_arr = cast_arr(img_arr)

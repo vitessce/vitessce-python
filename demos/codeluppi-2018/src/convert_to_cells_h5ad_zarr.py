@@ -48,6 +48,8 @@ LOOKUP = {
 }
 
 # Copied from https://github.com/vitessce/vitessce-data/blob/6726dae/python/cell_reader.py#L17
+
+
 def octagon(poly):
     """
     Returns a bounding octagon.
@@ -123,9 +125,9 @@ def convert_to_cells_h5ad_zarr(args):
     sc.pp.neighbors(adata)
     sc.tl.umap(adata)
 
-    adata.obs = adata.obs.rename(columns={ "ClusterName": "Subcluster" })
+    adata.obs = adata.obs.rename(columns={"ClusterName": "Subcluster"})
     adata.obs["Cluster"] = adata.obs["Subcluster"].apply(lambda val: LOOKUP[val])
-    
+
     adata.obsm["X_centroid"] = np.zeros((adata.shape[0], 2))
     adata.obsm["X_segmentations"] = np.zeros((adata.shape[0], 8, 2))
 

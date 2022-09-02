@@ -13,6 +13,7 @@ rule all:
     input:
         [ (PROCESSED_DIR / f) for f in config['output'] ]
 
+# The following rules are also imported by ../codeluppi-2018-via-zarr/Snakefile.
 rule convert_to_ome_zarr:
     input:
         (RAW_DIR / "Nuclei_polyT.int16.sf.hdf5")
@@ -89,6 +90,7 @@ rule convert_to_molecules_zarr:
             -o {output}
         '''
 
+# Download raw data.
 rule download_image_hdf5:
     output:
         (RAW_DIR / "Nuclei_polyT.int16.sf.hdf5")

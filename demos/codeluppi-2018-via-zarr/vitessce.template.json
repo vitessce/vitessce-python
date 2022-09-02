@@ -60,47 +60,8 @@
           }
         },
         {
-          "fileType": "image.raster.json",
-          "options": {
-            "schemaVersion": "0.0.2",
-            "images": [
-              {
-                "name": "Image",
-                "url": "https://vitessce-data.storage.googleapis.com/0.0.31/master_release/linnarsson/linnarsson.images.zarr",
-                "type": "zarr",
-                "metadata": {
-                  "dimensions": [
-                    {
-                      "field": "channel",
-                      "type": "nominal",
-                      "values": [
-                        "polyT",
-                        "nuclei"
-                      ]
-                    },
-                    {
-                      "field": "y",
-                      "type": "quantitative",
-                      "values": null
-                    },
-                    {
-                      "field": "x",
-                      "type": "quantitative",
-                      "values": null
-                    }
-                  ],
-                  "isPyramid": true,
-                  "transform": {
-                    "translate": {
-                      "y": 0,
-                      "x": 0
-                    },
-                    "scale": 1
-                  }
-                }
-              }
-            ]
-          }
+          "fileType": "image.ome-zarr",
+          "url": "{{ base_url_gcp }}/codeluppi_2018_nature_methods.image.ome.zarr"
         }
       ]
     }
@@ -123,6 +84,53 @@
     "spatialTargetY": {
       "A": 20000
     },
+    "spatialImageLayer": {
+      "A": [
+        {
+          "type": "raster",
+          "index": 0,
+          "visible": true,
+          "colormap": null,
+          "opacity": 1,
+          "domainType": "Min/Max",
+          "transparentColor": null,
+          "renderingMode": "Additive",
+          "use3d": false,
+          "channels": [
+            {
+              "selection": {
+                "c": 1
+              },
+              "color": [
+                0,
+                0,
+                255
+              ],
+              "visible": true,
+              "slider": [
+                1,
+                1473
+              ]
+            },
+            {
+              "selection": {
+                "c": 0
+              },
+              "color": [
+                0,
+                255,
+                0
+              ],
+              "visible": true,
+              "slider": [
+                1,
+                447
+              ]
+            }
+          ]
+        }
+      ]
+    },
     "spatialSegmentationLayer": {
       "A": {
         "opacity": 1, "radius": 0, "visible": true, "stroked": false
@@ -137,9 +145,6 @@
   "layout": [
     {
       "component": "description",
-      "props": {
-        "description": "Codeluppi et al., Nature Methods 2018: Spatial organization of the somatosensory cortex revealed by osmFISH"
-      },
       "x": 0,
       "y": 0,
       "w": 2,
@@ -148,6 +153,7 @@
     {
       "component": "layerController",
       "coordinationScopes": {
+        "spatialImageLayer": "A",
         "spatialSegmentationLayer": "A",
         "spatialPointLayer": "A"
       },
@@ -169,6 +175,7 @@
         "spatialZoom": "A",
         "spatialTargetX": "A",
         "spatialTargetY": "A",
+        "spatialImageLayer": "A",
         "spatialSegmentationLayer": "A",
         "spatialPointLayer": "A"
       },

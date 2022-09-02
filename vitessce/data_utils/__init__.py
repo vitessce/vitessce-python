@@ -8,4 +8,5 @@ from .anndata import (
 )
 from .ome import (
     rgb_img_to_ome_zarr,
+    multiplex_img_to_ome_zarr,
 )

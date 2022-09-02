@@ -1,39 +1,34 @@
 include: "../common.smk"
 configfile: "config.yml"
 
-BASE_URL = "https://s3.amazonaws.com/vitessce-data/0.0.31/master_release/linnarsson/linnarsson"
+from pathlib import Path
 
+BASE_SRC_DIR = Path("../codeluppi-2018/src")
+
+module base_workflow:
+    snakefile: "../codeluppi-2018/Snakefile"
+    config: config
 
 rule all:
     input:
         [ (PROCESSED_DIR / f) for f in config['output'] ]
 
-rule convert_to_zarr:
-    input:
-        cells=(RAW_DIR / "cells.json"),
-        molecules=(RAW_DIR / "molecules.json"),
-        expression_matrix=(RAW_DIR / "clusters.json")
-    output:
-        cells=directory(PROCESSED_DIR / "codeluppi_2018_nature_methods.cells.h5ad.zarr"),
-        molecules=directory(PROCESSED_DIR / "codeluppi_2018_nature_methods.molecules.h5ad.zarr")
-    params:
-        script=(SRC_DIR / "convert_to_zarr.py")
-    shell:
-        '''
-        python {params.script} \
-            -ic {input.cells} \
-            -im {input.molecules} \
-            -iem {input.expression_matrix} \
-            -oc {output.cells} \
-            -oc {output.cells} \
-            -om {output.molecules}
-        '''
+use rule * from base_workflow as base_*
 
-# Download original JSON files.
-rule download_file:
+use rule convert_to_ome_zarr from base_workflow as base_convert_to_ome_zarr with:
     output:
-        (RAW_DIR / "{prefix}.json")
-    shell:
-        '''
-        curl -L -o {output} {BASE_URL}.{wildcards.prefix}.json
-        '''
+        directory(PROCESSED_DIR / "codeluppi_2018_nature_methods.image.ome.zarr")
+    params:
+        script=(BASE_SRC_DIR / "convert_to_ome_zarr.py")
+
+use rule convert_to_cells_zarr from base_workflow as base_convert_to_cells_zarr with:
+    output:
+        directory(PROCESSED_DIR / "codeluppi_2018_nature_methods.cells.h5ad.zarr")
+    params:
+        script=(BASE_SRC_DIR / "convert_to_cells_h5ad_zarr.py")
+
+use rule convert_to_molecules_zarr from base_workflow as base_convert_to_molecules_zarr with:
+    output:
+        directory(PROCESSED_DIR / "codeluppi_2018_nature_methods.molecules.h5ad.zarr")
+    params:
+        script=(BASE_SRC_DIR / "convert_to_molecules_h5ad_zarr.py")

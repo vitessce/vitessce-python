@@ -147,7 +147,7 @@ def to_uint8(arr, norm_along=None):
 
 
 # Sort the var index after hierarchical clustering.
-def sort_var_axis(adata_X, orig_var_index):
+def sort_var_axis(adata_X, orig_var_index, full_var_index=None):
     gexp_arr = to_dense(adata_X)
 
     # Perform hierarchical clustering along the genes axis.
@@ -156,6 +156,9 @@ def sort_var_axis(adata_X, orig_var_index):
     # Get the hierarchy-based ordering of genes.
     leaf_index_list = scipy.cluster.hierarchy.leaves_list(Z)
     leaf_list = orig_var_index[leaf_index_list].tolist()
+
+    if full_var_index:
+        leaf_list = leaf_list + list(set(full_var_index).difference(set(leaf_list)))
 
     return leaf_list
 

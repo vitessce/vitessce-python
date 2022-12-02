@@ -93,9 +93,9 @@ def launch_vitessce_io(config, theme='light', port=None, base_url=None, open=Tru
     return vitessce_url
 
 ESM = """
-import * as d3 from "https://esm.sh/d3-require";
-import React from 'https://unpkg.com/es-react/react.js';
-import ReactDOM from 'https://unpkg.com/es-react/react-dom.js';
+import * as d3 from "https://esm.sh/d3-require@1.3.0";
+import React from 'https://unpkg.com/es-react@16.13.1/react.js';
+import ReactDOM from 'https://unpkg.com/es-react@16.13.1/react-dom.js';
 
 const myRequire = d3.require.alias({
   "react": React,
@@ -113,12 +113,76 @@ const Vitessce = React.lazy(() => myRequire("vitessce@2.0.1").then(vitessce => a
 
 const e = React.createElement;
 
-function App(props) {
+const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+// The jupyter server may be running through a proxy,
+// which means that the client needs to prepend the part of the URL before /proxy/8000 such as
+// https://hub.gke2.mybinder.org/user/vitessce-vitessce-python-swi31vcv/proxy/8000/A/0/cells
+function prependBaseUrl(config, proxy) {
+  if(!proxy) {
+    return config;
+  }
+  const { origin } = new URL(window.location.href);
+  let baseUrl;
+  const jupyterLabConfigEl = document.getElementById('jupyter-config-data');
+
+  if (jupyterLabConfigEl) {
+    // This is jupyter lab
+    baseUrl = JSON.parse(jupyterLabConfigEl.textContent || '').baseUrl;
+  } else {
+    // This is jupyter notebook
+    baseUrl = document.getElementsByTagName('body')[0].getAttribute('data-base-url');
+  }
+  return {
+    ...config,
+    datasets: config.datasets.map(d => ({
+      ...d,
+      files: d.files.map(f => ({
+        ...f,
+        url: `${origin}${baseUrl}${f.url}`,
+      })),
+    })),
+  };
+}
+
+function VitessceWidget(props) {
   const { model } = props;
 
+  const config = prependBaseUrl(model.get('config'), model.get('proxy'));
   const height = model.get('height');
-  const theme = model.get('theme');
-  const config = model.get('config');
+  const theme = model.get('theme') === 'auto' ? (prefersDark ? 'dark' : 'light') : model.get('theme');
+
+  const divRef = React.useRef();
+
+  React.useEffect(() => {
+    if(!divRef.current) {
+      return () => {};
+    }
+
+    function handleMouseEnter() {
+      const jpn = divRef.current.closest('.jp-Notebook');
+      if(jpn) {
+        jpn.style.overflow = "hidden";
+      }
+    }
+    function handleMouseLeave(event) {
+      if(event.relatedTarget === null || (event.relatedTarget && event.relatedTarget.closest('.jp-Notebook')?.length)) return;
+      const jpn = divRef.current.closest('.jp-Notebook');
+      if(jpn) {
+        jpn.style.overflow = "auto";
+      }
+    }
+    divRef.current.addEventListener("mouseenter", handleMouseEnter);
+    divRef.current.addEventListener("mouseleave", handleMouseLeave);
+
+    return () => {
+      if(divRef.current) {
+        divRef.current.removeEventListener("mouseenter", handleMouseEnter);
+        divRef.current.removeEventListener("mouseleave", handleMouseLeave);
+      }
+    };
+  }, [divRef]);
+
 
   const onConfigChange = React.useCallback((config) => {
     model.set('config', config);
@@ -127,7 +191,7 @@ function App(props) {
   
   const vitessceProps = { height, theme, config, onConfigChange };
 
-  return e('div', { style: { height: height + 'px' } }, 
+  return e('div', { ref: divRef, style: { height: height + 'px' } }, 
     e(React.Suspense, { fallback: e('div', {}, 'Loading...') },
       e(Vitessce, vitessceProps)
     )
@@ -135,7 +199,7 @@ function App(props) {
 }
 
 export function render(view) {
-    ReactDOM.render(e(App, { model: view.model }), view.el);
+    ReactDOM.render(e(VitessceWidget, { model: view.model }), view.el);
 }
 """
 

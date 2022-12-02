@@ -1,7 +1,8 @@
 import argparse
 from anndata import read_h5ad
 import numpy as np
-from vitessce.data_utils import to_uint8, to_dense
+from scipy import sparse
+from vitessce.data_utils import to_uint8
 
 
 def convert_h5ad_to_zarr(input_path, output_path):
@@ -10,8 +11,12 @@ def convert_h5ad_to_zarr(input_path, output_path):
     adata.var['is_gene_expression'] = adata.var['feature_types'] == 'Gene Expression'
     adata.var['is_antibody_capture'] = adata.var['feature_types'] == 'Antibody Capture'
 
-    adata.obsm['X_gene_expression_uint8'] = to_dense(to_uint8(adata[:, adata.var['is_gene_expression']].X, norm_along="global"))
-    adata.obsm['X_antibody_capture_uint8'] = to_dense(to_uint8(adata[:, adata.var['is_antibody_capture']].X, norm_along="global"))
+    adata.obsm['X_gene_expression_uint8'] = to_uint8(adata[:, adata.var['is_gene_expression']].X, norm_along="global")
+    if isinstance(adata.obsm['X_gene_expression_uint8'], sparse.spmatrix):
+        adata.obsm['X_gene_expression_uint8'] = adata.obsm['X_gene_expression_uint8'].tocsc()
+    adata.obsm['X_antibody_capture_uint8'] = to_uint8(adata[:, adata.var['is_antibody_capture']].X, norm_along="global")
+    if isinstance(adata.obsm['X_antibody_capture_uint8'], sparse.spmatrix):
+        adata.obsm['X_antibody_capture_uint8'] = adata.obsm['X_antibody_capture_uint8'].tocsc()
 
     adata.obsm['X_umap'] = adata.obsm['X_umap'].astype(np.dtype('<f4'))
 

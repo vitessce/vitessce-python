@@ -11,7 +11,6 @@ cd docs/notebooks
 conda env create -f environment.yml
 conda activate vitessce-python-notebooks
 pip install -e "../..[dev]"
-jupyter labextension install ../../js
 ```
 
 ## Run

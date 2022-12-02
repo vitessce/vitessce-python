@@ -4,7 +4,7 @@ from urllib.parse import quote_plus
 import json
 
 # Widget dependencies
-import ipywidgets as widgets
+import anywidget
 from traitlets import Unicode, Dict, Int, Bool
 import time
 
@@ -18,8 +18,6 @@ from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
 from threading import Thread
 import socket
-
-# See js/lib/widget.js for the frontend counterpart to this file.
 
 MAX_PORT_TRIES = 1000
 DEFAULT_PORT = 8000
@@ -94,31 +92,58 @@ def launch_vitessce_io(config, theme='light', port=None, base_url=None, open=Tru
         webbrowser.open(vitessce_url)
     return vitessce_url
 
+ESM = """
+import * as d3 from "https://esm.sh/d3-require";
+import React from 'https://unpkg.com/es-react/react.js';
+import ReactDOM from 'https://unpkg.com/es-react/react-dom.js';
 
-@widgets.register
-class VitessceWidget(widgets.DOMWidget):
+const myRequire = d3.require.alias({
+  "react": React,
+  "react-dom": ReactDOM
+});
+
+function asEsModule(component) {
+  return {
+    __esModule: true,
+    default: component,
+  };
+}
+
+const Vitessce = React.lazy(() => myRequire("vitessce@2.0.1").then(vitessce => asEsModule(vitessce.Vitessce)));
+
+const e = React.createElement;
+
+function App(props) {
+  const { model } = props;
+
+  const height = model.get('height');
+  const theme = model.get('theme');
+  const config = model.get('config');
+
+  const onConfigChange = React.useCallback((config) => {
+    model.set('config', config);
+    model.save_changes();
+  }, [model]);
+  
+  const vitessceProps = { height, theme, config, onConfigChange };
+
+  return e('div', { style: { height: height + 'px' } }, 
+    e(React.Suspense, { fallback: e('div', {}, 'Loading...') },
+      e(Vitessce, vitessceProps)
+    )
+  );
+}
+
+export function render(view) {
+    ReactDOM.render(e(App, { model: view.model }), view.el);
+}
+"""
+
+class VitessceWidget(anywidget.AnyWidget):
     """
     A class to represent a Jupyter widget for Vitessce.
     """
-
-    # Name of the widget view class in front-end
-    _view_name = Unicode('VitessceView').tag(sync=True)
-
-    # Name of the widget model class in front-end
-    _model_name = Unicode('VitessceModel').tag(sync=True)
-
-    # Name of the front-end module containing widget view
-    _view_module = Unicode('vitessce-jupyter').tag(sync=True)
-
-    # Name of the front-end module containing widget model
-    _model_module = Unicode('vitessce-jupyter').tag(sync=True)
-
-    # Version of the front-end module containing widget view
-    _view_module_version = Unicode('^%s.%s.%s' % (
-        js_version_info[0], js_version_info[1], js_version_info[2])).tag(sync=True)
-    # Version of the front-end module containing widget model
-    _model_module_version = Unicode('^%s.%s.%s' % (
-        js_version_info[0], js_version_info[1], js_version_info[2])).tag(sync=True)
+    _module = Unicode(ESM).tag(sync=True)
 
     # Widget specific property.
     # Widget properties are defined as traitlets. Any property tagged with `sync=True`

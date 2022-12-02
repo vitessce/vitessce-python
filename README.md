@@ -32,21 +32,6 @@ For a development installation (requires NodeJS and NPM),
     $ conda env create -f environment.yml
     $ conda activate vitessce-python-dev
     $ pip install -e ".[dev]"
-    $ jupyter nbextension install --py --symlink --overwrite --sys-prefix vitessce
-    $ jupyter nbextension enable --py --sys-prefix vitessce
-
-When actively developing your extension for JupyterLab, run the command:
-
-    $ jupyter labextension develop --overwrite vitessce
-
-For the JS codebase, [install nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-and then run `nvm install` to get the correct version of Node. 
-To rebuild the JS when you make a code change:
-
-    $ cd js
-    $ npm run build
-
-You then need to refresh the JupyterLab page when your javascript changes.
 
 ### Conda environments
 
@@ -80,7 +65,7 @@ cd js
 npm version patch
 ```
 
-Then, when you push or merge the code with the incremented versions to `mai`n, the GitHub Action `deploy.yml` workflow will build and push the packages to PyPI and NPM.
+Then, when you push or merge the code with the incremented versions to `main`, the GitHub Action `deploy.yml` workflow will build and push the packages to PyPI and NPM.
 
 
 ## Resources

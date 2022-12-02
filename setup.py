@@ -52,15 +52,6 @@ extras_require = {
     'building': [
         'build==0.1.0',
     ],
-    'jupyter': [
-        # Required for developing jupyter extensions.
-        'jupyterlab==3.1.14',
-        'jupyter_server==1.11.0',
-        # Traitlets and markupsafe versions need to be pinned.
-        # Reference: https://github.com/vitessce/vitessce-python/pull/143#discussion_r854340283
-        'traitlets==4.3.3',
-        'markupsafe==2.0.1',
-    ],
     'testing': [
         'pytest>=6.2.4',
         'anndata==0.7.8',
@@ -85,8 +76,7 @@ extras_require = {
     ],
     'notebook': [
         # Needed only for notebook use:
-        'ipywidgets<=7.7.2',
-        'jupyterlab-widgets<=1.1.1',
+        'anywidget==0.0.3',
         'hypercorn>=0.11.0',
         'ujson>=4.0.1',
         'starlette==0.14.0',

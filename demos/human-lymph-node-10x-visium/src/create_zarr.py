@@ -82,7 +82,7 @@ def create_zarr(output_adata, output_img):
     img_arr *= 255.0
 
     rgb_img_to_ome_zarr(img_arr, output_img, axes="cyx", chunks=(1, 256, 256), img_name="H & E Image")
-    X = adata.X
+    X = adata.X.tocsc()
     adata = optimize_adata(
         adata,
         obs_cols=["clusters"],

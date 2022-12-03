@@ -38,13 +38,16 @@ def convert_h5ad_to_zarr(input_path, output_path):
     for i in range(num_cells):
         adata.obsm['X_segmentations'][i, :, :] = to_diamond(adata.obsm['X_spatial'][i, 0], adata.obsm['X_spatial'][i, 1], radius)
 
+    X = adata.X
     adata = optimize_adata(
         adata,
         obs_cols=["cell_type"],
         var_cols=["feature_name"],
         obsm_keys=["X_hvg", "X_hvg_uint8", "X_umap", "X_spatial", "X_segmentations"],
         layer_keys=[],
+        ignore_X=True
     )
+    adata.X = X
 
     adata.write_zarr(output_path)
 

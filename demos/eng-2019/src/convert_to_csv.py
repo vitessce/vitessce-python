@@ -1,6 +1,7 @@
 import argparse
 import json
 import pandas as pd
+from pathlib import Path
 from vitessce.data_utils import to_diamond
 
 
@@ -23,6 +24,10 @@ def convert_to_csv(args):
     segmentations = dict()
     for cell_id, cell_obj in cells_json.items():
         segmentations[cell_id] = to_diamond(cell_obj['xy'][0], cell_obj['xy'][1], 50)
+
+    # Pandas does not make intermediate paths
+    output_dir = Path(args.output_cells).parent
+    output_dir.mkdir(parents=True, exist_ok=True)
 
     cells_df.to_csv(args.output_cells, index=True)
 

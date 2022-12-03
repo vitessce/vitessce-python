@@ -21,6 +21,8 @@ pip install -e "..[testing]"
 snakemake --cores all --rerun-triggers mtime
 ```
 
+> NOTE: You will need to refresh the cellxgene urls as they are valid only for a week - please see snakemake files for instructions.
+
 ### Serve data locally
 
 ```sh

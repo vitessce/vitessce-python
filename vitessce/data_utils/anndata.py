@@ -45,7 +45,10 @@ def cast_arr(arr):
 
 
 def optimize_arr(arr):
-    return to_dense(cast_arr(to_memory(arr)))
+    arr = to_dense(cast_arr(to_memory(arr)))
+    if isinstance(arr, np.matrix):
+        arr = np.array(arr)
+    return arr
 
 
 # Given an anndata object, optimize for usage with Vitessce

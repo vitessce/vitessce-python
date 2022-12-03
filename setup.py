@@ -119,7 +119,7 @@ setup_args = dict(
         'black>=21.11b1',
         'numpy>=1.21.2',
         'generate-tiff-offsets>=0.1.7',
-        'anndata==0.7.8',
+        'anndata>=0.8.0',
         'ome-zarr==0.2.1',
     ],
     extras_require=extras_require,

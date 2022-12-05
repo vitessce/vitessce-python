@@ -6,7 +6,7 @@ from scipy import sparse
 def convert_h5ad_to_zarr(input_path, output_path):
     adata = read_h5ad(input_path)
     # Vitessce plays nicely with csc matrices
-    if isinstance(adata, sparse.spmatrix):
+    if isinstance(adata.X, sparse.spmatrix):
         adata.X = adata.X.tocsc()
     adata.write_zarr(output_path, chunks=[adata.shape[0], 10])
 

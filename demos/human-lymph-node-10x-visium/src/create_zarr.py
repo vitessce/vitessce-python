@@ -61,7 +61,7 @@ def create_zarr(output_adata, output_img):
     adata = adata[:, var_index_ordering].copy()
     # Vitessce plays nicely with dense matrices saved with chunking 
     # and this one is small enough that dense is not a huge overhead.
-    if isinstance(adata, sparse.spmatrix):
+    if isinstance(adata.X, sparse.spmatrix):
         adata.X = adata.X.todense()
 
     # Unclear what the exact scale factor is required to align

@@ -1,4 +1,3 @@
-from ._version import js_version_info
 import importlib.util
 from urllib.parse import quote_plus
 import json
@@ -97,19 +96,12 @@ import * as d3 from "https://esm.sh/d3-require@1.3.0";
 import React from 'https://unpkg.com/es-react@16.13.1/react.js';
 import ReactDOM from 'https://unpkg.com/es-react@16.13.1/react-dom.js';
 
-const myRequire = d3.require.alias({
-  "react": React,
-  "react-dom": ReactDOM
-});
-
 function asEsModule(component) {
   return {
     __esModule: true,
     default: component,
   };
 }
-
-const Vitessce = React.lazy(() => myRequire("vitessce@2.0.1").then(vitessce => asEsModule(vitessce.Vitessce)));
 
 const e = React.createElement;
 
@@ -145,63 +137,80 @@ function prependBaseUrl(config, proxy) {
   };
 }
 
-function VitessceWidget(props) {
-  const { model } = props;
-
-  const config = prependBaseUrl(model.get('config'), model.get('proxy'));
-  const height = model.get('height');
-  const theme = model.get('theme') === 'auto' ? (prefersDark ? 'dark' : 'light') : model.get('theme');
-
-  const divRef = React.useRef();
-
-  React.useEffect(() => {
-    if(!divRef.current) {
-      return () => {};
-    }
-
-    function handleMouseEnter() {
-      const jpn = divRef.current.closest('.jp-Notebook');
-      if(jpn) {
-        jpn.style.overflow = "hidden";
-      }
-    }
-    function handleMouseLeave(event) {
-      if(event.relatedTarget === null || (event.relatedTarget && event.relatedTarget.closest('.jp-Notebook')?.length)) return;
-      const jpn = divRef.current.closest('.jp-Notebook');
-      if(jpn) {
-        jpn.style.overflow = "auto";
-      }
-    }
-    divRef.current.addEventListener("mouseenter", handleMouseEnter);
-    divRef.current.addEventListener("mouseleave", handleMouseLeave);
-
-    return () => {
-      if(divRef.current) {
-        divRef.current.removeEventListener("mouseenter", handleMouseEnter);
-        divRef.current.removeEventListener("mouseleave", handleMouseLeave);
-      }
-    };
-  }, [divRef]);
-
-
-  const onConfigChange = React.useCallback((config) => {
-    model.set('config', config);
-    model.save_changes();
-  }, [model]);
-  
-  const vitessceProps = { height, theme, config, onConfigChange };
-
-  return e('div', { ref: divRef, style: { height: height + 'px' } }, 
-    e(React.Suspense, { fallback: e('div', {}, 'Loading...') },
-      e(Vitessce, vitessceProps)
-    )
-  );
-}
-
 export function render(view) {
+    const jsPackageVersion = view.model.get('js_package_version');
+    let customRequire = d3.require;
+    const customJsUrl = view.model.get('custom_js_url');
+    if(customJsUrl.length > 0) {
+        customRequire = d3.requireFrom(async () => {
+            return customJsUrl;
+        });
+    }
+
+    const aliasedRequire = customRequire.alias({
+        "react": React,
+        "react-dom": ReactDOM
+    });
+
+    const Vitessce = React.lazy(() => aliasedRequire(`vitessce@${jsPackageVersion}`).then(vitessce => asEsModule(vitessce.Vitessce)));
+
+    function VitessceWidget(props) {
+        const { model } = props;
+
+        const config = prependBaseUrl(model.get('config'), model.get('proxy'));
+        const height = model.get('height');
+        const theme = model.get('theme') === 'auto' ? (prefersDark ? 'dark' : 'light') : model.get('theme');
+
+        const divRef = React.useRef();
+
+        React.useEffect(() => {
+            if(!divRef.current) {
+                return () => {};
+            }
+
+            function handleMouseEnter() {
+                const jpn = divRef.current.closest('.jp-Notebook');
+                if(jpn) {
+                    jpn.style.overflow = "hidden";
+                }
+            }
+            function handleMouseLeave(event) {
+                if(event.relatedTarget === null || (event.relatedTarget && event.relatedTarget.closest('.jp-Notebook')?.length)) return;
+                const jpn = divRef.current.closest('.jp-Notebook');
+                if(jpn) {
+                    jpn.style.overflow = "auto";
+                }
+            }
+            divRef.current.addEventListener("mouseenter", handleMouseEnter);
+            divRef.current.addEventListener("mouseleave", handleMouseLeave);
+
+            return () => {
+                if(divRef.current) {
+                    divRef.current.removeEventListener("mouseenter", handleMouseEnter);
+                    divRef.current.removeEventListener("mouseleave", handleMouseLeave);
+                }
+            };
+        }, [divRef]);
+
+        const onConfigChange = React.useCallback((config) => {
+            model.set('config', config);
+            model.save_changes();
+        }, [model]);
+        
+        const vitessceProps = { height, theme, config, onConfigChange };
+
+        return e('div', { ref: divRef, style: { height: height + 'px' } }, 
+            e(React.Suspense, { fallback: e('div', {}, 'Loading...') },
+                e(Vitessce, vitessceProps)
+            )
+        );
+    }
+
     ReactDOM.render(e(VitessceWidget, { model: view.model }), view.el);
 }
 """
+
+
 
 class VitessceWidget(anywidget.AnyWidget):
     """
@@ -220,7 +229,10 @@ class VitessceWidget(anywidget.AnyWidget):
 
     next_port = DEFAULT_PORT
 
-    def __init__(self, config, height=600, theme='auto', port=None, proxy=False):
+    js_package_version = Unicode('2.0.1').tag(sync=True)
+    custom_js_url = Unicode('').tag(sync=True)
+
+    def __init__(self, config, height=600, theme='auto', port=None, proxy=False, js_package_version='2.0.1', custom_js_url=''):
         """
         Construct a new Vitessce widget.
 
@@ -247,7 +259,9 @@ class VitessceWidget(anywidget.AnyWidget):
         routes = config.get_routes()
 
         super(VitessceWidget, self).__init__(
-            config=config_dict, height=height, theme=theme, proxy=proxy)
+            config=config_dict, height=height, theme=theme, proxy=proxy,
+            js_package_version=js_package_version, custom_js_url=custom_js_url
+        )
 
         serve_routes(routes, use_port)
 

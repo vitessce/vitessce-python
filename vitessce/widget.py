@@ -91,6 +91,7 @@ def launch_vitessce_io(config, theme='light', port=None, base_url=None, open=Tru
         webbrowser.open(vitessce_url)
     return vitessce_url
 
+
 ESM = """
 import * as d3 from "https://esm.sh/d3-require@1.3.0";
 import React from 'https://unpkg.com/es-react@16.13.1/react.js';
@@ -196,10 +197,10 @@ export function render(view) {
             model.set('config', config);
             model.save_changes();
         }, [model]);
-        
+
         const vitessceProps = { height, theme, config, onConfigChange };
 
-        return e('div', { ref: divRef, style: { height: height + 'px' } }, 
+        return e('div', { ref: divRef, style: { height: height + 'px' } },
             e(React.Suspense, { fallback: e('div', {}, 'Loading...') },
                 e(Vitessce, vitessceProps)
             )
@@ -209,7 +210,6 @@ export function render(view) {
     ReactDOM.render(e(VitessceWidget, { model: view.model }), view.el);
 }
 """
-
 
 
 class VitessceWidget(anywidget.AnyWidget):

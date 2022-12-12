@@ -2,6 +2,7 @@ import argparse
 from anndata import read_h5ad
 import numpy as np
 import scanpy as sc
+from scipy import sparse
 from vitessce.data_utils import (
     to_diamond,
     to_uint8,
@@ -11,7 +12,6 @@ from vitessce.data_utils import (
 
 def convert_h5ad_to_zarr(input_path, output_path):
     adata = read_h5ad(input_path)
-    print(adata)
 
     sc.pp.filter_cells(adata, min_genes=200)
     sc.pp.filter_genes(adata, min_cells=3)
@@ -38,6 +38,9 @@ def convert_h5ad_to_zarr(input_path, output_path):
     for i in range(num_cells):
         adata.obsm['X_segmentations'][i, :, :] = to_diamond(adata.obsm['X_spatial'][i, 0], adata.obsm['X_spatial'][i, 1], radius)
 
+    if isinstance(adata.X, sparse.spmatrix):
+        adata.X = adata.X.tocsc()
+
     X = adata.X
     adata = optimize_adata(
         adata,
@@ -49,7 +52,7 @@ def convert_h5ad_to_zarr(input_path, output_path):
     )
     adata.X = X
 
-    adata.write_zarr(output_path)
+    adata.write_zarr(output_path, chunks=[adata.shape[0], 10])
 
 
 if __name__ == '__main__':

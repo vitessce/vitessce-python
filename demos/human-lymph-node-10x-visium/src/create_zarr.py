@@ -59,7 +59,7 @@ def create_zarr(output_adata, output_img):
 
     # Create a new *ordered* gene expression dataframe.
     adata = adata[:, var_index_ordering].copy()
-    # Vitessce plays nicely with dense matrices saved with chunking 
+    # Vitessce plays nicely with dense matrices saved with chunking
     # and this one is small enough that dense is not a huge overhead.
     if isinstance(adata.X, sparse.spmatrix):
         adata.X = adata.X.todense()

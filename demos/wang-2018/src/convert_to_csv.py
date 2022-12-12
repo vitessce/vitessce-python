@@ -3,6 +3,7 @@ import json
 import pandas as pd
 from pathlib import Path
 
+
 def convert_to_csv(args):
     with open(args.input_cells) as f:
         cells_json = json.load(f)

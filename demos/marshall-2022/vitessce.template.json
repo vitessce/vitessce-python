@@ -16,8 +16,7 @@
       },
       "options": {
         "obsFeatureMatrix": {
-          "path": "obsm/X_hvg_uint8",
-          "featureFilterPath": "var/highly_variable"
+          "path": "X"
         },
         "obsEmbedding": {
           "path": "obsm/X_umap"

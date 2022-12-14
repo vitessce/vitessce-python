@@ -69,6 +69,7 @@ jobs:
           NPM_CONFIG_USERCONFIG: /home/runner/work/_temp/.npmrc
           NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
   deploy:
+    runs-on: ubuntu-18.04
     needs: pre_deploy
     environment:
       name: github-pages

@@ -1,15 +1,21 @@
 name: Deploy
 
+# Reference: https://github.com/alex-page/alexpage.dev/commit/717efbcc57d0c8ce9f64d28526263610ea444823
+
 on:
   push:
-    branches:
-      - main
+    branches: main
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
-  deploy:
+  pre_deploy:
     runs-on: ubuntu-18.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install system dependencies
         run: |
           sudo apt-get update
@@ -46,11 +52,9 @@ jobs:
         run: |
           make html
           touch docs-dist/html/.nojekyll
-      - name: Deploy docs to gh-pages branch
-        uses: alex-page/blazing-fast-gh-pages-deploy@v1.1.0
-        with:
-          repo-token: ${{ secrets.GH_TOKEN }}
-          site-directory: docs-dist/html
+      - uses: actions/upload-pages-artifact@v1
+          with:
+            path: ./docs-dist/html
       - name: Deploy package to PyPI
         continue-on-error: true
         uses: pypa/gh-action-pypi-publish@v1.4.1
@@ -64,3 +68,12 @@ jobs:
         env:
           NPM_CONFIG_USERCONFIG: /home/runner/work/_temp/.npmrc
           NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+  deploy:
+    needs: pre_deploy
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v1

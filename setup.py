@@ -25,7 +25,7 @@ extras_require = {
     ],
     'testing': [
         'pytest>=6.2.4',
-        'anndata==0.7.8',
+        'anndata==0.8.0',
         'loompy>=3.0.6',
         'coverage>=6.3.2'
     ],

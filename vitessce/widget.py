@@ -229,10 +229,10 @@ class VitessceWidget(anywidget.AnyWidget):
 
     next_port = DEFAULT_PORT
 
-    js_package_version = Unicode('2.0.1').tag(sync=True)
+    js_package_version = Unicode('2.0.2').tag(sync=True)
     custom_js_url = Unicode('').tag(sync=True)
 
-    def __init__(self, config, height=600, theme='auto', port=None, proxy=False, js_package_version='2.0.1', custom_js_url=''):
+    def __init__(self, config, height=600, theme='auto', port=None, proxy=False, js_package_version='2.0.2', custom_js_url=''):
         """
         Construct a new Vitessce widget.
 

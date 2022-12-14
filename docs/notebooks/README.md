@@ -18,3 +18,11 @@ pip install -e "../..[dev]"
 ```sh
 jupyter lab
 ```
+
+## Troubleshooting
+
+If you previously had the `vitessce` Python package v1 installed, you may need to uninstall the previous lab extension due to conflicts between the v1 and v2 widget JS code.
+
+```sh
+jupyter labextension uninstall vitessce-jupyter
+```

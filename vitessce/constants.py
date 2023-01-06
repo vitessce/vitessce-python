@@ -79,6 +79,8 @@ class Component(DocEnum):
     CELL_SET_SIZES = "cellSetSizes", "The cell set sizes component can display the quantities of cells in selected cell sets."
     GENES = "genes", "The gene list selector."
     CELL_SET_EXPRESSION = "cellSetExpression", "Expression levels are displayed by cell set"
+    OBS_SETS = "obsSets", "Observation sets"
+    FEATURE_LIST = "featureList", "The feature list selector"
 
 
 class DataType(DocEnum):
@@ -110,3 +112,4 @@ class FileType(DocEnum):
     ANNDATA_CELLS_ZARR = "anndata-cells.zarr", "The Zarr-based cells file type from an anndata object."
     ANNDATA_CELL_SETS_ZARR = "anndata-cell-sets.zarr", "The Zarr-based cell-sets file type from an anndata object."
     ANNDATA_EXPRESSION_MATRIX_ZARR = "anndata-expression-matrix.zarr", "The Zarr-based expression matrix file type from an anndata object."
+    ANNDATA_ZARR = "anndata.zarr", "Joint file type for AnnData objects"

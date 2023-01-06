@@ -53,10 +53,11 @@ class VitessceConfigDatasetFile:
         """
         Not meant to be instantiated directly, but instead created and returned by the ``VitessceConfigDataset.add_file()`` method.
 
-        :param str data_type: A data type.
         :param str file_type: A file type.
         :param url: A URL to this file. Can be a localhost URL or a remote URL.
         :type url: str or None
+        :param coordination_values: Coordination values to pass to the file loader class.
+        :type coordination_values: dict or None
         :param options: Extra options to pass to the file loader class.
         :type options: dict or list or None
         """
@@ -134,13 +135,13 @@ class VitessceConfigDataset:
         """
         Add a new file definition to this dataset instance.
 
-        :param data_type: The type of data stored in the file. Must be compatible with the specified file type.
-        :type data_type: str or vitessce.constants.DataType
         :param file_type: The file type. Must be compatible with the specified data type.
         :type file_type: str or vitessce.constants.FileType
         :param url: The URL for the file, pointing to either a local or remote location.
         :type url: str or None
-        :type options: Extra options to pass to the file loader class. Optional.
+        :param coordination_values: Coordination values to pass to the file loader class. Optional.
+        :type coordination_values: dict or None
+        :param options: Extra options to pass to the file loader class. Optional.
         :type options: dict or list or None
 
         :returns: Self, to allow function chaining.
@@ -151,7 +152,7 @@ class VitessceConfigDataset:
 
             from vitessce import VitessceConfig, DataType as dt, FileType as ft
 
-            vc = VitessceConfig(name='My Config')
+            vc = VitessceConfig(schema_version="1.0.15", name='My Config')
             my_dataset = (
                 vc.add_dataset(name='My Dataset')
                 .add_file(
@@ -260,7 +261,7 @@ def hconcat(*views):
 
         from vitessce import VitessceConfig, Component as cm, hconcat, vconcat
 
-        vc = VitessceConfig()
+        vc = VitessceConfig(schema_version="1.0.15")
         my_dataset = vc.add_dataset(name='My Dataset')
         v1 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
         v2 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
@@ -303,7 +304,7 @@ def vconcat(*views):
 
         from vitessce import VitessceConfig, Component as cm, hconcat, vconcat
 
-        vc = VitessceConfig()
+        vc = VitessceConfig(schema_version="1.0.15")
         my_dataset = vc.add_dataset(name='My Dataset')
         v1 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
         v2 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
@@ -383,7 +384,7 @@ class VitessceConfigView:
 
             from vitessce import VitessceConfig, Component as cm, CoordinationType as ct
 
-            vc = VitessceConfig()
+            vc = VitessceConfig(schema_version="1.0.15")
             my_dataset = vc.add_dataset(name='My Dataset')
             v1 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
             v2 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
@@ -493,7 +494,7 @@ class VitessceConfigCoordinationScope:
 
             from vitessce import VitessceConfig, Component as cm, CoordinationType as ct
 
-            vc = VitessceConfig()
+            vc = VitessceConfig(schema_version="1.0.15")
             my_dataset = vc.add_dataset(name='My Dataset')
             v1 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
             v2 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
@@ -577,12 +578,11 @@ class VitessceConfig:
 
             from vitessce import VitessceConfig, DataType as dt, FileType as ft
 
-            vc = VitessceConfig(name='My Config')
+            vc = VitessceConfig(schema_version="1.0.15", name='My Config')
             my_dataset = (
                 vc.add_dataset(name='My Dataset')
                 .add_file(
                     url="http://example.com/cells.json",
-                    data_type=dt.CELLS,
                     file_type=ft.CELLS_JSON,
                 )
             )
@@ -671,7 +671,7 @@ class VitessceConfig:
 
             from vitessce import VitessceConfig, Component as cm
 
-            vc = VitessceConfig()
+            vc = VitessceConfig(schema_version="1.0.15")
             my_dataset = vc.add_dataset(name='My Dataset')
             v1 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
             v2 = vc.add_view(cm.SCATTERPLOT, dataset=my_dataset, mapping="X_umap")
@@ -741,7 +741,7 @@ class VitessceConfig:
 
             from vitessce import VitessceConfig, Component as cm, CoordinationType as ct
 
-            vc = VitessceConfig()
+            vc = VitessceConfig(schema_version="1.0.15")
             my_dataset = vc.add_dataset(name='My Dataset')
             v1 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
             v2 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
@@ -829,7 +829,7 @@ class VitessceConfig:
 
             from vitessce import VitessceConfig, Component as cm, hconcat, vconcat
 
-            vc = VitessceConfig()
+            vc = VitessceConfig(schema_version="1.0.15")
             my_dataset = vc.add_dataset(name='My Dataset')
             v1 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
             v2 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
@@ -841,7 +841,7 @@ class VitessceConfig:
 
             from vitessce import VitessceConfig, Component as cm
 
-            vc = VitessceConfig()
+            vc = VitessceConfig(schema_version="1.0.15")
             my_dataset = vc.add_dataset(name='My Dataset')
             v1 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
             v2 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
@@ -1000,7 +1000,7 @@ class VitessceConfig:
             vc = VitessceConfig.from_dict(my_existing_config)
         """
         vc = VitessceConfig(
-            name=config["name"], description=config["description"], schema_version=config["version"])
+            schema_version=config["version"], name=config["name"], description=config["description"])
 
         # Add each dataset from the incoming config.
         for d in config["datasets"]:
@@ -1038,13 +1038,14 @@ class VitessceConfig:
         return vc
 
     @staticmethod
-    def from_object(obj, name=None, description=None):
+    def from_object(obj, schema_version, name=None, description=None):
         """
         Helper function to automatically construct a Vitessce view config object from a single-cell dataset object.
         Particularly helpful when using the ``VitessceWidget`` Jupyter widget.
 
         :param obj: A single-cell dataset in the format of a commonly-used single-cell or imaging data analysis package.
         :type obj: anndata.AnnData or loompy.LoomConnection or zarr.Store
+        :param str schema_version: The schema version to pass to the VitessceConfig constructor.
 
         :returns: The config instance.
         :rtype: VitessceConfig
@@ -1054,9 +1055,9 @@ class VitessceConfig:
 
             from vitessce import VitessceConfig
 
-            vc = VitessceConfig.from_object(my_scanpy_object)
+            vc = VitessceConfig.from_object(my_scanpy_object, schema_version="1.0.15")
         """
-        vc = VitessceConfig(name=name, description=description)
+        vc = VitessceConfig(schema_version=schema_version, name=name, description=description)
 
         # The data object may modify the view config if it implements the auto_view_config() method.
         obj.auto_view_config(vc)
@@ -1080,7 +1081,7 @@ class VitessceConfig:
 
             from vitessce import VitessceConfig, Component as cm, CoordinationType as ct
 
-            vc = VitessceConfig()
+            vc = VitessceConfig(schema_version="1.0.15")
             my_dataset = vc.add_dataset(name='My Dataset')
             v1 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
             vc.layout(v1)
@@ -1108,7 +1109,7 @@ class VitessceConfig:
 
             from vitessce import VitessceConfig, Component as cm, CoordinationType as ct
 
-            vc = VitessceConfig()
+            vc = VitessceConfig(schema_version="1.0.15")
             my_dataset = vc.add_dataset(name='My Dataset')
             v1 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
             vc.layout(v1)
@@ -1131,7 +1132,7 @@ class VitessceConfig:
 
             from vitessce import VitessceConfig, Component as cm, CoordinationType as ct
 
-            vc = VitessceConfig()
+            vc = VitessceConfig(schema_version="1.0.15")
             my_dataset = vc.add_dataset(name='My Dataset')
             v1 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
             vc.layout(v1)

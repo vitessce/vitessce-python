@@ -94,7 +94,7 @@ cd js
 npm version patch
 ```
 
-Then, when you push or merge the code with the incremented versions to `mai`n, the GitHub Action `deploy.yml` workflow will build and push the packages to PyPI and NPM.
+Then, when you push or merge the code with the incremented versions to `main`, the GitHub Action `deploy.yml` workflow will build and push the packages to PyPI and NPM.
 
 
 ## Resources

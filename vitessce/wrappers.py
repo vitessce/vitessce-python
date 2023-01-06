@@ -380,7 +380,7 @@ class OmeTiffWrapper(AbstractWrapper):
 
 
 class AnnDataWrapper(AbstractWrapper):
-    def __init__(self, adata=None, adata_url=None, expression_matrix=None, matrix_gene_var_filter=None, gene_var_filter=None, cell_set_obs=None, cell_set_obs_names=None, spatial_centroid_obsm=None, spatial_polygon_obsm=None, mappings_obsm=None, mappings_obsm_names=None, mappings_obsm_dims=None, request_init=None, factors_obs=None, gene_alias=None, **kwargs):
+    def __init__(self, adata=None, adata_url=None, expression_matrix=None, matrix_gene_var_filter=None, gene_var_filter=None, cell_set_obs=None, cell_set_obs_names=None, spatial_centroid_obsm=None, spatial_polygon_obsm=None, mappings_obsm=None, mappings_obsm_names=None, mappings_obsm_dims=None, request_init=None, factors_obs=None, gene_alias=None, convert_to_dense=True, **kwargs):
         """
         Wrap an AnnData object by creating an instance of the ``AnnDataWrapper`` class.
 
@@ -400,6 +400,7 @@ class AnnDataWrapper(AbstractWrapper):
         :param list[str] mappings_obsm_dims: Dimensions along which to get data for the scatterplot, like [[0, 1], [4, 5]] where [0, 1] is just the normal x and y but [4, 5] could be comparing the third and fourth principal components, for example.
         :param dict request_init: options to be passed along with every fetch request from the browser, like { "header": { "Authorization": "Bearer dsfjalsdfa1431" } }
         :param str gene_alias: The name of a column containing gene names, instead of the default index in `var` of the AnnData store.
+        :param bool convert_to_dense: Whether or not to convert `X` to dense the zarr store (dense is faster but takes more disk space).
         :param \\*\\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
         """
         super().__init__(**kwargs)
@@ -432,6 +433,7 @@ class AnnDataWrapper(AbstractWrapper):
         self._mappings_obsm_dims = mappings_obsm_dims
         self._request_init = request_init
         self._gene_alias = gene_alias
+        self._convert_to_dense = convert_to_dense
 
     def convert_and_save(self, dataset_uid, obj_i):
         # Only create out-directory if needed
@@ -441,7 +443,11 @@ class AnnDataWrapper(AbstractWrapper):
             # In the future, we can use sparse matrices with equal performance:
             # https://github.com/theislab/anndata/issues/524
             if isinstance(self._adata.X, sparse.spmatrix):
-                self._adata.X = self._adata.X.todense()
+                if self._convert_to_dense:
+                    self._adata.X = np.array(self._adata.X.todense())
+                else:
+                    # Vitessce can use csc matrices somewhat efficiently.
+                    self._adata.X = self._adata.X.tocsc()
             self._adata.write_zarr(zarr_filepath, chunks=[
                                    self._adata.shape[0], VAR_CHUNK_SIZE])
 

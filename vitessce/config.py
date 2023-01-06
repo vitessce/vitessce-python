@@ -49,7 +49,7 @@ class VitessceConfigDatasetFile:
     A class to represent a file (described by a URL, data type, and file type) in a Vitessce view config dataset.
     """
 
-    def __init__(self, data_type, file_type, url=None, options=None):
+    def __init__(self, file_type, url=None, coordination_values=None, options=None):
         """
         Not meant to be instantiated directly, but instead created and returned by the ``VitessceConfigDataset.add_file()`` method.
 
@@ -61,21 +61,23 @@ class VitessceConfigDatasetFile:
         :type options: dict or list or None
         """
         self.file = {
-            "type": data_type,
             "fileType": file_type
         }
         if url:
             self.file["url"] = url
         if options:
             self.file["options"] = options
+        if coordination_values:
+            self.file["coordinationValues"] = coordination_values
 
     def __repr__(self):
         repr_dict = {
-            "data_type": self.file["type"],
             "file_type": self.file["fileType"],
         }
         if "url" in self.file:
             repr_dict["url"] = self.file["url"]
+        if "coordinationValues" in self.file:
+            repr_dict["coordination_values"] = self.file["coordinationValues"]
         if "options" in self.file:
             repr_dict["options"] = self.file["options"]
 
@@ -128,7 +130,7 @@ class VitessceConfigDataset:
         """
         return self.dataset["uid"]
 
-    def add_file(self, data_type, file_type, url=None, options=None):
+    def add_file(self, file_type, url=None, coordination_values=None, options=None):
         """
         Add a new file definition to this dataset instance.
 
@@ -160,15 +162,7 @@ class VitessceConfigDataset:
             )
         """
 
-        assert isinstance(data_type, str) or isinstance(data_type, dt)
         assert isinstance(file_type, str) or isinstance(file_type, ft)
-
-        # TODO: assert that the file type is compatible with the data type (and vice versa)
-
-        if isinstance(data_type, str):
-            data_type_str = data_type
-        else:
-            data_type_str = data_type.value
 
         if isinstance(file_type, str):
             file_type_str = file_type
@@ -176,7 +170,7 @@ class VitessceConfigDataset:
             file_type_str = file_type.value
 
         self._add_file(VitessceConfigDatasetFile(
-            url=url, data_type=data_type_str, file_type=file_type_str, options=options))
+            url=url, file_type=file_type_str, coordination_values=coordination_values, options=options))
         return self
 
     def _add_file(self, obj):
@@ -523,20 +517,20 @@ class VitessceConfig:
     A class to represent a Vitessce view config.
     """
 
-    def __init__(self, name=None, description=None, schema_version="1.0.7"):
+    def __init__(self, schema_version, name=None, description=None):
         """
         Construct a Vitessce view config object.
 
+        :param str schema_version: The view config schema version.
         :param str name: A name for the view config. Optional.
         :param str description: A description for the view config. Optional.
-        :param str schema_version: The view config schema version.
 
         .. code-block:: python
             :emphasize-lines: 3
 
             from vitessce import VitessceConfig
 
-            vc = VitessceConfig(name='My Config')
+            vc = VitessceConfig(schema_version="1.0.15", name='My Config')
         """
         self.config = {
             "version": schema_version,
@@ -559,9 +553,9 @@ class VitessceConfig:
 
     def _to_py_params(self):
         return {
+            "schema_version": self.config["version"],
             "name": self.config["name"],
             "description": self.config["description"],
-            "schema_version": self.config["version"],
         }
 
     def add_dataset(self, name="", uid=None, files=None, objs=None):
@@ -1013,9 +1007,9 @@ class VitessceConfig:
             new_dataset = vc.add_dataset(uid=d["uid"], name=d["name"])
             for f in d["files"]:
                 new_dataset.add_file(
-                    url=f.get("url"),
-                    data_type=f["type"],
                     file_type=f["fileType"],
+                    url=f.get("url"),
+                    coordination_values=f.get("coordinationValues"),
                     options=f.get("options")
                 )
         if 'coordinationSpace' in config:
@@ -1175,7 +1169,7 @@ class VitessceChainableConfig(VitessceConfig):
 
     def __copy__(self):
         new_vc = VitessceChainableConfig(
-            name=self.config["name"], description=self.config["description"], schema_version=self.config["version"])
+            schema_version=self.config["version"], name=self.config["name"], description=self.config["description"])
         new_vc.config = self.config.copy()
         return new_vc
 

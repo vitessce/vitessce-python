@@ -1,11 +1,5 @@
-graft vitessce/nbextension
-graft vitessce/labextension
-
-graft js
 graft tests
 prune **/node_modules
-
-include vitessce-jupyter.json
 
 include LICENSE
 include setup.py

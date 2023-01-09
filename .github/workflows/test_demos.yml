@@ -18,6 +18,8 @@ jobs:
           use-mamba: true
           mamba-version: "*"
           auto-activate-base: false
+          channels: conda-forge,bioconda,defaults
+          channel-priority: true
       - run: |
           conda info
           conda list

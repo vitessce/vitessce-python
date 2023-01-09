@@ -85,15 +85,13 @@ def create_zarr(output_adata, output_img):
     img_arr *= 255.0
 
     rgb_img_to_ome_zarr(img_arr, output_img, axes="cyx", chunks=(1, 256, 256), img_name="H & E Image")
-    # TODO: add argument to keep X the same
-    X = adata.X
     adata = optimize_adata(
         adata,
         obs_cols=["clusters"],
         var_cols=["highly_variable"],
         obsm_keys=["spatial", "segmentations", "X_umap", "X_pca"],
         # obsm_keys=["X_hvg", "spatial", "segmentations", "X_umap", "X_pca"]
-        ignore_X=True
+        preserve_X=True
     )
     adata.X = np.array(to_dense(X))
     adata.write_zarr(output_adata, chunks=[adata.shape[0], 10])

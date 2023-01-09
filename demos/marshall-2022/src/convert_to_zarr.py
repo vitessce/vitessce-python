@@ -42,17 +42,14 @@ def convert_h5ad_to_zarr(input_path, output_path):
     if isinstance(adata.X, sparse.spmatrix):
         adata.X = adata.X.tocsc()
 
-    # TODO: add argument to keep X the same
-    X = adata.X
     adata = optimize_adata(
         adata,
         obs_cols=["cell_type"],
         var_cols=["feature_name"],
         obsm_keys=["X_hvg", "X_hvg_uint8", "X_umap", "X_spatial", "X_segmentations"],
         layer_keys=[],
-        ignore_X=True
+        preserve_X=True
     )
-    adata.X = X
 
     adata.write_zarr(output_path, chunks=[adata.shape[0], 10])
 

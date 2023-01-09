@@ -66,24 +66,19 @@ def process_h5ad_files(args):
         joint_adata,
         obs_cols=["cell_type", "development_stage", "disease", "sex"]
     )
-    # TODO: add argument to keep X the same
-    X = rna_adata.X
     rna_adata = optimize_adata(
         rna_adata,
         obsm_keys=["X_umap", "X_pca"],
         var_cols=["feature_name"],
-        ignore_X=True,
+        preserve_X=True,
     )
-    rna_adata.X = X
 
-    X = atac_adata.X
     atac_adata = optimize_adata(
         atac_adata,
         obsm_keys=["X_umap"],
         var_cols=["feature_name"],
-        ignore_X=True,
+        preserve_X=True,
     )
-    atac_adata.X = X
 
     # Use chunks in case data is not sparse.
     rna_adata.write_zarr(args.output_rna, [rna_adata.shape[0], 10])

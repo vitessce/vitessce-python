@@ -341,12 +341,9 @@
         "spatialSegmentationLayer": "A",
         "spatialImageLayer": "A"
       },
-<<<<<<< HEAD
       "props": {
         "disableChannelsIfRgbDetected": true
       },
-=======
->>>>>>> 5509799588b63882c432f06ec6b1706f5191da4e
       "h": 4,
       "w": 3,
       "x": 9,

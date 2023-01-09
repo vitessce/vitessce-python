@@ -93,7 +93,7 @@ def create_zarr(output_adata, output_img):
         obsm_keys=["X_hvg", "spatial", "segmentations", "X_umap", "X_pca"]
         preserve_X=True
     )
-    adata.X = np.array(to_dense(X))
+    adata.X = np.array(to_dense(adata.X))
     adata.write_zarr(output_adata, chunks=[adata.shape[0], 10])
 
 

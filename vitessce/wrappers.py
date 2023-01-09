@@ -12,7 +12,6 @@ from scipy.sparse import coo_matrix
 
 from .constants import (
     Component as cm,
-    DataType as dt,
     FileType as ft,
 )
 from .entities import Cells, CellSets, GenomicProfiles
@@ -165,7 +164,6 @@ class MultiImageWrapper(AbstractWrapper):
                 raster_json['renderLayers'].append(image.name)
 
             return {
-                "type": dt.RASTER.value,
                 "fileType": ft.RASTER_JSON.value,
                 "options": raster_json
             }
@@ -250,7 +248,6 @@ class OmeTiffWrapper(AbstractWrapper):
             }
 
             return {
-                "type": dt.RASTER.value,
                 "fileType": ft.RASTER_JSON.value,
                 "options": raster_json
             }
@@ -380,27 +377,28 @@ class OmeTiffWrapper(AbstractWrapper):
 
 
 class AnnDataWrapper(AbstractWrapper):
-    def __init__(self, adata=None, adata_url=None, expression_matrix=None, matrix_gene_var_filter=None, gene_var_filter=None, cell_set_obs=None, cell_set_obs_names=None, spatial_centroid_obsm=None, spatial_polygon_obsm=None, mappings_obsm=None, mappings_obsm_names=None, mappings_obsm_dims=None, request_init=None, factors_obs=None, gene_alias=None, convert_to_dense=True, **kwargs):
+    def __init__(self, adata=None, adata_url=None, obs_feature_matrix_path=None, feature_filter_path=None, initial_feature_filter_path=None, obs_set_paths=None, obs_set_names=None, obs_locations_path=None, obs_segmentations_path=None, obs_embedding_paths=None, obs_embedding_names=None, obs_embedding_dims=None, request_init=None, feature_labels_path=None, convert_to_dense=True, coordination_values=None, **kwargs):
         """
         Wrap an AnnData object by creating an instance of the ``AnnDataWrapper`` class.
 
         :param adata: An AnnData object containing single-cell experiment data.
         :type adata: anndata.AnnData
         :param str adata_url: A remote url pointing to a zarr-backed AnnData store.
-        :param str expression_matrix: Location of the expression (cell x gene) matrix, like `X` or `obsm/highly_variable_genes_subset`
-        :param str gene_var_filter: A string like `highly_variable` (from `var` in the AnnData stored) used in conjunction with expression_matrix if expression_matrix points to a subset of `X` of the full `var` list.
-        :param str matrix_gene_var_filter: A string like `highly_variable` (from `var` in the AnnData stored) used in conjunction with expression_matrix if expression_matrix points to a subset of `X` of the full `var` list.
-        :param list[str] factors_obs: Column names like `['top_marker_gene', 'sex']` for showing factors when cells are hovered over
-        :param list[str] cell_set_obs: Column names like `['louvain', 'cellType']` for showing cell sets from `obs`
-        :param list[str] cell_set_obs_names: Names to display in place of those in `cell_set_obs`, like `['Louvain', 'Cell Type']
-        :param str spatial_centroid_obsm: Column name in `obsm` that contains centroid coordinates for displaying centroids in the spatial viewer
-        :param str spatial_polygon_obsm: Column name in `obsm` that contains polygonal coordinates for displaying outlines in the spatial viewer
-        :param list[str] mappings_obsm: Column names like `['X_umap', 'X_pca']` for showing scatterplots from `obsm`
-        :param list[str] mappings_obsm_names: Overriding names like `['UMAP', 'PCA'] for displaying above scatterplots
-        :param list[str] mappings_obsm_dims: Dimensions along which to get data for the scatterplot, like [[0, 1], [4, 5]] where [0, 1] is just the normal x and y but [4, 5] could be comparing the third and fourth principal components, for example.
+        :param str obs_feature_matrix_path: Location of the expression (cell x gene) matrix, like `X` or `obsm/highly_variable_genes_subset`
+        :param str feature_filter_path: A string like `var/highly_variable` used in conjunction with `obs_feature_matrix_path` if obs_feature_matrix_path points to a subset of `X` of the full `var` list.
+        :param str initial_feature_filter_path: A string like `var/highly_variable` used in conjunction with `obs_feature_matrix_path` if obs_feature_matrix_path points to a subset of `X` of the full `var` list.
+        :param list[str] obs_set_paths: Column names like `['obs/louvain', 'obs/cellType']` for showing cell sets
+        :param list[str] obs_set_names: Names to display in place of those in `obs_set_paths`, like `['Louvain', 'Cell Type']
+        :param str obs_locations_path: Column name in `obsm` that contains centroid coordinates for displaying centroids in the spatial viewer
+        :param str obs_segmentations_path: Column name in `obsm` that contains polygonal coordinates for displaying outlines in the spatial viewer
+        :param list[str] obs_embedding_paths: Column names like `['obsm/X_umap', 'obsm/X_pca']` for showing scatterplots
+        :param list[str] obs_embedding_names: Overriding names like `['UMAP', 'PCA'] for displaying above scatterplots
+        :param list[str] obs_embedding_dims: Dimensions along which to get data for the scatterplot, like [[0, 1], [4, 5]] where [0, 1] is just the normal x and y but [4, 5] could be comparing the third and fourth principal components, for example.
         :param dict request_init: options to be passed along with every fetch request from the browser, like { "header": { "Authorization": "Bearer dsfjalsdfa1431" } }
-        :param str gene_alias: The name of a column containing gene names, instead of the default index in `var` of the AnnData store.
+        :param str feature_labels_path: The name of a column containing gene names, instead of the default index in `var` of the AnnData store.
         :param bool convert_to_dense: Whether or not to convert `X` to dense the zarr store (dense is faster but takes more disk space).
+        :param coordination_values: Coordination values for the file definition.
+        :type coordination_values: dict or None
         :param \\*\\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
         """
         super().__init__(**kwargs)
@@ -413,27 +411,20 @@ class AnnDataWrapper(AbstractWrapper):
         else:
             self.is_remote = True
             self.zarr_folder = None
-        self._expression_matrix = expression_matrix
-        self._cell_set_obs_names = cell_set_obs_names
-        self._mappings_obsm_names = mappings_obsm_names
-        self._gene_var_filter = "var/" + \
-            gene_var_filter if gene_var_filter is not None else gene_var_filter
-        self._matrix_gene_var_filter = "var/" + \
-            matrix_gene_var_filter if matrix_gene_var_filter is not None else matrix_gene_var_filter
-        self._cell_set_obs = [
-            "obs/" + i for i in cell_set_obs] if cell_set_obs is not None else cell_set_obs
-        self._factors_obs = [
-            "obs/" + i for i in factors_obs] if factors_obs is not None else factors_obs
-        self._spatial_centroid_obsm = "obsm/" + \
-            spatial_centroid_obsm if spatial_centroid_obsm is not None else spatial_centroid_obsm
-        self._spatial_polygon_obsm = "obsm/" + \
-            spatial_polygon_obsm if spatial_polygon_obsm is not None else spatial_polygon_obsm
-        self._mappings_obsm = [
-            "obsm/" + i for i in mappings_obsm] if mappings_obsm is not None else mappings_obsm
-        self._mappings_obsm_dims = mappings_obsm_dims
+        self._expression_matrix = obs_feature_matrix_path
+        self._cell_set_obs_names = obs_set_names
+        self._mappings_obsm_names = obs_embedding_names
+        self._gene_var_filter = feature_filter_path
+        self._matrix_gene_var_filter = initial_feature_filter_path
+        self._cell_set_obs = obs_set_paths
+        self._spatial_centroid_obsm = obs_locations_path
+        self._spatial_polygon_obsm = obs_segmentations_path
+        self._mappings_obsm = obs_embedding_paths
+        self._mappings_obsm_dims = obs_embedding_dims
         self._request_init = request_init
-        self._gene_alias = gene_alias
+        self._gene_alias = feature_labels_path
         self._convert_to_dense = convert_to_dense
+        self._coordination_values = coordination_values
 
     def convert_and_save(self, dataset_uid, obj_i):
         # Only create out-directory if needed
@@ -451,15 +442,10 @@ class AnnDataWrapper(AbstractWrapper):
             self._adata.write_zarr(zarr_filepath, chunks=[
                                    self._adata.shape[0], VAR_CHUNK_SIZE])
 
-        cells_file_creator = self.make_cells_file_def_creator(
-            dataset_uid, obj_i)
-        cell_sets_file_creator = self.make_cell_sets_file_def_creator(
-            dataset_uid, obj_i)
-        expression_matrix_file_creator = self.make_expression_matrix_file_def_creator(
+        file_creator = self.make_file_def_creator(
             dataset_uid, obj_i)
 
-        self.file_def_creators += [cells_file_creator,
-                                   cell_sets_file_creator, expression_matrix_file_creator]
+        self.file_def_creators += [file_creator]
         self.routes += self.get_out_dir_route(dataset_uid, obj_i)
 
     def get_zarr_path(self, dataset_uid, obj_i):
@@ -473,99 +459,75 @@ class AnnDataWrapper(AbstractWrapper):
         else:
             return self._get_url(base_url, dataset_uid, obj_i, self.zarr_folder)
 
-    def make_cells_file_def_creator(self, dataset_uid, obj_i):
-        def get_cells(base_url):
+    def make_file_def_creator(self, dataset_uid, obj_i):
+        def get_anndata_zarr(base_url):
             options = {}
             if self._spatial_centroid_obsm is not None:
-                options["xy"] = self._spatial_centroid_obsm
+                options["obsLocations"] = {
+                    "path": self._spatial_centroid_obsm
+                }
             if self._spatial_polygon_obsm is not None:
-                options["poly"] = self._spatial_polygon_obsm
+                options["obsSegmentations"] = {
+                    "path": self._spatial_polygon_obsm
+                }
             if self._mappings_obsm is not None:
-                options["mappings"] = {}
+                options["obsEmbedding"] = []
                 if self._mappings_obsm_names is not None:
                     for key, mapping in zip(self._mappings_obsm_names, self._mappings_obsm):
-                        options["mappings"][key] = {
-                            "key": mapping,
-                            "dims": [0, 1]
-                        }
+                        options["obsEmbedding"].append({
+                            "path": mapping,
+                            "dims": [0, 1],
+                            "embeddingType": key
+                        })
                 else:
                     for mapping in self._mappings_obsm:
                         mapping_key = mapping.split('/')[-1]
                         self._mappings_obsm_names = mapping_key
-                        options["mappings"][mapping_key] = {
-                            "key": mapping,
-                            "dims": [0, 1]
-                        }
+                        options["obsEmbedding"].append({
+                            "path": mapping,
+                            "dims": [0, 1],
+                            "embeddingType": mapping_key
+                        })
                 if self._mappings_obsm_dims is not None:
-                    for dim, key in zip(self._mappings_obsm_dims, self._mappings_obsm_names):
-                        options["mappings"][key]['dims'] = dim
-            if self._factors_obs is not None:
-                options["factors"] = []
-                for obs in self._factors_obs:
-                    options["factors"].append(obs)
-            if len(options.keys()) > 0:
-                obj_file_def = {
-                    "type": dt.CELLS.value,
-                    "fileType": ft.ANNDATA_CELLS_ZARR.value,
-                    "url": self.get_zarr_url(base_url, dataset_uid, obj_i),
-                    "options": options
-                }
-                if self._request_init is not None:
-                    obj_file_def['requestInit'] = self._request_init
-                return obj_file_def
-            return None
-        return get_cells
-
-    def make_cell_sets_file_def_creator(self, dataset_uid, obj_i):
-        def get_cell_sets(base_url):
+                    for dim_i, dim in enumerate(self._mappings_obsm_dims):
+                        options["obsEmbedding"][dim_i]['dims'] = dim
             if self._cell_set_obs is not None:
-                options = []
+                options["obsSets"] = []
                 if self._cell_set_obs_names is not None:
                     names = self._cell_set_obs_names
                 else:
                     names = [obs.split('/')[-1] for obs in self._cell_set_obs]
                 for obs, name in zip(self._cell_set_obs, names):
-                    options.append({
-                        "groupName": name,
-                        "setName": obs
+                    options["obsSets"].append({
+                        "name": name,
+                        "path": obs
                     })
-
-                obj_file_def = {
-                    "type": dt.CELL_SETS.value,
-                    "fileType": ft.ANNDATA_CELL_SETS_ZARR.value,
-                    "url": self.get_zarr_url(base_url, dataset_uid, obj_i),
-                    "options": options
-                }
-                if self._request_init is not None:
-                    obj_file_def['requestInit'] = self._request_init
-
-                return obj_file_def
-            return None
-        return get_cell_sets
-
-    def make_expression_matrix_file_def_creator(self, dataset_uid, obj_i):
-        def get_expression_matrix(base_url):
-            options = {}
             if self._expression_matrix is not None:
-                options["matrix"] = self._expression_matrix
+                options["obsFeatureMatrix"] = {
+                    "path": self._expression_matrix
+                }
                 if self._gene_var_filter is not None:
-                    options["geneFilter"] = self._gene_var_filter
+                    options["obsFeatureMatrix"]["featureFilterPath"] = self._gene_var_filter
                 if self._matrix_gene_var_filter is not None:
-                    options["matrixGeneFilter"] = self._matrix_gene_var_filter
+                    options["obsFeatureMatrix"]["initialFeatureFilterPath"] = self._matrix_gene_var_filter
                 if self._gene_alias is not None:
-                    options["geneAlias"] = self._gene_alias
+                    options["featureLabels"] = {
+                        "path": self._gene_alias,
+                        "featureLabelsType": "feature"
+                    }
+            if len(options.keys()) > 0:
                 obj_file_def = {
-                    "type": dt.EXPRESSION_MATRIX.value,
-                    "fileType": ft.ANNDATA_EXPRESSION_MATRIX_ZARR.value,
+                    "fileType": ft.ANNDATA_ZARR.value,
                     "url": self.get_zarr_url(base_url, dataset_uid, obj_i),
                     "options": options
                 }
                 if self._request_init is not None:
                     obj_file_def['requestInit'] = self._request_init
-
+                if self._coordination_values is not None:
+                    obj_file_def['coordinationValues'] = self._coordination_values
                 return obj_file_def
             return None
-        return get_expression_matrix
+        return get_anndata_zarr
 
     def auto_view_config(self, vc):
         dataset = vc.add_dataset().add_object(self)
@@ -573,8 +535,8 @@ class AnnDataWrapper(AbstractWrapper):
             self._mappings_obsm_names is not None) else self._mappings_obsm[0].split('/')[-1]
         scatterplot = vc.add_view(
             cm.SCATTERPLOT, dataset=dataset, mapping=mapping_name)
-        cell_sets = vc.add_view(cm.CELL_SETS, dataset=dataset)
-        genes = vc.add_view(cm.GENES, dataset=dataset)
+        cell_sets = vc.add_view(cm.OBS_SETS, dataset=dataset)
+        genes = vc.add_view(cm.FEATURE_LIST, dataset=dataset)
         heatmap = vc.add_view(cm.HEATMAP, dataset=dataset)
         if self._spatial_polygon_obsm is not None or self._spatial_centroid_obsm is not None:
             spatial = vc.add_view(cm.SPATIAL, dataset=dataset)
@@ -798,7 +760,6 @@ class SnapWrapper(AbstractWrapper):
     def make_genomic_profiles_file_def_creator(self, dataset_uid, obj_i):
         def get_genomic_profiles(base_url):
             return {
-                "type": dt.GENOMIC_PROFILES.value,
                 "fileType": ft.GENOMIC_PROFILES_ZARR.value,
                 "url": self._get_url(base_url, dataset_uid, obj_i, self.zarr_folder)
             }
@@ -831,7 +792,6 @@ class SnapWrapper(AbstractWrapper):
     def make_cell_sets_file_def_creator(self, dataset_uid, obj_i):
         def get_cell_sets(base_url):
             return {
-                "type": dt.CELL_SETS.value,
                 "fileType": ft.CELL_SETS_JSON.value,
                 "url": self._get_url(base_url, dataset_uid, obj_i, "cell-sets")
             }
@@ -850,7 +810,6 @@ class SnapWrapper(AbstractWrapper):
         def get_cells(base_url):
 
             return {
-                "type": dt.CELLS.value,
                 "fileType": ft.CELLS_JSON.value,
                 "url": self._get_url(base_url, dataset_uid, obj_i, "cells")
             }
@@ -860,6 +819,6 @@ class SnapWrapper(AbstractWrapper):
         dataset = vc.add_dataset().add_object(self)
         genomic_profiles = vc.add_view(cm.GENOMIC_PROFILES, dataset=dataset)
         scatter = vc.add_view(cm.SCATTERPLOT, dataset=dataset, mapping="UMAP")
-        cell_sets = vc.add_view(cm.CELL_SETS, dataset=dataset)
+        cell_sets = vc.add_view(cm.OBS_SETS, dataset=dataset)
 
         vc.layout(genomic_profiles / (scatter | cell_sets))

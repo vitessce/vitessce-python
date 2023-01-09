@@ -48,7 +48,6 @@ class TestWrappers(unittest.TestCase):
         )
         raster_json = raster_file_def_creator('http://localhost:8000')
         self.assertEqual(raster_json, {
-            'type': 'raster',
             'fileType': 'raster.json',
             'options': {
                 'schemaVersion': '0.0.2',
@@ -68,18 +67,16 @@ class TestWrappers(unittest.TestCase):
 
     def test_anndata(self):
         adata = read_h5ad(data_path / 'test.h5ad')
-        w = AnnDataWrapper(adata, cell_set_obs=['CellType'], mappings_obsm=[
-                           'X_umap'], mappings_obsm_names=['UMAP'])
+        w = AnnDataWrapper(adata, obs_set_paths=['obs/CellType'], obs_set_names=['Cell Type'], obs_embedding_paths=[
+                           'obsm/X_umap'], obs_embedding_names=['UMAP'])
 
-        cells_creator = w.make_cells_file_def_creator('A', 0)
+        cells_creator = w.make_file_def_creator('A', 0)
         cells = cells_creator('http://localhost:8000')
-        self.assertEqual(cells, {'type': 'cells', 'fileType': 'anndata-cells.zarr', 'url': 'http://localhost:8000/A/0/anndata.zarr',
-                                 'options': {"mappings": {'UMAP': {'dims': [0, 1], 'key': 'obsm/X_umap'}}}})
-
-        cell_sets_creator = w.make_cell_sets_file_def_creator('A', 0)
-        cell_sets = cell_sets_creator('http://localhost:8000')
-        self.assertEqual(cell_sets, {'type': 'cell-sets', 'fileType': 'anndata-cell-sets.zarr',
-                                     'url': 'http://localhost:8000/A/0/anndata.zarr', 'options': [{'groupName': 'CellType', 'setName': 'obs/CellType'}]})
+        self.assertEqual(cells, {'fileType': 'anndata.zarr', 'url': 'http://localhost:8000/A/0/anndata.zarr',
+                            'options': {
+                                'obsEmbedding': [{'path': 'obsm/X_umap', 'embeddingType': 'UMAP', 'dims': [0, 1]}],
+                                'obsSets': [{'path': 'obs/CellType', 'name': 'Cell Type'}]
+                            }})
 
     def test_snaptools(self):
         mtx = mmread(data_path / 'test.snap.mtx')

@@ -1,10 +1,9 @@
-from ._version import js_version_info
 import importlib.util
 from urllib.parse import quote_plus
 import json
 
 # Widget dependencies
-import ipywidgets as widgets
+import anywidget
 from traitlets import Unicode, Dict, Int, Bool
 import time
 
@@ -18,8 +17,6 @@ from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
 from threading import Thread
 import socket
-
-# See js/lib/widget.js for the frontend counterpart to this file.
 
 MAX_PORT_TRIES = 1000
 DEFAULT_PORT = 8000
@@ -95,30 +92,131 @@ def launch_vitessce_io(config, theme='light', port=None, base_url=None, open=Tru
     return vitessce_url
 
 
-@widgets.register
-class VitessceWidget(widgets.DOMWidget):
+ESM = """
+import * as d3 from "https://esm.sh/d3-require@1.3.0";
+import React from 'https://unpkg.com/es-react@16.13.1/react.js';
+import ReactDOM from 'https://unpkg.com/es-react@16.13.1/react-dom.js';
+
+function asEsModule(component) {
+  return {
+    __esModule: true,
+    default: component,
+  };
+}
+
+const e = React.createElement;
+
+const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+// The jupyter server may be running through a proxy,
+// which means that the client needs to prepend the part of the URL before /proxy/8000 such as
+// https://hub.gke2.mybinder.org/user/vitessce-vitessce-python-swi31vcv/proxy/8000/A/0/cells
+function prependBaseUrl(config, proxy) {
+  if(!proxy) {
+    return config;
+  }
+  const { origin } = new URL(window.location.href);
+  let baseUrl;
+  const jupyterLabConfigEl = document.getElementById('jupyter-config-data');
+
+  if (jupyterLabConfigEl) {
+    // This is jupyter lab
+    baseUrl = JSON.parse(jupyterLabConfigEl.textContent || '').baseUrl;
+  } else {
+    // This is jupyter notebook
+    baseUrl = document.getElementsByTagName('body')[0].getAttribute('data-base-url');
+  }
+  return {
+    ...config,
+    datasets: config.datasets.map(d => ({
+      ...d,
+      files: d.files.map(f => ({
+        ...f,
+        url: `${origin}${baseUrl}${f.url}`,
+      })),
+    })),
+  };
+}
+
+export function render(view) {
+    const jsPackageVersion = view.model.get('js_package_version');
+    let customRequire = d3.require;
+    const customJsUrl = view.model.get('custom_js_url');
+    if(customJsUrl.length > 0) {
+        customRequire = d3.requireFrom(async () => {
+            return customJsUrl;
+        });
+    }
+
+    const aliasedRequire = customRequire.alias({
+        "react": React,
+        "react-dom": ReactDOM
+    });
+
+    const Vitessce = React.lazy(() => aliasedRequire(`vitessce@${jsPackageVersion}`).then(vitessce => asEsModule(vitessce.Vitessce)));
+
+    function VitessceWidget(props) {
+        const { model } = props;
+
+        const config = prependBaseUrl(model.get('config'), model.get('proxy'));
+        const height = model.get('height');
+        const theme = model.get('theme') === 'auto' ? (prefersDark ? 'dark' : 'light') : model.get('theme');
+
+        const divRef = React.useRef();
+
+        React.useEffect(() => {
+            if(!divRef.current) {
+                return () => {};
+            }
+
+            function handleMouseEnter() {
+                const jpn = divRef.current.closest('.jp-Notebook');
+                if(jpn) {
+                    jpn.style.overflow = "hidden";
+                }
+            }
+            function handleMouseLeave(event) {
+                if(event.relatedTarget === null || (event.relatedTarget && event.relatedTarget.closest('.jp-Notebook')?.length)) return;
+                const jpn = divRef.current.closest('.jp-Notebook');
+                if(jpn) {
+                    jpn.style.overflow = "auto";
+                }
+            }
+            divRef.current.addEventListener("mouseenter", handleMouseEnter);
+            divRef.current.addEventListener("mouseleave", handleMouseLeave);
+
+            return () => {
+                if(divRef.current) {
+                    divRef.current.removeEventListener("mouseenter", handleMouseEnter);
+                    divRef.current.removeEventListener("mouseleave", handleMouseLeave);
+                }
+            };
+        }, [divRef]);
+
+        const onConfigChange = React.useCallback((config) => {
+            model.set('config', config);
+            model.save_changes();
+        }, [model]);
+
+        const vitessceProps = { height, theme, config, onConfigChange };
+
+        return e('div', { ref: divRef, style: { height: height + 'px' } },
+            e(React.Suspense, { fallback: e('div', {}, 'Loading...') },
+                e(Vitessce, vitessceProps)
+            )
+        );
+    }
+
+    ReactDOM.render(e(VitessceWidget, { model: view.model }), view.el);
+}
+"""
+
+
+class VitessceWidget(anywidget.AnyWidget):
     """
     A class to represent a Jupyter widget for Vitessce.
     """
-
-    # Name of the widget view class in front-end
-    _view_name = Unicode('VitessceView').tag(sync=True)
-
-    # Name of the widget model class in front-end
-    _model_name = Unicode('VitessceModel').tag(sync=True)
-
-    # Name of the front-end module containing widget view
-    _view_module = Unicode('vitessce-jupyter').tag(sync=True)
-
-    # Name of the front-end module containing widget model
-    _model_module = Unicode('vitessce-jupyter').tag(sync=True)
-
-    # Version of the front-end module containing widget view
-    _view_module_version = Unicode('^%s.%s.%s' % (
-        js_version_info[0], js_version_info[1], js_version_info[2])).tag(sync=True)
-    # Version of the front-end module containing widget model
-    _model_module_version = Unicode('^%s.%s.%s' % (
-        js_version_info[0], js_version_info[1], js_version_info[2])).tag(sync=True)
+    _module = Unicode(ESM).tag(sync=True)
 
     # Widget specific property.
     # Widget properties are defined as traitlets. Any property tagged with `sync=True`
@@ -131,7 +229,10 @@ class VitessceWidget(widgets.DOMWidget):
 
     next_port = DEFAULT_PORT
 
-    def __init__(self, config, height=600, theme='auto', port=None, proxy=False):
+    js_package_version = Unicode('2.0.2').tag(sync=True)
+    custom_js_url = Unicode('').tag(sync=True)
+
+    def __init__(self, config, height=600, theme='auto', port=None, proxy=False, js_package_version='2.0.2', custom_js_url=''):
         """
         Construct a new Vitessce widget.
 
@@ -158,7 +259,9 @@ class VitessceWidget(widgets.DOMWidget):
         routes = config.get_routes()
 
         super(VitessceWidget, self).__init__(
-            config=config_dict, height=height, theme=theme, proxy=proxy)
+            config=config_dict, height=height, theme=theme, proxy=proxy,
+            js_package_version=js_package_version, custom_js_url=custom_js_url
+        )
 
         serve_routes(routes, use_port)
 

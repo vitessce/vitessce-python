@@ -25,19 +25,6 @@ jobs:
           python-version: '3.8'
       - name: Install vitessce
         run: pip install -e .[dev]
-      - uses: actions/setup-node@v3
-        with:
-          node-version-file: '.nvmrc'
-          registry-url: https://registry.npmjs.org/
-      - name: NPM CI
-        working-directory: ./js
-        run: npm ci && npm run clean
-      - name: Build nbextension
-        working-directory: ./js
-        run: npm run build:nbextension
-      - name: Build labextension
-        working-directory: ./js
-        run: jupyter labextension build .
       - name: Run tests
         run: pytest
       - name: Build a binary wheel and a source tarball
@@ -61,13 +48,6 @@ jobs:
         with:
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
-      - name: Deploy package to NPM
-        continue-on-error: true
-        working-directory: ./js
-        run: npm ci && npm publish
-        env:
-          NPM_CONFIG_USERCONFIG: /home/runner/work/_temp/.npmrc
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
   deploy:
     runs-on: ubuntu-18.04
     needs: pre_deploy

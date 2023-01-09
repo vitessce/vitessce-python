@@ -59,6 +59,7 @@ def create_zarr(output_adata, output_img):
 
     # Create a new *ordered* gene expression dataframe.
     adata = adata[:, var_index_ordering].copy()
+    adata.obsm["X_hvg"] = adata[:, adata.var['highly_variable']].X.copy()
     # Vitessce plays nicely with dense matrices saved with chunking
     # and this one is small enough that dense is not a huge overhead.
     # TODO: automate conversion to csc in optimize_adata function
@@ -89,8 +90,7 @@ def create_zarr(output_adata, output_img):
         adata,
         obs_cols=["clusters"],
         var_cols=["highly_variable"],
-        obsm_keys=["spatial", "segmentations", "X_umap", "X_pca"],
-        # obsm_keys=["X_hvg", "spatial", "segmentations", "X_umap", "X_pca"]
+        obsm_keys=["X_hvg", "spatial", "segmentations", "X_umap", "X_pca"]
         preserve_X=True
     )
     adata.X = np.array(to_dense(X))

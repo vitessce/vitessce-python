@@ -44,6 +44,10 @@ def process_h5ad_files(args):
 
     rna_adata = read_h5ad(args.input_rna)
     atac_adata = read_h5ad(args.input_atac)
+
+    rna_adata.layers['X_uint8'] = to_uint8(rna_adata.X, norm_along="global")
+    atac_adata.layers['X_uint8'] = to_uint8(atac_adata.X, norm_along="global")
+
     # TODO: automate conversion to csc in optimize_adata function
     visium_adata.layers['X_uint8'] = to_uint8(visium_adata.X, norm_along="var")
     # Vitessce plays nicely with csc at the moment but not csr.
@@ -70,6 +74,7 @@ def process_h5ad_files(args):
         rna_adata,
         obsm_keys=["X_umap", "X_pca"],
         var_cols=["feature_name"],
+        layer_keys=["X_uint8"],
         preserve_X=True,
     )
 
@@ -77,6 +82,7 @@ def process_h5ad_files(args):
         atac_adata,
         obsm_keys=["X_umap"],
         var_cols=["feature_name"],
+        layer_keys=["X_uint8"],
         preserve_X=True,
     )
 

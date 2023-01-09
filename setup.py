@@ -84,7 +84,8 @@ extras_require = {
     ],
     'notebook': [
         # Needed only for notebook use:
-        'ipywidgets>=7.6.0',
+        'ipywidgets<=7.7.2',
+        'jupyterlab-widgets<=1.1.1',
         'hypercorn>=0.11.0',
         'ujson>=4.0.1',
         'starlette==0.14.0',
@@ -119,7 +120,7 @@ setup_args = dict(
         'black>=21.11b1',
         'numpy>=1.21.2',
         'generate-tiff-offsets>=0.1.7',
-        'anndata>=0.8.0',
+        'anndata>=0.7.8,<0.9',
         'ome-zarr==0.2.1',
     ],
     extras_require=extras_require,

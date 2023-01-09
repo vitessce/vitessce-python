@@ -38,9 +38,11 @@ def convert_h5ad_to_zarr(input_path, output_path):
     for i in range(num_cells):
         adata.obsm['X_segmentations'][i, :, :] = to_diamond(adata.obsm['X_spatial'][i, 0], adata.obsm['X_spatial'][i, 1], radius)
 
+    # TODO: automate conversion to csc in optimize_adata function
     if isinstance(adata.X, sparse.spmatrix):
         adata.X = adata.X.tocsc()
 
+    # TODO: add argument to keep X the same
     X = adata.X
     adata = optimize_adata(
         adata,

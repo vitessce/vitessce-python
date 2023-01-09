@@ -1,6 +1,6 @@
 # Module version
-py_version_info = (1, 0, 9)
-js_version_info = (0, 1, 14)
+py_version_info = (1, 0, 11)
+js_version_info = (0, 1, 15)
 
 # Module version accessible using vitessce.__version__
 __version__ = '%s.%s.%s' % (

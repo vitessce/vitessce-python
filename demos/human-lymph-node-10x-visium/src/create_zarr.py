@@ -2,13 +2,19 @@ import argparse
 import scanpy as sc
 import numpy as np
 import scipy.cluster
+<<<<<<< HEAD
 from scipy import sparse
+=======
+>>>>>>> 5509799588b63882c432f06ec6b1706f5191da4e
 from vitessce.data_utils import (
     to_diamond,
     rgb_img_to_ome_zarr,
     optimize_adata,
 )
+<<<<<<< HEAD
 from vitessce.data_utils.anndata import to_dense
+=======
+>>>>>>> 5509799588b63882c432f06ec6b1706f5191da4e
 
 
 def create_zarr(output_adata, output_img):
@@ -29,7 +35,11 @@ def create_zarr(output_adata, output_img):
     # Perform normalization
     sc.pp.normalize_total(adata, inplace=True)
     sc.pp.log1p(adata)
+<<<<<<< HEAD
     # Determine the top 300 highly variable genes.
+=======
+    # Determine the top 2000 highly variable genes.
+>>>>>>> 5509799588b63882c432f06ec6b1706f5191da4e
     sc.pp.highly_variable_genes(adata, flavor="seurat", n_top_genes=300)
 
     # Dimensionality reduction and clustering
@@ -61,8 +71,10 @@ def create_zarr(output_adata, output_img):
     adata = adata[:, var_index_ordering].copy()
     # Vitessce plays nicely with dense matrices saved with chunking
     # and this one is small enough that dense is not a huge overhead.
+    # TODO: automate conversion to csc in optimize_adata function
     if isinstance(adata.X, sparse.spmatrix):
         adata.X = adata.X.todense()
+    # adata.obsm["X_hvg"] = adata[:, adata.var['highly_variable']].X.copy()
 
     # Unclear what the exact scale factor is required to align
     # the spots to the image. Through trial and error / manual binary search
@@ -83,12 +95,14 @@ def create_zarr(output_adata, output_img):
     img_arr *= 255.0
 
     rgb_img_to_ome_zarr(img_arr, output_img, axes="cyx", chunks=(1, 256, 256), img_name="H & E Image")
+    # TODO: add argument to keep X the same
     X = adata.X
     adata = optimize_adata(
         adata,
         obs_cols=["clusters"],
         var_cols=["highly_variable"],
         obsm_keys=["spatial", "segmentations", "X_umap", "X_pca"],
+        # obsm_keys=["X_hvg", "spatial", "segmentations", "X_umap", "X_pca"]
         ignore_X=True
     )
     adata.X = np.array(to_dense(X))

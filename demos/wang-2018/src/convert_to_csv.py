@@ -1,7 +1,6 @@
 import argparse
 import json
 import pandas as pd
-from pathlib import Path
 
 
 def convert_to_csv(args):
@@ -45,9 +44,6 @@ def convert_to_csv(args):
                 matrix_df.at[cell_id, gene_id] = 0
     matrix_df.index = matrix_df.index.rename('cell_id')
 
-    # Pandas does not make intermediate paths
-    output_dir = Path(args.output_cells).parent
-    output_dir.mkdir(parents=True, exist_ok=True)
     cells_df.to_csv(args.output_cells, index=True)
     matrix_df.to_csv(args.output_cells_matrix, index=True)
     molecules_df.to_csv(args.output_molecules, index=True)

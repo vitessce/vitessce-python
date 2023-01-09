@@ -11,6 +11,7 @@ def convert_h5ad_to_zarr(input_path, output_path):
     adata.var['is_gene_expression'] = adata.var['feature_types'] == 'Gene Expression'
     adata.var['is_antibody_capture'] = adata.var['feature_types'] == 'Antibody Capture'
 
+    # TODO: automate conversion to csc in optimize_adata function
     adata.obsm['X_gene_expression_uint8'] = to_uint8(adata[:, adata.var['is_gene_expression']].X, norm_along="global")
     if isinstance(adata.obsm['X_gene_expression_uint8'], sparse.spmatrix):
         adata.obsm['X_gene_expression_uint8'] = adata.obsm['X_gene_expression_uint8'].tocsc()

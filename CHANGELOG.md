@@ -1,3 +1,7 @@
+## 1.0.10
+
+### Changed
+- Pin `ipywidgets` and `jupyterlab-widgets` dependency versions as a short-term fix. In the longer term, we will need to follow the [migration guide](https://ipywidgets.readthedocs.io/en/stable/migration_guides.html#migrating-from-7-x-to-8-0).
 
 ## 1.0.5 - in progress
 

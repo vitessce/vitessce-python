@@ -1,6 +1,5 @@
 import argparse
 import json
-from pathlib import Path
 import pandas as pd
 
 
@@ -25,9 +24,6 @@ def convert_to_csv(args):
 
     cells_df['cluster'] = cells_df['cluster'].astype(str)
 
-    # Pandas does not make intermediate paths
-    output_dir = Path(args.output_cells).parent
-    output_dir.mkdir(parents=True, exist_ok=True)
     cells_df.to_csv(args.output_cells, index=True)
 
 

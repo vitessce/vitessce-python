@@ -44,7 +44,7 @@ def process_h5ad_files(args):
 
     rna_adata = read_h5ad(args.input_rna)
     atac_adata = read_h5ad(args.input_atac)
-
+    # TODO: automate conversion to csc in optimize_adata function
     visium_adata.layers['X_uint8'] = to_uint8(visium_adata.X, norm_along="var")
     # Vitessce plays nicely with csc at the moment but not csr.
     if isinstance(rna_adata.X, sparse.spmatrix):
@@ -66,6 +66,7 @@ def process_h5ad_files(args):
         joint_adata,
         obs_cols=["cell_type", "development_stage", "disease", "sex"]
     )
+    # TODO: add argument to keep X the same
     X = rna_adata.X
     rna_adata = optimize_adata(
         rna_adata,

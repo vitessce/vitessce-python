@@ -73,10 +73,10 @@ class TestWrappers(unittest.TestCase):
         cells_creator = w.make_file_def_creator('A', 0)
         cells = cells_creator('http://localhost:8000')
         self.assertEqual(cells, {'fileType': 'anndata.zarr', 'url': 'http://localhost:8000/A/0/anndata.zarr',
-                                 'options': {
-                                    'obsEmbedding': [{'path': 'obsm/X_umap', 'embeddingType': 'UMAP', 'dims': [0, 1] }],
-                                    'obsSets': [{ 'path': 'obs/CellType', 'name': 'Cell Type'}]
-                                }})
+                            'options': {
+                                'obsEmbedding': [{'path': 'obsm/X_umap', 'embeddingType': 'UMAP', 'dims': [0, 1]}],
+                                'obsSets': [{'path': 'obs/CellType', 'name': 'Cell Type'}]
+                            }})
 
     def test_snaptools(self):
         mtx = mmread(data_path / 'test.snap.mtx')

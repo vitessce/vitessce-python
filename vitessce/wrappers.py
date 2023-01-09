@@ -12,7 +12,6 @@ from scipy.sparse import coo_matrix
 
 from .constants import (
     Component as cm,
-    DataType as dt,
     FileType as ft,
 )
 from .entities import Cells, CellSets, GenomicProfiles

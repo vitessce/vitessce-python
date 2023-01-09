@@ -65,11 +65,11 @@ def test_config_add_dataset_add_files():
     vc.add_dataset(name='My Chained Dataset').add_file(
         url="http://example.com/cells.json",
         file_type=ft.CELLS_JSON,
-        coordination_values={ "obsType": "cell" },
+        coordination_values={"obsType": "cell"},
     ).add_file(
         url="http://example.com/cell_sets.json",
         file_type=ft.CELL_SETS_JSON,
-        coordination_values={ "obsType": "cell" },
+        coordination_values={"obsType": "cell"},
     )
 
     vc_dict = vc.to_dict()

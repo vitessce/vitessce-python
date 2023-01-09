@@ -7,7 +7,6 @@ from collections import OrderedDict
 from .constants import (
     CoordinationType as ct,
     Component as cm,
-    DataType as dt,
     FileType as ft
 )
 

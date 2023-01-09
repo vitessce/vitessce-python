@@ -1,0 +1,134 @@
+from pathlib import Path, PosixPath
+import yaml
+import os
+from pprint import pprint
+
+# Remote providers should be used, but cloud files are
+# not working as outputs: https://github.com/snakemake/snakemake/issues/870
+# from snakemake.remote.S3 import RemoteProvider as S3RemoteProvider
+# from snakemake.remote.GS import RemoteProvider as GSRemoteProvider
+# S3 = S3RemoteProvider()
+# GS = GSRemoteProvider()
+
+BUCKET_VERSION = "0.0.33"
+BUCKET_NAME = "vitessce-data"
+BUCKET = PosixPath(BUCKET_NAME) / BUCKET_VERSION / "main"
+
+include: "./common.smk"
+
+# All subworkflows listed here will be
+# executed as part of the 'all' rule
+# in this snakefile.
+subworkflow codeluppi_2018:
+    workdir:
+        "codeluppi-2018"
+
+subworkflow codeluppi_2018_via_zarr:
+    workdir:
+        "codeluppi-2018-via-zarr"
+        
+subworkflow combat_2022:
+    workdir:
+        "combat-2022"
+
+subworkflow eng_2019:
+    workdir:
+        "eng-2019"
+
+subworkflow habib_2017:
+    workdir:
+        "habib-2017"
+
+subworkflow human_lymph_node_10x_visium:
+    workdir:
+        "human-lymph-node-10x-visium"
+
+subworkflow kuppe_2022:
+    workdir:
+        "kuppe-2022"
+
+subworkflow marshall_2022:
+    workdir:
+        "marshall-2022"
+
+subworkflow meta_2022_azimuth:
+    workdir:
+        "meta-2022-azimuth"
+
+subworkflow satija_2020:
+    workdir:
+        "satija-2020"
+
+subworkflow sn_atac_seq_hubmap_2020:
+    workdir:
+        "sn-atac-seq-hubmap-2020"
+
+subworkflow wang_2018:
+    workdir:
+        "wang-2018"
+
+# End subworkflow list.
+
+# Only access workflow._subworkflows after all
+# subworkflows have been defined above.
+SUBWORKFLOW_KEYS = workflow._subworkflows.keys()
+SUBWORKFLOW_DIRS = dict(zip(SUBWORKFLOW_KEYS, [ v._workdir for v in workflow._subworkflows.values() ]))
+
+def get_subworkflow_outputs(subworkflow_key):
+    with open(Path(SUBWORKFLOW_DIRS[subworkflow_key]) / "config.yml") as f:
+        subworkflow_config = yaml.load(f, Loader=yaml.SafeLoader)
+        return subworkflow_config['output']
+
+rule all:
+    input:
+        in_files=[
+            [
+                globals()[subworkflow_key](str(PROCESSED_DIR / subworkflow_output))
+                for subworkflow_output
+                in get_subworkflow_outputs(subworkflow_key)
+            ]
+            for subworkflow_key
+            in SUBWORKFLOW_KEYS
+        ]
+    params:
+        should_upload=config.get("upload"),
+        out_files=[
+            [
+                str(BUCKET / SUBWORKFLOW_DIRS[subworkflow_key] / subworkflow_output)
+                for subworkflow_output
+                in get_subworkflow_outputs(subworkflow_key)
+            ]
+            for subworkflow_key
+            in SUBWORKFLOW_KEYS
+        ]
+    run:
+        if str2bool(params.should_upload):
+            print("Uploading")
+            for in_file, out_file in zip(input.in_files, flatten(params.out_files)):
+                if os.path.isdir(in_file):
+                    if is_aws(out_file):
+                        shell(f"aws s3 sync {in_file} s3://{out_file}")
+                    else:
+                        shell(f"gsutil -m rsync -r {in_file} gs://{out_file}")
+                else:
+                    shell(f"aws s3 cp {in_file} s3://{out_file}")
+        else:
+            print("Not uploading. To upload, use snakemake --config upload=true")
+            for in_file, out_file in zip(input.in_files, flatten(params.out_files)):
+                if is_aws(out_file):
+                    shell(f"echo \"{in_file} s3://{out_file}\"")
+                else:
+                    shell(f"echo \"{in_file} gs://{out_file}\"")
+
+rule fill_templates:
+    params:
+        subworkflow_dirs=[
+            SUBWORKFLOW_DIRS[subworkflow_key]
+            for subworkflow_key
+            in SUBWORKFLOW_KEYS
+        ]
+    run:
+        for subworkflow_dir in params.subworkflow_dirs:
+            if os.path.exists(os.path.join(subworkflow_dir, 'vitessce.template.json')):
+                shell(f"python fill_template.py -d {subworkflow_dir} -t local > {os.path.join(subworkflow_dir, 'vitessce.local.json')}")
+                shell(f"python fill_template.py -d {subworkflow_dir} -t remote -v {BUCKET_VERSION} > {os.path.join(subworkflow_dir, 'vitessce.remote.json')}")

@@ -19,11 +19,11 @@ from vitessce import (  # noqa: F401
 
 
 def test_config_creation():
-    vc = VitessceConfig()
+    vc = VitessceConfig(schema_version="1.0.15")
     vc_dict = vc.to_dict()
 
     assert vc_dict == {
-        "version": "1.0.7",
+        "version": "1.0.15",
         "name": "",
         "description": "",
         "datasets": [],
@@ -34,13 +34,13 @@ def test_config_creation():
 
 
 def test_config_add_dataset():
-    vc = VitessceConfig()
+    vc = VitessceConfig(schema_version="1.0.15")
     vc.add_dataset(name='My Dataset')
 
     vc_dict = vc.to_dict()
 
     assert vc_dict == {
-        "version": "1.0.7",
+        "version": "1.0.15",
         "name": "",
         "description": "",
         "datasets": [
@@ -61,21 +61,21 @@ def test_config_add_dataset():
 
 
 def test_config_add_dataset_add_files():
-    vc = VitessceConfig()
+    vc = VitessceConfig(schema_version="1.0.15")
     vc.add_dataset(name='My Chained Dataset').add_file(
         url="http://example.com/cells.json",
-        data_type=dt.CELLS,
         file_type=ft.CELLS_JSON,
+        coordination_values={"obsType": "cell"},
     ).add_file(
         url="http://example.com/cell_sets.json",
-        data_type=dt.CELL_SETS,
         file_type=ft.CELL_SETS_JSON,
+        coordination_values={"obsType": "cell"},
     )
 
     vc_dict = vc.to_dict()
 
     assert vc_dict == {
-        "version": "1.0.7",
+        "version": "1.0.15",
         "name": "",
         "description": "",
         "datasets": [
@@ -85,13 +85,17 @@ def test_config_add_dataset_add_files():
                 'files': [
                     {
                         'url': 'http://example.com/cells.json',
-                        'type': 'cells',
-                        'fileType': 'cells.json'
+                        'fileType': 'cells.json',
+                        'coordinationValues': {
+                            'obsType': 'cell'
+                        }
                     },
                     {
                         'url': 'http://example.com/cell_sets.json',
-                        'type': 'cell-sets',
-                        'fileType': 'cell-sets.json'
+                        'fileType': 'cell-sets.json',
+                        'coordinationValues': {
+                            'obsType': 'cell'
+                        }
                     }
                 ]
             },
@@ -107,7 +111,7 @@ def test_config_add_dataset_add_files():
 
 
 def test_config_add_spatial_view():
-    vc = VitessceConfig()
+    vc = VitessceConfig(schema_version="1.0.15")
     my_dataset = vc.add_dataset(name='My Dataset')
 
     vc.add_view(cm.SPATIAL, dataset=my_dataset)
@@ -115,7 +119,7 @@ def test_config_add_spatial_view():
     vc_dict = vc.to_dict()
 
     assert vc_dict == {
-        "version": "1.0.7",
+        "version": "1.0.15",
         "name": "",
         "description": "",
         "datasets": [
@@ -147,7 +151,7 @@ def test_config_add_spatial_view():
 
 
 def test_config_add_scatterplot_view_with_mapping():
-    vc = VitessceConfig()
+    vc = VitessceConfig(schema_version="1.0.15")
     my_dataset = vc.add_dataset(name='My Dataset')
 
     vc.add_view(
@@ -156,7 +160,7 @@ def test_config_add_scatterplot_view_with_mapping():
     vc_dict = vc.to_dict()
 
     assert vc_dict == {
-        "version": "1.0.7",
+        "version": "1.0.15",
         "name": "",
         "description": "",
         "datasets": [
@@ -192,7 +196,7 @@ def test_config_add_scatterplot_view_with_mapping():
 
 
 def test_config_add_scatterplot_view_with_embedding_coordinations():
-    vc = VitessceConfig()
+    vc = VitessceConfig(schema_version="1.0.15")
     my_dataset = vc.add_dataset(name='My Dataset')
 
     my_view = vc.add_view(cm.SCATTERPLOT, dataset=my_dataset)
@@ -209,7 +213,7 @@ def test_config_add_scatterplot_view_with_embedding_coordinations():
     vc_dict = vc.to_dict()
 
     assert vc_dict == {
-        "version": "1.0.7",
+        "version": "1.0.15",
         "name": "",
         "description": "",
         "datasets": [
@@ -257,7 +261,7 @@ def test_config_add_scatterplot_view_with_embedding_coordinations():
 
 
 def test_config_add_dataset_add_objects():
-    vc = VitessceConfig()
+    vc = VitessceConfig(schema_version="1.0.15")
 
     class MockWrapperA(AbstractWrapper):
         def __init__(self, name, **kwargs):
@@ -268,14 +272,15 @@ def test_config_add_dataset_add_objects():
             def get_molecules(base_url):
                 return {
                     "url": f"{base_url}/molecules",
-                    "type": "molecules",
-                    "fileType": "molecules.json"
+                    "fileType": "molecules.json",
+                    "coordinationValues": {
+                        "obsType": "molecule"
+                    }
                 }
 
             def get_cells(base_url):
                 return {
                     "url": f"{base_url}/cells",
-                    "type": "cells",
                     "fileType": "cells.json"
                 }
             self.file_def_creators += [get_molecules, get_cells]
@@ -289,7 +294,6 @@ def test_config_add_dataset_add_objects():
             def get_cell_sets(base_url):
                 return {
                     "url": f"{base_url}/cell-sets",
-                    "type": "cell-sets",
                     "fileType": "cell-sets.json"
                 }
             self.file_def_creators += [get_cell_sets]
@@ -303,7 +307,7 @@ def test_config_add_dataset_add_objects():
     vc_dict = vc.to_dict(base_url="http://localhost:8000")
 
     assert vc_dict == {
-        "version": "1.0.7",
+        "version": "1.0.15",
         "name": "",
         "description": "",
         "datasets": [
@@ -313,17 +317,17 @@ def test_config_add_dataset_add_objects():
                 'files': [
                     {
                         "url": "http://localhost:8000/molecules",
-                        "type": "molecules",
-                        "fileType": "molecules.json"
+                        "fileType": "molecules.json",
+                        "coordinationValues": {
+                            "obsType": "molecule"
+                        }
                     },
                     {
                         "url": "http://localhost:8000/cells",
-                        "type": "cells",
                         "fileType": "cells.json"
                     },
                     {
                         "url": "http://localhost:8000/cell-sets",
-                        "type": "cell-sets",
                         "fileType": "cell-sets.json"
                     }
                 ]
@@ -340,7 +344,7 @@ def test_config_add_dataset_add_objects():
 
 
 def test_config_set_layout_single_view():
-    vc = VitessceConfig()
+    vc = VitessceConfig(schema_version="1.0.15")
     my_dataset = vc.add_dataset(name='My Dataset')
     my_view = vc.add_view(cm.SPATIAL, dataset=my_dataset)
     vc.layout(my_view)
@@ -348,7 +352,7 @@ def test_config_set_layout_single_view():
     vc_dict = vc.to_dict()
 
     assert vc_dict == {
-        "version": "1.0.7",
+        "version": "1.0.15",
         "name": "",
         "description": "",
         "datasets": [
@@ -380,7 +384,7 @@ def test_config_set_layout_single_view():
 
 
 def test_config_set_layout_multi_view():
-    vc = VitessceConfig()
+    vc = VitessceConfig(schema_version="1.0.15")
     my_dataset = vc.add_dataset(name='My Dataset')
     v1 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
     v2 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
@@ -391,7 +395,7 @@ def test_config_set_layout_multi_view():
     vc_dict = vc.to_dict()
 
     assert vc_dict == {
-        "version": "1.0.7",
+        "version": "1.0.15",
         "name": "",
         "description": "",
         "datasets": [
@@ -443,7 +447,7 @@ def test_config_set_layout_multi_view():
 
 
 def test_config_set_layout_multi_view_magic():
-    vc = VitessceConfig()
+    vc = VitessceConfig(schema_version="1.0.15")
     my_dataset = vc.add_dataset(name='My Dataset')
     v1 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
     v2 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
@@ -454,7 +458,7 @@ def test_config_set_layout_multi_view_magic():
     vc_dict = vc.to_dict()
 
     assert vc_dict == {
-        "version": "1.0.7",
+        "version": "1.0.15",
         "name": "",
         "description": "",
         "datasets": [
@@ -507,7 +511,7 @@ def test_config_set_layout_multi_view_magic():
 
 def test_config_from_dict():
     vc = VitessceConfig.from_dict({
-        "version": "1.0.7",
+        "version": "1.0.15",
         "name": "Test name",
         "description": "Test description",
         "datasets": [
@@ -517,7 +521,6 @@ def test_config_from_dict():
                 'files': [
                     {
                         'url': 'http://cells.json',
-                        'type': 'cells',
                         'fileType': 'cells.json'
                     }
                 ]
@@ -554,7 +557,7 @@ def test_config_from_dict():
     vc_dict = vc.to_dict()
 
     assert vc_dict == {
-        "version": "1.0.7",
+        "version": "1.0.15",
         "name": "Test name",
         "description": "Test description",
         "datasets": [
@@ -564,7 +567,6 @@ def test_config_from_dict():
                 'files': [
                     {
                         'url': 'http://cells.json',
-                        'type': 'cells',
                         'fileType': 'cells.json'
                     }
                 ]
@@ -606,7 +608,7 @@ def test_config_from_dict():
 def test_config_from_dict_raises_error_if_dataset_ambiguous():
     with pytest.raises(ValueError):
         VitessceConfig.from_dict({
-            "version": "1.0.7",
+            "version": "1.0.15",
             "name": "Test name",
             "description": "Test description",
             "datasets": [
@@ -616,7 +618,6 @@ def test_config_from_dict_raises_error_if_dataset_ambiguous():
                     'files': [
                         {
                             'url': 'http://cells-1.json',
-                            'type': 'cells',
                             'fileType': 'cells.json'
                         }
                     ]
@@ -627,7 +628,6 @@ def test_config_from_dict_raises_error_if_dataset_ambiguous():
                     'files': [
                         {
                             'url': 'http://cells-2.json',
-                            'type': 'cells',
                             'fileType': 'cells.json'
                         }
                     ]
@@ -661,7 +661,7 @@ def test_config_from_dict_raises_error_if_dataset_ambiguous():
 
 
 def test_config_to_python_with_data_objects():
-    vc = VitessceConfig()
+    vc = VitessceConfig(schema_version="1.0.15")
 
     class MockWrapperA(AbstractWrapper):
         def __init__(self, name, **kwargs):
@@ -673,14 +673,15 @@ def test_config_to_python_with_data_objects():
             def get_molecules(base_url):
                 return {
                     "url": f"{base_url}/molecules",
-                    "type": "molecules",
-                    "fileType": "molecules.json"
+                    "fileType": "molecules.json",
+                    "coordinationValues": {
+                        "obsType": "molecule"
+                    }
                 }
 
             def get_cells(base_url):
                 return {
                     "url": f"{base_url}/cells",
-                    "type": "cells",
                     "fileType": "cells.json"
                 }
             self.file_def_creators += [get_molecules, get_cells]
@@ -695,7 +696,6 @@ def test_config_to_python_with_data_objects():
             def get_cell_sets(base_url):
                 return {
                     "url": f"{base_url}/cell-sets",
-                    "type": "cell-sets",
                     "fileType": "cell-sets.json"
                 }
             self.file_def_creators += [get_cell_sets]
@@ -704,8 +704,7 @@ def test_config_to_python_with_data_objects():
         obj=MockWrapperA("Experiment A")
     ).add_file(
         url="http://example.com/my_cells.json",
-        file_type=ft.CELLS_JSON,
-        data_type=dt.CELLS
+        file_type=ft.CELLS_JSON
     )
     dataset_b = vc.add_dataset(name='My Second Dataset').add_object(
         obj=MockWrapperB("Experiment B")

@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import json
 from anndata import read_h5ad, AnnData
+from scipy import sparse
 import imageio.v2 as imageio
 from vitessce.data_utils import (
     to_diamond,
@@ -46,7 +47,14 @@ def process_h5ad_files(args):
 
     rna_adata.layers['X_uint8'] = to_uint8(rna_adata.X, norm_along="global")
     atac_adata.layers['X_uint8'] = to_uint8(atac_adata.X, norm_along="global")
+
+    # TODO: automate conversion to csc in optimize_adata function
     visium_adata.layers['X_uint8'] = to_uint8(visium_adata.X, norm_along="var")
+    # Vitessce plays nicely with csc at the moment but not csr.
+    if isinstance(rna_adata.X, sparse.spmatrix):
+        rna_adata.X = rna_adata.X.tocsc()
+    if isinstance(atac_adata.X, sparse.spmatrix):
+        atac_adata.X = atac_adata.X.tocsc()
 
     joint_cols = ['cell_type', 'development_stage', 'disease', 'sex']
     joint_obs_df = pd.concat([
@@ -62,12 +70,12 @@ def process_h5ad_files(args):
         joint_adata,
         obs_cols=["cell_type", "development_stage", "disease", "sex"]
     )
-
     rna_adata = optimize_adata(
         rna_adata,
         obsm_keys=["X_umap", "X_pca"],
         var_cols=["feature_name"],
         layer_keys=["X_uint8"],
+        preserve_X=True,
     )
 
     atac_adata = optimize_adata(
@@ -75,10 +83,12 @@ def process_h5ad_files(args):
         obsm_keys=["X_umap"],
         var_cols=["feature_name"],
         layer_keys=["X_uint8"],
+        preserve_X=True,
     )
 
-    rna_adata.write_zarr(args.output_rna)
-    atac_adata.write_zarr(args.output_atac)
+    # Use chunks in case data is not sparse.
+    rna_adata.write_zarr(args.output_rna, [rna_adata.shape[0], 10])
+    atac_adata.write_zarr(args.output_atac, [atac_adata.shape[0], 10])
 
     # Visium processing
     num_cells = visium_adata.obs.shape[0]

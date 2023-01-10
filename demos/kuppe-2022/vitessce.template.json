@@ -41,7 +41,7 @@
         },
         "options": {
           "obsFeatureMatrix": {
-            "path": "layers/X_uint8"
+            "path": "X"
           },
           "featureLabels": {
             "path": "var/feature_name"
@@ -68,7 +68,7 @@
         },
         "options": {
           "obsFeatureMatrix": {
-            "path": "layers/X_uint8"
+            "path": "X"
           },
           "featureLabels": {
             "path": "var/feature_name"
@@ -340,6 +340,9 @@
         "obsType": "B",
         "spatialSegmentationLayer": "A",
         "spatialImageLayer": "A"
+      },
+      "props": {
+        "disableChannelsIfRgbDetected": true
       },
       "h": 4,
       "w": 3,

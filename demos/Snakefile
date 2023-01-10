@@ -10,7 +10,7 @@ from pprint import pprint
 # S3 = S3RemoteProvider()
 # GS = GSRemoteProvider()
 
-BUCKET_VERSION = "0.0.33"
+BUCKET_VERSION = "0.0.34"
 BUCKET_NAME = "vitessce-data"
 BUCKET = PosixPath(BUCKET_NAME) / BUCKET_VERSION / "main"
 

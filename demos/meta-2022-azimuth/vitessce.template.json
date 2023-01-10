@@ -16,7 +16,7 @@
       },
       "options": {
         "obsFeatureMatrix": {
-          "path": "layers/X_uint8"
+          "path": "X"
         },
         "obsEmbedding": {
           "path": "obsm/X_umap"
@@ -55,7 +55,7 @@
           },
           {
             "name": "Ethnicity",
-            "path": "obs/ethnicity"
+            "path": "obs/self_reported_ethnicity"
           },
           {
             "name": "Development Stage",

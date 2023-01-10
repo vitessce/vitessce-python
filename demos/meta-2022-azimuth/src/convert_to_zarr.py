@@ -1,5 +1,6 @@
 import argparse
 from anndata import read_h5ad
+from scipy import sparse
 from vitessce.data_utils import (
     to_uint8,
 )
@@ -10,7 +11,11 @@ def convert_h5ad_to_zarr(input_path, output_path):
 
     adata.layers['X_uint8'] = to_uint8(adata.X, norm_along="global")
 
-    adata.write_zarr(output_path)
+    # Vitessce plays nicely with csc matrices
+    # TODO: automate conversion to csc in optimize_adata function
+    if isinstance(adata.X, sparse.spmatrix):
+        adata.X = adata.X.tocsc()
+    adata.write_zarr(output_path, chunks=[adata.shape[0], 10])
 
 
 if __name__ == '__main__':

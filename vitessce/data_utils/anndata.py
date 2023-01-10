@@ -45,13 +45,16 @@ def cast_arr(arr):
 
 
 def optimize_arr(arr):
-    return to_dense(cast_arr(to_memory(arr)))
+    arr = to_dense(cast_arr(to_memory(arr)))
+    if isinstance(arr, np.matrix):
+        arr = np.array(arr)
+    return arr
 
 
 # Given an anndata object, optimize for usage with Vitessce
-def optimize_adata(adata, obs_cols=None, obsm_keys=None, var_cols=None, varm_keys=None, layer_keys=None, ignore_X=False):
-    if not ignore_X:
-        if adata.X is not None:
+def optimize_adata(adata, obs_cols=None, obsm_keys=None, var_cols=None, varm_keys=None, layer_keys=None, preserve_X=False, remove_X=False):
+    if not remove_X:
+        if not preserve_X and adata.X is not None:
             new_X = optimize_arr(adata.X)
         else:
             new_X = adata.X

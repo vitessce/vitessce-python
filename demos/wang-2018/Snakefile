@@ -1,6 +1,7 @@
 include: "../common.smk"
 configfile: "config.yml"
 
+# TODO: start from the real raw files
 BASE_URL = "https://s3.amazonaws.com/vitessce-data/0.0.31/master_release/wang/wang"
 
 

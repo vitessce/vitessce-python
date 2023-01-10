@@ -1,18 +1,13 @@
 from __future__ import print_function
 from setuptools import setup, find_packages
 import os
-from os.path import join as pjoin
 from distutils import log
 
-from jupyter_packaging import (
-    create_cmdclass,
-    install_npm,
-    ensure_targets,
-    combine_commands,
-    get_version,
-)
+# Module version
+py_version_info = (2, 0, 1)
+__version__ = '%s.%s.%s' % (py_version_info[0], py_version_info[1], py_version_info[2])
 
-
+# Setup
 here = os.path.dirname(os.path.abspath(__file__))
 
 log.set_verbosity(log.DEBUG)
@@ -24,42 +19,9 @@ name = 'vitessce'
 with open("README.md", "r") as fh:
     LONG_DESCRIPTION = fh.read()
 
-# Get vitessce version
-version = get_version(pjoin(name, '_version.py'))
-
-js_dir = pjoin(here, 'js')
-
-# Representative files that should exist after a successful build
-jstargets = [
-    pjoin(js_dir, 'dist', 'index.js'),
-]
-
-data_files_spec = [
-    ('share/jupyter/nbextensions/vitessce-jupyter', 'vitessce/nbextension', '*.*'),
-    ('share/jupyter/labextensions/vitessce-jupyter', 'vitessce/labextension', '**'),
-    ('share/jupyter/labextensions/vitessce-jupyter', '.', 'install.json'),
-    ('etc/jupyter/nbconfig/notebook.d', '.', 'vitessce-jupyter.json'),
-]
-
-cmdclass = create_cmdclass('jsdeps', data_files_spec=data_files_spec)
-cmdclass['jsdeps'] = combine_commands(
-    install_npm(js_dir, npm=['npm'],
-                build_cmd='build'), ensure_targets(jstargets),
-)
-
-
 extras_require = {
     'building': [
         'build==0.1.0',
-    ],
-    'jupyter': [
-        # Required for developing jupyter extensions.
-        'jupyterlab==3.1.14',
-        'jupyter_server==1.11.0',
-        # Traitlets and markupsafe versions need to be pinned.
-        # Reference: https://github.com/vitessce/vitessce-python/pull/143#discussion_r854340283
-        'traitlets==4.3.3',
-        'markupsafe==2.0.1',
     ],
     'testing': [
         'pytest>=6.2.4',
@@ -84,8 +46,7 @@ extras_require = {
     ],
     'notebook': [
         # Needed only for notebook use:
-        'ipywidgets<=7.7.2',
-        'jupyterlab-widgets<=1.1.1',
+        'anywidget==0.0.3',
         'hypercorn>=0.11.0',
         'ujson>=4.0.1',
         'starlette==0.14.0',
@@ -106,11 +67,10 @@ extras_require['dev'] = sum(extras_require.values(), [])
 
 setup_args = dict(
     name=name,
-    version=version,
+    version=__version__,
     description='Jupyter widget facilitating interactive visualization of spatial single-cell data with Vitessce',
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
-    include_package_data=True,
     install_requires=[
         'zarr>=2.5.0',
         'numcodecs>=0.5.7',
@@ -125,8 +85,6 @@ setup_args = dict(
     ],
     extras_require=extras_require,
     packages=find_packages(),
-    zip_safe=False,
-    cmdclass=cmdclass,
     author='Gehlenborg Lab',
     author_email='',
     url='https://github.com/vitessce/vitessce-python',

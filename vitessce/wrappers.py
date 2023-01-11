@@ -9,6 +9,7 @@ import pandas as pd
 import zarr
 from scipy import sparse
 from scipy.sparse import coo_matrix
+from uuid import uuid4
 
 from .constants import (
     Component as cm,
@@ -97,11 +98,10 @@ class AbstractWrapper:
                           app=StaticFiles(directory=out_dir, html=False))]
         return []
     
-    def get_local_dir_url(self, base_url, dataset_uid, obj_i, local_dir_path):
-        local_dir_name = os.path.basename(local_dir_path)
-        return self._get_url(base_url, dataset_uid, obj_i, local_dir_name)
+    def get_local_dir_url(self, base_url, dataset_uid, obj_i, local_dir_uid):
+        return self._get_url(base_url, dataset_uid, obj_i, local_dir_uid)
     
-    def get_local_dir_route(self, dataset_uid, obj_i, local_dir_path):
+    def get_local_dir_route(self, dataset_uid, obj_i, local_dir_path, local_dir_uid):
         """
         Obtain the Mount for the `out_dir`
 
@@ -112,8 +112,7 @@ class AbstractWrapper:
         :rtype: list[starlette.routing.Mount]
         """
         if not self.is_remote:
-            local_dir_name = os.path.basename(local_dir_path)
-            route_path = self._get_route_str(dataset_uid, obj_i, local_dir_name)
+            route_path = self._get_route_str(dataset_uid, obj_i, local_dir_uid)
             # TODO: Move imports back to top when this is factored out.
             from starlette.staticfiles import StaticFiles
             from starlette.routing import Mount
@@ -221,6 +220,8 @@ class OmeTiffWrapper(AbstractWrapper):
         self._transformation_matrix = transformation_matrix
         self.is_remote = img_url is not None
         self.is_bitmask = is_bitmask
+        self.local_img_uid = str(uuid4())
+        self.local_offsets_uid = str(uuid4())
         if img_url is not None and (img_path is not None or offsets_path is not None):
             raise ValueError(
                 "Did not expect img_path or offsets_path to be provided with img_url")
@@ -252,10 +253,8 @@ class OmeTiffWrapper(AbstractWrapper):
             async def response_func(req):
                 return UJSONResponse(offsets)
             routes = [
-                Route(self._get_route_str(dataset_uid, obj_i, self._get_img_filename(
-                )), lambda req: range_repsonse(req, self._img_path)),
-                JsonRoute(self._get_route_str(dataset_uid, obj_i,
-                                              self.get_offsets_path_name()), response_func, offsets)
+                Route(self._get_route_str(dataset_uid, obj_i, self.local_img_uid), lambda req: range_repsonse(req, self._img_path)),
+                JsonRoute(self._get_route_str(dataset_uid, obj_i, self.local_offsets_uid), response_func, offsets)
             ]
             return routes
 
@@ -296,38 +295,39 @@ class OmeTiffWrapper(AbstractWrapper):
             image["metadata"] = metadata
         return image
 
-    def _get_image_dir(self):
-        return os.path.dirname(self._img_path)
-
-    def _get_img_filename(self):
-        return os.path.basename(self._img_path)
-
     def get_img_url(self, base_url="", dataset_uid="", obj_i=""):
-        if self._img_url is not None:
+        if self.is_remote:
             return self._img_url
-        img_url = self._get_url(base_url, dataset_uid,
-                                obj_i, self._get_img_filename())
+        return self._get_url(base_url, dataset_uid,
+                                obj_i, self.local_img_uid)
         return img_url
 
-    def get_offsets_path_name(self):
-        return f"{self._get_img_filename().split('ome.tif')[0]}offsets.json"
-
     def get_offsets_url(self, base_url="", dataset_uid="", obj_i=""):
-        if self._offsets_url is not None or self._img_url is not None:
+        if self._offsets_url is not None or self.is_remote:
             return self._offsets_url
         offsets_url = self._get_url(
-            base_url, dataset_uid, obj_i, self.get_offsets_path_name())
+            base_url, dataset_uid, obj_i, self.local_offsets_uid)
         return offsets_url
 
 
 class OmeZarrWrapper(AbstractWrapper):
 
-    def __init__(self, img_path, **kwargs):
+    def __init__(self, img_path=None, img_url=None, **kwargs):
         super().__init__(**kwargs)
         self._repr = make_repr(locals())
+        if img_url is not None and img_path is not None:
+            raise ValueError(
+                "Did not expect img_path to be provided with img_url")
+        if img_url is None and img_path is None:
+            raise ValueError(
+                "Expected either img_url or img_path to be provided")
         self._img_path = img_path
-        self.is_remote = False # TODO: remote case
-        self.zarr_folder = 'image.ome.zarr'
+        self._img_url = img_url
+        if self._img_path is not None:
+            self.is_remote = False
+        else:
+            self.is_remote = True
+        self.local_dir_uid = str(uuid4())
 
     def convert_and_save(self, dataset_uid, obj_i):
         # Only create out-directory if needed
@@ -345,13 +345,18 @@ class OmeZarrWrapper(AbstractWrapper):
         if self.is_remote:
             return []
         else:
-            return self.get_local_dir_route(dataset_uid, obj_i, self._img_path)
+            return self.get_local_dir_route(dataset_uid, obj_i, self._img_path, self.local_dir_uid)
+    
+    def get_img_url(self, base_url="", dataset_uid="", obj_i=""):
+        if self.is_remote:
+            return self._img_url
+        return self.get_local_dir_url(base_url, dataset_uid, obj_i, self.local_dir_uid)
 
     def make_image_file_def_creator(self, dataset_uid, obj_i):
         def image_file_def_creator(base_url):
             return {
                 "fileType": "image.ome-zarr",
-                "url": self.get_local_dir_url(base_url, dataset_uid, obj_i, self._img_path)
+                "url": self.get_img_url(base_url, dataset_uid, obj_i)
             }
         return image_file_def_creator
 
@@ -396,6 +401,7 @@ class AnnDataWrapper(AbstractWrapper):
         else:
             self.is_remote = True
             self.zarr_folder = None
+        self.local_dir_uid = str(uuid4())
         self._expression_matrix = obs_feature_matrix_path
         self._cell_set_obs_names = obs_set_names
         self._mappings_obsm_names = obs_embedding_names
@@ -427,13 +433,13 @@ class AnnDataWrapper(AbstractWrapper):
         if self.is_remote:
             return []
         else:
-            return self.get_local_dir_route(dataset_uid, obj_i, self._adata_path)
+            return self.get_local_dir_route(dataset_uid, obj_i, self._adata_path, self.local_dir_uid)
 
     def get_zarr_url(self, base_url="", dataset_uid="", obj_i=""):
         if self.is_remote:
             return self._adata_url
         else:
-            return self.get_local_dir_url(base_url, dataset_uid, obj_i, self._adata_path)
+            return self.get_local_dir_url(base_url, dataset_uid, obj_i, self.local_dir_uid)
 
     def make_file_def_creator(self, dataset_uid, obj_i):
         def get_anndata_zarr(base_url):

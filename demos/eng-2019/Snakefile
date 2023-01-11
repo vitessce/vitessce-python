@@ -1,0 +1,36 @@
+include: "../common.smk"
+configfile: "config.yml"
+
+# TODO: start from the real raw files
+BASE_URL = "https://s3.amazonaws.com/vitessce-data/0.0.31/master_release/dries/dries"
+
+
+rule all:
+    input:
+        [ (PROCESSED_DIR / f) for f in config['output'] ]
+
+# Convert the old JSON files to simpler CSV and JSON formats.
+rule convert_to_csv:
+    input:
+        cells=(RAW_DIR / "cells.json")
+    output:
+        cells=(PROCESSED_DIR / "eng_2019_nature.cells.csv"),
+        segmentations=(PROCESSED_DIR / "eng_2019_nature.cells.segmentations.json")
+    params:
+        script=(SRC_DIR / "convert_to_csv.py")
+    shell:
+        '''
+        python {params.script} \
+            -ic {input.cells} \
+            -oc {output.cells} \
+            -os {output.segmentations}
+        '''
+
+# Download original JSON files.
+rule download_file:
+    output:
+        (RAW_DIR / "{prefix}.json")
+    shell:
+        '''
+        curl -L -o {output} {BASE_URL}.{wildcards.prefix}.json
+        '''

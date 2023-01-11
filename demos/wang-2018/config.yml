@@ -1,0 +1,5 @@
+output:
+- wang_2018_scientific_reports.cells.csv
+- wang_2018_scientific_reports.cells.segmentations.json
+- wang_2018_scientific_reports.cells.matrix.csv
+- wang_2018_scientific_reports.molecules.csv

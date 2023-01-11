@@ -1,0 +1,31 @@
+name: vitessce-python-demos
+channels:
+ - bioconda
+ - conda-forge
+dependencies:
+ - python==3.8
+ - numpy
+ - pandas
+ - anndata>=0.7.8
+ - numba
+ - scanpy
+ - jupyterlab
+ - zarr
+ - h5py
+ - boto3
+ - numcodecs
+ - scipy
+ - snakemake>=6.0
+ - pyyaml
+ - imageio
+ - networkx
+ - shapely
+ - geopandas
+ - dask-geopandas
+ - pip
+ - pip:
+   - loompy
+   - generate-tiff-offsets>=0.1.7
+   - obonet==0.2.5
+   - leidenalg
+   - ome-zarr==0.2.1

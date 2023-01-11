@@ -1,0 +1,39 @@
+include: "../common.smk"
+configfile: "config.yml"
+
+# https://twitter.com/satijalab/status/1404822000464433158
+
+# cellxgene portal AWS URLs expire in one week.
+# May need to get new URLs from https://cellxgene.cziscience.com/collections/2f75d249-1bec-459b-bf2b-b86221097ced
+
+# Azimuth meta-analysis of 10 datasets of healthy and diseased human lung
+H5AD_URL = "https://corpora-data-prod.s3.amazonaws.com/626d44f9-dec1-4ea6-9c0b-9cd59a245c53/local.h5ad?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIATLYQ5N5XSMODNCWH%2F20221203%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20221203T114131Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKH%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCIC%2BYYs%2BzI2DlSnvSWHtsFCkx3ccRFJWpK2ARHatDYRM5AiBqWeoHS1f7kA1Jiiia3mqBuzKXhSH6goScJt%2BsFVgu5Sr0Awi6%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAEaDDIzMTQyNjg0NjU3NSIMlG1gNv4DckVqWCo8KsgDeCWIGXJ7sCyMshiC0ScYGO4hzRNT9gBrfUwyJDYnRNQ%2BAWeg9W2R6Vl4LFebVKpsbCcoGAGtq5Jefkw71w6G9%2B1uqo52UiL3Pv3XqtqRzuxZBxOKsp4%2BPgsrR87dsqsE509YNuLrJsN%2BsLJVpUFLccctCLlGc2rHr2qD6sUtOViFmHZmSJRLDDg2GaHFTd5%2FE6NS4fIMxY1Isw%2FrKYD83lMUD03PfkF6pl6dcwGxEALixktwrx%2BI6qTmRO0hrPCX2fEPmISZcmY8upw24EdKVn1FxqXZevU%2F3EQTw9qn5cQGZSZlPa%2Bekuvs2onm82asTQvCeKUPzsQr%2F8BLkAqTz8pOrbMZg719UsfVkcabAg8RKJsikmnUMbJCupnSawA5IjC5uPaUnaQ3GchpbrOIWJMeEiIOUxMQDl64hIDfeSgOz7hVsl1802M6QU%2FQTfhmDD04Z1MYnNzpvNwJASpw%2FTJEX3U1Vey8Imku%2BWPE3qkD5ZgJGJJ%2FYEK7H8K5pJwWvEMZiIJOVnNq4OL32m468Mlk5BkoFixNdvJRMkI6iZWjh8MLbFpCR%2BhbqeqwlugpSF%2FUtaZqfR2BxxaK%2BSpJFXFhh%2BzEOzOTMLqcrJwGOqYBiTrBQbjShILWEqOodut6iy4wObf%2F5b3Hb8EqhtrH7eKTgBAcbKgHUX6FMEC3xxauqY6sklV9X8e8XvpsYm%2F91oDD2v3GK3AYwtUVt%2FAjeGdfTcJDN2xIttIkmxNAk0WPxtCNYSDA2f0g3stmFiLQStq7EeA2nFg%2B7fU%2BBqoIyLwoOBlPcsXEebVLR0eo9eT7AXgQ5fmSWQelWpfRqS%2Fdv5iUV3F5dQ%3D%3D&X-Amz-Signature=a04c3757b63f886dd57caf20a7847d3a228f0e850613c4aee34ff6cba0ccb2ad"
+
+rule all:
+    input:
+        [ (PROCESSED_DIR / f) for f in config['output'] ]
+
+rule convert_to_zarr:
+    input:
+        (RAW_DIR / "meta.h5ad")
+    output:
+        directory(PROCESSED_DIR / "meta_2022_azimuth.h5ad.zarr")
+    params:
+        script=(SRC_DIR / "convert_to_zarr.py")
+    shell:
+        '''
+        python {params.script} \
+            -i {input} \
+            -o {output}
+        '''
+
+# Download raw h5ad file.
+rule download_adata:
+    output:
+        (RAW_DIR / "meta.h5ad")
+    params:
+        file_url=H5AD_URL
+    shell:
+        '''
+        curl -L --retry 999 --retry-delay 3 -C - -o {output} "{params.file_url}"
+        '''

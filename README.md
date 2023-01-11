@@ -48,6 +48,20 @@ flake8
 pytest
 ```
 
+### Formatting
+
+One file:
+
+```sh
+autopep8 --in-place --aggressive ./path/to/file.py
+```
+
+All `.py` files:
+
+```sh
+find . -name '*.py' -exec autopep8 --in-place --aggressive '{}' \;
+```
+
 
 ## Documentation
 

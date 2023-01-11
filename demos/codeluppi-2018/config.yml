@@ -1,0 +1,6 @@
+output:
+- codeluppi_2018_nature_methods.image.ome.zarr
+- codeluppi_2018_nature_methods.cells.csv
+- codeluppi_2018_nature_methods.cells.segmentations.json
+- codeluppi_2018_nature_methods.cells.matrix.csv
+- codeluppi_2018_nature_methods.molecules.csv

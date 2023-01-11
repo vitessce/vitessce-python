@@ -1,0 +1,132 @@
+include: "../common.smk"
+configfile: "config.yml"
+
+# HDF5 image URL
+PKLAB_URL = "http://pklab.med.harvard.edu/viktor/data/spatial/linnarson/Nuclei_polyT.int16.sf.hdf5"
+
+# http://linnarssonlab.org/osmFISH/availability/
+CELLS_LOOM_URL = "http://linnarssonlab.org/osmFISH/osmFISH_SScortex_mouse_all_cells.loom"
+CELLS_PKL_URL = "https://storage.googleapis.com/linnarsson-lab-www-blobs/blobs/osmFISH/data/polyT_seg.pkl"
+MOLECULES_HDF5_URL = "https://storage.googleapis.com/linnarsson-lab-www-blobs/blobs/osmFISH/data/mRNA_coords_raw_counting.hdf5"
+
+rule all:
+    input:
+        [ (PROCESSED_DIR / f) for f in config['output'] ]
+
+# The following rules are also imported by ../codeluppi-2018-via-zarr/Snakefile.
+rule convert_to_ome_zarr:
+    input:
+        (RAW_DIR / "Nuclei_polyT.int16.sf.hdf5")
+    output:
+        directory(PROCESSED_DIR / "codeluppi_2018_nature_methods.image.ome.zarr")
+    params:
+        script=(SRC_DIR / "convert_to_ome_zarr.py")
+    shell:
+        '''
+        python {params.script} \
+            -i {input} \
+            -o {output}
+        '''
+
+rule convert_to_cells_csv:
+    input:
+        directory(PROCESSED_DIR / "codeluppi_2018_nature_methods.cells.h5ad.zarr")
+    output:
+        cells=(PROCESSED_DIR / "codeluppi_2018_nature_methods.cells.csv"),
+        segmentations=(PROCESSED_DIR / "codeluppi_2018_nature_methods.cells.segmentations.json"),
+        matrix=(PROCESSED_DIR / "codeluppi_2018_nature_methods.cells.matrix.csv")
+    params:
+        script=(SRC_DIR / "convert_to_cells_csv.py")
+    shell:
+        '''
+        python {params.script} \
+            -i {input} \
+            -oc {output.cells} \
+            -os {output.segmentations} \
+            -om {output.matrix}
+        '''
+
+rule convert_to_molecules_csv:
+    input:
+        directory(PROCESSED_DIR / "codeluppi_2018_nature_methods.molecules.h5ad.zarr")
+    output:
+        (PROCESSED_DIR / "codeluppi_2018_nature_methods.molecules.csv")
+    params:
+        script=(SRC_DIR / "convert_to_molecules_csv.py")
+    shell:
+        '''
+        python {params.script} \
+            -i {input} \
+            -o {output}
+        '''
+
+rule convert_to_cells_zarr:
+    input:
+        loom=(RAW_DIR / "osmFISH_SScortex_mouse_all_cells.loom"),
+        pkl=(RAW_DIR / "polyT_seg.pkl")
+    output:
+        directory(PROCESSED_DIR / "codeluppi_2018_nature_methods.cells.h5ad.zarr")
+    params:
+        script=(SRC_DIR / "convert_to_cells_h5ad_zarr.py")
+    shell:
+        '''
+        python {params.script} \
+            -il {input.loom} \
+            -ip {input.pkl} \
+            -o {output}
+        '''
+
+rule convert_to_molecules_zarr:
+    input:
+        (RAW_DIR / "mRNA_coords_raw_counting.hdf5")
+    output:
+        directory(PROCESSED_DIR / "codeluppi_2018_nature_methods.molecules.h5ad.zarr")
+    params:
+        script=(SRC_DIR / "convert_to_molecules_h5ad_zarr.py")
+    shell:
+        '''
+        python {params.script} \
+            -i {input} \
+            -o {output}
+        '''
+
+# Download raw data.
+rule download_image_hdf5:
+    output:
+        (RAW_DIR / "Nuclei_polyT.int16.sf.hdf5")
+    params:
+        file_url=PKLAB_URL
+    shell:
+        '''
+        curl -L --retry 999 --retry-delay 3 -C - -o {output} {params.file_url}
+        '''
+
+rule download_cells_loom:
+    output:
+        (RAW_DIR / "osmFISH_SScortex_mouse_all_cells.loom")
+    params:
+        file_url=CELLS_LOOM_URL
+    shell:
+        '''
+        curl -L --retry 999 --retry-delay 3 -C - -o {output} {params.file_url}
+        '''
+
+rule download_cells_pkl:
+    output:
+        (RAW_DIR / "polyT_seg.pkl")
+    params:
+        file_url=CELLS_PKL_URL
+    shell:
+        '''
+        curl -L --retry 999 --retry-delay 3 -C - -o {output} {params.file_url}
+        '''
+
+rule download_molecules_hdf5:
+    output:
+        (RAW_DIR / "mRNA_coords_raw_counting.hdf5")
+    params:
+        file_url=MOLECULES_HDF5_URL
+    shell:
+        '''
+        curl -L --retry 999 --retry-delay 3 -C - -o {output} {params.file_url}
+        '''

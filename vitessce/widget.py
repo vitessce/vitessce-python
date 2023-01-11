@@ -93,9 +93,9 @@ def launch_vitessce_io(config, theme='light', port=None, base_url=None, open=Tru
 
 
 ESM = """
-import * as d3 from "https://esm.sh/d3-require@1.3.0";
-import React from 'https://unpkg.com/es-react@16.13.1/react.js';
-import ReactDOM from 'https://unpkg.com/es-react@16.13.1/react-dom.js';
+import * as d3 from 'https://esm.sh/d3-require@1.3.0';
+import React from 'https://esm.sh/react@18.2.0';
+import ReactDOM from 'https://esm.sh/react-dom@18.2.0';
 
 function asEsModule(component) {
   return {

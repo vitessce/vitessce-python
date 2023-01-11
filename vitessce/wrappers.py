@@ -7,7 +7,6 @@ import json
 import numpy as np
 import pandas as pd
 import zarr
-from scipy import sparse
 from scipy.sparse import coo_matrix
 from uuid import uuid4
 
@@ -97,10 +96,10 @@ class AbstractWrapper:
             return [Mount(self._get_route_str(dataset_uid, obj_i),
                           app=StaticFiles(directory=out_dir, html=False))]
         return []
-    
+
     def get_local_dir_url(self, base_url, dataset_uid, obj_i, local_dir_uid):
         return self._get_url(base_url, dataset_uid, obj_i, local_dir_uid)
-    
+
     def get_local_dir_route(self, dataset_uid, obj_i, local_dir_path, local_dir_uid):
         """
         Obtain the Mount for the `out_dir`
@@ -299,8 +298,7 @@ class OmeTiffWrapper(AbstractWrapper):
         if self.is_remote:
             return self._img_url
         return self._get_url(base_url, dataset_uid,
-                                obj_i, self.local_img_uid)
-        return img_url
+                             obj_i, self.local_img_uid)
 
     def get_offsets_url(self, base_url="", dataset_uid="", obj_i=""):
         if self._offsets_url is not None or self.is_remote:
@@ -346,7 +344,7 @@ class OmeZarrWrapper(AbstractWrapper):
             return []
         else:
             return self.get_local_dir_route(dataset_uid, obj_i, self._img_path, self.local_dir_uid)
-    
+
     def get_img_url(self, base_url="", dataset_uid="", obj_i=""):
         if self.is_remote:
             return self._img_url
@@ -428,7 +426,7 @@ class AnnDataWrapper(AbstractWrapper):
 
         self.file_def_creators.append(file_def_creator)
         self.routes += routes
-    
+
     def make_anndata_routes(self, dataset_uid, obj_i):
         if self.is_remote:
             return []
@@ -551,7 +549,7 @@ class SnapWrapper(AbstractWrapper):
         self.starting_resolution = starting_resolution
 
         # Convert to dense matrix if sparse.
-        if type(in_mtx) == coo_matrix:
+        if isinstance(in_mtx, coo_matrix):
             self.in_mtx = in_mtx.toarray()
 
     def convert_and_save(self, dataset_uid, obj_i):

@@ -102,12 +102,14 @@ class AbstractWrapper:
 
     def get_local_dir_route(self, dataset_uid, obj_i, local_dir_path, local_dir_uid):
         """
-        Obtain the Mount for the `out_dir`
+        Obtain the Mount for some local directory
 
         :param str dataset_uid: A dataset unique identifier for the Mount
         :param str obj_i: A index of the current vitessce.wrappers.AbstractWrapper among all other wrappers in the view config
+        :param str local_dir_path: The path to the local directory to serve.
+        :param str local_dir_uid: The UID to include as the route path suffix.
 
-        :returns: A starlette Mount of the the `out_dir`
+        :returns: A starlette Mount of the the `local_dir_path`
         :rtype: list[starlette.routing.Mount]
         """
         if not self.is_remote:
@@ -309,6 +311,14 @@ class OmeTiffWrapper(AbstractWrapper):
 
 
 class OmeZarrWrapper(AbstractWrapper):
+
+    """
+    Wrap an OME-NGFF Zarr store by creating an instance of the ``OmeZarrWrapper`` class.
+
+    :param str img_path: A local filepath to an OME-NGFF Zarr store.
+    :param str img_url: A remote URL of an OME-NGFF Zarr store.
+    :param \\*\\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
+    """
 
     def __init__(self, img_path=None, img_url=None, **kwargs):
         super().__init__(**kwargs)

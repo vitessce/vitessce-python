@@ -113,3 +113,4 @@ class FileType(DocEnum):
     ANNDATA_CELL_SETS_ZARR = "anndata-cell-sets.zarr", "The Zarr-based cell-sets file type from an anndata object."
     ANNDATA_EXPRESSION_MATRIX_ZARR = "anndata-expression-matrix.zarr", "The Zarr-based expression matrix file type from an anndata object."
     ANNDATA_ZARR = "anndata.zarr", "Joint file type for AnnData objects"
+    IMAGE_OME_ZARR = "image.ome-zarr", "File type for images stored as OME-NGFF Zarr stores."

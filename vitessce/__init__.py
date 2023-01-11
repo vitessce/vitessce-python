@@ -25,6 +25,7 @@ except ModuleNotFoundError as e:  # pragma: no cover
 try:
     from .wrappers import (
         OmeTiffWrapper,
+        OmeZarrWrapper,
         MultiImageWrapper,
         AnnDataWrapper,
         SnapWrapper,

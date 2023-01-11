@@ -1,0 +1,3 @@
+output:
+- human_lymph_node_10x_visium.h5ad.zarr
+- human_lymph_node_10x_visium.ome.zarr

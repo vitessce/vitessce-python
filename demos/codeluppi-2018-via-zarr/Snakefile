@@ -1,0 +1,34 @@
+include: "../common.smk"
+configfile: "config.yml"
+
+from pathlib import Path
+
+BASE_SRC_DIR = Path("../codeluppi-2018/src")
+
+module base_workflow:
+    snakefile: "../codeluppi-2018/Snakefile"
+    config: config
+
+rule all:
+    input:
+        [ (PROCESSED_DIR / f) for f in config['output'] ]
+
+use rule * from base_workflow as base_*
+
+use rule convert_to_ome_zarr from base_workflow as base_convert_to_ome_zarr with:
+    output:
+        directory(PROCESSED_DIR / "codeluppi_2018_nature_methods.image.ome.zarr")
+    params:
+        script=(BASE_SRC_DIR / "convert_to_ome_zarr.py")
+
+use rule convert_to_cells_zarr from base_workflow as base_convert_to_cells_zarr with:
+    output:
+        directory(PROCESSED_DIR / "codeluppi_2018_nature_methods.cells.h5ad.zarr")
+    params:
+        script=(BASE_SRC_DIR / "convert_to_cells_h5ad_zarr.py")
+
+use rule convert_to_molecules_zarr from base_workflow as base_convert_to_molecules_zarr with:
+    output:
+        directory(PROCESSED_DIR / "codeluppi_2018_nature_methods.molecules.h5ad.zarr")
+    params:
+        script=(BASE_SRC_DIR / "convert_to_molecules_h5ad_zarr.py")

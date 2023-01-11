@@ -11,7 +11,12 @@ tests/data/*
 !tests/data/test.ome.tif
 ./notebooks/
 docs/notebooks/data/
+__pycache__/
+.snakemake/
 .coverage
+demos/*/data/
+demos/*/vitessce.local.json
+demos/*/vitessce.remote.json
 
 # Compiled javascript
 vitessce/static/

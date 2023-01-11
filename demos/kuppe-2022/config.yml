@@ -1,0 +1,6 @@
+output:
+- kuppe_2022_nature.rna.h5ad.zarr
+- kuppe_2022_nature.atac.h5ad.zarr
+- kuppe_2022_nature.joint.h5ad.zarr
+- kuppe_2022_nature.visium.h5ad.zarr
+- kuppe_2022_nature.visium.ome.zarr

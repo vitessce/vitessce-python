@@ -1,0 +1,30 @@
+name: Demo data dry-run
+
+on: [push, pull_request]
+
+jobs:
+  test_demos:
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          activate-environment: vitessce-python-demos
+          environment-file: demos/environment.yml
+          python-version: 3.8
+          use-mamba: true
+          mamba-version: "*"
+          auto-activate-base: false
+          channels: conda-forge,bioconda,defaults
+          channel-priority: true
+      - run: |
+          conda info
+          conda list
+      - name: Install vitessce
+        run: pip install -e .[testing]
+      - name: Run tests
+        working-directory: ./demos
+        run: snakemake -j 1 --dry-run

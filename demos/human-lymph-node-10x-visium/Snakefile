@@ -1,0 +1,23 @@
+include: "../common.smk"
+configfile: "config.yml"
+
+# Rules
+rule all:
+    input:
+        [ (PROCESSED_DIR / f) for f in config['output'] ]
+        #(PROCESSED_DIR / "human_lymph_node_10x_visium.ome.zarr"),
+
+# Convert the raw AnnData .h5ad file to a processed AnnData .zarr store.
+rule create_zarr:
+    output:
+        adata=directory(PROCESSED_DIR / "human_lymph_node_10x_visium.h5ad.zarr"),
+        img=directory(PROCESSED_DIR / "human_lymph_node_10x_visium.ome.zarr")
+    params:
+        script=(SRC_DIR / "create_zarr.py")
+    shell:
+        '''
+        python {params.script} \
+            -oa {output.adata} \
+            -oi {output.img}
+        '''
+

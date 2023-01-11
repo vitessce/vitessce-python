@@ -1,0 +1,38 @@
+include: "../common.smk"
+configfile: "config.yml"
+
+# https://doi.org/10.1016/j.cell.2022.01.012
+# https://zenodo.org/record/6120249
+
+H5AD_URL = "https://zenodo.org/record/6120249/files/COMBAT-CITESeq-EXPRESSION-ATLAS.h5ad?download=1"
+
+rule all:
+    input:
+        [ (PROCESSED_DIR / f) for f in config['output'] ]
+
+# Convert the raw AnnData .h5ad file to a processed AnnData .zarr store.
+rule convert_to_zarr:
+    input:
+        (RAW_DIR / "COMBAT-CITESeq-EXPRESSION-ATLAS.h5ad")
+    output:
+        directory(PROCESSED_DIR / "combat_2022_cell.h5ad.zarr")
+    params:
+        script=(SRC_DIR / "convert_to_zarr.py")
+    shell:
+        '''
+        python {params.script} \
+            -i {input} \
+            -o {output}
+        '''
+
+# Download AnnData .h5ad file containing single-cell data.
+rule download_data:
+    output:
+        (RAW_DIR / "COMBAT-CITESeq-EXPRESSION-ATLAS.h5ad")
+    params:
+        file_url=H5AD_URL
+    shell:
+        '''
+        curl -L --retry 999 --retry-delay 3 -C - -o {output} {params.file_url}
+        '''
+

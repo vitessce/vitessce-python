@@ -15,11 +15,7 @@ jobs:
           activate-environment: vitessce-python-demos-dryrun
           environment-file: demos/dryrun_environment.yml
           python-version: 3.8
-          use-mamba: true
-          mamba-version: "*"
           auto-activate-base: false
-          channels: conda-forge,bioconda,defaults
-          channel-priority: true
       - run: |
           conda info
           conda list

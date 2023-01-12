@@ -7,16 +7,12 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v2
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y pandoc
       - uses: actions/setup-python@v2
         with:
           python-version: '3.8'
       - run: |
-        pip install snakemake
-        pip install pyyaml
+          pip install snakemake
+          pip install pyyaml
       - name: Install vitessce
         run: pip install -e .[testing]
       - name: Run tests

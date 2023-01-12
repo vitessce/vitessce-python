@@ -80,6 +80,7 @@ class Component(DocEnum):
     GENES = "genes", "The gene list selector."
     CELL_SET_EXPRESSION = "cellSetExpression", "Expression levels are displayed by cell set"
     OBS_SETS = "obsSets", "Observation sets"
+    OBS_SET_SIZES = "obsSetSizes", "Observation set sizes bar plot"
     FEATURE_LIST = "featureList", "The feature list selector"
 
 

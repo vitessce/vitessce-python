@@ -16,6 +16,7 @@ jobs:
           environment-file: demos/dryrun_environment.yml
           python-version: 3.8
           auto-activate-base: false
+          auto-update-conda: true
       - run: |
           conda info
           conda list

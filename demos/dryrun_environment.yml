@@ -1,7 +1,0 @@
-name: vitessce-python-demos-dryrun
-channels:
- - bioconda
- - conda-forge
-dependencies:
- - snakemake>=6.0
- - pyyaml

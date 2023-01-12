@@ -4,22 +4,19 @@ on: [push, pull_request]
 
 jobs:
   test_demos:
-    runs-on: ubuntu-20.04
-    defaults:
-      run:
-        shell: bash -l {0}
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v2
-      - uses: conda-incubator/setup-miniconda@v2
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pandoc
+      - uses: actions/setup-python@v2
         with:
-          activate-environment: vitessce-python-demos-dryrun
-          environment-file: demos/dryrun_environment.yml
-          python-version: 3.8
-          auto-activate-base: false
-          auto-update-conda: true
+          python-version: '3.8'
       - run: |
-          conda info
-          conda list
+        pip install snakemake
+        pip install pyyaml
       - name: Install vitessce
         run: pip install -e .[testing]
       - name: Run tests

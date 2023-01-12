@@ -62,6 +62,10 @@ class CoordinationType(DocEnum):
     GENOMIC_TARGET_X = "genomicTargetX", "The x-coordinate of the center of a higlass view."
     GENOMIC_TARGET_Y = "genomicTargetY", "The y-coordinate of the center of a higlass view."
     ADDITIONAL_CELL_SETS = "additionalCellSets", "User-defined cell sets."
+    # Obs-by-feature
+    SPATIAL_IMAGE_LAYER = 'spatialImageLayer', 'Layer definitions for image layer in spatial view'
+    SPATIAL_SEGMENTATION_LAYER = 'spatialSegmentationLayer', 'Layer definition for segmentation layer in spatial view'
+    SPATIAL_POINT_LAYER = 'spatialPointLayer', 'Layer definition for point layer in spatial view'
 
 
 class Component(DocEnum):

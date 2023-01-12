@@ -309,6 +309,86 @@ class OmeTiffWrapper(AbstractWrapper):
             base_url, dataset_uid, obj_i, self.local_offsets_uid)
         return offsets_url
 
+class CsvWrapper(AbstractWrapper):
+
+    """
+    Wrap a CSV file by creating an instance of the ``CsvWrapper`` class.
+
+    :param str data_type: The data type of the information contained in the file.
+    :param str csv_path: A local filepath to a CSV file.
+    :param str csv_url: A remote URL of a CSV file.
+    :param dict options: The file options.
+    :param dict coordination_values: The coordination values.
+    :param \\*\\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
+    """
+
+    def __init__(self, csv_path=None, csv_url=None, data_type=None, options=None, coordination_values=None,
+                 **kwargs):
+        super().__init__(**kwargs)
+        self._repr = make_repr(locals())
+        self._csv_path = csv_path
+        self._csv_url = csv_url
+        self._data_type = data_type
+        self._options = options
+        self._coordination_values = coordination_values
+        self.is_remote = csv_url is not None
+        self.local_csv_uid = str(uuid4())
+        if data_type is None:
+            raise ValueError("Expected data_type to be provided")
+        if csv_url is not None and csv_path is not None:
+            raise ValueError(
+                "Did not expect csv_url to be provided with csv_path")
+        if csv_url is None and csv_path is None:
+            raise ValueError(
+                "Expected csv_url or csv_path to be provided")
+
+    def convert_and_save(self, dataset_uid, obj_i):
+        # Only create out-directory if needed
+        if not self.is_remote:
+            super().convert_and_save(dataset_uid, obj_i)
+
+        file_def_creator = self.make_csv_file_def_creator(
+            dataset_uid, obj_i)
+        routes = self.make_csv_routes(dataset_uid, obj_i)
+
+        self.file_def_creators.append(file_def_creator)
+        self.routes += routes
+
+    def make_csv_routes(self, dataset_uid, obj_i):
+        if self.is_remote:
+            return []
+        else:
+            # TODO: Move imports back to top when this is factored out.
+            from starlette.responses import FileResponse
+            from starlette.routing import Route
+
+            async def response_func(req):
+                return FileResponse(self._csv_path, filename=os.path.basename(self._csv_path))
+            routes = [
+                Route(self._get_route_str(dataset_uid, obj_i, self.local_csv_uid), response_func),
+            ]
+            return routes
+
+    def make_csv_file_def_creator(self, dataset_uid, obj_i):
+        def csv_file_def_creator(base_url):
+            file_def = {
+                "fileType": f"{self._data_type}.csv",
+                "url": self.get_csv_url(base_url, dataset_uid, obj_i),
+            }
+            if self._options is not None:
+                file_def["options"] = self._options
+            if self._coordination_values is not None:
+                file_def["coordinationValues"] = self._coordination_values
+            return file_def
+        return csv_file_def_creator
+
+    def get_csv_url(self, base_url="", dataset_uid="", obj_i=""):
+        if self.is_remote:
+            return self._csv_url
+        return self._get_url(base_url, dataset_uid,
+                             obj_i, self.local_csv_uid)
+
+
 
 class OmeZarrWrapper(AbstractWrapper):
 

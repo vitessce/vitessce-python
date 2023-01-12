@@ -18,6 +18,7 @@ from vitessce import (
     OmeZarrWrapper,
     AnnDataWrapper,
     SnapWrapper,
+    CsvWrapper,
 )
 
 from pathlib import Path
@@ -95,6 +96,37 @@ class TestWrappers(unittest.TestCase):
                                         'obsEmbedding': [{'path': 'obsm/X_umap', 'embeddingType': 'UMAP', 'dims': [0, 1]}],
                                         'obsSets': [{'path': 'obs/CellType', 'name': 'Cell Type'}]
                                     }})
+    
+    def test_csv(self):
+        w = CsvWrapper(
+            csv_path=data_path / 'test.umap.csv',
+            data_type="obsEmbedding",
+            options={
+                "obsIndex": "index",
+                "obsEmbedding": ["UMAP_1", "UMAP_2"]
+            },
+            coordination_values={
+                "embeddingType": "UMAP"
+            }
+        )
+        w.local_csv_uid = 'test_uid'
+
+        file_def_creator = w.make_csv_file_def_creator(
+            "A",
+            "0"
+        )
+        file_def = file_def_creator('http://localhost:8000')
+        self.assertEqual(file_def, {
+            'fileType': 'obsEmbedding.csv',
+            'url': 'http://localhost:8000/A/0/test_uid',
+            'options': {
+                "obsIndex": "index",
+                "obsEmbedding": ["UMAP_1", "UMAP_2"]
+            },
+            'coordinationValues': {
+                "embeddingType": "UMAP"
+            }
+        })
 
     def test_snaptools(self):
         mtx = mmread(data_path / 'test.snap.mtx')

@@ -27,6 +27,7 @@ try:
         OmeTiffWrapper,
         OmeZarrWrapper,
         MultiImageWrapper,
+        CsvWrapper,
         AnnDataWrapper,
         SnapWrapper,
     )

@@ -3,7 +3,6 @@ import numpy as np
 import pandas as pd
 import json
 from anndata import read_h5ad, AnnData
-from scipy import sparse
 import imageio.v2 as imageio
 from vitessce.data_utils import (
     to_diamond,

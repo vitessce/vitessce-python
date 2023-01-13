@@ -4,6 +4,7 @@ from ome_zarr.writer import write_image
 from tifffile import TiffWriter
 from .anndata import cast_arr
 
+
 def rgb_img_to_ome_tiff(img_arr, output_path, img_name="Image", axes="CYX"):
     """
     Convert an RGB image to OME-TIFF.

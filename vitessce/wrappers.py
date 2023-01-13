@@ -306,6 +306,7 @@ class OmeTiffWrapper(AbstractWrapper):
             base_url, dataset_uid, obj_i, self.local_offsets_uid)
         return offsets_url
 
+
 class CsvWrapper(AbstractWrapper):
 
     """
@@ -385,7 +386,6 @@ class CsvWrapper(AbstractWrapper):
             return self._csv_url
         return self._get_url(base_url, dataset_uid,
                              obj_i, self.local_csv_uid)
-
 
 
 class OmeZarrWrapper(AbstractWrapper):

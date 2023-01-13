@@ -67,6 +67,7 @@ class JsonRoute(Route):
         super().__init__(path, endpoint)
         self.data_json = data_json
 
+
 class FileRoute(Route):
     def __init__(self, path, endpoint, file_path):
         super().__init__(path, endpoint)

@@ -2,12 +2,10 @@ import argparse
 import scanpy as sc
 import numpy as np
 import scipy.cluster
-from scipy import sparse
 from vitessce.data_utils import (
     to_diamond,
     rgb_img_to_ome_zarr,
     optimize_adata,
-    to_dense,
 )
 
 

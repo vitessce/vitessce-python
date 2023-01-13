@@ -5,6 +5,7 @@ from scipy.sparse import issparse
 
 VAR_CHUNK_SIZE = 10
 
+
 def cast_arr(arr):
     """
     Try to cast an array to a dtype that takes up less space.

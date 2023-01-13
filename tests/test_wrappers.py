@@ -96,7 +96,7 @@ class TestWrappers(unittest.TestCase):
                                         'obsEmbedding': [{'path': 'obsm/X_umap', 'embeddingType': 'UMAP', 'dims': [0, 1]}],
                                         'obsSets': [{'path': 'obs/CellType', 'name': 'Cell Type'}]
                                     }})
-    
+
     def test_csv(self):
         w = CsvWrapper(
             csv_path=data_path / 'test.umap.csv',

@@ -58,15 +58,10 @@ extras_require = {
         # Upgrading starlette will remove this dependency.
         'aiofiles>=0.6.0'
     ],
-    'data': [
-        'anndata>=0.7.8,<0.9',
-        'ome-zarr==0.2.1',
-        'tifffile>=2020.10.1',
-    ],
 }
 
 # Option for user to install all runtime deps.
-extras_require['all'] = extras_require['proxy'] + extras_require['notebook'] + extras_require['data']
+extras_require['all'] = extras_require['proxy'] + extras_require['notebook']
 
 # Option for developers to install all runtime deps + all development deps.
 extras_require['dev'] = sum(extras_require.values(), [])
@@ -85,6 +80,9 @@ setup_args = dict(
         'pandas>=1.1.2',
         'black>=21.11b1',
         'numpy>=1.21.2',
+        'anndata>=0.7.8,<0.9',
+        'ome-zarr==0.2.1',
+        'tifffile>=2020.10.1',
     ],
     extras_require=extras_require,
     packages=find_packages(),

@@ -359,7 +359,6 @@ class CsvWrapper(AbstractWrapper):
             # TODO: Move imports back to top when this is factored out.
             from .routes import FileRoute
             from starlette.responses import FileResponse
-            from starlette.routing import Route
 
             async def response_func(req):
                 return FileResponse(self._csv_path, filename=os.path.basename(self._csv_path))

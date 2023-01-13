@@ -153,7 +153,21 @@ export function render(view) {
         "react-dom": ReactDOM
     });
 
-    const Vitessce = React.lazy(() => aliasedRequire(`vitessce@${jsPackageVersion}`).then(vitessce => asEsModule(vitessce.Vitessce)));
+    const Vitessce = React.lazy(() => {
+        // Workaround for preventing side effects due to loading the Vitessce UMD bundle twice
+        // running createGenerateClassNames twice.
+        // Alternate solution should be possible in JS release v2.0.3.
+        // Reference: https://github.com/vitessce/vitessce/pull/1391
+        if(window.__VITESSCE_PYTHON__) {
+            return window.__VITESSCE_PYTHON__;
+        }
+        // Cache miss.
+        const result = aliasedRequire(`vitessce@${jsPackageVersion}`)
+            .then(vitessce => asEsModule(vitessce.Vitessce));
+        // Cache the promise returned by d3.require on the window.
+        window.__VITESSCE_PYTHON__ = result;
+        return result;
+    });
 
     function VitessceWidget(props) {
         const { model } = props;

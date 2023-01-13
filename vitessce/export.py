@@ -6,7 +6,7 @@ from shutil import copyfile
 from starlette.routing import Mount
 from starlette.staticfiles import StaticFiles
 
-from .routes import JsonRoute
+from .routes import JsonRoute, FileRoute
 
 
 def export_to_s3(config, s3, bucket_name, prefix=''):
@@ -38,6 +38,11 @@ def export_to_s3(config, s3, bucket_name, prefix=''):
             if route not in uploaded_routes:
                 data_json = route.data_json
                 bucket.put_object(Key=key, Body=json.dumps(data_json).encode())
+                uploaded_routes.append(route)
+        elif type(route) == FileRoute:
+            if route not in uploaded_routes:
+                local_file_path = route.file_path
+                s3.meta.client.upload_file(local_file_path, bucket_name, key)
                 uploaded_routes.append(route)
         elif type(route) == Mount:
             route_app = route.app
@@ -76,6 +81,10 @@ def export_to_files(config, base_url, out_dir='.'):
             os.makedirs(os.path.dirname(out_path), exist_ok=True)
             with open(out_path, 'w') as f:
                 json.dump(data_json, f)
+        elif type(route) == FileRoute:
+            local_file_path = route.file_path
+            os.makedirs(os.path.dirname(out_path), exist_ok=True)
+            copyfile(local_file_path, out_path)
         elif type(route) == Mount:
             route_app = route.app
             if type(route_app) == StaticFiles:

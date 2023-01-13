@@ -23,3 +23,9 @@ vitessce.export
 
 .. automodule:: vitessce.export
  :members:
+
+vitessce.data_utils
+*****************
+
+.. automodule:: vitessce.data_utils
+ :members:

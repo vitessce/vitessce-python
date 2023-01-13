@@ -17,8 +17,6 @@ from .constants import (
 from .entities import Cells, CellSets, GenomicProfiles
 from .repr import make_repr
 
-VAR_CHUNK_SIZE = 10
-
 
 class AbstractWrapper:
     """
@@ -244,17 +242,16 @@ class OmeTiffWrapper(AbstractWrapper):
             return []
         else:
             # TODO: Move imports back to top when this is factored out.
-            from .routes import range_repsonse, JsonRoute
+            from .routes import range_repsonse, JsonRoute, FileRoute
             from generate_tiff_offsets import get_offsets
             from starlette.responses import UJSONResponse
-            from starlette.routing import Route
 
             offsets = get_offsets(self._img_path)
 
             async def response_func(req):
                 return UJSONResponse(offsets)
             routes = [
-                Route(self._get_route_str(dataset_uid, obj_i, self.local_img_uid), lambda req: range_repsonse(req, self._img_path)),
+                FileRoute(self._get_route_str(dataset_uid, obj_i, self.local_img_uid), lambda req: range_repsonse(req, self._img_path), self._img_path),
                 JsonRoute(self._get_route_str(dataset_uid, obj_i, self.local_offsets_uid), response_func, offsets)
             ]
             return routes
@@ -359,13 +356,14 @@ class CsvWrapper(AbstractWrapper):
             return []
         else:
             # TODO: Move imports back to top when this is factored out.
+            from .routes import FileRoute
             from starlette.responses import FileResponse
             from starlette.routing import Route
 
             async def response_func(req):
                 return FileResponse(self._csv_path, filename=os.path.basename(self._csv_path))
             routes = [
-                Route(self._get_route_str(dataset_uid, obj_i, self.local_csv_uid), response_func),
+                FileRoute(self._get_route_str(dataset_uid, obj_i, self.local_csv_uid), response_func, self._csv_path),
             ]
             return routes
 

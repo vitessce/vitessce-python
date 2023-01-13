@@ -60,12 +60,6 @@ def create_zarr(output_adata, output_img):
     # Create a new *ordered* gene expression dataframe.
     adata = adata[:, var_index_ordering].copy()
     adata.obsm["X_hvg"] = adata[:, adata.var['highly_variable']].X.copy()
-    # Vitessce plays nicely with dense matrices saved with chunking
-    # and this one is small enough that dense is not a huge overhead.
-    # TODO: automate conversion to csc in optimize_adata function
-    if isinstance(adata.X, sparse.spmatrix):
-        adata.X = adata.X.todense()
-    # adata.obsm["X_hvg"] = adata[:, adata.var['highly_variable']].X.copy()
 
     # Unclear what the exact scale factor is required to align
     # the spots to the image. Through trial and error / manual binary search
@@ -91,9 +85,11 @@ def create_zarr(output_adata, output_img):
         obs_cols=["clusters"],
         var_cols=["highly_variable"],
         obsm_keys=["X_hvg", "spatial", "segmentations", "X_umap", "X_pca"],
-        preserve_X=True,
+        optimize_X=True,
+        # Vitessce plays nicely with dense matrices saved with chunking
+        # and this one is small enough that dense is not a huge overhead.
+        to_dense_X=True,
     )
-    adata.X = np.array(to_dense(adata.X))
     adata.write_zarr(output_adata, chunks=[adata.shape[0], 10])
 
 

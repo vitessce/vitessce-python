@@ -7,4 +7,3 @@ Data preparation examples
 
    notebooks/data_export_s3
    notebooks/data_export_files
-   notebooks/data_conversion

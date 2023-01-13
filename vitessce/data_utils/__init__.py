@@ -5,8 +5,11 @@ from .anndata import (
     to_uint8,
     sort_var_axis,
     to_diamond,
+    VAR_CHUNK_SIZE,
 )
 from .ome import (
     rgb_img_to_ome_zarr,
     multiplex_img_to_ome_zarr,
+    rgb_img_to_ome_tiff,
+    multiplex_img_to_ome_tiff,
 )

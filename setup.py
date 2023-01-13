@@ -50,17 +50,23 @@ extras_require = {
         'hypercorn>=0.11.0',
         'ujson>=4.0.1',
         'starlette==0.14.0',
+        'generate-tiff-offsets>=0.1.7',
 
         # aiofiles is not explicitly referenced in our code,
         # but it is an implicit dependency of starlette==0.14.0.
         # https://github.com/encode/starlette/issues/49
         # Upgrading starlette will remove this dependency.
         'aiofiles>=0.6.0'
-    ]
+    ],
+    'data': [
+        'anndata>=0.7.8,<0.9',
+        'ome-zarr==0.2.1',
+        'tifffile>=2020.10.1',
+    ],
 }
 
 # Option for user to install all runtime deps.
-extras_require['all'] = extras_require['proxy'] + extras_require['notebook']
+extras_require['all'] = extras_require['proxy'] + extras_require['notebook'] + extras_require['data']
 
 # Option for developers to install all runtime deps + all development deps.
 extras_require['dev'] = sum(extras_require.values(), [])
@@ -79,9 +85,6 @@ setup_args = dict(
         'pandas>=1.1.2',
         'black>=21.11b1',
         'numpy>=1.21.2',
-        'generate-tiff-offsets>=0.1.7',
-        'anndata>=0.7.8,<0.9',
-        'ome-zarr==0.2.1',
     ],
     extras_require=extras_require,
     packages=find_packages(),

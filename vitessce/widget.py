@@ -85,7 +85,7 @@ def launch_vitessce_io(config, theme='light', port=None, base_url=None, open=Tru
     config_dict = config.to_dict(base_url=base_url)
     routes = config.get_routes()
     serve_routes(routes, use_port)
-    vitessce_url = f"http://vitessce.io/?theme={theme}&url=data:," + quote_plus(
+    vitessce_url = f"http://vitessce.io/#?theme={theme}&url=data:," + quote_plus(
         json.dumps(config_dict))
     if open:
         webbrowser.open(vitessce_url)

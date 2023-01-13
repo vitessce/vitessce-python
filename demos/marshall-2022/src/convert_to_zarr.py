@@ -2,7 +2,6 @@ import argparse
 from anndata import read_h5ad
 import numpy as np
 import scanpy as sc
-from scipy import sparse
 from vitessce.data_utils import (
     to_diamond,
     to_uint8,

@@ -550,6 +550,24 @@ class VitessceConfig:
             self.config["description"] = ""
         else:
             self.config["description"] = description
+        
+        self.background_servers = {}
+    
+    def register_server(self, port, server):
+        self.background_servers[port] = server
+
+    def stop_server(self, port):
+        if port in self.background_servers:
+            self.background_servers[port].stop()
+            del self.background_servers[port]
+
+    def stop_all_servers(self):
+        for server in self.background_servers.values():
+            server.stop()
+        self.background_servers = {}
+    
+    def has_server(self, port):
+        return port in self.background_servers
 
     def _to_py_params(self):
         return {

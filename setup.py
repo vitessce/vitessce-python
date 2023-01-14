@@ -47,7 +47,7 @@ extras_require = {
     'notebook': [
         # Needed only for notebook use:
         'anywidget==0.0.3',
-        'hypercorn>=0.11.0',
+        'uvicorn>=0.17.0',
         'ujson>=4.0.1',
         'starlette==0.14.0',
         'generate-tiff-offsets>=0.1.7',

@@ -1170,7 +1170,7 @@ class VitessceChainableConfig(VitessceConfig):
     A class to represent a Vitessce view config, where the methods ``add_dataset``, ``add_view``, and ``set_coordination_value`` return self (the config instance). This class inherits from ``VitessceConfig``.
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, schema_version, **kwargs):
         """
         Construct a Vitessce view config object.
 
@@ -1181,9 +1181,9 @@ class VitessceChainableConfig(VitessceConfig):
 
             from vitessce import VitessceChainableConfig
 
-            vc = VitessceChainableConfig(name='My Config')
+            vc = VitessceChainableConfig(schema_version='1.0.15', name='My Config')
         """
-        super().__init__(**kwargs)
+        super().__init__(schema_version, **kwargs)
 
     def __copy__(self):
         new_vc = VitessceChainableConfig(

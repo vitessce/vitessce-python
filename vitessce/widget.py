@@ -32,7 +32,7 @@ class BackgroundServer:
         self.port = None
         self.thread = None
         self.server = None
-    
+
     def stop(self):
         if self.thread is None:
             return self
@@ -44,11 +44,11 @@ class BackgroundServer:
             self.server = None
             self.thread = None
         return self
-    
+
     def start(self, port=None, timeout=1, daemon=True, log_level="warning"):
         if self.thread is not None:
             return self
-        
+
         config = Config(
             app=self.app,
             port=port,
@@ -69,15 +69,16 @@ class BackgroundServer:
 class VitessceDataServer:
     def __init__(self):
         self.served_configs = []
-    
+
     def stop_all(self):
         for config in self.served_configs:
             config.stop_all_servers()
         self.served_configs = []
-            
+
     def register(self, config):
         if config not in self.served_configs:
             self.served_configs.append(config)
+
 
 # Create a singleton to have a global way to stop all servers
 # attached to configs.

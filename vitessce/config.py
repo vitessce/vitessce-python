@@ -399,7 +399,7 @@ class VitessceConfigView:
             y_scope.set_value(0)
         """
         for c_scope in c_scopes:
-            assert type(c_scope) == VitessceConfigCoordinationScope
+            assert isinstance(c_scope, VitessceConfigCoordinationScope)
             self.view["coordinationScopes"][c_scope.c_type] = c_scope.c_scope
         return self
 
@@ -550,9 +550,9 @@ class VitessceConfig:
             self.config["description"] = ""
         else:
             self.config["description"] = description
-        
+
         self.background_servers = {}
-    
+
     def register_server(self, port, server):
         self.background_servers[port] = server
 
@@ -565,7 +565,7 @@ class VitessceConfig:
         for server in self.background_servers.values():
             server.stop()
         self.background_servers = {}
-    
+
     def has_server(self, port):
         return port in self.background_servers
 
@@ -606,7 +606,7 @@ class VitessceConfig:
         """
         uid = uid if uid is not None else _get_next_scope(
             [d.dataset['uid'] for d in self.config["datasets"]])
-        assert type(uid) == str
+        assert isinstance(uid, str)
         vcd = VitessceConfigDataset(uid, name)
         self.config["datasets"].append(vcd)
         [d_scope] = self.add_coordination(ct.DATASET)
@@ -705,7 +705,7 @@ class VitessceConfig:
                 raise ValueError(
                     "A dataset with the provided dataset_uid could not be found.")
 
-        if type(component) == str:
+        if isinstance(component, str):
             component_str = component
         else:
             component_str = component.value
@@ -869,9 +869,9 @@ class VitessceConfig:
         def _layout(obj, x_min, x_max, y_min, y_max):
             w = x_max - x_min
             h = y_max - y_min
-            if type(obj) == VitessceConfigView:
+            if isinstance(obj, VitessceConfigView):
                 obj.set_xywh(x_min, y_min, w, h)
-            elif type(obj) == VitessceConfigViewHConcat:
+            elif isinstance(obj, VitessceConfigViewHConcat):
                 views = obj.views
                 num_views = len(views)
                 for i in range(num_views):
@@ -882,7 +882,7 @@ class VitessceConfig:
                         y_min,
                         y_max
                     )
-            elif type(obj) == VitessceConfigViewVConcat:
+            elif isinstance(obj, VitessceConfigViewVConcat):
                 views = obj.views
                 num_views = len(views)
                 for i in range(num_views):

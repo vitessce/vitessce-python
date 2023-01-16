@@ -11,7 +11,7 @@ from scipy.sparse import coo_matrix
 from uuid import uuid4
 
 from .constants import (
-    Component as cm,
+    ViewType as cm,
     FileType as ft,
 )
 from .entities import Cells, CellSets, GenomicProfiles

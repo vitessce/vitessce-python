@@ -6,7 +6,7 @@ from collections import OrderedDict
 
 from .constants import (
     CoordinationType as ct,
-    Component as cm,
+    ViewType as cm,  # TODO: change to vt
     FileType as ft
 )
 
@@ -258,13 +258,13 @@ def hconcat(*views):
     .. code-block:: python
         :emphasize-lines: 8
 
-        from vitessce import VitessceConfig, Component as cm, hconcat, vconcat
+        from vitessce import VitessceConfig, ViewType as vt, hconcat, vconcat
 
         vc = VitessceConfig(schema_version="1.0.15")
         my_dataset = vc.add_dataset(name='My Dataset')
-        v1 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
-        v2 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
-        v3 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
+        v1 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
+        v2 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
+        v3 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
         vc.layout(hconcat(v1, vconcat(v2, v3)))
     """
     return VitessceConfigViewHConcat(views)
@@ -301,13 +301,13 @@ def vconcat(*views):
     .. code-block:: python
         :emphasize-lines: 8
 
-        from vitessce import VitessceConfig, Component as cm, hconcat, vconcat
+        from vitessce import VitessceConfig, ViewType as vt, hconcat, vconcat
 
         vc = VitessceConfig(schema_version="1.0.15")
         my_dataset = vc.add_dataset(name='My Dataset')
-        v1 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
-        v2 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
-        v3 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
+        v1 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
+        v2 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
+        v3 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
         vc.layout(hconcat(v1, vconcat(v2, v3)))
     """
     return VitessceConfigViewVConcat(views)
@@ -381,12 +381,12 @@ class VitessceConfigView:
         .. code-block:: python
             :emphasize-lines: 12-13
 
-            from vitessce import VitessceConfig, Component as cm, CoordinationType as ct
+            from vitessce import VitessceConfig, ViewType as vt, CoordinationType as ct
 
             vc = VitessceConfig(schema_version="1.0.15")
             my_dataset = vc.add_dataset(name='My Dataset')
-            v1 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
-            v2 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
+            v1 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
+            v2 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
             zoom_scope, x_scope, y_scope = vc.add_coordination(
                 ct.SPATIAL_ZOOM,
                 ct.SPATIAL_TARGET_X,
@@ -491,12 +491,12 @@ class VitessceConfigCoordinationScope:
         .. code-block:: python
             :emphasize-lines: 14-16
 
-            from vitessce import VitessceConfig, Component as cm, CoordinationType as ct
+            from vitessce import VitessceConfig, ViewType as vt, CoordinationType as ct
 
             vc = VitessceConfig(schema_version="1.0.15")
             my_dataset = vc.add_dataset(name='My Dataset')
-            v1 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
-            v2 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
+            v1 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
+            v2 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
             zoom_scope, x_scope, y_scope = vc.add_coordination(
                 ct.SPATIAL_ZOOM,
                 ct.SPATIAL_TARGET_X,
@@ -659,12 +659,12 @@ class VitessceConfig:
         """
         return self.config["datasets"]
 
-    def add_view(self, component, dataset=None, dataset_uid=None, x=0, y=0, w=1, h=1, mapping=None, coordination_scopes=None, props=None):
+    def add_view(self, view_type, dataset=None, dataset_uid=None, x=0, y=0, w=1, h=1, mapping=None, coordination_scopes=None, props=None):
         """
         Add a view to the config.
 
-        :param component: A component name, either as a string or using the Component enum values.
-        :type component: str or vitessce.constants.Component
+        :param view_type: A component name, either as a string or using the ViewType enum values.
+        :type view_type: str or vitessce.constants.ViewType
         :param dataset: A dataset instance to be used for the data visualized in this view. Must provide dataset or dataset_uid, but not both.
         :type dataset: VitessceConfigDataset or None
         :param dataset_uid: A unique ID for a dataset to be used for the data visualized in this view. Must provide dataset or dataset_uid, but not both.
@@ -686,17 +686,18 @@ class VitessceConfig:
         .. code-block:: python
             :emphasize-lines: 5-6
 
-            from vitessce import VitessceConfig, Component as cm
+            from vitessce import VitessceConfig, ViewType as vt
 
             vc = VitessceConfig(schema_version="1.0.15")
             my_dataset = vc.add_dataset(name='My Dataset')
-            v1 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
-            v2 = vc.add_view(cm.SCATTERPLOT, dataset=my_dataset, mapping="X_umap")
+            v1 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
+            v2 = vc.add_view(vt.SCATTERPLOT, dataset=my_dataset, mapping="X_umap")
         """
         # User should only provide dataset or dataset_uid, but not both.
         assert isinstance(dataset, VitessceConfigDataset) or isinstance(
             dataset_uid, str)
         assert dataset is None or dataset_uid is None
+        component = view_type
         assert type(component) in [str, cm]
 
         if dataset is None:
@@ -756,12 +757,12 @@ class VitessceConfig:
         .. code-block:: python
             :emphasize-lines: 7-11
 
-            from vitessce import VitessceConfig, Component as cm, CoordinationType as ct
+            from vitessce import VitessceConfig, ViewType as vt, CoordinationType as ct
 
             vc = VitessceConfig(schema_version="1.0.15")
             my_dataset = vc.add_dataset(name='My Dataset')
-            v1 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
-            v2 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
+            v1 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
+            v2 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
             zoom_scope, x_scope, y_scope = vc.add_coordination(
                 ct.SPATIAL_ZOOM,
                 ct.SPATIAL_TARGET_X,
@@ -844,25 +845,25 @@ class VitessceConfig:
         .. code-block:: python
             :emphasize-lines: 8
 
-            from vitessce import VitessceConfig, Component as cm, hconcat, vconcat
+            from vitessce import VitessceConfig, ViewType as vt, hconcat, vconcat
 
             vc = VitessceConfig(schema_version="1.0.15")
             my_dataset = vc.add_dataset(name='My Dataset')
-            v1 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
-            v2 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
-            v3 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
+            v1 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
+            v2 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
+            v3 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
             vc.layout(hconcat(v1, vconcat(v2, v3)))
 
         .. code-block:: python
             :emphasize-lines: 8
 
-            from vitessce import VitessceConfig, Component as cm
+            from vitessce import VitessceConfig, ViewType as vt
 
             vc = VitessceConfig(schema_version="1.0.15")
             my_dataset = vc.add_dataset(name='My Dataset')
-            v1 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
-            v2 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
-            v3 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
+            v1 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
+            v2 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
+            v3 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
             vc.layout(v1 | (v2 / v3)) # * magic * (alternative syntax)
         """
 
@@ -1096,11 +1097,11 @@ class VitessceConfig:
         .. code-block:: python
             :emphasize-lines: 6-7
 
-            from vitessce import VitessceConfig, Component as cm, CoordinationType as ct
+            from vitessce import VitessceConfig, ViewType as vt, CoordinationType as ct
 
             vc = VitessceConfig(schema_version="1.0.15")
             my_dataset = vc.add_dataset(name='My Dataset')
-            v1 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
+            v1 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
             vc.layout(v1)
             vw = vc.widget()
             vw
@@ -1124,11 +1125,11 @@ class VitessceConfig:
         .. code-block:: python
             :emphasize-lines: 6
 
-            from vitessce import VitessceConfig, Component as cm, CoordinationType as ct
+            from vitessce import VitessceConfig, ViewType as vt, CoordinationType as ct
 
             vc = VitessceConfig(schema_version="1.0.15")
             my_dataset = vc.add_dataset(name='My Dataset')
-            v1 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
+            v1 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
             vc.layout(v1)
             vc.web_app()
         """
@@ -1147,11 +1148,11 @@ class VitessceConfig:
         .. code-block:: python
             :emphasize-lines: 8
 
-            from vitessce import VitessceConfig, Component as cm, CoordinationType as ct
+            from vitessce import VitessceConfig, ViewType as cvtm, CoordinationType as ct
 
             vc = VitessceConfig(schema_version="1.0.15")
             my_dataset = vc.add_dataset(name='My Dataset')
-            v1 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
+            v1 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
             vc.layout(v1)
 
             config_dict = vc.export(to="S3")

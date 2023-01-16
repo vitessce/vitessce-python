@@ -4,7 +4,7 @@ import ast
 from vitessce import (  # noqa: F401
     VitessceConfig,
     CoordinationType as ct,
-    Component as cm,
+    ViewType as cm,
     DataType as dt,
     FileType as ft,
     hconcat,

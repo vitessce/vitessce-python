@@ -11,7 +11,14 @@ from .config import (
 
 from .repr import make_repr
 
-from .constants import CoordinationType, Component, DataType, FileType
+from .constants import (
+    CoordinationType,
+    ViewType,
+    DataType,
+    FileType,
+    # For backwards compatibility, also export ViewType as Component
+    ViewType as Component,
+)
 
 from .wrappers import AbstractWrapper
 

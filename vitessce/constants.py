@@ -95,7 +95,7 @@ class CoordinationType(DocEnum):
     FEATURE_VALUE_TRANSFORM_COEFFICIENT = 'featureValueTransformCoefficient', "Coefficient to transform values in the gating scatterplot."
 
 
-class Component(DocEnum):
+class ViewType(DocEnum):
     """
     An enum type representing a view type in the visualization layout.
     """

@@ -181,8 +181,8 @@ class VitessceConfigDataset:
         """
         Add a data object to this dataset instance.
 
-        :param obj: A data object that can be served locally or uploaded to a remote storage provider.
-        :type obj: anndata.AnnData or loompy.LoomConnection or zarr.Store
+        :param obj: A data object that can be served locally or which points to a remote storage provider. Typically, a subclass of AbstractWrapper.
+        :type obj: vitessce.AbstractWrapper
 
         :returns: Self, to allow function chaining.
         :rtype: VitessceConfigDataset

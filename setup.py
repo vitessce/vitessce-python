@@ -4,7 +4,7 @@ import os
 from distutils import log
 
 # Module version
-py_version_info = (2, 0, 1)
+py_version_info = (3, 0, 0)
 __version__ = '%s.%s.%s' % (py_version_info[0], py_version_info[1], py_version_info[2])
 
 # Setup
@@ -47,16 +47,17 @@ extras_require = {
     'notebook': [
         # Needed only for notebook use:
         'anywidget==0.0.3',
-        'hypercorn>=0.11.0',
+        'uvicorn>=0.17.0',
         'ujson>=4.0.1',
         'starlette==0.14.0',
+        'generate-tiff-offsets>=0.1.7',
 
         # aiofiles is not explicitly referenced in our code,
         # but it is an implicit dependency of starlette==0.14.0.
         # https://github.com/encode/starlette/issues/49
         # Upgrading starlette will remove this dependency.
         'aiofiles>=0.6.0'
-    ]
+    ],
 }
 
 # Option for user to install all runtime deps.
@@ -79,9 +80,9 @@ setup_args = dict(
         'pandas>=1.1.2',
         'black>=21.11b1',
         'numpy>=1.21.2',
-        'generate-tiff-offsets>=0.1.7',
         'anndata>=0.7.8,<0.9',
         'ome-zarr==0.2.1',
+        'tifffile>=2020.10.1',
     ],
     extras_require=extras_require,
     packages=find_packages(),

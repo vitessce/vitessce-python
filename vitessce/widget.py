@@ -6,11 +6,10 @@ import json
 import anywidget
 from traitlets import Unicode, Dict, Int, Bool
 import time
+import uuid
 
 # Server dependencies
-import asyncio
-from hypercorn.config import Config
-from hypercorn.asyncio import serve
+from uvicorn import Config, Server
 
 from starlette.applications import Starlette
 from starlette.middleware import Middleware
@@ -22,18 +21,68 @@ MAX_PORT_TRIES = 1000
 DEFAULT_PORT = 8000
 
 
-def run_server_loop(app, port):
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
+class BackgroundServer:
+    # Reference: https://github.com/gosling-lang/gos/blob/main/gosling/data/_background_server.py#L10
+    def __init__(self, routes):
+        middleware = [
+            Middleware(CORSMiddleware, allow_origins=[
+                       '*'], allow_methods=["OPTIONS", "GET"], allow_headers=['Range'])
+        ]
+        self.app = Starlette(debug=True, routes=routes, middleware=middleware)
+        self.port = None
+        self.thread = None
+        self.server = None
 
-    config = Config()
-    config.bind = [f"localhost:{port}"]
+    def stop(self):
+        if self.thread is None:
+            return self
+        assert self.server is not None
+        try:
+            self.server.should_exit = True
+            self.thread.join()
+        finally:
+            self.server = None
+            self.thread = None
+        return self
 
-    # As of Hypercorn 0.11.0, need to explicitly set signal handlers to a no-op
-    # (otherwise it will try to set signal handlers assuming it is on the main thread which throws an error)
-    loop.run_until_complete(
-        serve(app, config, shutdown_trigger=lambda: asyncio.Future()))
-    loop.close()
+    def start(self, port=None, timeout=1, daemon=True, log_level="warning"):
+        if self.thread is not None:
+            return self
+
+        config = Config(
+            app=self.app,
+            port=port,
+            timeout_keep_alive=timeout,
+            log_level=log_level
+        )
+        self.port = config.port
+        self.server = Server(config=config)
+        self.thread = Thread(target=self.server.run, daemon=daemon)
+        self.thread.start()
+
+        while not self.server.started:
+            time.sleep(1e-3)
+
+        return self
+
+
+class VitessceDataServer:
+    def __init__(self):
+        self.served_configs = []
+
+    def stop_all(self):
+        for config in self.served_configs:
+            config.stop_all_servers()
+        self.served_configs = []
+
+    def register(self, config):
+        if config not in self.served_configs:
+            self.served_configs.append(config)
+
+
+# Create a singleton to have a global way to stop all servers
+# attached to configs.
+data_server = VitessceDataServer()
 
 
 def is_port_in_use(port):
@@ -65,17 +114,12 @@ def get_base_url_and_port(port, next_port, proxy=False, base_url=None):
     return base_url, use_port, next_port
 
 
-def serve_routes(routes, use_port):
-    if len(routes) > 0:
-        middleware = [
-            Middleware(CORSMiddleware, allow_origins=[
-                       '*'], allow_methods=["OPTIONS", "GET"], allow_headers=['Range'])
-        ]
-        app = Starlette(debug=True, routes=routes, middleware=middleware)
-
-        t = Thread(target=run_server_loop, args=(app, use_port))
-        t.start()
-        time.sleep(1)
+def serve_routes(config, routes, use_port):
+    if not config.has_server(use_port) and len(routes) > 0:
+        server = BackgroundServer(routes)
+        config.register_server(use_port, server)
+        data_server.register(config)
+        server.start(port=use_port)
 
 
 def launch_vitessce_io(config, theme='light', port=None, base_url=None, open=True):
@@ -84,8 +128,8 @@ def launch_vitessce_io(config, theme='light', port=None, base_url=None, open=Tru
         port, DEFAULT_PORT, base_url=base_url)
     config_dict = config.to_dict(base_url=base_url)
     routes = config.get_routes()
-    serve_routes(routes, use_port)
-    vitessce_url = f"http://vitessce.io/?theme={theme}&url=data:," + quote_plus(
+    serve_routes(config, routes, use_port)
+    vitessce_url = f"http://vitessce.io/#?theme={theme}&url=data:," + quote_plus(
         json.dumps(config_dict))
     if open:
         webbrowser.open(vitessce_url)
@@ -139,6 +183,7 @@ function prependBaseUrl(config, proxy) {
 }
 
 export function render(view) {
+    const cssUid = view.model.get('uid');
     const jsPackageVersion = view.model.get('js_package_version');
     let customRequire = d3.require;
     const customJsUrl = view.model.get('custom_js_url');
@@ -153,7 +198,14 @@ export function render(view) {
         "react-dom": ReactDOM
     });
 
-    const Vitessce = React.lazy(() => aliasedRequire(`vitessce@${jsPackageVersion}`).then(vitessce => asEsModule(vitessce.Vitessce)));
+    const Vitessce = React.lazy(() => {
+        // Workaround for preventing side effects due to loading the Vitessce UMD bundle twice
+        // running createGenerateClassNames twice.
+        // Alternate solution should be possible in JS release v2.0.3.
+        // Reference: https://github.com/vitessce/vitessce/pull/1391
+        return aliasedRequire(`vitessce@${jsPackageVersion}`)
+            .then(vitessce => asEsModule(vitessce.Vitessce));
+    });
 
     function VitessceWidget(props) {
         const { model } = props;
@@ -198,7 +250,7 @@ export function render(view) {
             model.save_changes();
         }, [model]);
 
-        const vitessceProps = { height, theme, config, onConfigChange };
+        const vitessceProps = { height, theme, config, onConfigChange, uid: cssUid };
 
         return e('div', { ref: divRef, style: { height: height + 'px' } },
             e(React.Suspense, { fallback: e('div', {}, 'Loading...') },
@@ -226,13 +278,14 @@ class VitessceWidget(anywidget.AnyWidget):
     height = Int(600).tag(sync=True)
     theme = Unicode('auto').tag(sync=True)
     proxy = Bool(False).tag(sync=True)
+    uid = Unicode('').tag(sync=True)
 
     next_port = DEFAULT_PORT
 
-    js_package_version = Unicode('2.0.2').tag(sync=True)
+    js_package_version = Unicode('2.0.3-beta.0').tag(sync=True)
     custom_js_url = Unicode('').tag(sync=True)
 
-    def __init__(self, config, height=600, theme='auto', port=None, proxy=False, js_package_version='2.0.2', custom_js_url=''):
+    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='2.0.3-beta.0', custom_js_url=''):
         """
         Construct a new Vitessce widget.
 
@@ -255,15 +308,23 @@ class VitessceWidget(anywidget.AnyWidget):
 
         base_url, use_port, VitessceWidget.next_port = get_base_url_and_port(
             port, VitessceWidget.next_port, proxy=proxy)
+        self.config_obj = config
+        self.port = use_port
         config_dict = config.to_dict(base_url=base_url)
         routes = config.get_routes()
 
+        if uid is None:
+            uid_str = str(uuid.uuid4())[:4]
+        else:
+            uid_str = uid
+
         super(VitessceWidget, self).__init__(
             config=config_dict, height=height, theme=theme, proxy=proxy,
-            js_package_version=js_package_version, custom_js_url=custom_js_url
+            js_package_version=js_package_version, custom_js_url=custom_js_url,
+            uid=uid_str,
         )
 
-        serve_routes(routes, use_port)
+        serve_routes(config, routes, use_port)
 
     def _get_coordination_value(self, coordination_type, coordination_scope):
         obj = self.config['coordinationSpace'][coordination_type]
@@ -287,3 +348,7 @@ class VitessceWidget(anywidget.AnyWidget):
 
     def get_cell_selection(self, scope=None):
         return self._get_coordination_value('cellSelection', scope)
+
+    def close(self):
+        self.config_obj.stop_server(self.port)
+        super().close()

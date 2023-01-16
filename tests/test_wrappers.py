@@ -15,8 +15,10 @@ from .create_test_data import (
 
 from vitessce import (
     OmeTiffWrapper,
+    OmeZarrWrapper,
     AnnDataWrapper,
     SnapWrapper,
+    CsvWrapper,
 )
 
 from pathlib import Path
@@ -41,13 +43,15 @@ class TestWrappers(unittest.TestCase):
 
     def test_ome_tiff(self):
         w = OmeTiffWrapper(img_path=data_path / 'test.ome.tif', name="Test")
+        w.local_img_uid = 'test.ome.tif'
+        w.local_offsets_uid = 'test.offsets.json'
 
-        raster_file_def_creator = w.make_raster_file_def_creator(
+        file_def_creator = w.make_raster_file_def_creator(
             "A",
             "0"
         )
-        raster_json = raster_file_def_creator('http://localhost:8000')
-        self.assertEqual(raster_json, {
+        file_def = file_def_creator('http://localhost:8000')
+        self.assertEqual(file_def, {
             'fileType': 'raster.json',
             'options': {
                 'schemaVersion': '0.0.2',
@@ -65,18 +69,64 @@ class TestWrappers(unittest.TestCase):
             }
         })
 
+    def test_ome_zarr(self):
+        w = OmeZarrWrapper(img_path=data_path / 'test.ome.zarr')
+        w.local_dir_uid = 'test.ome.zarr'
+
+        file_def_creator = w.make_image_file_def_creator(
+            "A",
+            "0"
+        )
+        file_def = file_def_creator('http://localhost:8000')
+        self.assertEqual(file_def, {
+            'fileType': 'image.ome-zarr',
+            'url': 'http://localhost:8000/A/0/test.ome.zarr'
+        })
+
     def test_anndata(self):
         adata = read_h5ad(data_path / 'test.h5ad')
         w = AnnDataWrapper(adata, obs_set_paths=['obs/CellType'], obs_set_names=['Cell Type'], obs_embedding_paths=[
                            'obsm/X_umap'], obs_embedding_names=['UMAP'])
+        w.local_dir_uid = 'anndata.zarr'
 
-        cells_creator = w.make_file_def_creator('A', 0)
-        cells = cells_creator('http://localhost:8000')
-        self.assertEqual(cells, {'fileType': 'anndata.zarr', 'url': 'http://localhost:8000/A/0/anndata.zarr',
-                            'options': {
-                                'obsEmbedding': [{'path': 'obsm/X_umap', 'embeddingType': 'UMAP', 'dims': [0, 1]}],
-                                'obsSets': [{'path': 'obs/CellType', 'name': 'Cell Type'}]
-                            }})
+        file_def_creator = w.make_file_def_creator('A', 0)
+        file_def = file_def_creator('http://localhost:8000')
+        self.assertEqual(file_def, {'fileType': 'anndata.zarr', 'url': 'http://localhost:8000/A/0/anndata.zarr',
+                                    'options': {
+                                        'obsEmbedding': [{'path': 'obsm/X_umap', 'embeddingType': 'UMAP', 'dims': [0, 1]}],
+                                        'obsSets': [{'path': 'obs/CellType', 'name': 'Cell Type'}]
+                                    }})
+
+    def test_csv(self):
+        w = CsvWrapper(
+            csv_path=data_path / 'test.umap.csv',
+            data_type="obsEmbedding",
+            options={
+                "obsIndex": "index",
+                "obsEmbedding": ["UMAP_1", "UMAP_2"]
+            },
+            coordination_values={
+                "embeddingType": "UMAP"
+            }
+        )
+        w.local_csv_uid = 'test_uid'
+
+        file_def_creator = w.make_csv_file_def_creator(
+            "A",
+            "0"
+        )
+        file_def = file_def_creator('http://localhost:8000')
+        self.assertEqual(file_def, {
+            'fileType': 'obsEmbedding.csv',
+            'url': 'http://localhost:8000/A/0/test_uid',
+            'options': {
+                "obsIndex": "index",
+                "obsEmbedding": ["UMAP_1", "UMAP_2"]
+            },
+            'coordinationValues': {
+                "embeddingType": "UMAP"
+            }
+        })
 
     def test_snaptools(self):
         mtx = mmread(data_path / 'test.snap.mtx')

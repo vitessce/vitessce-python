@@ -3,9 +3,19 @@ from anndata import AnnData
 import scipy.cluster
 from scipy.sparse import issparse
 
+VAR_CHUNK_SIZE = 10
 
-# Try to cast an array to a dtype that takes up less space.
+
 def cast_arr(arr):
+    """
+    Try to cast an array to a dtype that takes up less space.
+
+    :param arr: The array to cast.
+    :type arr: np.array
+
+    :returns: The new array.
+    :rtype: np.array
+    """
     orig_sum = np.sum(arr)
     orig_max = np.max(arr)
     orig_min = np.min(arr)
@@ -45,19 +55,68 @@ def cast_arr(arr):
 
 
 def optimize_arr(arr):
+    """
+    Try to cast an array to a dtype that takes up less space, and convert to dense.
+
+    :param arr: The array to cast and convert.
+    :type arr: np.array
+
+    :returns: The new array.
+    :rtype: np.array
+    """
     arr = to_dense(cast_arr(to_memory(arr)))
     if isinstance(arr, np.matrix):
         arr = np.array(arr)
     return arr
 
 
-# Given an anndata object, optimize for usage with Vitessce
-def optimize_adata(adata, obs_cols=None, obsm_keys=None, var_cols=None, varm_keys=None, layer_keys=None, preserve_X=False, remove_X=False):
+def optimize_adata(adata, obs_cols=None, obsm_keys=None, var_cols=None, varm_keys=None, layer_keys=None, remove_X=False, optimize_X=False, to_dense_X=False, to_sparse_X=False):
+    """
+    Given an AnnData object, optimize for usage with Vitessce and return a new object.
+
+    :param adata: The AnnData object to optimize.
+    :type adata: anndata.AnnData
+    :param obs_cols: Columns of adata.obs to optimize. Columns not specified will not be included in the returned object.
+    :type obs_cols: list[str] or None
+    :param var_cols: Columns of adata.var to optimize. Columns not specified will not be included in the returned object.
+    :type var_cols: list[str] or None
+    :param obsm_keys: Arrays within adata.obsm to optimize. Keys not specified will not be included in the returned object.
+    :type obsm_keys: list[str] or None
+    :param varm_keys: Arrays within adata.varm to optimize. Keys not specified will not be included in the returned object.
+    :type varm_keys: list[str] or None
+    :param layer_keys: Arrays within adata.layers to optimize. Keys not specified will not be included in the returned object.
+    :type layer_keys: list[str] or None
+    :param bool remove_X: Should the returned object have its X matrix set to None? By default, False.
+    :param bool optimize_X: Should the returned object run optimize_arr on adata.X? By default, False.
+    :param bool to_dense_X: Should adata.X be cast to a dense array in the returned object? By default, False.
+    :param bool to_sparse_X: Should adata.X be cast to a sparse array in the returned object? By default, False.
+
+    :returns: The new AnnData object.
+    :rtype: anndata.AnnData
+    """
     if not remove_X:
-        if not preserve_X and adata.X is not None:
-            new_X = optimize_arr(adata.X)
-        else:
-            new_X = adata.X
+        if adata.X is not None:
+            if optimize_X:
+                new_X = optimize_arr(adata.X)
+            else:
+                new_X = adata.X
+            # Convert to dense or sparse if asked
+            if to_dense_X:
+                new_X = to_dense(new_X)
+            if to_sparse_X:
+                new_X = new_X.tocsc()
+            if to_dense_X and to_sparse_X:
+                raise ValueError(
+                    "Did not expect both to_dense_X and to_sparse_X to be True")
+            # If the user has not asked for their matrix to be converted to dense or sparse,
+            # we still want to ensure that, if the original matrix was sparse, it
+            # uses the CSC sparse format.
+            if not to_dense_X and not to_sparse_X:
+                # In the future, we can use sparse matrices with equal performance:
+                # https://github.com/theislab/anndata/issues/524
+                # Vitessce can use csc matrices somewhat efficiently.
+                if issparse(new_X):
+                    new_X = new_X.tocsc()
     else:
         new_X = None
     # Only keep the subset of columns required.
@@ -96,6 +155,15 @@ def optimize_adata(adata, obs_cols=None, obsm_keys=None, var_cols=None, varm_key
 
 
 def to_memory(arr):
+    """
+    Try to load a backed AnnData array into memory.
+
+    :param arr: The array to load.
+    :type arr: np.array
+
+    :returns: The loaded array.
+    :rtype: np.array
+    """
     if type(arr).__name__ == "SparseDataset":
         # This comes from using a backed AnnData object (e.g. read_h5ad(path, backed="r+")).
         # Reference: https://github.com/scverse/anndata/blob/286bc7f207863964cb861f17c96ab24fe0cf72ac/anndata/_core/sparse_dataset.py#L230
@@ -103,15 +171,33 @@ def to_memory(arr):
     return arr
 
 
-# Convert a sparse array to dense.
 def to_dense(arr):
+    """
+    Convert a sparse array to dense.
+
+    :param arr: The array to convert.
+    :type arr: np.array
+
+    :returns: The converted array (or the original array if it was already dense).
+    :rtype: np.array
+    """
     if issparse(arr):
         return arr.todense()
     return arr
 
 
-# Convert an array to uint8 dtype.
 def to_uint8(arr, norm_along=None):
+    """
+    Convert an array to uint8 dtype.
+
+    :param arr: The array to convert.
+    :type arr: np.array
+    :param norm_along: How to normalize the array values. By default, None. Valid values are "global", "var", "obs".
+    :type norm_along: str or None
+
+    :returns: The converted array.
+    :rtype: np.array
+    """
     # Re-scale the gene expression values between 0 and 255 (one byte ints).
     if norm_along is None:
         norm_arr = arr
@@ -149,8 +235,20 @@ def to_uint8(arr, norm_along=None):
     return norm_arr.astype('u1')
 
 
-# Sort the var index after hierarchical clustering.
 def sort_var_axis(adata_X, orig_var_index, full_var_index=None):
+    """
+    Sort the var index by performing hierarchical clustering.
+
+    :param adata_X: The matrix to use for clustering. For example, adata.X
+    :type adata_X: np.array
+    :param orig_var_index: The original var index. For example, adata.var.index
+    :type orig_var_index: pandas.Index
+    :param full_var_index: Pass the full adata.var.index to append the var values excluded from sorting, if adata_X and orig_var_index are a subset of the full adata.X matrix. By default, None.
+    :type full_var_index: pandas.Index or None
+
+    :returns: The sorted elements of the var index.
+    :rtype: list[str]
+    """
     gexp_arr = to_dense(adata_X)
 
     # Perform hierarchical clustering along the genes axis.
@@ -166,6 +264,18 @@ def sort_var_axis(adata_X, orig_var_index, full_var_index=None):
     return leaf_list
 
 
-# Convert an (x, y) coordinate to a polygon (diamond) with a given radius.
 def to_diamond(x, y, r):
+    """
+    Convert an (x, y) coordinate to a polygon (diamond) with a given radius.
+
+    :param x: The x coordinate.
+    :type x: int or float
+    :param y: The y coordinate.
+    :type x: int or float
+    :param r: The radius.
+    :type r: int or float
+
+    :returns: The polygon vertices as an array of coordinate pairs, like [[x1, y1], [x2, y2], ...]
+    :rtype: np.array
+    """
     return np.array([[x, y + r], [x + r, y], [x, y - r], [x - r, y]])

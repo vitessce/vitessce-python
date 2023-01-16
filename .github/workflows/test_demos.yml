@@ -5,24 +5,14 @@ on: [push, pull_request]
 jobs:
   test_demos:
     runs-on: ubuntu-22.04
-    defaults:
-      run:
-        shell: bash -l {0}
     steps:
       - uses: actions/checkout@v2
-      - uses: conda-incubator/setup-miniconda@v2
+      - uses: actions/setup-python@v2
         with:
-          activate-environment: vitessce-python-demos-dryrun
-          environment-file: demos/dryrun_environment.yml
-          python-version: 3.8
-          use-mamba: true
-          mamba-version: "*"
-          auto-activate-base: false
-          channels: conda-forge,bioconda,defaults
-          channel-priority: true
+          python-version: '3.8'
       - run: |
-          conda info
-          conda list
+          pip install snakemake
+          pip install pyyaml
       - name: Install vitessce
         run: pip install -e .[testing]
       - name: Run tests

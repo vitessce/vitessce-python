@@ -1,7 +1,6 @@
 # vitessce-python
 
 [![PyPI](https://img.shields.io/pypi/v/vitessce)](https://pypi.org/project/vitessce)
-[![Vitessce JS dependency version](https://img.shields.io/badge/dynamic/json.svg?url=https%3A%2F%2Fraw.githubusercontent.com%2Fvitessce%2Fvitessce-python%2Fmain%2Fjs%2Fpackage.json&label=vitessce&query=$.dependencies.vitessce&colorB=blue)](https://github.com/vitessce/vitessce/blob/main/CHANGELOG.md)
 [![docs](https://img.shields.io/badge/docs-📖-57B4E9.svg)](https://vitessce.github.io/vitessce-python/)
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/vitessce/vitessce-python/main?filepath=docs/notebooks/widget_pbmc.ipynb)

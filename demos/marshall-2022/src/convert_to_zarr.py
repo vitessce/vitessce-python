@@ -2,7 +2,6 @@ import argparse
 from anndata import read_h5ad
 import numpy as np
 import scanpy as sc
-from scipy import sparse
 from vitessce.data_utils import (
     to_diamond,
     to_uint8,
@@ -38,17 +37,12 @@ def convert_h5ad_to_zarr(input_path, output_path):
     for i in range(num_cells):
         adata.obsm['X_segmentations'][i, :, :] = to_diamond(adata.obsm['X_spatial'][i, 0], adata.obsm['X_spatial'][i, 1], radius)
 
-    # TODO: automate conversion to csc in optimize_adata function
-    if isinstance(adata.X, sparse.spmatrix):
-        adata.X = adata.X.tocsc()
-
     adata = optimize_adata(
         adata,
         obs_cols=["cell_type"],
         var_cols=["feature_name"],
         obsm_keys=["X_hvg", "X_hvg_uint8", "X_umap", "X_spatial", "X_segmentations"],
         layer_keys=[],
-        preserve_X=True
     )
 
     adata.write_zarr(output_path, chunks=[adata.shape[0], 10])

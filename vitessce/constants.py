@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-BASE_URL_PLACEHOLDER = "{{ base_url_placeholder }}"
+BASE_URL_PLACEHOLDER = "{{ base_url }}"
 
 
 # Reference: https://stackoverflow.com/a/50473952

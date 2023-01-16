@@ -18,6 +18,7 @@ from .constants import (
     FileType,
     # For backwards compatibility, also export ViewType as Component
     ViewType as Component,
+    BASE_URL_PLACEHOLDER,
 )
 
 from .wrappers import AbstractWrapper

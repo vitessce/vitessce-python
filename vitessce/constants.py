@@ -1,8 +1,10 @@
 from enum import Enum
 
+
+BASE_URL_PLACEHOLDER = "{{ base_url_placeholder }}"
+
+
 # Reference: https://stackoverflow.com/a/50473952
-
-
 class DocEnum(Enum):
     def __new__(cls, value, doc):
         self = object.__new__(cls)

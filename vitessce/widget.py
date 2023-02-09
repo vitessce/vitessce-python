@@ -268,7 +268,7 @@ class VitessceWidget(anywidget.AnyWidget):
     """
     A class to represent a Jupyter widget for Vitessce.
     """
-    _module = Unicode(ESM).tag(sync=True)
+    _esm = ESM
 
     # Widget specific property.
     # Widget properties are defined as traitlets. Any property tagged with `sync=True`

@@ -4,7 +4,6 @@ prune **/node_modules
 include LICENSE
 include setup.py
 include pyproject.toml
-include install.json
 
 # Patterns to exclude from any directory
 global-exclude *~

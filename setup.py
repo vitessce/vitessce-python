@@ -36,6 +36,9 @@ extras_require = {
         'sphinx-rtd-theme==1.0.0',
         'nbsphinx==0.8.8',
         'nbclean==0.3.2',
+        # Pin sqlalchemy to before 1.4 to fix issue importing nbclean.NotebookCleaner
+        # Reference: https://docs.sqlalchemy.org/en/14/core/sqlelement.html#sqlalchemy.sql.expression.case.params.*whens
+        'sqlalchemy==1.3.24',
         # nbconvert and jinja2 versions need to be pinned.
         # Reference: https://github.com/vitessce/vitessce-python/issues/152
         'nbconvert==5.6.1',

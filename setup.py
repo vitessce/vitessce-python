@@ -4,7 +4,7 @@ import os
 from distutils import log
 
 # Module version
-py_version_info = (3, 0, 0)
+py_version_info = (3, 0, 1)
 __version__ = '%s.%s.%s' % (py_version_info[0], py_version_info[1], py_version_info[2])
 
 # Setup
@@ -46,7 +46,7 @@ extras_require = {
     ],
     'notebook': [
         # Needed only for notebook use:
-        'anywidget==0.0.3',
+        'anywidget==0.1.0',
         'uvicorn>=0.17.0',
         'ujson>=4.0.1',
         'starlette==0.14.0',

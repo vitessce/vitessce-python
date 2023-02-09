@@ -58,11 +58,3 @@ try:
     )
 except ModuleNotFoundError as e:  # pragma: no cover
     warn(f'Extra installs are necessary to use exports: {e}')
-
-try:
-    if "google.colab" in sys.modules:  # pragma: no cover
-        from google.colab import output
-
-        output.enable_custom_widget_manager()
-except ImportError:  # pragma: no cover
-    pass

@@ -1142,7 +1142,7 @@ class VitessceConfig:
 
     def display(self, **kwargs):
         """
-        Launch the http://vitessce.io web app using this config.
+        As a fallback to widget, render Vitessce using functions from IPython.display. This method does not support bi-directional communication (i.e., user interactions in Vitessce cannot be sent back to Python).
 
         :param str theme: The theme name, either "light" or "dark". By default, "auto", which selects light or dark based on operating system preferences.
         :param int port: The port to use when serving data objects on localhost. By default, 8000.
@@ -1151,11 +1151,6 @@ class VitessceConfig:
         :param host_name: The host name where the Jupyter server is running, e.g. "http://localhost:8888". By default, None.
         :type host_name: str or None
         :param bool proxy: Is this widget being served through a proxy, for example with a cloud notebook? If True, host_name should be provided.
-
-        :param bool open: Should the browser be opened to the web app URL? By default, True.
-
-        :returns: The URL of the web app (containing the Vitessce configuration as URL-encoded JSON).
-        :rtype: str
 
         .. code-block:: python
             :emphasize-lines: 6

@@ -4,7 +4,7 @@ import os
 from distutils import log
 
 # Module version
-py_version_info = (3, 0, 1)
+py_version_info = (3, 0, 2)
 __version__ = '%s.%s.%s' % (py_version_info[0], py_version_info[1], py_version_info[2])
 
 # Setup

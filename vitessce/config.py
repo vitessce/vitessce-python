@@ -1117,6 +1117,10 @@ class VitessceConfig:
         :param int port: The port to use when serving data objects on localhost. By default, 8000.
         :param base_url: If the web app is being accessed remotely (i.e. the data is being served from a remote machine), specify the base URL here. If serving and accessing the data on the same machine, keep as None to use a localhost URL.
         :type base_url: str or None
+        :param host_name: The host name where the Jupyter server is running, e.g. "http://localhost:8888". By default, None.
+        :type host_name: str or None
+        :param bool proxy: Is this widget being served through a proxy, for example with a cloud notebook? If True, host_name should be provided.
+
         :param bool open: Should the browser be opened to the web app URL? By default, True.
 
         :returns: The URL of the web app (containing the Vitessce configuration as URL-encoded JSON).
@@ -1135,6 +1139,32 @@ class VitessceConfig:
         """
         from .widget import launch_vitessce_io  # TODO: Move import back to top when this is factored out.
         return launch_vitessce_io(self, **kwargs)
+
+    def display(self, **kwargs):
+        """
+        As a fallback to widget, render Vitessce using functions from IPython.display. This method does not support bi-directional communication (i.e., user interactions in Vitessce cannot be sent back to Python).
+
+        :param str theme: The theme name, either "light" or "dark". By default, "auto", which selects light or dark based on operating system preferences.
+        :param int port: The port to use when serving data objects on localhost. By default, 8000.
+        :param base_url: If the web app is being accessed remotely (i.e. the data is being served from a remote machine), specify the base URL here. If serving and accessing the data on the same machine, keep as None to use a localhost URL.
+        :type base_url: str or None
+        :param host_name: The host name where the Jupyter server is running, e.g. "http://localhost:8888". By default, None.
+        :type host_name: str or None
+        :param bool proxy: Is this widget being served through a proxy, for example with a cloud notebook? If True, host_name should be provided.
+
+        .. code-block:: python
+            :emphasize-lines: 6
+
+            from vitessce import VitessceConfig, ViewType as vt, CoordinationType as ct
+
+            vc = VitessceConfig(schema_version="1.0.15")
+            my_dataset = vc.add_dataset(name='My Dataset')
+            v1 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
+            vc.layout(v1)
+            vc.display()
+        """
+        from .widget import ipython_display
+        return ipython_display(self, **kwargs)
 
     def export(self, to, *args, **kwargs):
         """

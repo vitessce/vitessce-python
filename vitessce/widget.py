@@ -90,7 +90,7 @@ def is_port_in_use(port):
         return s.connect_ex(('localhost', port)) == 0
 
 
-def get_base_url_and_port(port, next_port, proxy=False, base_url=None):
+def get_base_url_and_port(port, next_port, proxy=False, base_url=None, host_name=None):
     if port is None:
         use_port = next_port
         next_port += 1
@@ -107,7 +107,10 @@ def get_base_url_and_port(port, next_port, proxy=False, base_url=None):
             if importlib.util.find_spec('jupyter_server_proxy') is None:
                 raise ValueError(
                     "To use the widget through a proxy, jupyter-server-proxy must be installed.")
-            base_url = f"proxy/{use_port}"
+            if host_name is None:
+                base_url = f"proxy/{use_port}"
+            else:
+                base_url = f"{host_name}/proxy/{use_port}"
         else:
             base_url = f"http://localhost:{use_port}"
 
@@ -122,10 +125,10 @@ def serve_routes(config, routes, use_port):
         server.start(port=use_port)
 
 
-def launch_vitessce_io(config, theme='light', port=None, base_url=None, open=True):
+def launch_vitessce_io(config, theme='light', port=None, base_url=None, host_name=None, proxy=False, open=True):
     import webbrowser
     base_url, use_port, _ = get_base_url_and_port(
-        port, DEFAULT_PORT, base_url=base_url)
+        port, DEFAULT_PORT, proxy=proxy, base_url=base_url, host_name=host_name)
     config_dict = config.to_dict(base_url=base_url)
     routes = config.get_routes()
     serve_routes(config, routes, use_port)
@@ -134,6 +137,14 @@ def launch_vitessce_io(config, theme='light', port=None, base_url=None, open=Tru
     if open:
         webbrowser.open(vitessce_url)
     return vitessce_url
+
+
+def get_uid_str(uid):
+    if uid is None or not str(uid).isalnum():
+        uid_str = str(uuid.uuid4())[:4]
+    else:
+        uid_str = uid
+    return uid_str
 
 
 ESM = """
@@ -155,8 +166,8 @@ const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-schem
 // The jupyter server may be running through a proxy,
 // which means that the client needs to prepend the part of the URL before /proxy/8000 such as
 // https://hub.gke2.mybinder.org/user/vitessce-vitessce-python-swi31vcv/proxy/8000/A/0/cells
-function prependBaseUrl(config, proxy) {
-  if(!proxy) {
+function prependBaseUrl(config, proxy, hasHostName) {
+  if(!proxy || hasHostName) {
     return config;
   }
   const { origin } = new URL(window.location.href);
@@ -210,7 +221,7 @@ export function render(view) {
     function VitessceWidget(props) {
         const { model } = props;
 
-        const config = prependBaseUrl(model.get('config'), model.get('proxy'));
+        const config = prependBaseUrl(model.get('config'), model.get('proxy'), model.get('has_host_name'));
         const height = model.get('height');
         const theme = model.get('theme') === 'auto' ? (prefersDark ? 'dark' : 'light') : model.get('theme');
 
@@ -279,13 +290,14 @@ class VitessceWidget(anywidget.AnyWidget):
     theme = Unicode('auto').tag(sync=True)
     proxy = Bool(False).tag(sync=True)
     uid = Unicode('').tag(sync=True)
+    has_host_name = Bool(False).tag(sync=True)
 
     next_port = DEFAULT_PORT
 
-    js_package_version = Unicode('2.0.3-beta.0').tag(sync=True)
+    js_package_version = Unicode('2.0.3').tag(sync=True)
     custom_js_url = Unicode('').tag(sync=True)
 
-    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='2.0.3-beta.0', custom_js_url=''):
+    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='2.0.3', custom_js_url=''):
         """
         Construct a new Vitessce widget.
 
@@ -313,10 +325,7 @@ class VitessceWidget(anywidget.AnyWidget):
         config_dict = config.to_dict(base_url=base_url)
         routes = config.get_routes()
 
-        if uid is None:
-            uid_str = str(uuid.uuid4())[:4]
-        else:
-            uid_str = uid
+        uid_str = get_uid_str(uid)
 
         super(VitessceWidget, self).__init__(
             config=config_dict, height=height, theme=theme, proxy=proxy,
@@ -352,3 +361,49 @@ class VitessceWidget(anywidget.AnyWidget):
     def close(self):
         self.config_obj.stop_server(self.port)
         super().close()
+
+# Launch Vitessce using plain HTML representation (no ipywidgets)
+
+
+def ipython_display(config, height=600, theme='auto', base_url=None, host_name=None, uid=None, port=None, proxy=False, js_package_version='2.0.3', custom_js_url=''):
+    from IPython.display import display, HTML
+    uid_str = "vitessce" + get_uid_str(uid)
+
+    base_url, use_port, _ = get_base_url_and_port(
+        port, DEFAULT_PORT, proxy=proxy, base_url=base_url, host_name=host_name)
+    config_dict = config.to_dict(base_url=base_url)
+    routes = config.get_routes()
+    serve_routes(config, routes, use_port)
+
+    model_vals = {
+        "uid": uid_str,
+        "js_package_version": js_package_version,
+        "custom_js_url": custom_js_url,
+        "proxy": proxy,
+        "has_host_name": host_name is not None,
+        "height": height,
+        "theme": theme,
+        "config": config_dict,
+    }
+
+    HTML_STR = f"""
+        <div id="{uid_str}"></div>
+
+        <script type="module">
+
+            """ + ESM + """
+
+            render({
+                model: {
+                    get: (key) => {
+                        const vals = """ + json.dumps(model_vals) + """;
+                        return vals[key];
+                    },
+                    set: () => {},
+                    save_changes: () => {}
+                },
+                el: """ + f"""document.getElementById("{uid_str}")""" + """,
+            });
+        </script>
+    """
+    display(HTML(HTML_STR))

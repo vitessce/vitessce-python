@@ -75,6 +75,49 @@ To deploy a new version, increment the version of the Python package in [`setup.
 
 Then, when you push or merge the code with the incremented versions to `main`, the GitHub Action `deploy.yml` workflow will build and push the package to PyPI.
 
+## Troubleshooting
+
+### Check JavaScript console
+
+Check the JavaScript console in the web browser for error messages. To do so, shift+right click in Jupyter, then click Inspect element. You may need to enable your browser's develop mode in its preferences for this option to appear when you right-click.
+
+### Check your Python environment
+
+Check that you have activated the correct conda or other virtual environment as you expect.
+When sharing errors, it can be helpful to share the current versions of packages in the environment, e.g., by `conda list` or `pip list`.
+
+### Restart Kernel and Clear All Outputs, then refresh the browser tab
+
+To ensure that older widget JavaScript output is not causing conflicts with newer JavaScript output (which may persist via notebook outputs even without running notebook cells), clear old outputs by Kernel -> Restart Kernel and Clear All Outputs. Then refresh the browser tab (containing Jupyter) to ensure all JavaScript outputs are fresh.
+
+### Check the widget configuration
+
+If the widget renders successfully, you can get its current configuration by
+
+```py
+vw = vc.widget()
+vw
+```
+
+```py
+vw.config
+```
+
+## Usage when Jupyter is running on a remote machine
+
+If Jupyter is running on a remote machine, then use `proxy=True`. You may need to specify `host_name` as well (`widget` should be able to detect this but the plain `display` cannot).
+
+```py
+vw = vc.widget(proxy=True)
+vw
+```
+
+or 
+
+```py
+vc.display(proxy=True, host_name="http://localhost:8888")
+```
+
 
 ## Resources
 

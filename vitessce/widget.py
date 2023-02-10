@@ -138,6 +138,7 @@ def launch_vitessce_io(config, theme='light', port=None, base_url=None, host_nam
         webbrowser.open(vitessce_url)
     return vitessce_url
 
+
 def get_uid_str(uid):
     if uid is None or not str(uid).isalnum():
         uid_str = str(uuid.uuid4())[:4]
@@ -362,6 +363,8 @@ class VitessceWidget(anywidget.AnyWidget):
         super().close()
 
 # Launch Vitessce using plain HTML representation (no ipywidgets)
+
+
 def ipython_display(config, height=600, theme='auto', base_url=None, host_name=None, uid=None, port=None, proxy=False, js_package_version='2.0.3', custom_js_url=''):
     from IPython.display import display, HTML
     uid_str = "vitessce" + get_uid_str(uid)

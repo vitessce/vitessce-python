@@ -1120,7 +1120,7 @@ class VitessceConfig:
         :param host_name: The host name where the Jupyter server is running, e.g. "http://localhost:8888". By default, None.
         :type host_name: str or None
         :param bool proxy: Is this widget being served through a proxy, for example with a cloud notebook? If True, host_name should be provided.
-        
+
         :param bool open: Should the browser be opened to the web app URL? By default, True.
 
         :returns: The URL of the web app (containing the Vitessce configuration as URL-encoded JSON).
@@ -1139,7 +1139,7 @@ class VitessceConfig:
         """
         from .widget import launch_vitessce_io  # TODO: Move import back to top when this is factored out.
         return launch_vitessce_io(self, **kwargs)
-    
+
     def display(self, **kwargs):
         """
         Launch the http://vitessce.io web app using this config.
@@ -1151,7 +1151,7 @@ class VitessceConfig:
         :param host_name: The host name where the Jupyter server is running, e.g. "http://localhost:8888". By default, None.
         :type host_name: str or None
         :param bool proxy: Is this widget being served through a proxy, for example with a cloud notebook? If True, host_name should be provided.
-        
+
         :param bool open: Should the browser be opened to the web app URL? By default, True.
 
         :returns: The URL of the web app (containing the Vitessce configuration as URL-encoded JSON).

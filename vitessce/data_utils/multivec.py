@@ -1,17 +1,18 @@
-import zarr
-import negspy.coordinates as nc
-import numpy as np
 import math
+import zarr
+import numpy as np
 import pandas as pd
+
 from .anndata import to_dense
 from .entities import GenomicProfiles
+
 
 def adata_to_multivec_zarr(adata, output_path, obs_set_col, obs_set_name, obs_set_vals=None, var_interval_col="interval", layer_key=None, assembly="hg38", starting_resolution=5000):
     in_mtx = adata.layers[layer_key] if layer_key is not None else adata.X
     in_barcodes_df = adata.obs
     in_bins_df = adata.var
 
-    in_mtx = to_dense(in_mtx) # TODO: is this necessary?
+    in_mtx = to_dense(in_mtx)  # TODO: is this necessary?
 
     # The bin datafram consists of one column like chrName:binStart-binEnd
     def convert_bin_name_to_chr_name(bin_name):
@@ -32,9 +33,9 @@ def adata_to_multivec_zarr(adata, output_path, obs_set_col, obs_set_name, obs_se
         except ValueError:
             return np.nan
 
-    # Keep only the interval column 
+    # Keep only the interval column
     in_bins_df = in_bins_df[[var_interval_col]]
-    in_bins_df = in_bins_df.rename(columns={ var_interval_col: "interval" })
+    in_bins_df = in_bins_df.rename(columns={var_interval_col: "interval"})
     in_bins_df["chr_name"] = in_bins_df["interval"].apply(
         convert_bin_name_to_chr_name)
     in_bins_df["chr_start"] = in_bins_df["interval"].apply(
@@ -57,7 +58,7 @@ def adata_to_multivec_zarr(adata, output_path, obs_set_col, obs_set_name, obs_se
     max_interval = interval_sizes.max()
     if max_interval > starting_resolution:
         raise ValueError("Starting resolution is smaller than largest interval.")
-    
+
     # Round bins
     in_bins_df["chr_start_round"] = in_bins_df["chr_start"].apply(lambda x: math.floor(x / starting_resolution) * starting_resolution + 1)
     in_bins_df["chr_end_round"] = in_bins_df["chr_start_round"].apply(lambda x: x + starting_resolution - 1)
@@ -83,7 +84,7 @@ def adata_to_multivec_zarr(adata, output_path, obs_set_col, obs_set_name, obs_se
     )
     chrom_name_to_length = genomic_profiles.chrom_name_to_length
 
-        # Create each chromosome dataset.
+    # Create each chromosome dataset.
     for chr_name, chr_len in chrom_name_to_length.items():
         # The bins dataframe frustratingly does not contain every bin.
         # We need to figure out which bins are missing.
@@ -115,7 +116,7 @@ def adata_to_multivec_zarr(adata, output_path, obs_set_col, obs_set_name, obs_se
         chr_bins_gt_df["chr_end"] = chr_bins_gt_df["chr_end"].astype(int)
         chr_bins_gt_df["chr_name"] = chr_name
         chr_bins_gt_df[0] = chr_bins_gt_df.apply(lambda r: f"{r['chr_name']}:{r['chr_start']}-{r['chr_end']}", axis='columns')
-        
+
         # We will add a new column "i", which should match the _old_ index, so that we will be able join with the data matrix on the original indices.
         # For the new rows, we will add values for the "i" column that are greater than any of the original indices,
         # to prevent any joining with the incoming data matrix onto these bins for which the data is missing.
@@ -160,7 +161,7 @@ def adata_to_multivec_zarr(adata, output_path, obs_set_col, obs_set_name, obs_se
         chr_mtx_join_df = chr_mtx_join_df.drop(columns=['i'])
         # Obtain the new full data matrix, which contains values for all bins of the chromosome.
         chr_mtx = chr_mtx_join_df.values.T
-        
+
         # Fill in the Zarr store with data for each cluster.
         for cluster_index, cluster_id in enumerate(cluster_ids):
             # Get the list of cells in the current cluster.
@@ -174,7 +175,7 @@ def adata_to_multivec_zarr(adata, output_path, obs_set_col, obs_set_name, obs_se
             cluster_cell_by_bin_mtx = chr_mtx[cluster_cells_tf, :]
             # Take the sum of this cluster along the cells axis.
             cluster_profile = cluster_cell_by_bin_mtx.sum(axis=0)
-            
+
             # For some reason the matrix can contain intervals past the end of the
             # chromosome according to the length from negspy,
             # so we only keep those bins that fit.

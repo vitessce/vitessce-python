@@ -1,13 +1,6 @@
 import os
 from os.path import join
 import tempfile
-import math
-import json
-
-import numpy as np
-import pandas as pd
-import zarr
-from scipy.sparse import coo_matrix
 from uuid import uuid4
 
 from .constants import (

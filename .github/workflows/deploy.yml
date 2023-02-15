@@ -24,7 +24,7 @@ jobs:
         with:
           python-version: '3.8'
       - name: Install vitessce
-        run: pip install -e .[dev]
+        run: pip install -e .[dev,docs,all]
       - name: Run tests
         run: pytest
       - name: Build a binary wheel and a source tarball

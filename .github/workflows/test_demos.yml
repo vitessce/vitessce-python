@@ -14,7 +14,7 @@ jobs:
           pip install snakemake
           pip install pyyaml
       - name: Install vitessce
-        run: pip install -e .[testing]
+        run: pip install -e .[dev,all]
       - name: Run tests
         working-directory: ./demos
         run: snakemake -j 1 --dry-run

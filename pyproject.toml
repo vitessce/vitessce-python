@@ -80,3 +80,5 @@ notebook = []
 [project.urls]
 repository = "https://github.com/vitessce/vitessce-python"
 
+[tool.setuptools]
+packages = ["vitessce"]

@@ -12,7 +12,7 @@ Set up the `vitessce-python-demos` environment using conda.
 cd demos
 conda env create -f environment.yml
 conda activate vitessce-python-demos
-pip install -e "..[testing]"
+pip install -e "..[dev]"
 ```
 
 ### Run

@@ -5,6 +5,7 @@ omit =
     vitessce/routes.py
     vitessce/widget.py
     vitessce/wrappers.py
+    vitessce/repr.py
     vitessce/data_utils/anndata.py
     vitessce/data_utils/ome.py
     vitessce/data_utils/entities.py

@@ -5,6 +5,8 @@ include LICENSE
 include setup.py
 include pyproject.toml
 
+recursive-exclude tests *
+
 # Patterns to exclude from any directory
 global-exclude *~
 global-exclude *.pyc

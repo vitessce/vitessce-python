@@ -1,3 +1,84 @@
 [build-system]
-requires = ["jupyter_packaging~=0.7.9", "jupyterlab>=3.0.0,==3.*", "setuptools>=40.8.0", "wheel"]
+requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "vitessce"
+version = "3.0.3"
+authors = [
+  { name="Mark Keller", email="mark_keller@hms.harvard.edu" },
+]
+description = "Jupyter widget facilitating interactive visualization of spatial single-cell data with Vitessce"
+readme = "README.md"
+license = {file = "LICENSE"}
+requires-python = ">=3.7"
+keywords = ["ipython", "jupyter", "widgets"]
+classifiers = [
+  'Development Status :: 4 - Beta',
+  'Framework :: IPython',
+  'Intended Audience :: Developers',
+  'Intended Audience :: Science/Research',
+  'Topic :: Multimedia :: Graphics',
+  'Programming Language :: Python :: 3.7',
+  'Programming Language :: Python :: 3.8',
+  'Programming Language :: Python :: 3.9',
+  'Programming Language :: Python :: 3.10',
+]
+dependencies = [
+  'zarr>=2.5.0',
+  'numcodecs>=0.5.7',
+  'scipy>=1.2.1',
+  'negspy>=0.2.24',
+  'pandas>=1.1.2',
+  'black>=21.11b1',
+  'numpy>=1.21.2',
+  'anndata>=0.7.8,<0.9',
+  'ome-zarr==0.2.1',
+  'tifffile>=2020.10.1',
+]
+
+[project.optional-dependencies]
+dev = [
+  'build==0.1.0',
+  'pytest>=6.2.4',
+  'loompy>=3.0.6',
+  'coverage>=6.3.2',
+  'flake8==3.8.4',
+]
+docs = [
+  'sphinx==4.2.0',
+  'sphinx-rtd-theme==1.0.0',
+  'nbsphinx==0.8.8',
+  'nbclean==0.3.2',
+  # Pin sqlalchemy to before 1.4 to fix issue importing nbclean.NotebookCleaner
+  # Reference: https://docs.sqlalchemy.org/en/14/core/sqlelement.html#sqlalchemy.sql.expression.case.params.*whens
+  'sqlalchemy==1.3.24',
+  # nbconvert and jinja2 versions need to be pinned.
+  # Reference: https://github.com/vitessce/vitessce-python/issues/152
+  'nbconvert==5.6.1',
+  'jinja2==3.0.3',
+]
+all = [
+  'jupyter-server-proxy>=1.5.2',
+  'anywidget==0.1.0',
+  'uvicorn>=0.17.0',
+  'ujson>=4.0.1',
+  'starlette==0.14.0',
+  'generate-tiff-offsets>=0.1.7',
+
+  # aiofiles is not explicitly referenced in our code,
+  # but it is an implicit dependency of starlette==0.14.0.
+  # https://github.com/encode/starlette/issues/49
+  # Upgrading starlette will remove this dependency.
+  'aiofiles>=0.6.0'
+]
+building = []
+testing = []
+linting = []
+notebook = []
+
+[project.urls]
+repository = "https://github.com/vitessce/vitessce-python"
+
+[tool.setuptools]
+packages = ["vitessce", "vitessce.data_utils"]

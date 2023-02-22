@@ -13,3 +13,6 @@ from .ome import (
     rgb_img_to_ome_tiff,
     multiplex_img_to_ome_tiff,
 )
+from .multivec import (
+    adata_to_multivec_zarr,
+)

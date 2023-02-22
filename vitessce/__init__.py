@@ -37,19 +37,10 @@ try:
         MultiImageWrapper,
         CsvWrapper,
         AnnDataWrapper,
-        SnapWrapper,
+        MultivecZarrWrapper,
     )
 except ModuleNotFoundError as e:  # pragma: no cover
     warn(f'Extra installs are necessary to use wrappers: {e}')
-
-try:
-    from .entities import (
-        CellSets,
-        Cells,
-        Molecules,
-    )
-except ModuleNotFoundError as e:  # pragma: no cover
-    warn(f'Extra installs are necessary to use entities: {e}')
 
 try:
     from .export import (

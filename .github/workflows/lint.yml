@@ -11,5 +11,5 @@ jobs:
         with:
           python-version: '3.8'
           architecture: 'x64'
-      - run: pip install .[linting]
+      - run: pip install .[dev]
       - run: flake8

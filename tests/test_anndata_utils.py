@@ -1,14 +1,22 @@
 import unittest
+
 from anndata import AnnData
 import pandas as pd
 import numpy as np
+from pathlib import Path
+from scipy.io import mmread
+import zarr
 
 from vitessce.data_utils import (
     optimize_arr,
     optimize_adata,
     sort_var_axis,
     to_uint8,
+    adata_to_multivec_zarr,
 )
+
+
+data_path = Path('tests/data')
 
 
 class TestAnnDataUtils(unittest.TestCase):
@@ -87,3 +95,48 @@ class TestAnnDataUtils(unittest.TestCase):
         adata = self.adata
         norm_X = to_uint8(adata.X, norm_along="obs")
         assert norm_X.tolist() == [[255, 0, 231], [248, 0, 255], [255, 0, 231], [245, 0, 255]]
+
+    def test_multivec_zarr(self):
+        mtx = mmread(data_path / 'test.snap.mtx').toarray()
+        bins_df = pd.read_csv(
+            data_path / 'test.snap.bins.txt', header=None, names=["interval"])
+        clusters_df = pd.read_csv(
+            data_path / 'test.snap.clusters.csv', index_col=0)
+
+        zarr_filepath = data_path / 'test_out.snap.multivec.zarr'
+
+        # The genome assembly is GRCh38 but the chromosome names in the bin names do not start with the "chr" prefix.
+        # This is incompatible with the chromosome names from `negspy`, so we need to append the prefix.
+        bins_df["interval"] = bins_df["interval"].apply(lambda x: "chr" + x)
+
+        obs = clusters_df[["cluster"]]
+        obs["cluster"] = obs["cluster"].astype(str)
+        obsm = {"X_umap": clusters_df[["umap.1", "umap.2"]].values}
+        adata = AnnData(X=mtx, obs=obs, var=bins_df, obsm=obsm)
+
+        # Sort cluster IDs
+        cluster_ids = obs["cluster"].unique().tolist()
+        cluster_ids.sort(key=int)
+        # Save genomic profiles to multivec-zarr format.
+        adata_to_multivec_zarr(adata, zarr_filepath, obs_set_col="cluster", obs_set_name="Cluster", obs_set_vals=cluster_ids)
+
+        z = zarr.open(zarr_filepath, mode='r')
+
+        self.assertEqual(z['chromosomes/chr1/5000'].shape, (4, 49792))
+        self.assertEqual(z['chromosomes/chr1/5000'][:, 0].sum(), 0)
+        self.assertEqual(z['chromosomes/chr1/5000'][:, 1].sum(), 0)
+        self.assertEqual(z['chromosomes/chr1/5000'][:, 2].sum(), 7)
+        self.assertEqual(z['chromosomes/chr1/5000'][:, 3].sum(), 7)
+        self.assertEqual(z['chromosomes/chr1/5000'][:, 4].sum(), 0)
+        self.assertEqual(z['chromosomes/chr1/5000'][0, :].sum(), 17)
+        self.assertEqual(z['chromosomes/chr1/10000'][0, :].sum(), 17)
+        self.assertEqual(z['chromosomes/chr1/5000'][:, 2].sum(), 7)
+        self.assertEqual(z['chromosomes/chr2/5000'][:, 0].sum(), 0)
+        self.assertEqual(z['chromosomes/chr2/5000'][:, 1].sum(), 0)
+        self.assertEqual(z['chromosomes/chr2/10000'][:, 0].sum(), 0)
+        self.assertEqual(z['chromosomes/chr2/5000'][:, 2].sum(), 4)
+        self.assertEqual(z['chromosomes/chr2/5000'][:, 3].sum(), 9)
+        self.assertEqual(z['chromosomes/chr2/10000'][:, 1].sum(), 13)
+        self.assertEqual(z['chromosomes/chr3/5000'][:, 3].sum(), 9)
+        self.assertEqual(z['chromosomes/chr3/5000'][:].sum(), 9)
+        self.assertEqual(z['chromosomes/chr18/5000'][:].sum(), 8)

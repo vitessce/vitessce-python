@@ -30,7 +30,7 @@ For a development installation (requires NodeJS and NPM),
     $ cd vitessce-python
     $ conda env create -f environment.yml
     $ conda activate vitessce-python-dev
-    $ pip install -e ".[dev]"
+    $ pip install -e ".[dev,docs,all]"
 
 ### Conda environments
 

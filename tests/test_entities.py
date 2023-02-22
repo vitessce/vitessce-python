@@ -1,6 +1,6 @@
 import pytest
 
-from vitessce import (
+from vitessce.data_utils.entities import (
     CellSets,
     Cells,
 )

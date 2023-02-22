@@ -103,7 +103,7 @@ vw
 vw.config
 ```
 
-## Usage when Jupyter is running on a remote machine
+### Usage when Jupyter is running on a remote machine
 
 If Jupyter is running on a remote machine, then use `proxy=True`. You may need to specify `host_name` as well (`widget` should be able to detect this but the plain `display` cannot).
 

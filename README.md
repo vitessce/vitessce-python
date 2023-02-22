@@ -118,6 +118,22 @@ or
 vc.display(proxy=True, host_name="http://localhost:8888")
 ```
 
+### Ensure that Vitessce and Jupyter are installed in the same environment
+
+With the environment activated, run `pip list` on the command line:
+
+```
+Package                       Version
+----------------------------- -----------
+...
+jupyterlab                    3.x.x
+...
+vitessce                      3.x.x
+```
+
+
+
+
 
 ## Resources
 

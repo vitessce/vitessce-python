@@ -2,12 +2,19 @@ import os
 from os.path import join
 import tempfile
 from uuid import uuid4
+from pathlib import PurePath, PurePosixPath
 
 from .constants import (
     ViewType as cm,
     FileType as ft,
 )
 from .repr import make_repr
+
+def file_path_to_url_path(local_path, prepend_slash=True):
+    url_path = str(PurePosixPath(PurePath(local_path)))
+    if prepend_slash and not url_path.startswith("/"):
+        url_path = f"/{url_path}"
+    return url_path
 
 
 class AbstractWrapper:
@@ -27,11 +34,12 @@ class AbstractWrapper:
         self.routes = []
         self.is_remote = False
         self.file_def_creators = []
+        self.base_dir = None
 
     def __repr__(self):
         return self._repr
 
-    def convert_and_save(self, dataset_uid, obj_i):
+    def convert_and_save(self, dataset_uid, obj_i, base_dir=None):
         """
         Fill in the file_def_creators array.
         Each function added to this list should take in a base URL and generate a Vitessce file definition.
@@ -42,6 +50,7 @@ class AbstractWrapper:
         :param int obj_i: Within the dataset, the index of this data wrapper object.
         """
         os.makedirs(self._get_out_dir(dataset_uid, obj_i), exist_ok=True)
+        self.base_dir = base_dir
 
     def get_routes(self):
         """
@@ -87,7 +96,9 @@ class AbstractWrapper:
                           app=StaticFiles(directory=out_dir, html=False))]
         return []
 
-    def get_local_dir_url(self, base_url, dataset_uid, obj_i, local_dir_uid):
+    def get_local_dir_url(self, base_url, dataset_uid, obj_i, local_dir_path, local_dir_uid):
+        if not self.is_remote and self.base_dir is not None:
+            return self._get_url_simple(base_url, file_path_to_url_path(local_dir_path, prepend_slash=False))
         return self._get_url(base_url, dataset_uid, obj_i, local_dir_uid)
 
     def get_local_dir_route(self, dataset_uid, obj_i, local_dir_path, local_dir_uid):
@@ -103,7 +114,11 @@ class AbstractWrapper:
         :rtype: list[starlette.routing.Mount]
         """
         if not self.is_remote:
-            route_path = self._get_route_str(dataset_uid, obj_i, local_dir_uid)
+            if self.base_dir is None:
+                route_path = self._get_route_str(dataset_uid, obj_i, local_dir_uid)
+            else:
+                route_path = file_path_to_url_path(local_dir_path)
+                local_dir_path = join(self.base_dir, local_dir_path)
             # TODO: Move imports back to top when this is factored out.
             from starlette.staticfiles import StaticFiles
             from starlette.routing import Mount
@@ -113,6 +128,9 @@ class AbstractWrapper:
 
     def _get_url(self, base_url, dataset_uid, obj_i, *args):
         return base_url + self._get_route_str(dataset_uid, obj_i, *args)
+    
+    def _get_url_simple(self, base_url, suffix):
+        return base_url + "/" + suffix
 
     def _get_route_str(self, dataset_uid, obj_i, *args):
         return "/" + "/".join(map(str, [dataset_uid, obj_i, *args]))
@@ -148,9 +166,9 @@ class MultiImageWrapper(AbstractWrapper):
         self.image_wrappers = image_wrappers
         self.use_physical_size_scaling = use_physical_size_scaling
 
-    def convert_and_save(self, dataset_uid, obj_i):
+    def convert_and_save(self, dataset_uid, obj_i, base_dir=None):
         for image in self.image_wrappers:
-            image.convert_and_save(dataset_uid, obj_i)
+            image.convert_and_save(dataset_uid, obj_i, base_dir=base_dir)
         file_def_creator = self.make_raster_file_def_creator(
             dataset_uid, obj_i)
         routes = self.make_raster_routes()
@@ -217,10 +235,10 @@ class OmeTiffWrapper(AbstractWrapper):
             raise ValueError(
                 "Did not expect img_path or offsets_path to be provided with img_url")
 
-    def convert_and_save(self, dataset_uid, obj_i):
+    def convert_and_save(self, dataset_uid, obj_i, base_dir=None):
         # Only create out-directory if needed
         if not self.is_remote:
-            super().convert_and_save(dataset_uid, obj_i)
+            super().convert_and_save(dataset_uid, obj_i, base_dir=base_dir)
 
         file_def_creator = self.make_raster_file_def_creator(
             dataset_uid, obj_i)
@@ -242,10 +260,23 @@ class OmeTiffWrapper(AbstractWrapper):
 
             async def response_func(req):
                 return UJSONResponse(offsets)
+            if self.base_dir is None:
+                local_img_path = self._img_path
+                local_img_route_path = self._get_route_str(dataset_uid, obj_i, self.local_img_uid)
+                local_offsets_route_path = self._get_route_str(dataset_uid, obj_i, self.local_offsets_uid)
+            else:
+                local_img_path = join(self.base_dir, self._img_path)
+                local_img_route_path = file_path_to_url_path(self._img_path)
+                # Do not include offsets in base_dir mode.
+                local_offsets_route_path = None
+
             routes = [
-                FileRoute(self._get_route_str(dataset_uid, obj_i, self.local_img_uid), lambda req: range_repsonse(req, self._img_path), self._img_path),
-                JsonRoute(self._get_route_str(dataset_uid, obj_i, self.local_offsets_uid), response_func, offsets)
+                FileRoute(local_img_route_path, lambda req: range_repsonse(req, local_img_path), local_img_path),
             ]
+            if local_offsets_route_path is not None:
+                # Do not include offsets in base_dir mode.
+                routes.append(JsonRoute(local_offsets_route_path, response_func, offsets))
+
             return routes
 
     def make_image_def(self, dataset_uid, obj_i, base_url):
@@ -273,7 +304,8 @@ class OmeTiffWrapper(AbstractWrapper):
             "type": "ome-tiff",
             "url": img_url,
         }
-        if offsets_url is not None:
+        if offsets_url is not None and self.base_dir is None:
+            # Do not include offsets in base_dir mode.
             metadata["omeTiffOffsetsUrl"] = offsets_url
         if self._transformation_matrix is not None:
             metadata["transform"] = {
@@ -288,6 +320,8 @@ class OmeTiffWrapper(AbstractWrapper):
     def get_img_url(self, base_url="", dataset_uid="", obj_i=""):
         if self.is_remote:
             return self._img_url
+        if self.base_dir is not None:
+            return self._get_url_simple(base_url, file_path_to_url_path(self._img_path, prepend_slash=False))
         return self._get_url(base_url, dataset_uid,
                              obj_i, self.local_img_uid)
 
@@ -332,10 +366,10 @@ class CsvWrapper(AbstractWrapper):
             raise ValueError(
                 "Expected csv_url or csv_path to be provided")
 
-    def convert_and_save(self, dataset_uid, obj_i):
+    def convert_and_save(self, dataset_uid, obj_i, base_dir=None):
         # Only create out-directory if needed
         if not self.is_remote:
-            super().convert_and_save(dataset_uid, obj_i)
+            super().convert_and_save(dataset_uid, obj_i, base_dir=base_dir)
 
         file_def_creator = self.make_csv_file_def_creator(
             dataset_uid, obj_i)
@@ -352,10 +386,17 @@ class CsvWrapper(AbstractWrapper):
             from .routes import FileRoute
             from starlette.responses import FileResponse
 
+            if self.base_dir is not None:
+                local_csv_path = join(self.base_dir, self._csv_path)
+                local_csv_route_path = file_path_to_url_path(self._csv_path)
+            else:
+                local_csv_path = self._csv_path
+                local_csv_route_path = self._get_route_str(dataset_uid, obj_i, self.local_csv_uid)
+
             async def response_func(req):
-                return FileResponse(self._csv_path, filename=os.path.basename(self._csv_path))
+                return FileResponse(local_csv_path, filename=os.path.basename(self._csv_path))
             routes = [
-                FileRoute(self._get_route_str(dataset_uid, obj_i, self.local_csv_uid), response_func, self._csv_path),
+                FileRoute(local_csv_route_path, response_func, local_csv_path),
             ]
             return routes
 
@@ -375,6 +416,8 @@ class CsvWrapper(AbstractWrapper):
     def get_csv_url(self, base_url="", dataset_uid="", obj_i=""):
         if self.is_remote:
             return self._csv_url
+        if self.base_dir is not None:
+            return self._get_url_simple(base_url, file_path_to_url_path(self._csv_path, prepend_slash=False))
         return self._get_url(base_url, dataset_uid,
                              obj_i, self.local_csv_uid)
 
@@ -406,10 +449,10 @@ class OmeZarrWrapper(AbstractWrapper):
             self.is_remote = True
         self.local_dir_uid = str(uuid4())
 
-    def convert_and_save(self, dataset_uid, obj_i):
+    def convert_and_save(self, dataset_uid, obj_i, base_dir=None):
         # Only create out-directory if needed
         if not self.is_remote:
-            super().convert_and_save(dataset_uid, obj_i)
+            super().convert_and_save(dataset_uid, obj_i, base_dir=base_dir)
 
         file_def_creator = self.make_image_file_def_creator(
             dataset_uid, obj_i)
@@ -427,7 +470,7 @@ class OmeZarrWrapper(AbstractWrapper):
     def get_img_url(self, base_url="", dataset_uid="", obj_i=""):
         if self.is_remote:
             return self._img_url
-        return self.get_local_dir_url(base_url, dataset_uid, obj_i, self.local_dir_uid)
+        return self.get_local_dir_url(base_url, dataset_uid, obj_i, self._img_path, self.local_dir_uid)
 
     def make_image_file_def_creator(self, dataset_uid, obj_i):
         def image_file_def_creator(base_url):
@@ -494,10 +537,10 @@ class AnnDataWrapper(AbstractWrapper):
         self._convert_to_dense = convert_to_dense
         self._coordination_values = coordination_values
 
-    def convert_and_save(self, dataset_uid, obj_i):
+    def convert_and_save(self, dataset_uid, obj_i, base_dir=None):
         # Only create out-directory if needed
         if not self.is_remote:
-            super().convert_and_save(dataset_uid, obj_i)
+            super().convert_and_save(dataset_uid, obj_i, base_dir=base_dir)
 
         file_def_creator = self.make_file_def_creator(
             dataset_uid, obj_i)
@@ -516,7 +559,7 @@ class AnnDataWrapper(AbstractWrapper):
         if self.is_remote:
             return self._adata_url
         else:
-            return self.get_local_dir_url(base_url, dataset_uid, obj_i, self.local_dir_uid)
+            return self.get_local_dir_url(base_url, dataset_uid, obj_i, self._adata_path, self.local_dir_uid)
 
     def make_file_def_creator(self, dataset_uid, obj_i):
         def get_anndata_zarr(base_url):
@@ -624,10 +667,10 @@ class MultivecZarrWrapper(AbstractWrapper):
             self.is_remote = True
         self.local_dir_uid = str(uuid4())
 
-    def convert_and_save(self, dataset_uid, obj_i):
+    def convert_and_save(self, dataset_uid, obj_i, base_dir=None):
         # Only create out-directory if needed
         if not self.is_remote:
-            super().convert_and_save(dataset_uid, obj_i)
+            super().convert_and_save(dataset_uid, obj_i, base_dir=base_dir)
 
         file_def_creator = self.make_genomic_profiles_file_def_creator(
             dataset_uid, obj_i)
@@ -645,7 +688,7 @@ class MultivecZarrWrapper(AbstractWrapper):
     def get_zarr_url(self, base_url="", dataset_uid="", obj_i=""):
         if self.is_remote:
             return self._zarr_url
-        return self.get_local_dir_url(base_url, dataset_uid, obj_i, self.local_dir_uid)
+        return self.get_local_dir_url(base_url, dataset_uid, obj_i, self._zarr_path, self.local_dir_uid)
 
     def make_genomic_profiles_file_def_creator(self, dataset_uid, obj_i):
         def genomic_profiles_file_def_creator(base_url):

@@ -92,7 +92,7 @@ class VitessceConfigDataset:
     A class to represent a dataset (i.e. list of files containing common biological entities) in the Vitessce view config.
     """
 
-    def __init__(self, uid, name):
+    def __init__(self, uid, name, base_dir=None):
         """
         Not meant to be instantiated directly, but instead created and returned by the ``VitessceConfig.add_dataset()`` method.
 
@@ -105,6 +105,8 @@ class VitessceConfigDataset:
             "files": [],
         }
         self.objs = []
+
+        self.base_dir = base_dir
 
     def _to_py_params(self):
         return {
@@ -187,7 +189,7 @@ class VitessceConfigDataset:
         :returns: Self, to allow function chaining.
         :rtype: VitessceConfigDataset
         """
-        obj.convert_and_save(self.dataset["uid"], len(self.objs))
+        obj.convert_and_save(self.dataset["uid"], len(self.objs), base_dir=self.base_dir)
         self.objs.append(obj)
         return self
 
@@ -517,13 +519,14 @@ class VitessceConfig:
     A class to represent a Vitessce view config.
     """
 
-    def __init__(self, schema_version, name=None, description=None):
+    def __init__(self, schema_version, name=None, description=None, base_dir=None):
         """
         Construct a Vitessce view config object.
 
         :param str schema_version: The view config schema version.
         :param str name: A name for the view config. Optional.
         :param str description: A description for the view config. Optional.
+        :param str base_dir: A local path to a directory to be served. If provided, local data objects will be configured relative to this directory. Optional.
 
         .. code-block:: python
             :emphasize-lines: 3
@@ -552,6 +555,8 @@ class VitessceConfig:
             self.config["description"] = description
 
         self.background_servers = {}
+        
+        self.base_dir = base_dir
 
     def register_server(self, port, server):
         self.background_servers[port] = server
@@ -607,7 +612,7 @@ class VitessceConfig:
         uid = uid if uid is not None else _get_next_scope(
             [d.dataset['uid'] for d in self.config["datasets"]])
         assert isinstance(uid, str)
-        vcd = VitessceConfigDataset(uid, name)
+        vcd = VitessceConfigDataset(uid, name, base_dir=self.base_dir)
         self.config["datasets"].append(vcd)
         [d_scope] = self.add_coordination(ct.DATASET)
         d_scope.set_value(uid)

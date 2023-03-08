@@ -268,7 +268,7 @@ def test_config_add_dataset_add_objects():
             super().__init__(**kwargs)
             self.name = name
 
-        def convert_and_save(self, dataset_uid, obj_i):
+        def convert_and_save(self, dataset_uid, obj_i, base_dir=None):
             def get_molecules(base_url):
                 return {
                     "url": f"{base_url}/molecules",
@@ -290,7 +290,7 @@ def test_config_add_dataset_add_objects():
             super().__init__(**kwargs)
             self.name = name
 
-        def convert_and_save(self, dataset_uid, obj_i):
+        def convert_and_save(self, dataset_uid, obj_i, base_dir=None):
             def get_cell_sets(base_url):
                 return {
                     "url": f"{base_url}/cell-sets",
@@ -669,7 +669,7 @@ def test_config_to_python_with_data_objects():
             self._repr = make_repr(locals())
             self.name = name
 
-        def convert_and_save(self, dataset_uid, obj_i):
+        def convert_and_save(self, dataset_uid, obj_i, base_dir=None):
             def get_molecules(base_url):
                 return {
                     "url": f"{base_url}/molecules",
@@ -692,7 +692,7 @@ def test_config_to_python_with_data_objects():
             self._repr = make_repr(locals())
             self.name = name
 
-        def convert_and_save(self, dataset_uid, obj_i):
+        def convert_and_save(self, dataset_uid, obj_i, base_dir=None):
             def get_cell_sets(base_url):
                 return {
                     "url": f"{base_url}/cell-sets",

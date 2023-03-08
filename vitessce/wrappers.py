@@ -10,8 +10,9 @@ from .constants import (
 )
 from .repr import make_repr
 
-def file_path_to_url_path(local_path, prepend_slash=True):
-    url_path = str(PurePosixPath(PurePath(local_path)))
+def file_path_to_url_path(local_path, prepend_slash=True, path_class=None):
+    # force_windows is used in tests
+    url_path = str(PurePosixPath(PurePath(local_path) if path_class is None else path_class(local_path)))
     if prepend_slash and not url_path.startswith("/"):
         url_path = f"/{url_path}"
     return url_path

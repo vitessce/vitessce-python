@@ -1,6 +1,5 @@
 import unittest
 
-from anndata import read_h5ad
 from pathlib import Path, PurePosixPath, PureWindowsPath
 
 from .create_test_data import (
@@ -38,7 +37,7 @@ class TestWrappers(unittest.TestCase):
             data_path / 'test.snap.barcodes.txt',
             data_path / 'test.snap.clusters.csv',
         )
-    
+
     def test_file_path_to_url_path(self):
         posix_with_slash = file_path_to_url_path("tests/data/test.snap.mtx", path_class=PurePosixPath)
         self.assertEqual(posix_with_slash, "/tests/data/test.snap.mtx")
@@ -82,7 +81,7 @@ class TestWrappers(unittest.TestCase):
                 ],
             }
         })
-    
+
     def test_ome_tiff_with_base_dir(self):
         w = OmeTiffWrapper(img_path='test.ome.tif', name="Test")
         w.base_dir = str(data_path)
@@ -153,7 +152,7 @@ class TestWrappers(unittest.TestCase):
                                         'obsEmbedding': [{'path': 'obsm/X_umap', 'embeddingType': 'UMAP', 'dims': [0, 1]}],
                                         'obsSets': [{'path': 'obs/CellType', 'name': 'Cell Type'}]
                                     }})
-    
+
     def test_anndata_with_base_dir(self):
         adata_path = 'test.h5ad.zarr'
         w = AnnDataWrapper(adata_path, obs_set_paths=['obs/CellType'], obs_set_names=['Cell Type'], obs_embedding_paths=[

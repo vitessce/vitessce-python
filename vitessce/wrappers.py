@@ -10,6 +10,7 @@ from .constants import (
 )
 from .repr import make_repr
 
+
 def file_path_to_url_path(local_path, prepend_slash=True, path_class=None):
     # force_windows is used in tests
     url_path = str(PurePosixPath(PurePath(local_path) if path_class is None else path_class(local_path)))
@@ -129,7 +130,7 @@ class AbstractWrapper:
 
     def _get_url(self, base_url, dataset_uid, obj_i, *args):
         return base_url + self._get_route_str(dataset_uid, obj_i, *args)
-    
+
     def _get_url_simple(self, base_url, suffix):
         return base_url + "/" + suffix
 

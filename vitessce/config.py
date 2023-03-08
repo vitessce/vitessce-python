@@ -555,7 +555,7 @@ class VitessceConfig:
             self.config["description"] = description
 
         self.background_servers = {}
-        
+
         self.base_dir = base_dir
 
     def register_server(self, port, server):

@@ -616,14 +616,14 @@ class AnnDataWrapper(AbstractWrapper):
                     options["obsFeatureMatrix"]["featureFilterPath"] = self._gene_var_filter
                 if self._matrix_gene_var_filter is not None:
                     options["obsFeatureMatrix"]["initialFeatureFilterPath"] = self._matrix_gene_var_filter
-                if self._gene_alias is not None:
-                    options["featureLabels"] = {
-                        "path": self._gene_alias
-                    }
-                if self._obs_labels_path is not None:
-                    options["obsLabels"] = {
-                        "path": self._obs_labels_path
-                    }
+            if self._gene_alias is not None:
+                options["featureLabels"] = {
+                    "path": self._gene_alias
+                }
+            if self._obs_labels_path is not None:
+                options["obsLabels"] = {
+                    "path": self._obs_labels_path
+                }
             if len(options.keys()) > 0:
                 obj_file_def = {
                     "fileType": ft.ANNDATA_ZARR.value,

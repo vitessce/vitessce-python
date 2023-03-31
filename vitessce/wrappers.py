@@ -484,7 +484,7 @@ class OmeZarrWrapper(AbstractWrapper):
 
 
 class AnnDataWrapper(AbstractWrapper):
-    def __init__(self, adata_path=None, adata_url=None, obs_feature_matrix_path=None, feature_filter_path=None, initial_feature_filter_path=None, obs_set_paths=None, obs_set_names=None, obs_locations_path=None, obs_segmentations_path=None, obs_embedding_paths=None, obs_embedding_names=None, obs_embedding_dims=None, request_init=None, feature_labels_path=None, convert_to_dense=True, coordination_values=None, **kwargs):
+    def __init__(self, adata_path=None, adata_url=None, obs_feature_matrix_path=None, feature_filter_path=None, initial_feature_filter_path=None, obs_set_paths=None, obs_set_names=None, obs_locations_path=None, obs_segmentations_path=None, obs_embedding_paths=None, obs_embedding_names=None, obs_embedding_dims=None, request_init=None, feature_labels_path=None, obs_labels_path=None, convert_to_dense=True, coordination_values=None, **kwargs):
         """
         Wrap an AnnData object by creating an instance of the ``AnnDataWrapper`` class.
 
@@ -501,7 +501,8 @@ class AnnDataWrapper(AbstractWrapper):
         :param list[str] obs_embedding_names: Overriding names like `['UMAP', 'PCA'] for displaying above scatterplots
         :param list[str] obs_embedding_dims: Dimensions along which to get data for the scatterplot, like [[0, 1], [4, 5]] where [0, 1] is just the normal x and y but [4, 5] could be comparing the third and fourth principal components, for example.
         :param dict request_init: options to be passed along with every fetch request from the browser, like { "header": { "Authorization": "Bearer dsfjalsdfa1431" } }
-        :param str feature_labels_path: The name of a column containing gene names, instead of the default index in `var` of the AnnData store.
+        :param str feature_labels_path: The name of a column containing feature labels (e.g., alternate gene symbols), instead of the default index in `var` of the AnnData store.
+        :param str obs_labels_path: The name of a column containing observation labels (e.g., alternate cell IDs), instead of the default index in `obs` of the AnnData store.
         :param bool convert_to_dense: Whether or not to convert `X` to dense the zarr store (dense is faster but takes more disk space).
         :param coordination_values: Coordination values for the file definition.
         :type coordination_values: dict or None
@@ -536,6 +537,7 @@ class AnnDataWrapper(AbstractWrapper):
         self._mappings_obsm_dims = obs_embedding_dims
         self._request_init = request_init
         self._gene_alias = feature_labels_path
+        self._obs_labels_path = obs_labels_path
         self._convert_to_dense = convert_to_dense
         self._coordination_values = coordination_values
 
@@ -617,6 +619,10 @@ class AnnDataWrapper(AbstractWrapper):
                 if self._gene_alias is not None:
                     options["featureLabels"] = {
                         "path": self._gene_alias
+                    }
+                if self._obs_labels_path is not None:
+                    options["obsLabels"] = {
+                        "path": self._obs_labels_path
                     }
             if len(options.keys()) > 0:
                 obj_file_def = {

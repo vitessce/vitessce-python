@@ -148,9 +148,18 @@ def get_uid_str(uid):
 
 
 ESM = """
-import * as d3 from 'https://esm.sh/d3-require@1.3.0';
-import React from 'https://esm.sh/react@18.2.0';
-import ReactDOM from 'https://esm.sh/react-dom@18.2.0';
+import { importWithMap } from 'https://unpkg.com/dynamic-importmap@0.0.1';
+const importMap = {
+  imports: {
+    "react": "https://esm.sh/react@18.2.0?dev",
+    "react-dom": "https://esm.sh/react-dom@18.2.0?dev",
+    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client?dev",
+  },
+};
+
+const React = await importWithMap("react", importMap);
+const ReactDOM = await importWithMap("react-dom", importMap);
+// const { createRoot } = await importWithMap("react-dom/client", importMap);
 
 function asEsModule(component) {
   return {
@@ -193,30 +202,20 @@ function prependBaseUrl(config, proxy, hasHostName) {
   };
 }
 
-export function render(view) {
+export async function render(view) {
     const cssUid = view.model.get('uid');
+    const jsDevMode = view.model.get('js_dev_mode');
     const jsPackageVersion = view.model.get('js_package_version');
-    let customRequire = d3.require;
     const customJsUrl = view.model.get('custom_js_url');
-    if(customJsUrl.length > 0) {
-        customRequire = d3.requireFrom(async () => {
-            return customJsUrl;
-        });
-    }
 
-    const aliasedRequire = customRequire.alias({
-        "react": React,
-        "react-dom": ReactDOM
-    });
+    const pkgName = (true ? "@vitessce/dev" : "vitessce");
 
-    const Vitessce = React.lazy(() => {
-        // Workaround for preventing side effects due to loading the Vitessce UMD bundle twice
-        // running createGenerateClassNames twice.
-        // Alternate solution should be possible in JS release v2.0.3.
-        // Reference: https://github.com/vitessce/vitessce/pull/1391
-        return aliasedRequire(`vitessce@${jsPackageVersion}`)
-            .then(vitessce => asEsModule(vitessce.Vitessce));
-    });
+    importMap.imports["vitessce"] = (customJsUrl.length > 0
+        ? customJsUrl
+        : `https://unpkg.com/${pkgName}@${jsPackageVersion}`
+    );
+
+    const { Vitessce } = await importWithMap("vitessce", importMap);
 
     function VitessceWidget(props) {
         const { model } = props;
@@ -270,7 +269,11 @@ export function render(view) {
         );
     }
 
+    // const root = createRoot(view.el);
+    // root.render(e(VitessceWidget, { model: view.model }));
+    const unmounted = ReactDOM.unmountComponentAtNode(view.el);
     ReactDOM.render(e(VitessceWidget, { model: view.model }), view.el);
+    
 }
 """
 
@@ -294,10 +297,10 @@ class VitessceWidget(anywidget.AnyWidget):
 
     next_port = DEFAULT_PORT
 
-    js_package_version = Unicode('2.0.3').tag(sync=True)
+    js_package_version = Unicode('3.0.0').tag(sync=True)
     custom_js_url = Unicode('').tag(sync=True)
 
-    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='2.0.3', custom_js_url=''):
+    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='3.0.0', custom_js_url=''):
         """
         Construct a new Vitessce widget.
 
@@ -365,7 +368,7 @@ class VitessceWidget(anywidget.AnyWidget):
 # Launch Vitessce using plain HTML representation (no ipywidgets)
 
 
-def ipython_display(config, height=600, theme='auto', base_url=None, host_name=None, uid=None, port=None, proxy=False, js_package_version='2.0.3', custom_js_url=''):
+def ipython_display(config, height=600, theme='auto', base_url=None, host_name=None, uid=None, port=None, proxy=False, js_package_version='3.0.0', custom_js_url=''):
     from IPython.display import display, HTML
     uid_str = "vitessce" + get_uid_str(uid)
 

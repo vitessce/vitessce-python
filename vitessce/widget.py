@@ -208,7 +208,7 @@ export async function render(view) {
     const jsPackageVersion = view.model.get('js_package_version');
     const customJsUrl = view.model.get('custom_js_url');
 
-    const pkgName = (true ? "@vitessce/dev" : "vitessce");
+    const pkgName = (jsDevMode ? "@vitessce/dev" : "vitessce");
 
     importMap.imports["vitessce"] = (customJsUrl.length > 0
         ? customJsUrl
@@ -271,9 +271,19 @@ export async function render(view) {
 
     // const root = createRoot(view.el);
     // root.render(e(VitessceWidget, { model: view.model }));
-    const unmounted = ReactDOM.unmountComponentAtNode(view.el);
     ReactDOM.render(e(VitessceWidget, { model: view.model }), view.el);
-    
+
+    return () => {
+        // Re-enable scrolling.
+        const jpn = view.el.closest('.jp-Notebook');
+        if(jpn) {
+            jpn.style.overflow = "auto";
+        }
+
+        // Clean up React and DOM state.
+        ReactDOM.unmountComponentAtNode(view.el);
+        view.remove();
+    };
 }
 """
 
@@ -298,9 +308,10 @@ class VitessceWidget(anywidget.AnyWidget):
     next_port = DEFAULT_PORT
 
     js_package_version = Unicode('3.0.0').tag(sync=True)
+    js_dev_mode = Bool(False).tag(sync=True)
     custom_js_url = Unicode('').tag(sync=True)
 
-    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='3.0.0', custom_js_url=''):
+    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='3.0.0', js_dev_mode=False, custom_js_url=''):
         """
         Construct a new Vitessce widget.
 
@@ -332,7 +343,7 @@ class VitessceWidget(anywidget.AnyWidget):
 
         super(VitessceWidget, self).__init__(
             config=config_dict, height=height, theme=theme, proxy=proxy,
-            js_package_version=js_package_version, custom_js_url=custom_js_url,
+            js_package_version=js_package_version, js_dev_mode=js_dev_mode, custom_js_url=custom_js_url,
             uid=uid_str,
         )
 
@@ -368,8 +379,8 @@ class VitessceWidget(anywidget.AnyWidget):
 # Launch Vitessce using plain HTML representation (no ipywidgets)
 
 
-def ipython_display(config, height=600, theme='auto', base_url=None, host_name=None, uid=None, port=None, proxy=False, js_package_version='3.0.0', custom_js_url=''):
-    from IPython.display import display, HTML
+def ipython_display(config, height=600, theme='auto', base_url=None, host_name=None, uid=None, port=None, proxy=False, js_package_version='3.0.0', js_dev_mode=False, custom_js_url=''):
+    from IPython.display import display, HTML, clear_output
     uid_str = "vitessce" + get_uid_str(uid)
 
     base_url, use_port, _ = get_base_url_and_port(
@@ -381,6 +392,7 @@ def ipython_display(config, height=600, theme='auto', base_url=None, host_name=N
     model_vals = {
         "uid": uid_str,
         "js_package_version": js_package_version,
+        "js_dev_mode": js_dev_mode,
         "custom_js_url": custom_js_url,
         "proxy": proxy,
         "has_host_name": host_name is not None,
@@ -389,12 +401,67 @@ def ipython_display(config, height=600, theme='auto', base_url=None, host_name=N
         "config": config_dict,
     }
 
+    # We need to clean up the React and DOM state in any case in which
+    # .display() is being run in the same cell as a previous .display().
+    # Otherwise, React tries to diff the virtual DOM,
+    # causing the browser to become unresponsive.
+
+    # In the .widget() case, we return a cleanup function that anywidget runs for us.
+    # However, in the .display() case, we need to run do cleanup ourselves.
+    # However, using IPython.display, there is not bidirectional communication,
+    # so we cannot simply sent "events" or "messages" to previously rendered widgets
+    # to tell them to clean up. Instead, we need to store a reference to the wrapper
+    # div element on the window, scoped to the cell, for cleanup.
+
+    # There are two edge cases in which the user runs .display(), then .widget()
+    # or vice-versa, in the same cell -- we do not currently handle those,
+    # as this would require using the hack-y cleanup over the AnyWidget cleanup
+    # in all cases.
+
+    CLEANUP_STR = """
+        // Initialize the global Map if not yet defined.
+        if (!window.__VITESSCE_DISPLAY_CELLS__) {
+            window.__VITESSCE_DISPLAY_CELLS__ = new Map();
+        }
+
+        // Rename for readability.
+        const CELL_MAP = window.__VITESSCE_DISPLAY_CELLS__;
+
+        // Need cases for getting parent in plain notebook, colab, etc.
+        const potentialParents = [
+            nextWidgetEl.closest('.jp-Notebook-cell'), // JupyterLab
+            nextWidgetEl.closest('.cell'), // JupyterLab Classic Notebook
+        ];
+
+        // Get the cell's parent element.
+        const parentEl = potentialParents.find(potentialEl => potentialEl !== null);
+
+        if (parentEl) {
+            const prevWidgetEl = CELL_MAP.get(parentEl);
+
+            if (prevWidgetEl) {
+                // Clean up the previous DOM node by unmounting via ReactDOM.
+                ReactDOM.unmountComponentAtNode(prevWidgetEl);
+                prevWidgetEl.remove();
+                CELL_MAP.set(parentEl, null);
+            }
+
+            // Store a reference to the widget div element on the window, scoped to the cell,
+            // for future cleanups to use.
+            CELL_MAP.set(parentEl, nextWidgetEl);
+        }
+    """
+
     HTML_STR = f"""
         <div id="{uid_str}"></div>
 
         <script type="module">
 
+            const nextWidgetEl = document.getElementById("{uid_str}");
+
             """ + ESM + """
+
+            """ + CLEANUP_STR + """
 
             render({
                 model: {
@@ -405,8 +472,9 @@ def ipython_display(config, height=600, theme='auto', base_url=None, host_name=N
                     set: () => {},
                     save_changes: () => {}
                 },
-                el: """ + f"""document.getElementById("{uid_str}")""" + """,
+                el: nextWidgetEl,
             });
         </script>
     """
+    
     display(HTML(HTML_STR))

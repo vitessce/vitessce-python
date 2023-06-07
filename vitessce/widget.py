@@ -158,7 +158,6 @@ const importMap = {
 };
 
 const React = await importWithMap("react", importMap);
-// const ReactDOM = await importWithMap("react-dom", importMap);
 const { createRoot } = await importWithMap("react-dom/client", importMap);
 
 function asEsModule(component) {
@@ -271,7 +270,6 @@ export async function render(view) {
 
     const root = createRoot(view.el);
     root.render(e(VitessceWidget, { model: view.model }));
-    // ReactDOM.render(e(VitessceWidget, { model: view.model }), view.el);
 
     return () => {
         // Re-enable scrolling.

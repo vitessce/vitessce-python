@@ -158,8 +158,8 @@ const importMap = {
 };
 
 const React = await importWithMap("react", importMap);
-const ReactDOM = await importWithMap("react-dom", importMap);
-// const { createRoot } = await importWithMap("react-dom/client", importMap);
+// const ReactDOM = await importWithMap("react-dom", importMap);
+const { createRoot } = await importWithMap("react-dom/client", importMap);
 
 function asEsModule(component) {
   return {
@@ -269,9 +269,9 @@ export async function render(view) {
         );
     }
 
-    // const root = createRoot(view.el);
-    // root.render(e(VitessceWidget, { model: view.model }));
-    ReactDOM.render(e(VitessceWidget, { model: view.model }), view.el);
+    const root = createRoot(view.el);
+    root.render(e(VitessceWidget, { model: view.model }));
+    // ReactDOM.render(e(VitessceWidget, { model: view.model }), view.el);
 
     return () => {
         // Re-enable scrolling.
@@ -281,8 +281,14 @@ export async function render(view) {
         }
 
         // Clean up React and DOM state.
-        ReactDOM.unmountComponentAtNode(view.el);
-        view.remove();
+        root.unmount();
+        if(view.remove) {
+            // .widget()
+            view.remove();
+        } else {
+            // .display()
+            view.el.remove();
+        }
     };
 }
 """
@@ -380,7 +386,7 @@ class VitessceWidget(anywidget.AnyWidget):
 
 
 def ipython_display(config, height=600, theme='auto', base_url=None, host_name=None, uid=None, port=None, proxy=False, js_package_version='3.0.0', js_dev_mode=False, custom_js_url=''):
-    from IPython.display import display, HTML, clear_output
+    from IPython.display import display, HTML
     uid_str = "vitessce" + get_uid_str(uid)
 
     base_url, use_port, _ = get_base_url_and_port(
@@ -437,18 +443,13 @@ def ipython_display(config, height=600, theme='auto', base_url=None, host_name=N
         const parentEl = potentialParents.find(potentialEl => potentialEl !== null);
 
         if (parentEl) {
-            const prevWidgetEl = CELL_MAP.get(parentEl);
+            const prevCleanupFunctionPromise = CELL_MAP.get(parentEl);
 
-            if (prevWidgetEl) {
-                // Clean up the previous DOM node by unmounting via ReactDOM.
-                ReactDOM.unmountComponentAtNode(prevWidgetEl);
-                prevWidgetEl.remove();
+            if (prevCleanupFunctionPromise) {
+                const prevCleanupFunction = await prevCleanupFunctionPromise;
+                prevCleanupFunction();
                 CELL_MAP.set(parentEl, null);
             }
-
-            // Store a reference to the widget div element on the window, scoped to the cell,
-            // for future cleanups to use.
-            CELL_MAP.set(parentEl, nextWidgetEl);
         }
     """
 
@@ -463,7 +464,7 @@ def ipython_display(config, height=600, theme='auto', base_url=None, host_name=N
 
             """ + CLEANUP_STR + """
 
-            render({
+            const nextCleanupFunction = render({
                 model: {
                     get: (key) => {
                         const vals = """ + json.dumps(model_vals) + """;
@@ -474,6 +475,12 @@ def ipython_display(config, height=600, theme='auto', base_url=None, host_name=N
                 },
                 el: nextWidgetEl,
             });
+
+            // Store a reference to the widget div element on the window, scoped to the cell,
+            // for future cleanups to use.
+            if (parentEl) {
+                CELL_MAP.set(parentEl, nextCleanupFunction);
+            }
         </script>
     """
     

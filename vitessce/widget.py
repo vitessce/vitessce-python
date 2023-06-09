@@ -277,8 +277,10 @@ export async function render(view) {
 
         return e('div', { ref: divRef, style: { height: height + 'px' } },
             e(React.Suspense, { fallback: e('div', {}, 'Loading...') },
-                e(Vitessce, vitessceProps)
-            )
+                e(React.StrictMode, {},
+                    e(Vitessce, vitessceProps)
+                ),
+            ),
         );
     }
 
@@ -296,7 +298,7 @@ export async function render(view) {
         root.unmount();
         if(view.remove) {
             // .widget()
-            view.remove();
+            // view.remove();
         } else {
             // .display()
             view.el.remove();

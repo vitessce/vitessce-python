@@ -219,7 +219,7 @@ export async function render(view) {
     function VitessceWidget(props) {
         const { model } = props;
 
-        const config = prependBaseUrl(model.get('config'), model.get('proxy'), model.get('has_host_name'));
+        const [config, setConfig] = React.useState(prependBaseUrl(model.get('config'), model.get('proxy'), model.get('has_host_name')));
         const height = model.get('height');
         const theme = model.get('theme') === 'auto' ? (prefersDark ? 'dark' : 'light') : model.get('theme');
 
@@ -254,10 +254,24 @@ export async function render(view) {
             };
         }, [divRef]);
 
+        // Config changed on JS side (from within <Vitessce/>),
+        // send updated config to Python side.
         const onConfigChange = React.useCallback((config) => {
             model.set('config', config);
             model.save_changes();
         }, [model]);
+
+        // Config changed on Python side,
+        // pass to <Vitessce/> component to it is updated on JS side.
+        React.useEffect(() => {
+            model.on('change:config', () => {
+                const newConfig = prependBaseUrl(model.get('config'), model.get('proxy'), model.get('has_host_name'));
+                
+                // Force a re-render and re-validation by setting a new config.uid value.
+                //newConfig.uid = `random-${Math.random()}`;
+                setConfig(newConfig);
+            });
+        }, []);
 
         const vitessceProps = { height, theme, config, onConfigChange, uid: cssUid };
 
@@ -287,6 +301,7 @@ export async function render(view) {
             // .display()
             view.el.remove();
         }
+        console.log("Cleaned up widget.");
     };
 }
 """
@@ -469,7 +484,8 @@ def ipython_display(config, height=600, theme='auto', base_url=None, host_name=N
                         return vals[key];
                     },
                     set: () => {},
-                    save_changes: () => {}
+                    save_changes: () => {},
+                    on: () => {},
                 },
                 el: nextWidgetEl,
             });

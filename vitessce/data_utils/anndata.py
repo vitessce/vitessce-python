@@ -117,6 +117,8 @@ def optimize_adata(adata, obs_cols=None, obsm_keys=None, var_cols=None, varm_key
                 # Vitessce can use csc matrices somewhat efficiently.
                 if issparse(new_X):
                     new_X = new_X.tocsc()
+        else:
+            new_X = None
     else:
         new_X = None
     # Only keep the subset of columns required.

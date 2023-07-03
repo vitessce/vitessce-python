@@ -21,6 +21,10 @@ from .constants import (
     BASE_URL_PLACEHOLDER,
 )
 
+from .convert_to_vitessce_config import (
+    CellBrowserToVitessceConfigConverter
+)
+
 from .wrappers import AbstractWrapper
 
 # We allow installation without all of the dependencies that the widget requires.

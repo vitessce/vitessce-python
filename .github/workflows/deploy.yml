@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   pre_deploy:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - name: Install system dependencies
@@ -22,7 +22,7 @@ jobs:
           sudo apt-get install -y pandoc
       - uses: actions/setup-python@v2
         with:
-          python-version: '3.8'
+          python-version: '3.9'
       - name: Install vitessce
         run: pip install -e .[dev,docs,all]
       - name: Run tests
@@ -49,7 +49,7 @@ jobs:
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
   deploy:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     needs: pre_deploy
     environment:
       name: github-pages

@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   docs_build:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name: Install system dependencies
@@ -13,6 +13,6 @@ jobs:
           sudo apt-get install -y pandoc
       - uses: actions/setup-python@v2
         with:
-          python-version: '3.8'
+          python-version: '3.9'
       - run: pip install -e .[docs,all]
       - run: make html

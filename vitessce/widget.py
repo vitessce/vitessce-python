@@ -272,7 +272,7 @@ export async function render(view) {
         React.useEffect(() => {
             model.on('change:config', () => {
                 const newConfig = prependBaseUrl(model.get('config'), model.get('proxy'), model.get('has_host_name'));
-                
+
                 // Force a re-render and re-validation by setting a new config.uid value.
                 // TODO: make this conditional on a parameter from Python.
                 //newConfig.uid = `random-${Math.random()}`;
@@ -507,5 +507,5 @@ def ipython_display(config, height=600, theme='auto', base_url=None, host_name=N
             }
         </script>
     """
-    
+
     display(HTML(HTML_STR))

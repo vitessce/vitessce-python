@@ -148,9 +148,17 @@ def get_uid_str(uid):
 
 
 ESM = """
-import * as d3 from 'https://esm.sh/d3-require@1.3.0';
-import React from 'https://esm.sh/react@18.2.0';
-import ReactDOM from 'https://esm.sh/react-dom@18.2.0';
+import { importWithMap } from 'https://unpkg.com/dynamic-importmap@0.0.1';
+const importMap = {
+  imports: {
+    "react": "https://esm.sh/react@18.2.0?dev",
+    "react-dom": "https://esm.sh/react-dom@18.2.0?dev",
+    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client?dev",
+  },
+};
+
+const React = await importWithMap("react", importMap);
+const { createRoot } = await importWithMap("react-dom/client", importMap);
 
 function asEsModule(component) {
   return {
@@ -193,35 +201,26 @@ function prependBaseUrl(config, proxy, hasHostName) {
   };
 }
 
-export function render(view) {
+export async function render(view) {
     const cssUid = view.model.get('uid');
+    const jsDevMode = view.model.get('js_dev_mode');
     const jsPackageVersion = view.model.get('js_package_version');
-    let customRequire = d3.require;
     const customJsUrl = view.model.get('custom_js_url');
-    if(customJsUrl.length > 0) {
-        customRequire = d3.requireFrom(async () => {
-            return customJsUrl;
-        });
-    }
 
-    const aliasedRequire = customRequire.alias({
-        "react": React,
-        "react-dom": ReactDOM
-    });
+    const pkgName = (jsDevMode ? "@vitessce/dev" : "vitessce");
 
-    const Vitessce = React.lazy(() => {
-        // Workaround for preventing side effects due to loading the Vitessce UMD bundle twice
-        // running createGenerateClassNames twice.
-        // Alternate solution should be possible in JS release v2.0.3.
-        // Reference: https://github.com/vitessce/vitessce/pull/1391
-        return aliasedRequire(`vitessce@${jsPackageVersion}`)
-            .then(vitessce => asEsModule(vitessce.Vitessce));
-    });
+    importMap.imports["vitessce"] = (customJsUrl.length > 0
+        ? customJsUrl
+        : `https://unpkg.com/${pkgName}@${jsPackageVersion}`
+    );
+
+    const { Vitessce } = await importWithMap("vitessce", importMap);
 
     function VitessceWidget(props) {
         const { model } = props;
 
-        const config = prependBaseUrl(model.get('config'), model.get('proxy'), model.get('has_host_name'));
+        const [config, setConfig] = React.useState(prependBaseUrl(model.get('config'), model.get('proxy'), model.get('has_host_name')));
+        const [validateConfig, setValidateConfig] = React.useState(true);
         const height = model.get('height');
         const theme = model.get('theme') === 'auto' ? (prefersDark ? 'dark' : 'light') : model.get('theme');
 
@@ -256,21 +255,55 @@ export function render(view) {
             };
         }, [divRef]);
 
+        // Config changed on JS side (from within <Vitessce/>),
+        // send updated config to Python side.
         const onConfigChange = React.useCallback((config) => {
             model.set('config', config);
+            setValidateConfig(false);
             model.save_changes();
         }, [model]);
 
-        const vitessceProps = { height, theme, config, onConfigChange, uid: cssUid };
+        // Config changed on Python side,
+        // pass to <Vitessce/> component to it is updated on JS side.
+        React.useEffect(() => {
+            model.on('change:config', () => {
+                const newConfig = prependBaseUrl(model.get('config'), model.get('proxy'), model.get('has_host_name'));
+
+                // Force a re-render and re-validation by setting a new config.uid value.
+                // TODO: make this conditional on a parameter from Python.
+                //newConfig.uid = `random-${Math.random()}`;
+                //console.log('newConfig', newConfig);
+                setConfig(newConfig);
+            });
+        }, []);
+
+        const vitessceProps = { height, theme, config, onConfigChange, validateConfig };
 
         return e('div', { ref: divRef, style: { height: height + 'px' } },
             e(React.Suspense, { fallback: e('div', {}, 'Loading...') },
-                e(Vitessce, vitessceProps)
-            )
+                e(React.StrictMode, {},
+                    e(Vitessce, vitessceProps)
+                ),
+            ),
         );
     }
 
-    ReactDOM.render(e(VitessceWidget, { model: view.model }), view.el);
+    const root = createRoot(view.el);
+    root.render(e(VitessceWidget, { model: view.model }));
+
+    return () => {
+        // Re-enable scrolling.
+        const jpn = view.el.closest('.jp-Notebook');
+        if(jpn) {
+            jpn.style.overflow = "auto";
+        }
+
+        // Clean up React and DOM state.
+        root.unmount();
+        if(view._isFromDisplay) {
+            view.el.remove();
+        }
+    };
 }
 """
 
@@ -294,10 +327,11 @@ class VitessceWidget(anywidget.AnyWidget):
 
     next_port = DEFAULT_PORT
 
-    js_package_version = Unicode('2.0.3').tag(sync=True)
+    js_package_version = Unicode('3.0.1').tag(sync=True)
+    js_dev_mode = Bool(False).tag(sync=True)
     custom_js_url = Unicode('').tag(sync=True)
 
-    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='2.0.3', custom_js_url=''):
+    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='3.0.1', js_dev_mode=False, custom_js_url=''):
         """
         Construct a new Vitessce widget.
 
@@ -329,7 +363,7 @@ class VitessceWidget(anywidget.AnyWidget):
 
         super(VitessceWidget, self).__init__(
             config=config_dict, height=height, theme=theme, proxy=proxy,
-            js_package_version=js_package_version, custom_js_url=custom_js_url,
+            js_package_version=js_package_version, js_dev_mode=js_dev_mode, custom_js_url=custom_js_url,
             uid=uid_str,
         )
 
@@ -365,7 +399,7 @@ class VitessceWidget(anywidget.AnyWidget):
 # Launch Vitessce using plain HTML representation (no ipywidgets)
 
 
-def ipython_display(config, height=600, theme='auto', base_url=None, host_name=None, uid=None, port=None, proxy=False, js_package_version='2.0.3', custom_js_url=''):
+def ipython_display(config, height=600, theme='auto', base_url=None, host_name=None, uid=None, port=None, proxy=False, js_package_version='3.0.1', js_dev_mode=False, custom_js_url=''):
     from IPython.display import display, HTML
     uid_str = "vitessce" + get_uid_str(uid)
 
@@ -378,6 +412,7 @@ def ipython_display(config, height=600, theme='auto', base_url=None, host_name=N
     model_vals = {
         "uid": uid_str,
         "js_package_version": js_package_version,
+        "js_dev_mode": js_dev_mode,
         "custom_js_url": custom_js_url,
         "proxy": proxy,
         "has_host_name": host_name is not None,
@@ -386,24 +421,83 @@ def ipython_display(config, height=600, theme='auto', base_url=None, host_name=N
         "config": config_dict,
     }
 
+    # We need to clean up the React and DOM state in any case in which
+    # .display() is being run in the same cell as a previous .display().
+    # Otherwise, React tries to diff the virtual DOM,
+    # causing the browser to become unresponsive.
+
+    # In the .widget() case, we return a cleanup function that anywidget runs for us.
+    # However, in the .display() case, we need to run do cleanup ourselves.
+    # However, using IPython.display, there is not bidirectional communication,
+    # so we cannot simply sent "events" or "messages" to previously rendered widgets
+    # to tell them to clean up. Instead, we need to store a reference to the wrapper
+    # div element on the window, scoped to the cell, for cleanup.
+
+    # There are two edge cases in which the user runs .display(), then .widget()
+    # or vice-versa, in the same cell -- we do not currently handle those,
+    # as this would require using the hack-y cleanup over the AnyWidget cleanup
+    # in all cases.
+
+    CLEANUP_STR = """
+        // Initialize the global Map if not yet defined.
+        if (!window.__VITESSCE_DISPLAY_CELLS__) {
+            window.__VITESSCE_DISPLAY_CELLS__ = new Map();
+        }
+
+        // Rename for readability.
+        const CELL_MAP = window.__VITESSCE_DISPLAY_CELLS__;
+
+        // Need cases for getting parent in plain notebook, colab, etc.
+        const potentialParents = [
+            nextWidgetEl.closest('.jp-Notebook-cell'), // JupyterLab
+            nextWidgetEl.closest('.cell'), // JupyterLab Classic Notebook
+        ];
+
+        // Get the cell's parent element.
+        const parentEl = potentialParents.find(potentialEl => potentialEl !== null);
+
+        if (parentEl) {
+            const prevCleanupFunctionPromise = CELL_MAP.get(parentEl);
+
+            if (prevCleanupFunctionPromise) {
+                const prevCleanupFunction = await prevCleanupFunctionPromise;
+                prevCleanupFunction();
+                CELL_MAP.set(parentEl, null);
+            }
+        }
+    """
+
     HTML_STR = f"""
         <div id="{uid_str}"></div>
 
         <script type="module">
 
+            const nextWidgetEl = document.getElementById("{uid_str}");
+
             """ + ESM + """
 
-            render({
+            """ + CLEANUP_STR + """
+
+            const nextCleanupFunction = render({
                 model: {
                     get: (key) => {
                         const vals = """ + json.dumps(model_vals) + """;
                         return vals[key];
                     },
                     set: () => {},
-                    save_changes: () => {}
+                    save_changes: () => {},
+                    on: () => {},
                 },
-                el: """ + f"""document.getElementById("{uid_str}")""" + """,
+                el: nextWidgetEl,
+                _isFromDisplay: true,
             });
+
+            // Store a reference to the widget div element on the window, scoped to the cell,
+            // for future cleanups to use.
+            if (parentEl) {
+                CELL_MAP.set(parentEl, nextCleanupFunction);
+            }
         </script>
     """
+
     display(HTML(HTML_STR))

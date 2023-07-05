@@ -3,7 +3,7 @@ channels:
  - bioconda
  - conda-forge
 dependencies:
- - python==3.8
+ - python==3.9
  - numpy
  - pandas
  - anndata>=0.7.8

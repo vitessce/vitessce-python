@@ -22,7 +22,7 @@ The ``vitessce`` Python package includes:
 Installation
 -------------
 
-Installation requires Python 3.8 or greater. Install from `PyPI <https://pypi.org/project/vitessce>`_:
+Installation requires Python 3.9 or greater. Install from `PyPI <https://pypi.org/project/vitessce>`_:
 
 .. code-block:: bash
 

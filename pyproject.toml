@@ -60,7 +60,7 @@ docs = [
 ]
 all = [
   'jupyter-server-proxy>=1.5.2',
-  'anywidget==0.2.0',
+  'anywidget==0.4.2',
   'uvicorn>=0.17.0',
   'ujson>=4.0.1',
   'starlette==0.14.0',

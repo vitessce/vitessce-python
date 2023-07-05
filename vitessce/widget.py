@@ -263,10 +263,6 @@ export async function render(view) {
             model.save_changes();
         }, [model]);
 
-        const onLoaderChange = React.useCallback(() => {
-            console.log('loaders changed');
-        }, []);
-
         // Config changed on Python side,
         // pass to <Vitessce/> component to it is updated on JS side.
         React.useEffect(() => {
@@ -281,7 +277,7 @@ export async function render(view) {
             });
         }, []);
 
-        const vitessceProps = { height, theme, config, onConfigChange, validateConfig, onLoaderChange };
+        const vitessceProps = { height, theme, config, onConfigChange, validateConfig };
 
         return e('div', { ref: divRef, style: { height: height + 'px' } },
             e(React.Suspense, { fallback: e('div', {}, 'Loading...') },
@@ -304,14 +300,9 @@ export async function render(view) {
 
         // Clean up React and DOM state.
         root.unmount();
-        if(view.remove) {
-            // .widget()
-            // view.remove();
-        } else {
-            // .display()
+        if(view._isFromDisplay) {
             view.el.remove();
         }
-        console.log("Cleaned up widget.");
     };
 }
 """
@@ -498,6 +489,7 @@ def ipython_display(config, height=600, theme='auto', base_url=None, host_name=N
                     on: () => {},
                 },
                 el: nextWidgetEl,
+                _isFromDisplay: true,
             });
 
             // Store a reference to the widget div element on the window, scoped to the cell,

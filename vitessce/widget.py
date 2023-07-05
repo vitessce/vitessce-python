@@ -220,6 +220,7 @@ export async function render(view) {
         const { model } = props;
 
         const [config, setConfig] = React.useState(prependBaseUrl(model.get('config'), model.get('proxy'), model.get('has_host_name')));
+        const [validateConfig, setValidateConfig] = React.useState(true);
         const height = model.get('height');
         const theme = model.get('theme') === 'auto' ? (prefersDark ? 'dark' : 'light') : model.get('theme');
 
@@ -258,8 +259,13 @@ export async function render(view) {
         // send updated config to Python side.
         const onConfigChange = React.useCallback((config) => {
             model.set('config', config);
+            setValidateConfig(false);
             model.save_changes();
         }, [model]);
+
+        const onLoaderChange = React.useCallback(() => {
+            console.log('loaders changed');
+        }, []);
 
         // Config changed on Python side,
         // pass to <Vitessce/> component to it is updated on JS side.
@@ -268,12 +274,14 @@ export async function render(view) {
                 const newConfig = prependBaseUrl(model.get('config'), model.get('proxy'), model.get('has_host_name'));
                 
                 // Force a re-render and re-validation by setting a new config.uid value.
+                // TODO: make this conditional on a parameter from Python.
                 //newConfig.uid = `random-${Math.random()}`;
+                //console.log('newConfig', newConfig);
                 setConfig(newConfig);
             });
         }, []);
 
-        const vitessceProps = { height, theme, config, onConfigChange, uid: cssUid };
+        const vitessceProps = { height, theme, config, onConfigChange, validateConfig, onLoaderChange };
 
         return e('div', { ref: divRef, style: { height: height + 'px' } },
             e(React.Suspense, { fallback: e('div', {}, 'Loading...') },
@@ -328,11 +336,11 @@ class VitessceWidget(anywidget.AnyWidget):
 
     next_port = DEFAULT_PORT
 
-    js_package_version = Unicode('3.0.0').tag(sync=True)
+    js_package_version = Unicode('3.0.1').tag(sync=True)
     js_dev_mode = Bool(False).tag(sync=True)
     custom_js_url = Unicode('').tag(sync=True)
 
-    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='3.0.0', js_dev_mode=False, custom_js_url=''):
+    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='3.0.1', js_dev_mode=False, custom_js_url=''):
         """
         Construct a new Vitessce widget.
 
@@ -400,7 +408,7 @@ class VitessceWidget(anywidget.AnyWidget):
 # Launch Vitessce using plain HTML representation (no ipywidgets)
 
 
-def ipython_display(config, height=600, theme='auto', base_url=None, host_name=None, uid=None, port=None, proxy=False, js_package_version='3.0.0', js_dev_mode=False, custom_js_url=''):
+def ipython_display(config, height=600, theme='auto', base_url=None, host_name=None, uid=None, port=None, proxy=False, js_package_version='3.0.1', js_dev_mode=False, custom_js_url=''):
     from IPython.display import display, HTML
     uid_str = "vitessce" + get_uid_str(uid)
 

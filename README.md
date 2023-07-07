@@ -90,6 +90,9 @@ When sharing errors, it can be helpful to share the current versions of packages
 
 To ensure that older widget JavaScript output is not causing conflicts with newer JavaScript output (which may persist via notebook outputs even without running notebook cells), clear old outputs by Kernel -> Restart Kernel and Clear All Outputs. Then refresh the browser tab (containing Jupyter) to ensure all JavaScript outputs are fresh.
 
+This is also typically required when running `!pip install vitessce[all]` from within a Jupyter notebook cell in the same session as running `vc.widget()` for the first time.
+The Kernel restart/Output clearing is required when a new Jupyter widget is installed in the environment, otherwise Jupyter will not yet recognize the newly-installed widget (as the notebook was opened with a different set of Jupyter widgets installed).
+
 ### Check the widget configuration
 
 If the widget renders successfully, you can get its current configuration by

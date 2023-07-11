@@ -434,7 +434,7 @@ class OmeZarrWrapper(AbstractWrapper):
     :param \\*\\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
     """
 
-    def __init__(self, img_path=None, img_url=None, **kwargs):
+    def __init__(self, img_path=None, img_url=None, name="", is_bitmask=False, **kwargs):
         super().__init__(**kwargs)
         self._repr = make_repr(locals())
         if img_url is not None and img_path is not None:
@@ -445,6 +445,8 @@ class OmeZarrWrapper(AbstractWrapper):
                 "Expected either img_url or img_path to be provided")
         self._img_path = img_path
         self._img_url = img_url
+        self.name = name
+        self.is_bitmask = is_bitmask
         if self._img_path is not None:
             self.is_remote = False
         else:
@@ -481,6 +483,26 @@ class OmeZarrWrapper(AbstractWrapper):
                 "url": self.get_img_url(base_url, dataset_uid, obj_i)
             }
         return image_file_def_creator
+
+    # The following two functions will be used when OmeZarrWrapper
+    # is used within MultiImageWrapper.
+    def make_image_def(self, dataset_uid, obj_i, base_url):
+        img_url = self.get_img_url(base_url, dataset_uid, obj_i)
+        return self.create_image_json(img_url)
+    
+    def create_image_json(self, img_url):
+        metadata = {}
+        image = {
+            "name": self.name,
+            "type": "ome-zarr",
+            "url": img_url,
+        }
+        if self.is_bitmask:
+            metadata["isBitmask"] = self.is_bitmask
+        # Only attach metadata if there is some - otherwise schema validation fails.
+        if len(metadata.keys()) > 0:
+            image["metadata"] = metadata
+        return image
 
 
 class AnnDataWrapper(AbstractWrapper):

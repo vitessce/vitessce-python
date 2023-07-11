@@ -22,6 +22,7 @@ from .constants import (
 )
 
 from .config_converter import (
+    CellBrowserToVitessceConfigConverter,
     convert
 )
 

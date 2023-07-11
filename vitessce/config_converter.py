@@ -16,14 +16,14 @@ from vitessce.data_utils import (
 class CellBrowserToVitessceConfigConverter:
 
     def __init__(self, project_name, output_dir, keep_only_marker_genes):
-        self.url_prefix = f"https://cells.ucsc.edu/{self.project_name}"
+        self.url_prefix = f"https://cells.ucsc.edu/{project_name}"
         self.project_name = project_name
         self.output_dir = output_dir
         self.keep_only_marker_genes = keep_only_marker_genes
         self.cellbrowser_config = {}
         self.adata = None
 
-    def _filter_data(self):
+    def filter_data(self):
         # Filter data
         self.adata.var_names_make_unique()
         sc.pp.filter_cells(self.adata, min_genes=200)
@@ -40,14 +40,14 @@ class CellBrowserToVitessceConfigConverter:
             self.adata = self.adata[:, self.adata.var_names.isin(marker_genes)]
             print("Successfully filtered out all non-marker genes from Anndata object.")
 
-    def _write_to_zarr_store(self):
+    def write_to_zarr_store(self):
         data_dir = join(self.output_dir, self.project_name)
         zarr_filepath = join(data_dir, "out.adata.zarr")
 
         obs_columns_list = self.adata.obs.columns.tolist()
         obsm_keys = list(self.adata.obsm.keys())
         var_cols_list = list(self.adata.var.keys())
-        print("About to Anndata object to the Zarr store. The following properties will be saved:")
+        print("About to write the Anndata object to the Zarr store. The following properties will be saved:")
         print(f"  Obs columns: {obs_columns_list}")
         print(f"  Obsm keys: {obsm_keys}")
         print(f"  Var columns: {var_cols_list}")
@@ -70,7 +70,7 @@ class CellBrowserToVitessceConfigConverter:
         self.adata.write_zarr(zarr_filepath, chunks=[self.adata.shape[0], VAR_CHUNK_SIZE])
         print("Successfully saved Anndata object to the Zarr store.")
 
-    def _load_expr_matrix(self):
+    def load_expr_matrix(self):
         gzip_file = None
         expr_matrix = None
 
@@ -103,7 +103,7 @@ class CellBrowserToVitessceConfigConverter:
             self.adata.var_names = [x.split("|")[1] for x in list(self.adata.var_names)]
         print("Successfully loaded expression matrix into Anndata object.")
 
-    def _load_coordinates(self):
+    def load_coordinates(self):
         coordinate_types = {
             'tsne': 'X_tsne',
             't-sne': 'X_tsne',
@@ -162,7 +162,7 @@ class CellBrowserToVitessceConfigConverter:
                 raise e
             print("Done adding coordinates to the Anndata object.")
 
-    def _load_cell_metadata(self):
+    def load_cell_metadata(self):
         try:
             print("Adding cell metadata to Anndata object ...")
             # Load meta
@@ -224,7 +224,7 @@ class CellBrowserToVitessceConfigConverter:
             print("Invalid CellBrowser config: ", e.message)
             return False
 
-    def _download_config(self):
+    def download_config(self):
         config_url = "/".join([self.url_prefix, "dataset.json"])
         try:
             response = requests.get(config_url)
@@ -240,13 +240,13 @@ class CellBrowserToVitessceConfigConverter:
 def convert(project_name, output_dir, keep_only_marker_genes=False):
     print(f"Converting CellBrowser config for project {project_name} to Vitessce format and saving it to {output_dir}")
     config_converter = CellBrowserToVitessceConfigConverter(project_name, output_dir, keep_only_marker_genes)
-    config_is_valid = config_converter._download_config()
+    config_is_valid = config_converter.download_config()
     if config_is_valid:
-        config_converter._load_expr_matrix()
-        config_converter._load_cell_metadata()
-        config_converter._load_coordinates()
-        config_converter._filter_data()
-        config_converter._write_to_zarr_store()
+        config_converter.load_expr_matrix()
+        config_converter.load_cell_metadata()
+        config_converter.load_coordinates()
+        config_converter.filter_data()
+        config_converter.write_to_zarr_store()
         print(f"CellBrowser config finished conversion. See the output files in {output_dir}.")
     else:
         print("CellBrowser config could not be converted, because it is not valid.")

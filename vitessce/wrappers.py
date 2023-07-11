@@ -489,7 +489,7 @@ class OmeZarrWrapper(AbstractWrapper):
     def make_image_def(self, dataset_uid, obj_i, base_url):
         img_url = self.get_img_url(base_url, dataset_uid, obj_i)
         return self.create_image_json(img_url)
-    
+
     def create_image_json(self, img_url):
         metadata = {}
         image = {

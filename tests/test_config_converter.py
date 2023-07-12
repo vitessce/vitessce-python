@@ -105,7 +105,7 @@ def test_download_valid_config(mock_requests_get):
 
     # Now you can make assertions about how the mock was used and the result of your function
     mock_requests_get.assert_called_once_with('https://cells.ucsc.edu/test-project/dataset.json')
-    assert is_valid == True
+    assert is_valid
     assert obj.cellbrowser_config == valid_cellbrowser_config
 
 
@@ -153,7 +153,7 @@ def test_filter_based_on_marker_genes(mock_requests_get, mock_end_to_end_tests, 
     inst = CellBrowserToVitessceConfigConverter(project_name, output_dir, True)
     config_is_valid = inst.download_config()
 
-    assert config_is_valid == True
+    assert config_is_valid
     inst.load_expr_matrix()
     inst.load_cell_metadata()
     inst.load_coordinates()

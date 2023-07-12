@@ -87,54 +87,15 @@ output_dir = "test-output-dir"
 
 
 @pytest.fixture
-def mock_requests_get():
-    with patch('requests.get') as mock_get:
-
-        yield mock_get
-
-
-def test_download_valid_config(mock_requests_get):
-
-    # Set up the Mock to return a fake response when called
-    mock_response = Mock()
-    mock_response.json.return_value = valid_cellbrowser_config
-    mock_requests_get.return_value = mock_response
-
-    obj = CellBrowserToVitessceConfigConverter(project_name, output_dir, False)
-    is_valid = obj.download_config()
-
-    # Now you can make assertions about how the mock was used and the result of your function
-    mock_requests_get.assert_called_once_with('https://cells.ucsc.edu/test-project/dataset.json')
-    assert is_valid
-    assert obj.cellbrowser_config == valid_cellbrowser_config
+def mock_makedirs():
+    with patch('os.makedirs') as mock:
+        yield mock
 
 
 @pytest.fixture
-def mock_end_to_end_tests():
-    # Set up the Mock to return a fake response when called
-    mock_response_json = Mock()
-    mock_response_json.json.return_value = valid_cellbrowser_config
-    mock_response_json.raise_for_status.return_value = None
-    mock_response_json.content = b''
-
-    with open('tests/data/smaller_expr_matrix.tsv.gz', 'rb') as f:
-        mock_response_expr_matrix = Mock()
-        mock_response_expr_matrix.content = f.read()
-        mock_response_expr_matrix.raise_for_status.return_value = None
-
-    with open('tests/data/test_meta.tsv', 'rb') as f:
-        mock_response_meta = Mock()
-        mock_response_meta.content = f.read()
-        mock_response_meta.raise_for_status.return_value = None
-
-    with open('tests/data/test.coords.tsv.gz', 'rb') as f:
-        mock_response_coords = Mock()
-        mock_response_coords.content = f.read()
-        mock_response_coords.raise_for_status.return_value = None
-
-    with patch('requests.get') as mock_get:
-        mock_get.side_effect = [mock_response_json, mock_response_expr_matrix, mock_response_meta, mock_response_coords]
-        yield mock_get
+def mock_write_zarr():
+    with patch('anndata.AnnData.write_zarr') as mock:
+        yield mock
 
 
 @pytest.fixture
@@ -143,12 +104,42 @@ def mock_filter_cells():
         yield mock
 
 
-def test_filter_based_on_marker_genes(mock_requests_get, mock_end_to_end_tests, mock_filter_cells):
-
+@pytest.fixture
+def mock_end_to_end_tests():
     # Set up the Mock to return a fake response when called
-    mock_response = Mock()
-    mock_response.json.return_value = valid_cellbrowser_config
-    mock_requests_get.return_value = mock_response
+    mock_response_json = Mock()
+    mock_response_json.json.return_value = valid_cellbrowser_config
+
+    with open('tests/data/smaller_expr_matrix.tsv.gz', 'rb') as f:
+        mock_response_expr_matrix = Mock()
+        mock_response_expr_matrix.content = f.read()
+
+    with open('tests/data/test_meta.tsv', 'rb') as f:
+        mock_response_meta = Mock()
+        mock_response_meta.content = f.read()
+
+    with open('tests/data/test.coords.tsv.gz', 'rb') as f:
+        mock_response_coords = Mock()
+        mock_response_coords.content = f.read()
+
+    with patch('requests.get') as mock_get:
+        mock_get.side_effect = [mock_response_json, mock_response_expr_matrix, mock_response_meta, mock_response_coords]
+        yield mock_get
+
+
+def test_download_valid_config():
+
+    with patch('requests.get') as mock_get:
+        mock_get.return_value.json.return_value = valid_cellbrowser_config
+        obj = CellBrowserToVitessceConfigConverter(project_name, output_dir, False)
+        is_valid = obj.download_config()
+
+        mock_get.assert_called_once_with('https://cells.ucsc.edu/test-project/dataset.json')
+        assert is_valid
+        assert obj.cellbrowser_config == valid_cellbrowser_config
+
+
+def test_filter_based_on_marker_genes(mock_end_to_end_tests, mock_filter_cells):
 
     inst = CellBrowserToVitessceConfigConverter(project_name, output_dir, True)
     config_is_valid = inst.download_config()
@@ -171,20 +162,6 @@ def test_filter_based_on_marker_genes(mock_requests_get, mock_end_to_end_tests, 
 
     assert mock_end_to_end_tests.call_count == 4
     assert mock_filter_cells.call_count == 1
-
-
-@pytest.fixture
-def mock_makedirs():
-    with patch('os.makedirs') as mock:
-        yield mock
-
-# Define a fixture for adata.write_zarr
-
-
-@pytest.fixture
-def mock_write_zarr():
-    with patch('anndata.AnnData.write_zarr') as mock:
-        yield mock
 
 
 def test_end_to_end(mock_makedirs, mock_write_zarr, mock_filter_cells, mock_end_to_end_tests):
@@ -210,6 +187,9 @@ def test_end_to_end_invalid_config(mock_makedirs, mock_write_zarr, mock_filter_c
         mock_get.assert_called_once_with("https://cells.ucsc.edu/test-project/dataset.json")
 
     assert mock_get.call_count == 1
+    assert mock_makedirs.call_count == 0
+    assert mock_write_zarr.call_count == 0
+    assert mock_filter_cells.call_count == 0
 
 
 def test_end_to_end_download_config_raises_exception(mock_makedirs, mock_write_zarr, mock_filter_cells):

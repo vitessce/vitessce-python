@@ -4,7 +4,7 @@ import os
 from os.path import join
 from copy import deepcopy
 
-from vitessce import (CellBrowserToVitessceConfigConverter, convert)
+from vitessce import (CellBrowserToAnndataZarrConverter, convert)
 from vitessce.data_utils import (
     VAR_CHUNK_SIZE
 )
@@ -131,7 +131,7 @@ def test_download_valid_config():
 
     with patch('requests.get') as mock_get:
         mock_get.return_value.json.return_value = valid_cellbrowser_config
-        obj = CellBrowserToVitessceConfigConverter(project_name, output_dir, False)
+        obj = CellBrowserToAnndataZarrConverter(project_name, output_dir, False)
         is_valid = obj.download_config()
 
         mock_get.assert_called_once_with('https://cells.ucsc.edu/test-project/dataset.json')
@@ -141,17 +141,11 @@ def test_download_valid_config():
 
 def test_filter_based_on_marker_genes(mock_end_to_end_tests, mock_filter_cells):
 
-    inst = CellBrowserToVitessceConfigConverter(project_name, output_dir, True)
+    inst = CellBrowserToAnndataZarrConverter(project_name, output_dir, True)
     config_is_valid = inst.download_config()
 
     assert config_is_valid
-    inst.load_expr_matrix()
-    inst.load_cell_metadata()
-    inst.load_coordinates()
-
-    assert inst.adata.shape == (8, 10)
-
-    inst.filter_data()
+    inst.create_anndata_object()
 
     assert inst.adata.shape == (8, 1)
 

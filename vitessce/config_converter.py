@@ -24,6 +24,10 @@ class CellBrowserToVitessceConfigConverter:
         self.adata = None
 
     def filter_data(self):
+
+        print("***************")
+        print(self.adata)
+        print("***************")
         # Filter data
         self.adata.var_names_make_unique()
         sc.pp.filter_cells(self.adata, min_genes=200)
@@ -86,7 +90,7 @@ class CellBrowserToVitessceConfigConverter:
             gzip_file = io.BytesIO(response.content)
             print(f"Successfully downloaded expression matrix {full_url}.")
         except Exception as e:
-            print(f"Could not download expression matrix {full_url} because: {e}.")
+            print(f"Could not download expression matrix because: {e}.")
             raise e
 
         print("Loading expression matrix into Anndata object ...")
@@ -119,16 +123,9 @@ class CellBrowserToVitessceConfigConverter:
             short_label = obj["shortLabel"].lower()
             for term, key in coordinate_types.items():
                 if term in short_label:
-                    if 'textFname' in obj:
-                        coord_urls[key] = obj['textFname']
-                    else:
-                        print(f"Detected {term} type of coordinates, but could not find link to coordinates files. Skipping.")
-                    break
+                    coord_urls[key] = obj['textFname']
 
-        if len(coord_urls.keys()) == 0:
-            print("WARN: Dataset will be displayed without an embedding. No valid coordinates were found.")
-        else:
-            print(f"Successful extraction of the following coordinates and URLS: {coord_urls}")
+        print(f"Successful extraction of the following coordinates and URLS: {coord_urls}")
 
         for (coord_type, url_suffix) in coord_urls.items():
             try:
@@ -180,7 +177,7 @@ class CellBrowserToVitessceConfigConverter:
             self.adata.obs.columns = [x.replace(" ", "") for x in self.adata.obs.columns.tolist()]
             print(f"Successfully downloaded metadata {meta_url_suffix}.")
         except Exception as e:
-            print(f"Could not download metadata {meta_url_suffix} because: {e}.")
+            print(f"Could not download metadata because: {e}.")
             raise e
 
     def _validate_config(self):
@@ -249,4 +246,4 @@ def convert(project_name, output_dir, keep_only_marker_genes=False):
         config_converter.write_to_zarr_store()
         print(f"CellBrowser config finished conversion. See the output files in {output_dir}.")
     else:
-        print("CellBrowser config could not be converted, because it is not valid.")
+        raise ValueError("CellBrowser config is not valid. Please check the error message above.")

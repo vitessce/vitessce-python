@@ -4,7 +4,7 @@ import os
 from os.path import join
 from copy import deepcopy
 
-from vitessce import (CellBrowserToAnndataZarrConverter, convert)
+from vitessce import (CellBrowserToAnndataZarrConverter, write_to_AnndataZarr_store)
 from vitessce.data_utils import (
     VAR_CHUNK_SIZE
 )
@@ -159,7 +159,7 @@ def test_filter_based_on_marker_genes(mock_end_to_end_tests, mock_filter_cells):
 
 
 def test_end_to_end(mock_makedirs, mock_write_zarr, mock_filter_cells, mock_end_to_end_tests):
-    convert(project_name, output_dir, keep_only_marker_genes=False)
+    write_to_AnndataZarr_store(project_name, output_dir, keep_only_marker_genes=False)
 
     mock_end_to_end_tests.assert_any_call("https://cells.ucsc.edu/test-project/dataset.json")
     mock_end_to_end_tests.assert_any_call("https://cells.ucsc.edu/test-project/exprMatrix.tsv.gz")
@@ -176,7 +176,7 @@ def test_end_to_end_invalid_config(mock_makedirs, mock_write_zarr, mock_filter_c
     with patch('requests.get') as mock_get:
         mock_get.return_value.json.return_value = invalid_cellbrowser_config
         with pytest.raises(ValueError):
-            convert(project_name, output_dir, keep_only_marker_genes=False)
+            write_to_AnndataZarr_store(project_name, output_dir, keep_only_marker_genes=False)
 
         mock_get.assert_called_once_with("https://cells.ucsc.edu/test-project/dataset.json")
 
@@ -193,7 +193,7 @@ def test_end_to_end_download_config_raises_exception(mock_makedirs, mock_write_z
     with patch('requests.get') as mock_get:
         mock_get.return_value = mock_response
         with pytest.raises(Exception):
-            convert(project_name, output_dir, keep_only_marker_genes=False)
+            write_to_AnndataZarr_store(project_name, output_dir, keep_only_marker_genes=False)
 
         mock_get.assert_called_once_with("https://cells.ucsc.edu/test-project/dataset.json")
 
@@ -213,7 +213,7 @@ def test_end_to_end_load_expr_matrix_raises_exception(mock_makedirs, mock_write_
     with patch('requests.get') as mock_get:
         mock_get.side_effect = [mock_first_response, mock_second_response]
         with pytest.raises(Exception):
-            convert(project_name, output_dir, keep_only_marker_genes=False)
+            write_to_AnndataZarr_store(project_name, output_dir, keep_only_marker_genes=False)
 
         mock_get.assert_any_call("https://cells.ucsc.edu/test-project/dataset.json")
         mock_get.assert_any_call("https://cells.ucsc.edu/test-project/exprMatrix.tsv.gz")
@@ -241,7 +241,7 @@ def test_end_to_end_load_cell_metadata_raises_exception(mock_makedirs, mock_writ
     with patch('requests.get') as mock_get:
         mock_get.side_effect = [mock_get_config, mock_response_expr_matrix, mock_response_meta]
         with pytest.raises(Exception):
-            convert(project_name, output_dir, keep_only_marker_genes=False)
+            write_to_AnndataZarr_store(project_name, output_dir, keep_only_marker_genes=False)
 
         mock_get.assert_any_call("https://cells.ucsc.edu/test-project/dataset.json")
         mock_get.assert_any_call("https://cells.ucsc.edu/test-project/exprMatrix.tsv.gz")
@@ -272,7 +272,7 @@ def test_end_to_end_add_coords_raises_exception(mock_makedirs, mock_write_zarr, 
     with patch('requests.get') as mock_get:
         mock_get.side_effect = [mock_get_config, mock_response_expr_matrix, mock_response_meta, mock_coords]
         with pytest.raises(Exception):
-            convert(project_name, output_dir, keep_only_marker_genes=False)
+            write_to_AnndataZarr_store(project_name, output_dir, keep_only_marker_genes=False)
 
         mock_get.assert_any_call("https://cells.ucsc.edu/test-project/dataset.json")
         mock_get.assert_any_call("https://cells.ucsc.edu/test-project/exprMatrix.tsv.gz")

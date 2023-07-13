@@ -216,7 +216,7 @@ def test_filter_based_on_marker_genes(mock_end_to_end_tests, mock_filter_cells):
     'mock_end_to_end_tests, expected',
     [
         (valid_cellbrowser_config, "test.coords.tsv.gz"),
-        (cellbrowser_config_no_coords_filename, "t-SNE.coords.tsv.gz"),
+        (cellbrowser_config_no_coords_filename, "tMinusSNE.coords.tsv.gz"),
         (cellbrowser_config_no_coords_filename_multi_word_shortlabel, "Seurat_umap.coords.tsv.gz")
     ], indirect=["mock_end_to_end_tests"]
 )

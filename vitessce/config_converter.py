@@ -123,6 +123,11 @@ class CellBrowserToAnndataZarrConverter:
         # Now create anndata object
         self.adata = anndata.AnnData(X=expr_matrix)
         self.adata.var['gene'] = self.adata.var_names
+
+        # Filter out nan values
+        self.adata = self.adata[~self.adata.obs.index.isnull(), :]
+        self.adata = self.adata[:, ~self.adata.var.index.isnull()]
+
         first_gene = list(self.adata.var_names)[0]
         if len(first_gene.split("|")) == 2:
             # TODO: sometimes we might want to keep them both
@@ -159,7 +164,9 @@ class CellBrowserToAnndataZarrConverter:
                     else:
                         # if textFname is not defined, that means that the name of file is the shortLabel
                         labels = obj["shortLabel"].split(" ")
-                        file_name = "_".join(labels)
+                        filtered_labels = [label.replace("-", "Minus") for label in labels]
+                        print(filtered_labels)
+                        file_name = "_".join(filtered_labels)
                         coord_urls[key] = ".".join((file_name, "coords.tsv.gz"))
 
         print(f"Successful extraction of the following coordinates and URLS: {coord_urls}")

@@ -32,7 +32,8 @@ class CellBrowserToAnndataZarrConverter:
         :param keep_only_marker_genes: A flag indicating whether to keep only marker genes in the Anndata object.
         :type keep_only_marker_genes: bool
         """
-        self.url_prefix = f"https://cells.ucsc.edu/{project_name}"
+        url_suffix = "/".join(project_name.split("+"))
+        self.url_prefix = f"https://cells.ucsc.edu/{url_suffix}"
         self.project_name = project_name
         self.output_dir = output_dir
         self.keep_only_marker_genes = keep_only_marker_genes
@@ -64,7 +65,7 @@ class CellBrowserToAnndataZarrConverter:
                             "shortLabel": {"type": "string"},
                             "textFname": {"type": "string"},
                         },
-                        "required": ["shortLabel", "textFname"]
+                        "required": ["shortLabel"]
                     },
                     "minItems": 1
                 },
@@ -153,7 +154,13 @@ class CellBrowserToAnndataZarrConverter:
             short_label = obj["shortLabel"].lower()
             for term, key in coordinate_types.items():
                 if term in short_label:
-                    coord_urls[key] = obj['textFname']
+                    if 'textFname' in obj:
+                        coord_urls[key] = obj['textFname']
+                    else:
+                        # if textFname is not defined, that means that the name of file is the shortLabel
+                        labels = obj["shortLabel"].split(" ")
+                        file_name = "_".join(labels)
+                        coord_urls[key] = ".".join((file_name, "coords.tsv.gz"))
 
         print(f"Successful extraction of the following coordinates and URLS: {coord_urls}")
 
@@ -315,7 +322,7 @@ class CellBrowserToAnndataZarrConverter:
         return json.dumps(vc.to_dict())
 
 
-def write_cellbrowser_to_anndata_zarr_store(project_name, output_dir="vitessce-files", keep_only_marker_genes=False):
+def convert_cell_browser_project_to_anndata(project_name, output_dir="vitessce-files", keep_only_marker_genes=False):
     """
     Given a CellBrowser project name, download the config, convert it to an Anndata-Zarr format,
     which is digestable by Vitessce, and save it to the output directory.
@@ -337,7 +344,7 @@ def write_cellbrowser_to_anndata_zarr_store(project_name, output_dir="vitessce-f
         raise ValueError("CellBrowser config is not valid. Please check the error message above.")
 
 
-def convert_cellbrowser_to_vitessce_view_config(project_name, output_dir="vitessce-files", keep_only_marker_genes=False):
+def convert_cellbrowser_project_to_vitessce_config(project_name, output_dir="vitessce-files", keep_only_marker_genes=False):
     """
     Given a CellBrowser project name, download the config, creates an Anndata object out of the .tsv files
     and returns a Vitessce view config json.

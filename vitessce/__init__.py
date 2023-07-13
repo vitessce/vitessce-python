@@ -23,8 +23,8 @@ from .constants import (
 
 from .config_converter import (
     CellBrowserToAnndataZarrConverter,
-    convert_to_vitessce_view_config,
-    write_to_AnndataZarr_store
+    convert_cellbrowser_to_vitessce_view_config,
+    write_cellbrowser_to_anndata_zarr_store
 )
 
 from .wrappers import AbstractWrapper

@@ -312,14 +312,10 @@ class CellBrowserToAnndataZarrConverter:
         )
         vc = VitessceConfig("1.0.15", f"Vitessce configuration for CellBrowser project {self.project_name}")
         anndata_wrapper_inst.auto_view_config(vc)
-        vc.get_datasets()[0].add_file(
-            file_type="anndata.h5ad",
-            url=str(path)
-        )
         return json.dumps(vc.to_dict())
 
 
-def write_to_AnndataZarr_store(project_name, output_dir="vitessce-files", keep_only_marker_genes=False):
+def write_cellbrowser_to_anndata_zarr_store(project_name, output_dir="vitessce-files", keep_only_marker_genes=False):
     """
     Given a CellBrowser project name, download the config, convert it to an Anndata-Zarr format,
     which is digestable by Vitessce, and save it to the output directory.
@@ -336,13 +332,12 @@ def write_to_AnndataZarr_store(project_name, output_dir="vitessce-files", keep_o
     config_is_valid = config_converter.download_config()
     if config_is_valid:
         config_converter.create_anndata_object()
-        config_converter.export_anndata_object()
-        print(f"CellBrowser config finished conversion. See the output files in {output_dir}.")
+        return config_converter.export_anndata_object()
     else:
         raise ValueError("CellBrowser config is not valid. Please check the error message above.")
 
 
-def convert_to_vitessce_view_config(project_name, output_dir="vitessce-files", keep_only_marker_genes=False):
+def convert_cellbrowser_to_vitessce_view_config(project_name, output_dir="vitessce-files", keep_only_marker_genes=False):
     """
     Given a CellBrowser project name, download the config, creates an Anndata object out of the .tsv files
     and returns a Vitessce view config json.

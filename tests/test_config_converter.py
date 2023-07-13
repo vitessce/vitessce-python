@@ -4,7 +4,12 @@ import os
 from os.path import join
 from copy import deepcopy
 
-from vitessce import (CellBrowserToAnndataZarrConverter, write_to_AnndataZarr_store)
+from vitessce import (
+    CellBrowserToAnndataZarrConverter,
+    write_cellbrowser_to_anndata_zarr_store,
+    convert_cellbrowser_to_vitessce_view_config,
+)
+
 from vitessce.data_utils import (
     VAR_CHUNK_SIZE
 )
@@ -99,6 +104,12 @@ def mock_write_zarr():
 
 
 @pytest.fixture
+def mock_write_adata():
+    with patch('anndata.AnnData.write') as mock:
+        yield mock
+
+
+@pytest.fixture
 def mock_filter_cells():
     with patch('scanpy.pp.filter_cells') as mock:
         yield mock
@@ -159,7 +170,7 @@ def test_filter_based_on_marker_genes(mock_end_to_end_tests, mock_filter_cells):
 
 
 def test_end_to_end(mock_makedirs, mock_write_zarr, mock_filter_cells, mock_end_to_end_tests):
-    write_to_AnndataZarr_store(project_name, output_dir, keep_only_marker_genes=False)
+    write_cellbrowser_to_anndata_zarr_store(project_name, output_dir, keep_only_marker_genes=False)
 
     mock_end_to_end_tests.assert_any_call("https://cells.ucsc.edu/test-project/dataset.json")
     mock_end_to_end_tests.assert_any_call("https://cells.ucsc.edu/test-project/exprMatrix.tsv.gz")
@@ -176,7 +187,7 @@ def test_end_to_end_invalid_config(mock_makedirs, mock_write_zarr, mock_filter_c
     with patch('requests.get') as mock_get:
         mock_get.return_value.json.return_value = invalid_cellbrowser_config
         with pytest.raises(ValueError):
-            write_to_AnndataZarr_store(project_name, output_dir, keep_only_marker_genes=False)
+            write_cellbrowser_to_anndata_zarr_store(project_name, output_dir, keep_only_marker_genes=False)
 
         mock_get.assert_called_once_with("https://cells.ucsc.edu/test-project/dataset.json")
 
@@ -193,7 +204,7 @@ def test_end_to_end_download_config_raises_exception(mock_makedirs, mock_write_z
     with patch('requests.get') as mock_get:
         mock_get.return_value = mock_response
         with pytest.raises(Exception):
-            write_to_AnndataZarr_store(project_name, output_dir, keep_only_marker_genes=False)
+            write_cellbrowser_to_anndata_zarr_store(project_name, output_dir, keep_only_marker_genes=False)
 
         mock_get.assert_called_once_with("https://cells.ucsc.edu/test-project/dataset.json")
 
@@ -213,7 +224,7 @@ def test_end_to_end_load_expr_matrix_raises_exception(mock_makedirs, mock_write_
     with patch('requests.get') as mock_get:
         mock_get.side_effect = [mock_first_response, mock_second_response]
         with pytest.raises(Exception):
-            write_to_AnndataZarr_store(project_name, output_dir, keep_only_marker_genes=False)
+            write_cellbrowser_to_anndata_zarr_store(project_name, output_dir, keep_only_marker_genes=False)
 
         mock_get.assert_any_call("https://cells.ucsc.edu/test-project/dataset.json")
         mock_get.assert_any_call("https://cells.ucsc.edu/test-project/exprMatrix.tsv.gz")
@@ -241,7 +252,7 @@ def test_end_to_end_load_cell_metadata_raises_exception(mock_makedirs, mock_writ
     with patch('requests.get') as mock_get:
         mock_get.side_effect = [mock_get_config, mock_response_expr_matrix, mock_response_meta]
         with pytest.raises(Exception):
-            write_to_AnndataZarr_store(project_name, output_dir, keep_only_marker_genes=False)
+            write_cellbrowser_to_anndata_zarr_store(project_name, output_dir, keep_only_marker_genes=False)
 
         mock_get.assert_any_call("https://cells.ucsc.edu/test-project/dataset.json")
         mock_get.assert_any_call("https://cells.ucsc.edu/test-project/exprMatrix.tsv.gz")
@@ -272,7 +283,7 @@ def test_end_to_end_add_coords_raises_exception(mock_makedirs, mock_write_zarr, 
     with patch('requests.get') as mock_get:
         mock_get.side_effect = [mock_get_config, mock_response_expr_matrix, mock_response_meta, mock_coords]
         with pytest.raises(Exception):
-            write_to_AnndataZarr_store(project_name, output_dir, keep_only_marker_genes=False)
+            write_cellbrowser_to_anndata_zarr_store(project_name, output_dir, keep_only_marker_genes=False)
 
         mock_get.assert_any_call("https://cells.ucsc.edu/test-project/dataset.json")
         mock_get.assert_any_call("https://cells.ucsc.edu/test-project/exprMatrix.tsv.gz")
@@ -282,3 +293,36 @@ def test_end_to_end_add_coords_raises_exception(mock_makedirs, mock_write_zarr, 
     assert mock_makedirs.call_count == 0
     assert mock_write_zarr.call_count == 0
     assert mock_filter_cells.call_count == 0
+
+
+def test_convert_cellbrowser_to_vitessce_view_config(mock_end_to_end_tests, mock_write_adata, mock_makedirs):
+
+    with patch('vitessce.wrappers.AnnDataWrapper.auto_view_config') as mock_auto_view_config:
+        with patch('vitessce.config.VitessceConfig.to_dict') as mock_vitessce_config:
+            mock_vitessce_config.return_value = {}
+            convert_cellbrowser_to_vitessce_view_config(project_name, output_dir, keep_only_marker_genes=False)
+            assert mock_auto_view_config.call_count == 1
+            assert mock_vitessce_config.call_count == 1
+
+    mock_end_to_end_tests.assert_any_call("https://cells.ucsc.edu/test-project/dataset.json")
+    mock_end_to_end_tests.assert_any_call("https://cells.ucsc.edu/test-project/exprMatrix.tsv.gz")
+    mock_end_to_end_tests.assert_any_call("https://cells.ucsc.edu/test-project/meta.tsv")
+    mock_end_to_end_tests.assert_any_call("https://cells.ucsc.edu/test-project/test.coords.tsv.gz")
+
+    assert mock_end_to_end_tests.call_count == 4
+    mock_makedirs.assert_called_once_with(os.path.dirname(join(output_dir, project_name)), exist_ok=True)
+    mock_write_adata.assert_called_once_with(join(output_dir, project_name, "out.adata.h5ad"))
+
+
+def test_convert_cellbrowser_to_vitessce_view_config_invalid_config(mock_makedirs, mock_write_adata):
+    with patch('requests.get') as mock_get:
+        mock_get.return_value.json.return_value = invalid_cellbrowser_config
+        with pytest.raises(ValueError):
+            convert_cellbrowser_to_vitessce_view_config(project_name, output_dir, keep_only_marker_genes=False)
+
+        mock_get.assert_called_once_with("https://cells.ucsc.edu/test-project/dataset.json")
+
+    assert mock_get.call_count == 1
+    assert mock_makedirs.call_count == 0
+    assert mock_write_adata.call_count == 0
+    assert mock_makedirs.call_count == 0

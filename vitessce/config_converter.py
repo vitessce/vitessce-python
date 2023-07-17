@@ -48,7 +48,7 @@ class CellBrowserToAnndataZarrConverter:
             return
 
         print(f"Saving the current version of the Anndata object to {self.adata_path} ...")
-        os.makedirs(os.path.dirname(self.output_path), exist_ok=True)
+        os.makedirs(os.path.dirname(self.adata_path), exist_ok=True)
         self.adata.write(self.adata_path)
         print("Anndata object is saved.")
 

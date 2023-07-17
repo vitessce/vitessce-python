@@ -22,7 +22,7 @@ class CellBrowserToAnndataZarrConverter:
     CellBrowserToAnndataZarrConverter class is responsible for converting a Cell Browser project to an Anndata-Zarr format.
     """
 
-    def __init__(self, project_name, output_dir, keep_only_marker_genes):
+    def __init__(self, project_name, output_dir, keep_only_marker_genes, save_intermediate_object):
         """
         Constructor for the CellBrowserToAnndataZarrConverter class.
         :param project_name: The name of the Cell Browser project to be converted.
@@ -35,10 +35,29 @@ class CellBrowserToAnndataZarrConverter:
         url_suffix = "/".join(project_name.split("+"))
         self.url_prefix = f"https://cells.ucsc.edu/{url_suffix}"
         self.project_name = project_name
-        self.output_dir = output_dir
         self.keep_only_marker_genes = keep_only_marker_genes
         self.cellbrowser_config = {}
         self.adata = None
+        self.save_intermediate_object = save_intermediate_object
+        self.output_path = join(output_dir, project_name)
+        self.adata_path = join(self.output_path, "out.adata.h5ad")
+
+    def _save_adata(self, force_save=False):
+        if not self.save_intermediate_object and not force_save:
+            print("save_intermediate_object is False. The current version of the Anndata object is not saved.")
+            return
+
+        print(f"Saving the current version of the Anndata object to {self.adata_path} ...")
+        os.makedirs(os.path.dirname(self.output_path), exist_ok=True)
+        self.adata.write(self.adata_path)
+        print("Anndata object is saved.")
+
+    def _load_adata(self):
+        if self.adata:
+            return
+        print("Loading the current version of the Anndata object from disk ...")
+        self.adata = anndata.read(self.adata_path)
+        print("Anndata object is loaded.")
 
     def _validate_config(self):
         schema = {
@@ -117,11 +136,12 @@ class CellBrowserToAnndataZarrConverter:
             raise e
 
         print("Loading expression matrix into Anndata object ...")
+
         with gzip.open(gzip_file, 'rt') as f:
             expr_matrix = pd.read_csv(f, sep='\t', index_col=0).T  # transpose it, because of Scanpy
 
         # Now create anndata object
-        self.adata = anndata.AnnData(X=expr_matrix)
+        self.adata = anndata.AnnData(X=expr_matrix, dtype='float32')
         self.adata.var['gene'] = self.adata.var_names
 
         # Filter out nan values
@@ -133,7 +153,9 @@ class CellBrowserToAnndataZarrConverter:
             # TODO: sometimes we might want to keep them both
             print("This dataset uses the format identifier|symbol for the ad.obs gene names (e.g. “ENSG0123123.3|HOX3”). We are keeping only the symbol.")
             self.adata.var_names = [x.split("|")[1] for x in list(self.adata.var_names)]
+
         print("Successfully loaded expression matrix into Anndata object.")
+        self._save_adata()
 
     def _load_coordinates(self):
         """
@@ -154,6 +176,8 @@ class CellBrowserToAnndataZarrConverter:
         }
 
         coord_urls = {}
+
+        self._load_adata()
 
         for obj in self.cellbrowser_config["coords"]:
             short_label = obj["shortLabel"].lower()
@@ -201,7 +225,9 @@ class CellBrowserToAnndataZarrConverter:
             except Exception as e:
                 print(f"Could not add {coord_type} to Anndata object because: {e}.")
                 raise e
-            print("Done adding coordinates to the Anndata object.")
+
+        print("Done adding coordinates to the Anndata object.")
+        self._save_adata()
 
     def _load_cell_metadata(self):
         """
@@ -210,6 +236,7 @@ class CellBrowserToAnndataZarrConverter:
         """
         try:
             print("Adding cell metadata to Anndata object ...")
+            self._load_adata()
             # Load meta
             meta_url_suffix = self.cellbrowser_config["fileVersions"]["outMeta"]["fname"].split("/")[-1]
             response = requests.get("/".join([self.url_prefix, meta_url_suffix]))
@@ -224,6 +251,7 @@ class CellBrowserToAnndataZarrConverter:
             # remove space from obs column names to avoid Vitessce breaking downstream
             self.adata.obs.columns = [x.replace(" ", "") for x in self.adata.obs.columns.tolist()]
             print(f"Successfully downloaded metadata {meta_url_suffix}.")
+            self._save_adata()
         except Exception as e:
             print(f"Could not download metadata because: {e}.")
             raise e
@@ -245,6 +273,7 @@ class CellBrowserToAnndataZarrConverter:
         workflow in single-cell RNA sequencing data analysis.
         They are taken from this tutorial: https://scanpy-tutorials.readthedocs.io/en/latest/tutorial_pearson_residuals.html.
         """
+        self._load_adata()
         # Filter data
         self.adata.var_names_make_unique()
         sc.pp.filter_cells(self.adata, min_genes=200)
@@ -260,6 +289,7 @@ class CellBrowserToAnndataZarrConverter:
             marker_genes = [gene for sublist in self.cellbrowser_config["topMarkers"].values() for gene in sublist]
             self.adata = self.adata[:, self.adata.var_names.isin(marker_genes)]
             print("Successfully filtered out all non-marker genes from Anndata object.")
+        self._save_adata()
 
     def create_anndata_object(self):
         """
@@ -279,8 +309,7 @@ class CellBrowserToAnndataZarrConverter:
         Writes the contents of the Anndata object of the class instance to a Zarr store. Saves the Zarr store to the output directory
         that the class is instantiated with.
         """
-        data_dir = join(self.output_dir, self.project_name)
-        zarr_filepath = join(data_dir, "out.adata.zarr")
+        zarr_filepath = join(self.output_path, "out.adata.zarr")
 
         obs_columns_list = self.adata.obs.columns.tolist()
         obsm_keys = list(self.adata.obsm.keys())
@@ -304,21 +333,16 @@ class CellBrowserToAnndataZarrConverter:
             var_cols=var_cols_list,
         )
 
-        os.makedirs(os.path.dirname(data_dir), exist_ok=True)
+        os.makedirs(os.path.dirname(self.output_path), exist_ok=True)
         self.adata.write_zarr(zarr_filepath, chunks=[self.adata.shape[0], VAR_CHUNK_SIZE])
         print("Successfully saved Anndata object to the Zarr store.")
 
     def create_vitessce_config(self):
         """
-        Saves the Anndata object to a file and creates a Vitessce configuration dictionary for the project.
+        Creates a Vitessce configuration dictionary for the project with the latest version of the Anndata object.
         """
-        output_dir = join(self.output_dir, self.project_name)
-        os.makedirs(os.path.dirname(output_dir), exist_ok=True)
-
-        adata_path = join(self.output_dir, self.project_name, "out.adata.h5ad")
-        self.adata.write(adata_path)
-
-        path = Path(adata_path)
+        self._save_adata(force_save=True)
+        path = Path(self.adata_path)
         anndata_wrapper_inst = AnnDataWrapper(
             adata_path=str(path.parent),
             obs_embedding_names=list(self.adata.obsm.keys()),
@@ -329,7 +353,7 @@ class CellBrowserToAnndataZarrConverter:
         return json.dumps(vc.to_dict())
 
 
-def convert_cell_browser_project_to_anndata(project_name, output_dir="vitessce-files", keep_only_marker_genes=False):
+def convert_cell_browser_project_to_anndata(project_name, output_dir="vitessce-files", keep_only_marker_genes=False, save_intermediate_object=False):
     """
     Given a CellBrowser project name, download the config, convert it to an Anndata-Zarr format,
     which is digestable by Vitessce, and save it to the output directory.
@@ -340,9 +364,12 @@ def convert_cell_browser_project_to_anndata(project_name, output_dir="vitessce-f
     :type output_dir: str, "vitessce-files" by default
     :param keep_only_marker_genes: Whether to keep only marker genes in the expression matrix.
     :type keep_only_marker_genes: bool, False by default
+    :param save_intermediate_object: Whether to save the intermediate versions of the Anndata object to the output directory.
+    Allows for the script to be restarted from a later step if previous run fails. Useful when creating configs for large datasets.
+    :type: bool
     """
     print(f"Converting CellBrowser config for project {project_name} to Anndata-Zarr object and saving it to {output_dir}")
-    config_converter = CellBrowserToAnndataZarrConverter(project_name, output_dir, keep_only_marker_genes)
+    config_converter = CellBrowserToAnndataZarrConverter(project_name, output_dir, keep_only_marker_genes, save_intermediate_object)
     config_is_valid = config_converter.download_config()
     if config_is_valid:
         config_converter.create_anndata_object()
@@ -351,13 +378,23 @@ def convert_cell_browser_project_to_anndata(project_name, output_dir="vitessce-f
         raise ValueError("CellBrowser config is not valid. Please check the error message above.")
 
 
-def convert_cellbrowser_project_to_vitessce_config(project_name, output_dir="vitessce-files", keep_only_marker_genes=False):
+def convert_cellbrowser_project_to_vitessce_config(project_name, output_dir="vitessce-files", keep_only_marker_genes=False, save_intermediate_object=False):
     """
     Given a CellBrowser project name, download the config, creates an Anndata object out of the .tsv files
     and returns a Vitessce view config json.
+
+    :type project_name: str
+    :param project_name: CellBrowser project name
+    :param output_dir: Output directory to save the Anndata-Zarr file
+    :type output_dir: str, "vitessce-files" by default
+    :param keep_only_marker_genes: Whether to keep only marker genes in the expression matrix.
+    :type keep_only_marker_genes: bool, False by default
+    :param save_intermediate_object: Whether to save the intermediate versions of the Anndata object to the output directory.
+    Allows for the script to be restarted from a later step if previous run fails. Useful when creating configs for large datasets.
+    :type: bool
     """
     print(f"Converting CellBrowser config for project {project_name} to Vitessce view config")
-    config_converter = CellBrowserToAnndataZarrConverter(project_name, output_dir, keep_only_marker_genes)
+    config_converter = CellBrowserToAnndataZarrConverter(project_name, output_dir, keep_only_marker_genes, save_intermediate_object)
     config_is_valid = config_converter.download_config()
     vitessce_config = {}
     if config_is_valid:
@@ -366,6 +403,7 @@ def convert_cellbrowser_project_to_vitessce_config(project_name, output_dir="vit
     else:
         raise ValueError("CellBrowser config is not valid. Please check the error message above.")
 
-    print("CellBrowser config finished conversion. Here is your Vitessce view config:")
+    print("CellBrowser config finished conversion. Here is your Vitessce view config JSON:")
     print(vitessce_config)
+    print("\n")
     print("NOTE: make sure that the path under files.url is accessible from the browser.")

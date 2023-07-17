@@ -3,6 +3,9 @@ from unittest.mock import patch, Mock
 import os
 from os.path import join
 from copy import deepcopy
+import numpy as np
+import anndata
+
 
 from vitessce import (
     CellBrowserToAnndataZarrConverter,
@@ -152,6 +155,18 @@ def mock_write_adata():
 
 
 @pytest.fixture
+def mock_read_adata():
+    with patch('anndata.read') as mock:
+        # Create a dummy AnnData object
+        dummy_data = np.random.rand(10, 10)
+        mock_adata = anndata.AnnData(dummy_data)
+
+        # Mock _read_adata to return the dummy AnnData object
+        mock.return_value = mock_adata
+        yield mock
+
+
+@pytest.fixture
 def mock_filter_cells():
     with patch('scanpy.pp.filter_cells') as mock:
         yield mock
@@ -180,11 +195,39 @@ def mock_end_to_end_tests(request):
         yield mock_get
 
 
+def test_load_adata_from_previous_run(mock_read_adata, mock_filter_cells, mock_write_adata):
+
+    mock_get_config = Mock()
+    mock_get_config.json.return_value = valid_cellbrowser_config
+
+    with open('tests/data/test_meta.tsv', 'rb') as f:
+        mock_response_meta = Mock()
+        mock_response_meta.content = f.read()
+        mock_response_meta.raise_for_status.return_value = None
+
+    with open('tests/data/test.coords.tsv.gz', 'rb') as f:
+        mock_response_coords = Mock()
+        mock_response_coords.content = f.read()
+
+    with patch('requests.get') as mock_get:
+        mock_get.side_effect = [mock_get_config, mock_response_meta, mock_response_coords]
+        with patch('vitessce.config_converter.CellBrowserToAnndataZarrConverter._load_expr_matrix') as mock_load:
+            obj = CellBrowserToAnndataZarrConverter(project_name, output_dir, False, True)
+            config_is_valid = obj.download_config()
+            assert config_is_valid
+            obj.create_anndata_object()
+            assert mock_load.call_count == 1
+
+    assert mock_read_adata.call_count == 1
+    assert mock_filter_cells.call_count == 1
+    assert mock_write_adata.call_count == 3
+
+
 def test_download_valid_config():
 
     with patch('requests.get') as mock_get:
         mock_get.return_value.json.return_value = valid_cellbrowser_config
-        obj = CellBrowserToAnndataZarrConverter(project_name, output_dir, False)
+        obj = CellBrowserToAnndataZarrConverter(project_name, output_dir, False, False)
         is_valid = obj.download_config()
 
         mock_get.assert_called_once_with('https://cells.ucsc.edu/test-project/dataset.json')
@@ -195,7 +238,7 @@ def test_download_valid_config():
 @pytest.mark.parametrize('mock_end_to_end_tests', [valid_cellbrowser_config], indirect=True)
 def test_filter_based_on_marker_genes(mock_end_to_end_tests, mock_filter_cells):
 
-    inst = CellBrowserToAnndataZarrConverter(project_name, output_dir, True)
+    inst = CellBrowserToAnndataZarrConverter(project_name, output_dir, True, False)
     config_is_valid = inst.download_config()
 
     assert config_is_valid

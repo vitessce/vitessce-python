@@ -5,14 +5,13 @@ channels:
 dependencies:
  - python==3.9
  - numpy>=1.14.0
- - pandas>=1.5.3
- - anndata==0.8.0
+ - pandas>=1.1.2
+ - anndata==0.7.8
  - numba>=0.53.0
  - scanpy>=1.6.0
  - jupyterlab>=3
  - zarr>=2.5.0
  - boto3>=1.16.30
- - starlette==0.30.0
  - pip
  - pip:
    - loompy>=3.0.6

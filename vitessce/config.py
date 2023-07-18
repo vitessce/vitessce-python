@@ -251,8 +251,8 @@ def hconcat(*views):
     """
     A helper function to create a ``VitessceConfigViewHConcat`` instance.
 
-    :param \\*views: A variable number of views to concatenate horizontally.
-    :type \\*views: VitessceConfigView or VitessceConfigViewVConcat or VitessceConfigViewHConcat
+    :param \*views: A variable number of views to concatenate horizontally.
+    :type \*views: VitessceConfigView or VitessceConfigViewVConcat or VitessceConfigViewHConcat
 
     :returns: The concatenated view instance.
     :rtype: VitessceConfigViewHConcat
@@ -294,8 +294,8 @@ def vconcat(*views):
     """
     A helper function to create a ``VitessceConfigViewVConcat`` instance.
 
-    :param \\*views: A variable number of views to concatenate vertically.
-    :type \\*views: VitessceConfigView or VitessceConfigViewVConcat or VitessceConfigViewHConcat
+    :param \*views: A variable number of views to concatenate vertically.
+    :type \*views: VitessceConfigView or VitessceConfigViewVConcat or VitessceConfigViewHConcat
 
     :returns: The concatenated view instance.
     :rtype: VitessceConfigViewVConcat
@@ -374,8 +374,8 @@ class VitessceConfigView:
         """
         Attach a coordination scope to this view instance. All views using the same coordination scope for a particular coordination type will effectively be linked together.
 
-        :param \\*c_scopes: A variable number of coordination scope instances can be passed.
-        :type \\*c_scopes: VitessceConfigCoordinationScope
+        :param \*c_scopes: A variable number of coordination scope instances can be passed.
+        :type \*c_scopes: VitessceConfigCoordinationScope
 
         :returns: Self, to allow chaining.
         :rtype: VitessceConfigView
@@ -427,7 +427,7 @@ class VitessceConfigView:
         """
         Set the props for this view.
 
-        :param \\*\\*kwargs: A variable number of named props.
+        :param \*\*kwargs: A variable number of named props.
 
         :returns: Self, to allow chaining.
         :rtype: VitessceConfigView
@@ -753,8 +753,8 @@ class VitessceConfig:
         """
         Add scope(s) for new coordination type(s) to the config.
 
-        :param \\*c_types: A variable number of coordination types.
-        :type \\*c_types: str or vitessce.constants.CoordinationType
+        :param \*c_types: A variable number of coordination types.
+        :type \*c_types: str or vitessce.constants.CoordinationType
 
         :returns: The instances for the new scope objects corresponding to each coordination type. These can be linked to views via the ``VitessceConfigView.use_coordination()`` method.
         :rtype: list[VitessceConfigCoordinationScope]
@@ -1176,7 +1176,7 @@ class VitessceConfig:
         Export this config's data objects to the local file system or a cloud storage system and get the resulting view config.
 
         :param str to: The export destination. Valid values include "S3" and "files".
-        :param \\*\\*kwargs: Keyword arguments to pass to the export function.
+        :param \*\*kwargs: Keyword arguments to pass to the export function.
         :returns: The config as a dict, with URLs for the bucket filled in.
         :rtype: dict
 
@@ -1210,7 +1210,7 @@ class VitessceChainableConfig(VitessceConfig):
         """
         Construct a Vitessce view config object.
 
-        :param \\*\\*kwargs:  Takes the same arguments as the constructor on the ``VitessceConfig`` class.
+        :param \*\*kwargs:  Takes the same arguments as the constructor on the ``VitessceConfig`` class.
 
         .. code-block:: python
             :emphasize-lines: 3
@@ -1231,7 +1231,7 @@ class VitessceChainableConfig(VitessceConfig):
         """
         Add a dataset to this config.
 
-        :param \\*\\*kwargs: Takes the same arguments as the ``add_dataset`` method on the ``VitessceConfig`` class.
+        :param \*\*kwargs: Takes the same arguments as the ``add_dataset`` method on the ``VitessceConfig`` class.
 
         :returns: The config instance.
         :rtype: VitessceChainableConfig
@@ -1247,7 +1247,7 @@ class VitessceChainableConfig(VitessceConfig):
         Add a view to this config.
 
         :param component: Takes the same arguments as the ``add_view`` method on the ``VitessceConfig`` class.
-        :param \\*\\*kwargs: Takes the same arguments as the ``add_view`` method on the ``VitessceConfig`` class.
+        :param \*\*kwargs: Takes the same arguments as the ``add_view`` method on the ``VitessceConfig`` class.
 
         :returns: The config instance.
         :rtype: VitessceChainableConfig

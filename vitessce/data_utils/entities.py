@@ -38,7 +38,7 @@ class Cells:
         if len(coords) != len(self._cell_ids):
             raise ArgumentLengthDoesNotMatchCellIdsException(
                 'Coordinates length does not match Cell IDs Length')
-        if not isinstance(name, str):
+        if type(name) != str:
             raise TypeError(
                 'name argument needs to be a string for adding a scatterplot mapping')
         for idx, id in enumerate(self._cell_ids):
@@ -56,7 +56,7 @@ class Cells:
         if len(centroids) != len(self._cell_ids):
             raise ArgumentLengthDoesNotMatchCellIdsException(
                 'Centroid length does not match Cell IDs Length')
-        if not isinstance(centroids, list) or any([len(centroid) != 2 or not isinstance(centroid, list) for centroid in centroids]):
+        if type(centroids) != list or any([len(centroid) != 2 or type(centroid) != list for centroid in centroids]):
             raise TypeError('Centroids should be a list of two element lists')
         for idx, id in enumerate(self._cell_ids):
             self.json[id]['xy'] = centroids[idx]
@@ -71,7 +71,7 @@ class Cells:
             raise ArgumentLengthDoesNotMatchCellIdsException(
                 'Segmentations length does not match Cell IDs Length')
         for idx, id in enumerate(self._cell_ids):
-            if not isinstance(polygon_outline[idx], list) or any([len(coord) != 2 or not isinstance(coord, list) for coord in polygon_outline[idx]]):
+            if type(polygon_outline[idx]) != list or any([len(coord) != 2 or type(coord) != list for coord in polygon_outline[idx]]):
                 raise TypeError(
                     f'Polygon outline for {id} should be a list of two element lists i.e xy coordinates')
             self.json[id]['poly'] = polygon_outline[idx]

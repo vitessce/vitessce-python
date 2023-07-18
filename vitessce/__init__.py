@@ -22,9 +22,8 @@ from .constants import (
 )
 
 from .config_converter import (
-    CellBrowserToAnndataZarrConverter,
-    convert_cellbrowser_project_to_vitessce_config,
-    convert_cell_browser_project_to_anndata
+    CellBrowserToAnndataZarrConverter, # only exported for testing.
+    convert_cell_browser_project_to_anndata,
 )
 
 from .wrappers import AbstractWrapper

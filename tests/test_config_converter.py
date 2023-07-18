@@ -155,6 +155,7 @@ def mock_read_adata():
         yield mock
 """
 
+
 @pytest.fixture
 def mock_filter_cells():
     with patch('scanpy.pp.filter_cells') as mock:
@@ -182,6 +183,7 @@ def mock_end_to_end_tests(request):
     with patch('requests.get') as mock_get:
         mock_get.side_effect = [mock_response_json, mock_response_expr_matrix, mock_response_meta, mock_response_coords]
         yield mock_get
+
 
 def test_download_valid_config():
 
@@ -233,6 +235,7 @@ def test_end_to_end(mock_filter_cells, mock_end_to_end_tests, expected):
 
     assert mock_end_to_end_tests.call_count == 4
     assert mock_filter_cells.call_count == 1
+
 
 def test_end_to_end_invalid_config(mock_filter_cells):
     with patch('requests.get') as mock_get:

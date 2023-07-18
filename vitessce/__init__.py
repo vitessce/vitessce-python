@@ -22,7 +22,7 @@ from .constants import (
 )
 
 from .config_converter import (
-    CellBrowserToAnndataZarrConverter, # only exported for testing.
+    CellBrowserToAnndataZarrConverter,  # only exported for testing.
     convert_cell_browser_project_to_anndata,
 )
 

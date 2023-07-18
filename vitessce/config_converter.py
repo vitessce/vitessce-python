@@ -290,7 +290,7 @@ class CellBrowserToAnndataZarrConverter:
             if isinstance(self.adata.obsm[key], pd.DataFrame):
                 print(f"obsm {key} is an instance of DataFrame, converting it to numpy array.")
                 self.adata.obsm[key] = self.adata.obsm[key].to_numpy()
-        
+
         for col in self.adata.obs.columns.tolist():
             if self.adata.obs[col].dtype == object:
                 self.adata.obs[col] = self.adata.obs[col].astype('category')
@@ -302,6 +302,7 @@ class CellBrowserToAnndataZarrConverter:
             optimize_X=True,
             var_cols=var_cols_list,
         ).copy()
+
 
 def convert_cell_browser_project_to_anndata(project_name, keep_only_marker_genes=False):
     """

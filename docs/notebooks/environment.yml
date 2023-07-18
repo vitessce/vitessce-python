@@ -12,7 +12,12 @@ dependencies:
  - jupyterlab>=3
  - zarr>=2.5.0
  - boto3>=1.16.30
- - starlette==0.30.0
+ - starlette==0.14.0
+  # aiofiles is not explicitly referenced in our code,
+  # but it is an implicit dependency of starlette==0.14.0.
+  # https://github.com/encode/starlette/issues/49
+  # Upgrading starlette will remove this dependency.
+ - aiofiles>=0.6.0
  - pip
  - pip:
    - loompy>=3.0.6

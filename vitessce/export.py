@@ -34,19 +34,19 @@ def export_to_s3(config, s3, bucket_name, prefix=''):
 
         print(f"Uploading {bucket_name}:{key}")
 
-        if type(route) == JsonRoute:
+        if isinstance(route, JsonRoute):
             if route not in uploaded_routes:
                 data_json = route.data_json
                 bucket.put_object(Key=key, Body=json.dumps(data_json).encode())
                 uploaded_routes.append(route)
-        elif type(route) == FileRoute:
+        elif isinstance(route, FileRoute):
             if route not in uploaded_routes:
                 local_file_path = route.file_path
                 s3.meta.client.upload_file(local_file_path, bucket_name, key)
                 uploaded_routes.append(route)
-        elif type(route) == Mount:
+        elif isinstance(route, Mount):
             route_app = route.app
-            if type(route_app) == StaticFiles:
+            if isinstance(route_app, StaticFiles):
                 if route not in uploaded_routes:
                     uploaded_routes.append(route)
                     static_dir = route_app.directory
@@ -76,18 +76,18 @@ def export_to_files(config, base_url, out_dir='.'):
         route_path = route.path[1:]
         out_path = join(out_dir, route_path)
 
-        if type(route) == JsonRoute:
+        if isinstance(route, JsonRoute):
             data_json = route.data_json
             os.makedirs(os.path.dirname(out_path), exist_ok=True)
             with open(out_path, 'w') as f:
                 json.dump(data_json, f)
-        elif type(route) == FileRoute:
+        elif isinstance(route, FileRoute):
             local_file_path = route.file_path
             os.makedirs(os.path.dirname(out_path), exist_ok=True)
             copyfile(local_file_path, out_path)
-        elif type(route) == Mount:
+        elif isinstance(route, Mount):
             route_app = route.app
-            if type(route_app) == StaticFiles:
+            if isinstance(route_app, StaticFiles):
                 static_dir = route_app.directory
 
                 for root, dirs, files in os.walk(static_dir):

@@ -1,21 +1,12 @@
 import pytest
 from unittest.mock import patch, Mock
-import os
-from os.path import join
 from copy import deepcopy
-import numpy as np
-import anndata
-
 
 from vitessce import (
     CellBrowserToAnndataZarrConverter,
     convert_cell_browser_project_to_anndata,
-    convert_cellbrowser_project_to_vitessce_config,
 )
 
-from vitessce.data_utils import (
-    VAR_CHUNK_SIZE
-)
 
 valid_cellbrowser_config = {
     "fileVersions": {
@@ -133,9 +124,8 @@ cellbrowser_config_no_coords_filename_multi_word_shortlabel = {
 }
 
 project_name = "test-project"
-output_dir = "test-output-dir"
 
-
+"""
 @pytest.fixture
 def mock_makedirs():
     with patch('os.makedirs') as mock:
@@ -153,7 +143,6 @@ def mock_write_adata():
     with patch('anndata.AnnData.write') as mock:
         yield mock
 
-
 @pytest.fixture
 def mock_read_adata():
     with patch('anndata.read') as mock:
@@ -164,6 +153,7 @@ def mock_read_adata():
         # Mock _read_adata to return the dummy AnnData object
         mock.return_value = mock_adata
         yield mock
+"""
 
 
 @pytest.fixture
@@ -195,39 +185,11 @@ def mock_end_to_end_tests(request):
         yield mock_get
 
 
-def test_load_adata_from_previous_run(mock_read_adata, mock_filter_cells, mock_write_adata):
-
-    mock_get_config = Mock()
-    mock_get_config.json.return_value = valid_cellbrowser_config
-
-    with open('tests/data/test_meta.tsv', 'rb') as f:
-        mock_response_meta = Mock()
-        mock_response_meta.content = f.read()
-        mock_response_meta.raise_for_status.return_value = None
-
-    with open('tests/data/test.coords.tsv.gz', 'rb') as f:
-        mock_response_coords = Mock()
-        mock_response_coords.content = f.read()
-
-    with patch('requests.get') as mock_get:
-        mock_get.side_effect = [mock_get_config, mock_response_meta, mock_response_coords]
-        with patch('vitessce.config_converter.CellBrowserToAnndataZarrConverter._load_expr_matrix') as mock_load:
-            obj = CellBrowserToAnndataZarrConverter(project_name, output_dir, False, True)
-            config_is_valid = obj.download_config()
-            assert config_is_valid
-            obj.create_anndata_object()
-            assert mock_load.call_count == 1
-
-    assert mock_read_adata.call_count == 1
-    assert mock_filter_cells.call_count == 1
-    assert mock_write_adata.call_count == 3
-
-
 def test_download_valid_config():
 
     with patch('requests.get') as mock_get:
         mock_get.return_value.json.return_value = valid_cellbrowser_config
-        obj = CellBrowserToAnndataZarrConverter(project_name, output_dir, False, False)
+        obj = CellBrowserToAnndataZarrConverter(project_name, keep_only_marker_genes=False)
         is_valid = obj.download_config()
 
         mock_get.assert_called_once_with('https://cells.ucsc.edu/test-project/dataset.json')
@@ -238,7 +200,7 @@ def test_download_valid_config():
 @pytest.mark.parametrize('mock_end_to_end_tests', [valid_cellbrowser_config], indirect=True)
 def test_filter_based_on_marker_genes(mock_end_to_end_tests, mock_filter_cells):
 
-    inst = CellBrowserToAnndataZarrConverter(project_name, output_dir, True, False)
+    inst = CellBrowserToAnndataZarrConverter(project_name, keep_only_marker_genes=True)
     config_is_valid = inst.download_config()
 
     assert config_is_valid
@@ -263,8 +225,8 @@ def test_filter_based_on_marker_genes(mock_end_to_end_tests, mock_filter_cells):
         (cellbrowser_config_no_coords_filename_multi_word_shortlabel, "Seurat_umap.coords.tsv.gz")
     ], indirect=["mock_end_to_end_tests"]
 )
-def test_end_to_end(mock_makedirs, mock_write_zarr, mock_filter_cells, mock_end_to_end_tests, expected):
-    convert_cell_browser_project_to_anndata(project_name, output_dir, keep_only_marker_genes=False)
+def test_end_to_end(mock_filter_cells, mock_end_to_end_tests, expected):
+    convert_cell_browser_project_to_anndata(project_name, keep_only_marker_genes=False)
 
     mock_end_to_end_tests.assert_any_call("https://cells.ucsc.edu/test-project/dataset.json")
     mock_end_to_end_tests.assert_any_call("https://cells.ucsc.edu/test-project/exprMatrix.tsv.gz")
@@ -273,42 +235,36 @@ def test_end_to_end(mock_makedirs, mock_write_zarr, mock_filter_cells, mock_end_
 
     assert mock_end_to_end_tests.call_count == 4
     assert mock_filter_cells.call_count == 1
-    mock_makedirs.assert_called_once_with(os.path.dirname(join(output_dir, project_name)), exist_ok=True)
-    mock_write_zarr.assert_called_once_with(join(output_dir, project_name, "out.adata.zarr"), chunks=[8, VAR_CHUNK_SIZE])
 
 
-def test_end_to_end_invalid_config(mock_makedirs, mock_write_zarr, mock_filter_cells):
+def test_end_to_end_invalid_config(mock_filter_cells):
     with patch('requests.get') as mock_get:
         mock_get.return_value.json.return_value = invalid_cellbrowser_config
         with pytest.raises(ValueError):
-            convert_cell_browser_project_to_anndata(project_name, output_dir, keep_only_marker_genes=False)
+            convert_cell_browser_project_to_anndata(project_name, keep_only_marker_genes=False)
 
         mock_get.assert_called_once_with("https://cells.ucsc.edu/test-project/dataset.json")
 
     assert mock_get.call_count == 1
-    assert mock_makedirs.call_count == 0
-    assert mock_write_zarr.call_count == 0
     assert mock_filter_cells.call_count == 0
 
 
-def test_end_to_end_download_config_raises_exception(mock_makedirs, mock_write_zarr, mock_filter_cells):
+def test_end_to_end_download_config_raises_exception(mock_filter_cells):
     mock_response = Mock()
     mock_response.raise_for_status.side_effect = Exception("Error downloading file")
 
     with patch('requests.get') as mock_get:
         mock_get.return_value = mock_response
         with pytest.raises(Exception):
-            convert_cell_browser_project_to_anndata(project_name, output_dir, keep_only_marker_genes=False)
+            convert_cell_browser_project_to_anndata(project_name, keep_only_marker_genes=False)
 
         mock_get.assert_called_once_with("https://cells.ucsc.edu/test-project/dataset.json")
 
         assert mock_get.call_count == 1
-    assert mock_makedirs.call_count == 0
-    assert mock_write_zarr.call_count == 0
     assert mock_filter_cells.call_count == 0
 
 
-def test_end_to_end_load_expr_matrix_raises_exception(mock_makedirs, mock_write_zarr, mock_filter_cells):
+def test_end_to_end_load_expr_matrix_raises_exception(mock_filter_cells):
     mock_first_response = Mock()
     mock_first_response.json.return_value = valid_cellbrowser_config
 
@@ -318,17 +274,15 @@ def test_end_to_end_load_expr_matrix_raises_exception(mock_makedirs, mock_write_
     with patch('requests.get') as mock_get:
         mock_get.side_effect = [mock_first_response, mock_second_response]
         with pytest.raises(Exception):
-            convert_cell_browser_project_to_anndata(project_name, output_dir, keep_only_marker_genes=False)
+            convert_cell_browser_project_to_anndata(project_name, keep_only_marker_genes=False)
 
         mock_get.assert_any_call("https://cells.ucsc.edu/test-project/dataset.json")
         mock_get.assert_any_call("https://cells.ucsc.edu/test-project/exprMatrix.tsv.gz")
         assert mock_get.call_count == 2
-    assert mock_makedirs.call_count == 0
-    assert mock_write_zarr.call_count == 0
     assert mock_filter_cells.call_count == 0
 
 
-def test_end_to_end_load_cell_metadata_raises_exception(mock_makedirs, mock_write_zarr, mock_filter_cells):
+def test_end_to_end_load_cell_metadata_raises_exception(mock_filter_cells):
     mock_get_config = Mock()
     mock_get_config.json.return_value = valid_cellbrowser_config
 
@@ -339,25 +293,21 @@ def test_end_to_end_load_cell_metadata_raises_exception(mock_makedirs, mock_writ
 
     mock_response_meta = Mock()
     mock_response_meta.raise_for_status.side_effect = Exception("Error downloading file")
-    assert mock_makedirs.call_count == 0
-    assert mock_write_zarr.call_count == 0
     assert mock_filter_cells.call_count == 0
 
     with patch('requests.get') as mock_get:
         mock_get.side_effect = [mock_get_config, mock_response_expr_matrix, mock_response_meta]
         with pytest.raises(Exception):
-            convert_cell_browser_project_to_anndata(project_name, output_dir, keep_only_marker_genes=False)
+            convert_cell_browser_project_to_anndata(project_name, keep_only_marker_genes=False)
 
         mock_get.assert_any_call("https://cells.ucsc.edu/test-project/dataset.json")
         mock_get.assert_any_call("https://cells.ucsc.edu/test-project/exprMatrix.tsv.gz")
         mock_get.assert_any_call("https://cells.ucsc.edu/test-project/meta.tsv")
         assert mock_get.call_count == 3
-    assert mock_makedirs.call_count == 0
-    assert mock_write_zarr.call_count == 0
     assert mock_filter_cells.call_count == 0
 
 
-def test_end_to_end_add_coords_raises_exception(mock_makedirs, mock_write_zarr, mock_filter_cells):
+def test_end_to_end_add_coords_raises_exception(mock_filter_cells):
     mock_get_config = Mock()
     mock_get_config.json.return_value = valid_cellbrowser_config
 
@@ -377,47 +327,11 @@ def test_end_to_end_add_coords_raises_exception(mock_makedirs, mock_write_zarr, 
     with patch('requests.get') as mock_get:
         mock_get.side_effect = [mock_get_config, mock_response_expr_matrix, mock_response_meta, mock_coords]
         with pytest.raises(Exception):
-            convert_cell_browser_project_to_anndata(project_name, output_dir, keep_only_marker_genes=False)
+            convert_cell_browser_project_to_anndata(project_name, keep_only_marker_genes=False)
 
         mock_get.assert_any_call("https://cells.ucsc.edu/test-project/dataset.json")
         mock_get.assert_any_call("https://cells.ucsc.edu/test-project/exprMatrix.tsv.gz")
         mock_get.assert_any_call("https://cells.ucsc.edu/test-project/meta.tsv")
         mock_get.assert_any_call("https://cells.ucsc.edu/test-project/test.coords.tsv.gz")
         assert mock_get.call_count == 4
-    assert mock_makedirs.call_count == 0
-    assert mock_write_zarr.call_count == 0
     assert mock_filter_cells.call_count == 0
-
-
-@pytest.mark.parametrize('mock_end_to_end_tests', [valid_cellbrowser_config], indirect=True)
-def test_convert_cellbrowser_to_vitessce_view_config(mock_end_to_end_tests, mock_write_adata, mock_makedirs):
-
-    with patch('vitessce.wrappers.AnnDataWrapper.auto_view_config') as mock_auto_view_config:
-        with patch('vitessce.config.VitessceConfig.to_dict') as mock_vitessce_config:
-            mock_vitessce_config.return_value = {}
-            convert_cellbrowser_project_to_vitessce_config(project_name, output_dir, keep_only_marker_genes=False)
-            assert mock_auto_view_config.call_count == 1
-            assert mock_vitessce_config.call_count == 1
-
-    mock_end_to_end_tests.assert_any_call("https://cells.ucsc.edu/test-project/dataset.json")
-    mock_end_to_end_tests.assert_any_call("https://cells.ucsc.edu/test-project/exprMatrix.tsv.gz")
-    mock_end_to_end_tests.assert_any_call("https://cells.ucsc.edu/test-project/meta.tsv")
-    mock_end_to_end_tests.assert_any_call("https://cells.ucsc.edu/test-project/test.coords.tsv.gz")
-
-    assert mock_end_to_end_tests.call_count == 4
-    mock_makedirs.assert_called_once_with(os.path.dirname(join(output_dir, project_name)), exist_ok=True)
-    mock_write_adata.assert_called_once_with(join(output_dir, project_name, "out.adata.h5ad"))
-
-
-def test_convert_cellbrowser_to_vitessce_view_config_invalid_config(mock_makedirs, mock_write_adata):
-    with patch('requests.get') as mock_get:
-        mock_get.return_value.json.return_value = invalid_cellbrowser_config
-        with pytest.raises(ValueError):
-            convert_cellbrowser_project_to_vitessce_config(project_name, output_dir, keep_only_marker_genes=False)
-
-        mock_get.assert_called_once_with("https://cells.ucsc.edu/test-project/dataset.json")
-
-    assert mock_get.call_count == 1
-    assert mock_makedirs.call_count == 0
-    assert mock_write_adata.call_count == 0
-    assert mock_makedirs.call_count == 0

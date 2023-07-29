@@ -12,6 +12,17 @@ class DocEnum(Enum):
         self.__doc__ = doc
         return self
 
+def norm_enum(enum_val, expected_enum_class=None):
+    assert isinstance(enum_val, str) or isinstance(enum_val, expected_enum_class)
+    # We don't actually use the expected_enum_class,
+    # since it would not account for things like plugin coordination types, etc.
+    # But we can pass it around anyway and in the future could use
+    # it for extra checks, e.g. upon debug flags being true.
+    if isinstance(enum_val, str):
+        return enum_val
+    else:
+        return enum_val.value
+
 
 class CoordinationType(DocEnum):
     """
@@ -19,6 +30,8 @@ class CoordinationType(DocEnum):
     The term coordination type refers to a parameter to be coordinated, and its programming-language-like type.
     For example, the ``SPATIAL_ZOOM`` coordination type represents a coordination of the zoom level of a spatial view, which can take a float value.
     """
+    META_COORDINATION_SCOPES = "metaCoordinationScopes", "Shared representation of view-level coordinationScopes."
+    META_COORDINATION_SCOPES_BY = "metaCoordinationScopesBy", "Shared representation of view-level coordinationScopesBy."
     DATASET = "dataset", "The identifier for the dataset associated with a view."
     OBS_TYPE = "obsType", "The type of entity represented by each observation."
     FEATURE_TYPE = "featureType", "The type of entity represented by each feature."

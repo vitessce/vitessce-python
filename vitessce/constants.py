@@ -12,6 +12,7 @@ class DocEnum(Enum):
         self.__doc__ = doc
         return self
 
+
 def norm_enum(enum_val, expected_enum_class=None):
     assert isinstance(enum_val, str) or isinstance(enum_val, expected_enum_class)
     # We don't actually use the expected_enum_class,

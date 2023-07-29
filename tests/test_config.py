@@ -731,9 +731,10 @@ def test_config_to_python_with_data_objects():
     else:  # pragma: no cover
         ast.parse(code_block)
 
+
 def test_config_add_complex_coordination():
     vc = VitessceConfig(schema_version="1.0.16")
-    
+
     vc.add_complex_coordination({
         'spatialImageLayer': CL([
             {
@@ -781,19 +782,19 @@ def test_config_add_complex_coordination():
     vc_dict = vc.to_dict()
 
     assert vc_dict["coordinationSpace"] == {
-        "spatialImageLayer": { "A": '__dummy__' },
-        "image": { "A": 'S-1905-017737_bf', "B": 'S-1905-017737' },
-        "spatialLayerVisible": { "A": True, "B": True },
-        "spatialLayerOpacity": { "A": 1, "B": 1 },
-        "spatialImageChannel": { "A": '__dummy__', "B": '__dummy__' },
+        "spatialImageLayer": {"A": '__dummy__'},
+        "image": {"A": 'S-1905-017737_bf', "B": 'S-1905-017737'},
+        "spatialLayerVisible": {"A": True, "B": True},
+        "spatialLayerOpacity": {"A": 1, "B": 1},
+        "spatialImageChannel": {"A": '__dummy__', "B": '__dummy__'},
         "spatialTargetC": {
             "A": 0, "B": 1, "C": 0, "D": 1, "E": 2,
         },
         "spatialChannelColor": {
             "A": [255, 0, 0], "B": [0, 255, 0], "C": [255, 0, 0], "D": [255, 0, 0], "E": [255, 0, 0],
         },
-        "spatialSegmentationLayer": { "A": '__dummy__' },
-        "spatialSegmentationChannel": { "A": '__dummy__', "B": '__dummy__', "C": '__dummy__' },
+        "spatialSegmentationLayer": {"A": '__dummy__'},
+        "spatialSegmentationChannel": {"A": '__dummy__', "B": '__dummy__', "C": '__dummy__'},
         "obsType": {
             "A": 'Cortical Interstitia',
             "B": 'Non-Globally Sclerotic Glomeruli',
@@ -801,13 +802,14 @@ def test_config_add_complex_coordination():
         },
     }
 
+
 def test_config_add_and_use_complex_coordination():
     vc = VitessceConfig(schema_version="1.0.16", name="My config")
     dataset = vc.add_dataset(name="My dataset")
 
     (color_scope, ) = vc.add_coordination('spatialChannelColor')
     color_scope.set_value([255, 0, 0])
-    
+
     scopes = vc.add_complex_coordination({
         "spatialImageLayer": CL([
             {
@@ -899,9 +901,9 @@ def test_config_add_and_use_complex_coordination():
                 "E": 2
             },
             "spatialChannelColor": {
-                "A": [ 255, 0, 0 ],
-                "B": [ 0, 255, 0 ],
-                "C": [ 0, 0, 255 ]
+                "A": [255, 0, 0],
+                "B": [0, 255, 0],
+                "C": [0, 0, 255]
             },
             "spatialSegmentationLayer": {
                 "A": "__dummy__"
@@ -921,8 +923,8 @@ def test_config_add_and_use_complex_coordination():
             {
                 "component": "spatial",
                 "coordinationScopes": {
-                    "spatialImageLayer": [ "A" ],
-                    "spatialSegmentationLayer": [ "A" ]
+                    "spatialImageLayer": ["A"],
+                    "spatialSegmentationLayer": ["A"]
                 },
                 "coordinationScopesBy": {
                     "spatialImageLayer": {
@@ -936,7 +938,7 @@ def test_config_add_and_use_complex_coordination():
                             "A": "A"
                         },
                         "spatialImageChannel": {
-                            "A": [  "A", "B" ]
+                            "A": ["A", "B"]
                         }
                     },
                     "spatialImageChannel": {
@@ -960,7 +962,7 @@ def test_config_add_and_use_complex_coordination():
                             "A": "B"
                         },
                         "spatialSegmentationChannel": {
-                            "A": [ "A", "B", "C" ]
+                            "A": ["A", "B", "C"]
                         }
                     },
                     "spatialSegmentationChannel": {
@@ -987,10 +989,11 @@ def test_config_add_and_use_complex_coordination():
         "initStrategy": "auto"
     }
 
+
 def test_config_use_meta_complex_coordination():
     vc = VitessceConfig(schema_version="1.0.16", name="My config")
     dataset = vc.add_dataset(name="My dataset")
-    
+
     scopes = vc.add_complex_coordination({
         'spatialImageLayer': CL([
             {
@@ -1040,7 +1043,7 @@ def test_config_use_meta_complex_coordination():
 
     spatial_view = vc.add_view('spatial', dataset=dataset)
     lc_view = vc.add_view('layerController', dataset=dataset)
-    
+
     spatial_view.use_meta_coordination(meta_coordination_scope)
     lc_view.use_meta_coordination(meta_coordination_scope)
 
@@ -1088,11 +1091,11 @@ def test_config_use_meta_complex_coordination():
                 "E": 2
             },
             "spatialChannelColor": {
-                "A": [ 255, 0, 0 ],
-                "B": [ 0, 255, 0 ],
-                "C": [ 255, 0, 0 ],
-                "D": [ 255, 0, 0 ],
-                "E": [ 255, 0, 0 ]
+                "A": [255, 0, 0],
+                "B": [0, 255, 0],
+                "C": [255, 0, 0],
+                "D": [255, 0, 0],
+                "E": [255, 0, 0]
             },
             "spatialSegmentationLayer": {
                 "A": "__dummy__"
@@ -1109,8 +1112,8 @@ def test_config_use_meta_complex_coordination():
             },
             "metaCoordinationScopes": {
                 "A": {
-                    "spatialImageLayer": [ "A" ],
-                    "spatialSegmentationLayer": [ "A" ]
+                    "spatialImageLayer": ["A"],
+                    "spatialSegmentationLayer": ["A"]
                 }
             },
             "metaCoordinationScopesBy": {
@@ -1126,7 +1129,7 @@ def test_config_use_meta_complex_coordination():
                             "A": "A"
                         },
                         "spatialImageChannel": {
-                            "A": [ "A", "B" ]
+                            "A": ["A", "B"]
                         }
                     },
                     "spatialImageChannel": {
@@ -1150,7 +1153,7 @@ def test_config_use_meta_complex_coordination():
                             "A": "B"
                         },
                         "spatialSegmentationChannel": {
-                            "A": [ "A", "B", "C" ]
+                            "A": ["A", "B", "C"]
                         }
                     },
                     "spatialSegmentationChannel": {
@@ -1178,8 +1181,8 @@ def test_config_use_meta_complex_coordination():
                 "component": "spatial",
                 "coordinationScopes": {
                     "dataset": "A",
-                    "metaCoordinationScopes": [ "A" ],
-                    "metaCoordinationScopesBy": [ "A" ]
+                    "metaCoordinationScopes": ["A"],
+                    "metaCoordinationScopesBy": ["A"]
                 },
                 "x": 0, "y": 0, "w": 1, "h": 1
             },
@@ -1187,8 +1190,8 @@ def test_config_use_meta_complex_coordination():
                 "component": "layerController",
                 "coordinationScopes": {
                     "dataset": "A",
-                    "metaCoordinationScopes": [ "A" ],
-                    "metaCoordinationScopesBy": [ "A" ]
+                    "metaCoordinationScopes": ["A"],
+                    "metaCoordinationScopesBy": ["A"]
                 },
                 "x": 0, "y": 0, "w": 1, "h": 1
             }

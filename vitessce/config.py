@@ -249,8 +249,8 @@ def hconcat(*views):
     """
     A helper function to create a ``VitessceConfigViewHConcat`` instance.
 
-    :param \*views: A variable number of views to concatenate horizontally.
-    :type \*views: VitessceConfigView or VitessceConfigViewVConcat or VitessceConfigViewHConcat
+    :param \\*views: A variable number of views to concatenate horizontally.
+    :type \\*views: VitessceConfigView or VitessceConfigViewVConcat or VitessceConfigViewHConcat
 
     :returns: The concatenated view instance.
     :rtype: VitessceConfigViewHConcat
@@ -292,8 +292,8 @@ def vconcat(*views):
     """
     A helper function to create a ``VitessceConfigViewVConcat`` instance.
 
-    :param \*views: A variable number of views to concatenate vertically.
-    :type \*views: VitessceConfigView or VitessceConfigViewVConcat or VitessceConfigViewHConcat
+    :param \\*views: A variable number of views to concatenate vertically.
+    :type \\*views: VitessceConfigView or VitessceConfigViewVConcat or VitessceConfigViewHConcat
 
     :returns: The concatenated view instance.
     :rtype: VitessceConfigViewVConcat
@@ -387,12 +387,11 @@ def use_complex_coordination_helper(scopes, coordination_scopes, coordination_sc
         level_type = norm_enum(level_type, ct)
 
         if isinstance(level_val, list):
-            # eslint-disable-next-line no-param-reassign
             coordination_scopes_by[parent_type] = {
                 **coordination_scopes_by.get(parent_type, {}),
                 level_type: {
                     **coordination_scopes_by.get(parent_type, {}).get(level_type, {}),
-                    parent_scope.c_scope: [ child_val["scope"].c_scope for child_val in level_val ],
+                    parent_scope.c_scope: [child_val["scope"].c_scope for child_val in level_val],
                 },
             }
             for child_val in level_val:
@@ -402,7 +401,6 @@ def use_complex_coordination_helper(scopes, coordination_scopes, coordination_sc
                         process_level(level_type, child_val["scope"], next_level_type, next_level_val)
                 # Else is the base case: no children
         else:
-            # eslint-disable-next-line no-param-reassign
             coordination_scopes_by[parent_type] = {
                 **coordination_scopes_by.get(parent_type, {}),
                 level_type: {
@@ -421,25 +419,24 @@ def use_complex_coordination_helper(scopes, coordination_scopes, coordination_sc
     for top_level_type, top_level_val in scopes.items():
         top_level_type = norm_enum(top_level_type, ct)
         if isinstance(top_level_val, list):
-            # eslint-disable-next-line no-param-reassign
-            coordination_scopes[top_level_type] = [ level_val["scope"].c_scope for level_val in top_level_val ]
+            coordination_scopes[top_level_type] = [level_val["scope"].c_scope for level_val in top_level_val]
 
             for level_val in top_level_val:
                 if "children" in level_val:
                     # Begin recursion.
                     for next_level_type, next_level_val in level_val["children"].items():
                         process_level(top_level_type, level_val["scope"], next_level_type, next_level_val)
-                   
+
         else:
-            # eslint-disable-next-line no-param-reassign
             coordination_scopes[top_level_type] = top_level_val["scope"].c_scope
             if "children" in top_level_val:
                 # Begin recursion.
                 for next_level_type, next_level_val in top_level_val["children"].items():
                     next_level_type = norm_enum(next_level_type, ct)
                     process_level(top_level_type, top_level_val["scope"], next_level_type, next_level_val)
-    
+
     return (coordination_scopes, coordination_scopes_by)
+
 
 class VitessceConfigView:
     """
@@ -501,8 +498,8 @@ class VitessceConfigView:
         """
         Attach a coordination scope to this view instance. All views using the same coordination scope for a particular coordination type will effectively be linked together.
 
-        :param \*c_scopes: A variable number of coordination scope instances can be passed.
-        :type \*c_scopes: VitessceConfigCoordinationScope
+        :param \\*c_scopes: A variable number of coordination scope instances can be passed.
+        :type \\*c_scopes: VitessceConfigCoordinationScope
 
         :returns: Self, to allow chaining.
         :rtype: VitessceConfigView
@@ -531,14 +528,14 @@ class VitessceConfigView:
             assert isinstance(c_scope, VitessceConfigCoordinationScope)
             self.view["coordinationScopes"][c_scope.c_type] = c_scope.c_scope
         return self
-    
+
     def use_complex_coordination(self, scopes):
         if "coordinationScopes" not in self.view["coordinationScopes"] or self.view["coordinationScopes"] is None:
             self.view["coordinationScopes"] = {}
-        
+
         if "coordinationScopesBy" not in self.view or self.view["coordinationScopesBy"] is None:
             self.view["coordinationScopesBy"] = {}
-        
+
         (next_coordination_scopes, next_coordination_scopes_by) = use_complex_coordination_helper(
             scopes,
             self.view["coordinationScopes"],
@@ -547,7 +544,7 @@ class VitessceConfigView:
         self.view["coordinationScopes"] = next_coordination_scopes
         self.view["coordinationScopesBy"] = next_coordination_scopes_by
         return self
-    
+
     """
     /**
     * Attach meta coordination scopes to this view.
@@ -555,6 +552,7 @@ class VitessceConfigView:
     * @returns {VitessceConfigView} This, to allow chaining.
     */
     """
+
     def use_meta_coordination(self, meta_scope):
         if self.view["coordinationScopes"] is None:
             self.view["coordinationScopes"] = {}
@@ -591,7 +589,7 @@ class VitessceConfigView:
         """
         Set the props for this view.
 
-        :param \*\*kwargs: A variable number of named props.
+        :param \\*\\*kwargs: A variable number of named props.
 
         :returns: Self, to allow chaining.
         :rtype: VitessceConfigView
@@ -621,11 +619,13 @@ class VitessceConfigView:
         return vconcat(self, other)
 
 # would import as CL for convenience
+
+
 class CoordinationLevel:
     def __init__(self, value):
         self.value = value
         self.cached_value = None
-    
+
     def set_cached(self, processed_level):
         self.cached_value = processed_level
 
@@ -692,6 +692,7 @@ class VitessceConfigCoordinationScope:
         self.c_value = c_value
         return self
 
+
 """
 /**
  * Class representing a pair of coordination scopes,
@@ -699,6 +700,8 @@ class VitessceConfigCoordinationScope:
  * respectively, in the coordination space.
  */
 """
+
+
 class VitessceConfigMetaCoordinationScope:
     """
     /**
@@ -707,6 +710,7 @@ class VitessceConfigMetaCoordinationScope:
     * @param {string} metaByScope The name of the coordination scope for metaCoordinationScopesBy.
     */
     """
+
     def __init__(self, meta_scope, meta_by_scope):
         self.meta_scope = VitessceConfigCoordinationScope(
             ct.META_COORDINATION_SCOPES.value,
@@ -716,7 +720,7 @@ class VitessceConfigMetaCoordinationScope:
             ct.META_COORDINATION_SCOPES_BY.value,
             meta_by_scope,
         )
-    
+
     """
     /**
     * Attach coordination scopes to this meta scope.
@@ -725,6 +729,7 @@ class VitessceConfigMetaCoordinationScope:
     * @returns {VitessceConfigMetaCoordinationScope} This, to allow chaining.
     */
     """
+
     def use_coordination(self, *c_scopes):
         meta_scopes_val = self.meta_scope.c_value
         for c_scope in c_scopes:
@@ -735,10 +740,10 @@ class VitessceConfigMetaCoordinationScope:
     def use_complex_coordination(self, scopes):
         if self.meta_scope.c_value is None:
             self.meta_scope.set_value({})
-        
+
         if self.meta_by_scope.c_value is None:
             self.meta_by_scope.set_value({})
-        
+
         (meta_scopes_val, meta_by_scopes_val) = use_complex_coordination_helper(
             scopes,
             self.meta_scope.c_value,
@@ -747,7 +752,7 @@ class VitessceConfigMetaCoordinationScope:
         self.meta_scope.set_value(meta_scopes_val)
         self.meta_by_scope.set_value(meta_by_scopes_val)
         return self
-    
+
     """
     /**
     * Set the coordination value of the coordination scope.
@@ -755,6 +760,7 @@ class VitessceConfigMetaCoordinationScope:
     * @returns {VitessceConfigCoordinationScope} This, to allow chaining.
     */
     """
+
     def set_value(self, c_value):
         # TODO: is this function used? or just an artifact of copy/paste...
         self.c_value = c_value
@@ -997,8 +1003,8 @@ class VitessceConfig:
         """
         Add scope(s) for new coordination type(s) to the config.
 
-        :param \*c_types: A variable number of coordination types.
-        :type \*c_types: str or vitessce.constants.CoordinationType
+        :param \\*c_types: A variable number of coordination types.
+        :type \\*c_types: str or vitessce.constants.CoordinationType
 
         :returns: The instances for the new scope objects corresponding to each coordination type. These can be linked to views via the ``VitessceConfigView.use_coordination()`` method.
         :rtype: list[VitessceConfigCoordinationScope]
@@ -1048,12 +1054,10 @@ class VitessceConfig:
             self.config["coordinationSpace"][ct.META_COORDINATION_SCOPES.value] = {}
         if ct.META_COORDINATION_SCOPES_BY.value not in self.config["coordinationSpace"]:
             self.config["coordinationSpace"][ct.META_COORDINATION_SCOPES_BY.value] = {}
-        # eslint-disable-next-line max-len
         self.config["coordinationSpace"][ct.META_COORDINATION_SCOPES.value][meta_container.meta_scope.c_scope] = meta_container.meta_scope
-        # eslint-disable-next-line max-len
         self.config["coordinationSpace"][ct.META_COORDINATION_SCOPES_BY.value][meta_container.meta_by_scope.c_scope] = meta_container.meta_by_scope
         return meta_container
-    
+
     def add_complex_coordination(self, input_val):
         """
         /*
@@ -1163,14 +1167,14 @@ class VitessceConfig:
                     # Base case.
                     initial_value = next_level_or_initial_value
                     if isinstance(initial_value, VitessceConfigCoordinationScope):
-                        result[c_type_str] = { "scope": initial_value }
+                        result[c_type_str] = {"scope": initial_value}
                     else:
                         (scope, ) = self.add_coordination(c_type_str)
                         scope.set_value(initial_value)
-                        result[c_type_str] = { "scope": scope }
+                        result[c_type_str] = {"scope": scope}
             return result
         # End process_level function
-    
+
         # Begin recursion.
         output_val = process_level(input_val)
         return output_val
@@ -1555,7 +1559,7 @@ class VitessceConfig:
         Export this config's data objects to the local file system or a cloud storage system and get the resulting view config.
 
         :param str to: The export destination. Valid values include "S3" and "files".
-        :param \*\*kwargs: Keyword arguments to pass to the export function.
+        :param \\*\\*kwargs: Keyword arguments to pass to the export function.
         :returns: The config as a dict, with URLs for the bucket filled in.
         :rtype: dict
 
@@ -1589,7 +1593,7 @@ class VitessceChainableConfig(VitessceConfig):
         """
         Construct a Vitessce view config object.
 
-        :param \*\*kwargs:  Takes the same arguments as the constructor on the ``VitessceConfig`` class.
+        :param \\*\\*kwargs:  Takes the same arguments as the constructor on the ``VitessceConfig`` class.
 
         .. code-block:: python
             :emphasize-lines: 3
@@ -1610,7 +1614,7 @@ class VitessceChainableConfig(VitessceConfig):
         """
         Add a dataset to this config.
 
-        :param \*\*kwargs: Takes the same arguments as the ``add_dataset`` method on the ``VitessceConfig`` class.
+        :param \\*\\*kwargs: Takes the same arguments as the ``add_dataset`` method on the ``VitessceConfig`` class.
 
         :returns: The config instance.
         :rtype: VitessceChainableConfig
@@ -1626,7 +1630,7 @@ class VitessceChainableConfig(VitessceConfig):
         Add a view to this config.
 
         :param component: Takes the same arguments as the ``add_view`` method on the ``VitessceConfig`` class.
-        :param \*\*kwargs: Takes the same arguments as the ``add_view`` method on the ``VitessceConfig`` class.
+        :param \\*\\*kwargs: Takes the same arguments as the ``add_view`` method on the ``VitessceConfig`` class.
 
         :returns: The config instance.
         :rtype: VitessceChainableConfig

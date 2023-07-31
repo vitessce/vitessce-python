@@ -732,10 +732,10 @@ def test_config_to_python_with_data_objects():
         ast.parse(code_block)
 
 
-def test_config_add_complex_coordination():
+def test_config_add_coordination_by_dict():
     vc = VitessceConfig(schema_version="1.0.16")
 
-    vc.add_complex_coordination({
+    vc.add_coordination_by_dict({
         'spatialImageLayer': CL([
             {
                 'image': 'S-1905-017737_bf',
@@ -803,14 +803,14 @@ def test_config_add_complex_coordination():
     }
 
 
-def test_config_add_and_use_complex_coordination():
+def test_config_add_and_use_coordination_by_dict():
     vc = VitessceConfig(schema_version="1.0.16", name="My config")
     dataset = vc.add_dataset(name="My dataset")
 
     (color_scope, ) = vc.add_coordination('spatialChannelColor')
     color_scope.set_value([255, 0, 0])
 
-    scopes = vc.add_complex_coordination({
+    scopes = vc.add_coordination_by_dict({
         "spatialImageLayer": CL([
             {
                 "image": 'S-1905-017737_bf',
@@ -855,7 +855,7 @@ def test_config_add_and_use_complex_coordination():
     })
 
     spatial_view = vc.add_view('spatial', dataset=dataset)
-    spatial_view.use_complex_coordination(scopes)
+    spatial_view.use_coordination_by_dict(scopes)
 
     vc_dict = vc.to_dict()
 
@@ -994,7 +994,7 @@ def test_config_use_meta_complex_coordination():
     vc = VitessceConfig(schema_version="1.0.16", name="My config")
     dataset = vc.add_dataset(name="My dataset")
 
-    scopes = vc.add_complex_coordination({
+    scopes = vc.add_coordination_by_dict({
         'spatialImageLayer': CL([
             {
                 'image': 'S-1905-017737_bf',
@@ -1039,7 +1039,7 @@ def test_config_use_meta_complex_coordination():
     })
 
     meta_coordination_scope = vc.add_meta_coordination()
-    meta_coordination_scope.use_complex_coordination(scopes)
+    meta_coordination_scope.use_coordination_by_dict(scopes)
 
     spatial_view = vc.add_view('spatial', dataset=dataset)
     lc_view = vc.add_view('layerController', dataset=dataset)

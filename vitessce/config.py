@@ -313,7 +313,7 @@ def vconcat(*views):
     return VitessceConfigViewVConcat(views)
 
 
-def use_complex_coordination_helper(scopes, coordination_scopes, coordination_scopes_by):
+def use_coordination_by_dict_helper(scopes, coordination_scopes, coordination_scopes_by):
     """
     // Set this.coordinationScopes and this.coordinationScopesBy by recursion on `scopes`.
     /*
@@ -529,14 +529,14 @@ class VitessceConfigView:
             self.view["coordinationScopes"][c_scope.c_type] = c_scope.c_scope
         return self
 
-    def use_complex_coordination(self, scopes):
+    def use_coordination_by_dict(self, scopes):
         if "coordinationScopes" not in self.view["coordinationScopes"] or self.view["coordinationScopes"] is None:
             self.view["coordinationScopes"] = {}
 
         if "coordinationScopesBy" not in self.view or self.view["coordinationScopesBy"] is None:
             self.view["coordinationScopesBy"] = {}
 
-        (next_coordination_scopes, next_coordination_scopes_by) = use_complex_coordination_helper(
+        (next_coordination_scopes, next_coordination_scopes_by) = use_coordination_by_dict_helper(
             scopes,
             self.view["coordinationScopes"],
             self.view["coordinationScopesBy"],
@@ -737,14 +737,14 @@ class VitessceConfigMetaCoordinationScope:
         self.meta_scope.set_value(meta_scopes_val)
         return self
 
-    def use_complex_coordination(self, scopes):
+    def use_coordination_by_dict(self, scopes):
         if self.meta_scope.c_value is None:
             self.meta_scope.set_value({})
 
         if self.meta_by_scope.c_value is None:
             self.meta_by_scope.set_value({})
 
-        (meta_scopes_val, meta_by_scopes_val) = use_complex_coordination_helper(
+        (meta_scopes_val, meta_by_scopes_val) = use_coordination_by_dict_helper(
             scopes,
             self.meta_scope.c_value,
             self.meta_by_scope.c_value,
@@ -1058,7 +1058,7 @@ class VitessceConfig:
         self.config["coordinationSpace"][ct.META_COORDINATION_SCOPES_BY.value][meta_container.meta_by_scope.c_scope] = meta_container.meta_by_scope
         return meta_container
 
-    def add_complex_coordination(self, input_val):
+    def add_coordination_by_dict(self, input_val):
         """
         /*
         // The value for `input` might look like:

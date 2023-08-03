@@ -148,7 +148,7 @@ def get_uid_str(uid):
 
 
 ESM = """
-import { importWithMap } from 'https://unpkg.com/dynamic-importmap@0.0.1';
+import { importWithMap } from 'https://unpkg.com/dynamic-importmap@0.1.0';
 const importMap = {
   imports: {
     "react": "https://esm.sh/react@18.2.0?dev",

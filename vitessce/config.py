@@ -313,7 +313,7 @@ def vconcat(*views):
     return VitessceConfigViewVConcat(views)
 
 
-def use_coordination_by_dict_helper(scopes, coordination_scopes, coordination_scopes_by):
+def _use_coordination_by_dict_helper(scopes, coordination_scopes, coordination_scopes_by):
     """
     // Set this.coordinationScopes and this.coordinationScopesBy by recursion on `scopes`.
     /*
@@ -530,13 +530,37 @@ class VitessceConfigView:
         return self
 
     def use_coordination_by_dict(self, scopes):
+        """
+        Attach potentially multi-level coordination scopes to this view.
+
+        :param scopes: A value returned by ``VitessceConfig.add_coordination_by_dict``. Not intended to be a manually-constructed object.
+        :type scopes: dict
+
+        :returns: Self, to allow chaining.
+        :rtype: VitessceConfigView
+
+        .. code-block:: python
+            :emphasize-lines: 11
+
+            from vitessce import VitessceConfig, ViewType as vt, CoordinationType as ct
+
+            vc = VitessceConfig(schema_version="1.0.15")
+            my_dataset = vc.add_dataset(name='My Dataset')
+            spatial_view = vc.add_view(vt.SPATIAL, dataset=my_dataset)
+            scopes = vc.add_coordination_by_dict({
+                ct.SPATIAL_ZOOM: 2,
+                ct.SPATIAL_TARGET_X: 0,
+                ct.SPATIAL_TARGET_Y: 0,
+            })
+            spatial_view.use_coordination_by_dict(scopes)
+        """
         if "coordinationScopes" not in self.view["coordinationScopes"] or self.view["coordinationScopes"] is None:
             self.view["coordinationScopes"] = {}
 
         if "coordinationScopesBy" not in self.view or self.view["coordinationScopesBy"] is None:
             self.view["coordinationScopesBy"] = {}
 
-        (next_coordination_scopes, next_coordination_scopes_by) = use_coordination_by_dict_helper(
+        (next_coordination_scopes, next_coordination_scopes_by) = _use_coordination_by_dict_helper(
             scopes,
             self.view["coordinationScopes"],
             self.view["coordinationScopesBy"],
@@ -545,15 +569,36 @@ class VitessceConfigView:
         self.view["coordinationScopesBy"] = next_coordination_scopes_by
         return self
 
-    """
-    /**
-    * Attach meta coordination scopes to this view.
-    * @param {VitessceConfigMetaCoordinationScope} metaScope A meta coordination scope instance.
-    * @returns {VitessceConfigView} This, to allow chaining.
-    */
-    """
 
     def use_meta_coordination(self, meta_scope):
+        """
+        Attach meta coordination scopes to this view.
+        :param meta_scope: A meta coordination scope instance.
+        :type meta_scope: VitessceConfigMetaCoordinationScope
+        :returns: Self, to allow chaining.
+        :rtype: VitessceConfigView
+
+        .. code-block:: python
+            :emphasize-lines: 16-17
+
+            from vitessce import VitessceConfig, ViewType as vt, CoordinationType as ct
+
+            vc = VitessceConfig(schema_version="1.0.15")
+            my_dataset = vc.add_dataset(name='My Dataset')
+            spatial_view = vc.add_view(vt.SPATIAL, dataset=my_dataset)
+            lc_view = vc.add_view(vt.LAYER_CONTROLLER, dataset=my_dataset)
+            scopes = vc.add_coordination_by_dict({
+                ct.SPATIAL_ZOOM: 2,
+                ct.SPATIAL_TARGET_X: 0,
+                ct.SPATIAL_TARGET_Y: 0,
+            })
+
+            meta_scopes = vc.add_meta_coordination()
+            meta_scopes.use_coordination_by_dict(scopes)  
+
+            spatial_view.use_meta_coordination(meta_scopes)
+            lc_view.use_meta_coordination(meta_scopes)
+        """
         if self.view["coordinationScopes"] is None:
             self.view["coordinationScopes"] = {}
 
@@ -693,25 +738,18 @@ class VitessceConfigCoordinationScope:
         return self
 
 
-"""
-/**
- * Class representing a pair of coordination scopes,
- * for metaCoordinationScopes and metaCoordinationScopesBy,
- * respectively, in the coordination space.
- */
-"""
-
-
 class VitessceConfigMetaCoordinationScope:
     """
-    /**
-    * Construct a new coordination scope instance.
-    * @param {string} metaScope The name of the coordination scope for metaCoordinationScopes.
-    * @param {string} metaByScope The name of the coordination scope for metaCoordinationScopesBy.
-    */
+    A class representing a pair of coordination scopes, for metaCoordinationScopes and metaCoordinationScopesBy, respectively, in the coordination space.
     """
 
     def __init__(self, meta_scope, meta_by_scope):
+        """
+        Not meant to be instantiated directly, but instead created and returned by the ``VitessceConfig.add_meta_coordination()`` method.
+
+        :param str meta_scope: The name of the coordination scope for metaCoordinationScopes.
+        :param str meta_by_scope: The name of the coordination scope for metaCoordinationScopesBy.
+        """
         self.meta_scope = VitessceConfigCoordinationScope(
             ct.META_COORDINATION_SCOPES.value,
             meta_scope,
@@ -721,16 +759,15 @@ class VitessceConfigMetaCoordinationScope:
             meta_by_scope,
         )
 
-    """
-    /**
-    * Attach coordination scopes to this meta scope.
-    * @param  {...VitessceConfigCoordinationScope} args A variable number of
-    * coordination scope instances.
-    * @returns {VitessceConfigMetaCoordinationScope} This, to allow chaining.
-    */
-    """
-
     def use_coordination(self, *c_scopes):
+        """
+        Attach coordination scopes to this meta scope.
+
+        :param  \\*c_scopes: A variable number of coordination scope instances.
+        :type \\*c_scopes: VitessceConfigCoordinationScope
+        :returns: Self, to allow chaining.
+        :rtype: VitessceConfigMetaCoordinationScope
+        """
         meta_scopes_val = self.meta_scope.c_value
         for c_scope in c_scopes:
             meta_scopes_val[c_scope.c_type] = c_scope.c_scope
@@ -738,32 +775,49 @@ class VitessceConfigMetaCoordinationScope:
         return self
 
     def use_coordination_by_dict(self, scopes):
+        """
+        Attach potentially multi-level coordination scopes to this meta-scopes instance.
+
+        :param scopes: A value returned by ``VitessceConfig.add_coordination_by_dict``. Not intended to be a manually-constructed object.
+        :type scopes: dict
+
+        :returns: Self, to allow chaining.
+        :rtype: VitessceConfigMetaCoordinationScope
+
+        .. code-block:: python
+            :emphasize-lines: 14
+
+            from vitessce import VitessceConfig, ViewType as vt, CoordinationType as ct
+
+            vc = VitessceConfig(schema_version="1.0.15")
+            my_dataset = vc.add_dataset(name='My Dataset')
+            spatial_view = vc.add_view(vt.SPATIAL, dataset=my_dataset)
+            lc_view = vc.add_view(vt.LAYER_CONTROLLER, dataset=my_dataset)
+            scopes = vc.add_coordination_by_dict({
+                ct.SPATIAL_ZOOM: 2,
+                ct.SPATIAL_TARGET_X: 0,
+                ct.SPATIAL_TARGET_Y: 0,
+            })
+
+            meta_scopes = vc.add_meta_coordination()
+            meta_scopes.use_coordination_by_dict(scopes)  
+
+            spatial_view.use_meta_coordination(meta_scopes)
+            lc_view.use_meta_coordination(meta_scopes)
+        """
         if self.meta_scope.c_value is None:
             self.meta_scope.set_value({})
 
         if self.meta_by_scope.c_value is None:
             self.meta_by_scope.set_value({})
 
-        (meta_scopes_val, meta_by_scopes_val) = use_coordination_by_dict_helper(
+        (meta_scopes_val, meta_by_scopes_val) = _use_coordination_by_dict_helper(
             scopes,
             self.meta_scope.c_value,
             self.meta_by_scope.c_value,
         )
         self.meta_scope.set_value(meta_scopes_val)
         self.meta_by_scope.set_value(meta_by_scopes_val)
-        return self
-
-    """
-    /**
-    * Set the coordination value of the coordination scope.
-    * @param {any} cValue The value to set.
-    * @returns {VitessceConfigCoordinationScope} This, to allow chaining.
-    */
-    """
-
-    def set_value(self, c_value):
-        # TODO: is this function used? or just an artifact of copy/paste...
-        self.c_value = c_value
         return self
 
 
@@ -1043,6 +1097,33 @@ class VitessceConfig:
         return result
 
     def add_meta_coordination(self):
+        """
+        Initialize a new meta coordination scope in the coordination space, and get a reference to it in the form of a meta coordination scope instance.
+        
+        :returns: A new meta coordination scope instance.
+        :rtype: VitessceConfigMetaCoordinationScope
+
+        .. code-block:: python
+            :emphasize-lines: 13
+
+            from vitessce import VitessceConfig, ViewType as vt, CoordinationType as ct
+
+            vc = VitessceConfig(schema_version="1.0.15")
+            my_dataset = vc.add_dataset(name='My Dataset')
+            spatial_view = vc.add_view(vt.SPATIAL, dataset=my_dataset)
+            lc_view = vc.add_view(vt.LAYER_CONTROLLER, dataset=my_dataset)
+            scopes = vc.add_coordination_by_dict({
+                ct.SPATIAL_ZOOM: 2,
+                ct.SPATIAL_TARGET_X: 0,
+                ct.SPATIAL_TARGET_Y: 0,
+            })
+
+            meta_scopes = vc.add_meta_coordination()
+            meta_scopes.use_coordination_by_dict(scopes)  
+
+            spatial_view.use_meta_coordination(meta_scopes)
+            lc_view.use_meta_coordination(meta_scopes)
+        """
         prev_meta_scopes = self.config["coordinationSpace"].get(ct.META_COORDINATION_SCOPES.value, {}).keys()
         prev_meta_by_scopes = self.config["coordinationSpace"].get(ct.META_COORDINATION_SCOPES_BY.value, {}).keys()
 
@@ -1059,6 +1140,31 @@ class VitessceConfig:
         return meta_container
 
     def add_coordination_by_dict(self, input_val):
+        """
+        Set up the initial values for multi-level coordination in the coordination space. Get a reference to these values to pass to the ``useCoordinationByObject`` method of either view or meta coordination scope instances.
+        
+        :param input_val: A (potentially nested) object with coordination types as keys and values being either the initial coordination value, a ``VitessceConfigCoordinationScope`` instance, or a ``CoordinationLevel`` instance. The CoordinationLevel constructor takes an array of objects as its argument to support nesting.
+        :type input_val: dict
+        :returns: A (potentially nested) object with coordination types as keys and values being either ``{ scope }``, ``{ scope, children }``, or an array of these. Not intended to be manipulated before being passed to a ``useCoordinationByObject`` function.
+        :rtype: dict
+
+        .. code-block:: python
+            :emphasize-lines: 7-11
+
+            from vitessce import VitessceConfig, ViewType as vt, CoordinationType as ct
+
+            vc = VitessceConfig(schema_version="1.0.15")
+            my_dataset = vc.add_dataset(name='My Dataset')
+            spatial_view = vc.add_view(vt.SPATIAL, dataset=my_dataset)
+            lc_view = vc.add_view(vt.LAYER_CONTROLLER, dataset=my_dataset)
+            scopes = vc.add_coordination_by_dict({
+                ct.SPATIAL_ZOOM: 2,
+                ct.SPATIAL_TARGET_X: 0,
+                ct.SPATIAL_TARGET_Y: 0,
+            })
+        """
+
+        # Developer notes
         """
         /*
         // The value for `input` might look like:

@@ -569,7 +569,6 @@ class VitessceConfigView:
         self.view["coordinationScopesBy"] = next_coordination_scopes_by
         return self
 
-
     def use_meta_coordination(self, meta_scope):
         """
         Attach meta coordination scopes to this view.
@@ -594,7 +593,7 @@ class VitessceConfigView:
             })
 
             meta_scopes = vc.add_meta_coordination()
-            meta_scopes.use_coordination_by_dict(scopes)  
+            meta_scopes.use_coordination_by_dict(scopes)
 
             spatial_view.use_meta_coordination(meta_scopes)
             lc_view.use_meta_coordination(meta_scopes)
@@ -800,7 +799,7 @@ class VitessceConfigMetaCoordinationScope:
             })
 
             meta_scopes = vc.add_meta_coordination()
-            meta_scopes.use_coordination_by_dict(scopes)  
+            meta_scopes.use_coordination_by_dict(scopes)
 
             spatial_view.use_meta_coordination(meta_scopes)
             lc_view.use_meta_coordination(meta_scopes)
@@ -1099,7 +1098,7 @@ class VitessceConfig:
     def add_meta_coordination(self):
         """
         Initialize a new meta coordination scope in the coordination space, and get a reference to it in the form of a meta coordination scope instance.
-        
+
         :returns: A new meta coordination scope instance.
         :rtype: VitessceConfigMetaCoordinationScope
 
@@ -1119,7 +1118,7 @@ class VitessceConfig:
             })
 
             meta_scopes = vc.add_meta_coordination()
-            meta_scopes.use_coordination_by_dict(scopes)  
+            meta_scopes.use_coordination_by_dict(scopes)
 
             spatial_view.use_meta_coordination(meta_scopes)
             lc_view.use_meta_coordination(meta_scopes)
@@ -1142,7 +1141,7 @@ class VitessceConfig:
     def add_coordination_by_dict(self, input_val):
         """
         Set up the initial values for multi-level coordination in the coordination space. Get a reference to these values to pass to the ``useCoordinationByObject`` method of either view or meta coordination scope instances.
-        
+
         :param input_val: A (potentially nested) object with coordination types as keys and values being either the initial coordination value, a ``VitessceConfigCoordinationScope`` instance, or a ``CoordinationLevel`` instance. The CoordinationLevel constructor takes an array of objects as its argument to support nesting.
         :type input_val: dict
         :returns: A (potentially nested) object with coordination types as keys and values being either ``{ scope }``, ``{ scope, children }``, or an array of these. Not intended to be manipulated before being passed to a ``useCoordinationByObject`` function.

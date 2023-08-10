@@ -407,7 +407,7 @@ class VitessceConfigView:
             new_value = c_scope.c_scope
             if (existing_value is not None and allow_multiple_scopes_per_type):
                 if (isinstance(existing_value, list)):
-                    self.view["coordinationScopes"][c_scope.c_type] = existing_value.append(new_value)
+                    self.view["coordinationScopes"][c_scope.c_type] = existing_value + [new_value]
                 else:
                     self.view["coordinationScopes"][c_scope.c_type] = [existing_value, new_value]
             else:

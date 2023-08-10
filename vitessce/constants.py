@@ -176,3 +176,7 @@ class FileType(DocEnum):
     ANNDATA_CELLS_ZARR = "anndata-cells.zarr", "The Zarr-based cells file type from an anndata object."
     ANNDATA_CELL_SETS_ZARR = "anndata-cell-sets.zarr", "The Zarr-based cell-sets file type from an anndata object."
     ANNDATA_EXPRESSION_MATRIX_ZARR = "anndata-expression-matrix.zarr", "The Zarr-based expression matrix file type from an anndata object."
+    OBS_SEGMENTATIONS_CELLS_JSON = "obsSegmentations.cells.json", "The JSON-based cells file type for obsSegmentations."
+    OBS_LOCATIONS_CELLS_JSON = "obsLocations.cells.json", "The JSON-based cells file type for obsLocations."
+    OBS_EMBEDDING_CELLS_JSON = "obsEmbedding.cells.json", "The JSON-based cells file type for obsEmbedding."
+    OBS_SETS_CELL_SETS_JSON = "obsSets.cell-sets.json", "The JSON-based cell sets file type for obsSets."

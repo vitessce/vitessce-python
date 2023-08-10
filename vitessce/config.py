@@ -832,7 +832,7 @@ class VitessceConfig:
         :type c_types: list of str or list of vitessce.constants.CoordinationType
         :param list c_values: Initial values corresponding to each coordination type. Should have the same length as the c_types array. Optional.
         :param bool allow_multiple_scopes_per_type: Whether to allow multiple coordination scopes per coordination type. If true, multiple values for the same coordination type are treated as a list. If false, latest value for same coordination type is used. Defaults to False.
-        
+
         :returns: Self, to allow chaining.
         :rtype: VitessceConfig
         """

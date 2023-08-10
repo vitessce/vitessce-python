@@ -403,7 +403,7 @@ class VitessceConfigView:
         """
         for c_scope in c_scopes:
             assert isinstance(c_scope, VitessceConfigCoordinationScope)
-            existing_value = self.view["coordinationScopes"][c_scope.c_type]
+            existing_value = self.view["coordinationScopes"].get(c_scope.c_type)
             new_value = c_scope.c_scope
             if (existing_value is not None and allow_multiple_scopes_per_type):
                 if (isinstance(existing_value, list)):

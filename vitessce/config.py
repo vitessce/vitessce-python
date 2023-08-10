@@ -370,12 +370,13 @@ class VitessceConfigView:
         """
         return self.view["coordinationScopes"].get(c_type)
 
-    def use_coordination(self, *c_scopes):
+    def use_coordination(self, *c_scopes, allow_multiple_scopes_per_type=False):
         """
         Attach a coordination scope to this view instance. All views using the same coordination scope for a particular coordination type will effectively be linked together.
 
         :param \\*c_scopes: A variable number of coordination scope instances can be passed.
         :type \\*c_scopes: VitessceConfigCoordinationScope
+        :param bool allow_multiple_scopes_per_type: Whether to allow multiple coordination scopes per coordination type. If true, multiple values for the same coordination type are treated as a list. If false, latest value for same coordination type is used. Defaults to False.
 
         :returns: Self, to allow chaining.
         :rtype: VitessceConfigView
@@ -402,7 +403,15 @@ class VitessceConfigView:
         """
         for c_scope in c_scopes:
             assert isinstance(c_scope, VitessceConfigCoordinationScope)
-            self.view["coordinationScopes"][c_scope.c_type] = c_scope.c_scope
+            existing_value = self.view["coordinationScopes"][c_scope.c_type]
+            new_value = c_scope.c_scope
+            if (existing_value is not None and allow_multiple_scopes_per_type):
+                if (isinstance(existing_value, list)):
+                    self.view["coordinationScopes"][c_scope.c_type] = existing_value.append(new_value)
+                else:
+                    self.view["coordinationScopes"][c_scope.c_type] = [existing_value, new_value]
+            else:
+                self.view["coordinationScopes"][c_scope.c_type] = new_value
         return self
 
     def set_xywh(self, x, y, w, h):
@@ -813,7 +822,7 @@ class VitessceConfig:
         self.config["coordinationSpace"][scope.c_type][scope.c_scope] = scope
         return scope
 
-    def link_views(self, views, c_types, c_values=None):
+    def link_views(self, views, c_types, c_values=None, allow_multiple_scopes_per_type=False):
         """
         A convenience function for setting up new coordination scopes across a set of views.
 
@@ -822,14 +831,15 @@ class VitessceConfig:
         :param c_types: The coordination types on which to coordinate the views.
         :type c_types: list of str or list of vitessce.constants.CoordinationType
         :param list c_values: Initial values corresponding to each coordination type. Should have the same length as the c_types array. Optional.
-
+        :param bool allow_multiple_scopes_per_type: Whether to allow multiple coordination scopes per coordination type. If true, multiple values for the same coordination type are treated as a list. If false, latest value for same coordination type is used. Defaults to False.
+        
         :returns: Self, to allow chaining.
         :rtype: VitessceConfig
         """
         c_scopes = self.add_coordination(*c_types)
         for view in views:
             for c_scope in c_scopes:
-                view.use_coordination(c_scope)
+                view.use_coordination(c_scope, allow_multiple_scopes_per_type=allow_multiple_scopes_per_type)
 
         if c_values is not None and len(c_values) == len(c_types):
             for i, c_scope in enumerate(c_scopes):

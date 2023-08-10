@@ -139,7 +139,7 @@ def create_test_anndata_file(h5ad_path):
         'exPFC2',
         'GABA2'
     ]
-    obs_cell_label_arr = [f'{l}-label' for l in obs_celltype_arr]
+    obs_cell_label_arr = [f'{obs_label}-label' for obs_label in obs_celltype_arr]
     obs_df = pd.DataFrame(
         data=[
             {'index': i, 'CellType': ct, 'CellLabel': cl}

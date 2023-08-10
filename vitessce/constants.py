@@ -23,6 +23,7 @@ class CoordinationType(DocEnum):
     OBS_TYPE = "obsType", "The type of entity represented by each observation."
     FEATURE_TYPE = "featureType", "The type of entity represented by each feature."
     FEATURE_VALUE_TYPE = "featureValueType", "The type of value stored in the observation-by-feature matrix."
+    OBS_LABELS_TYPE = 'obsLabelType', "Feature for displaying additional obs sets' data in heatmap/scatterplot/spatial tooltips."
     EMBEDDING_TYPE = "embeddingType", "The type of embedding used for a scatterplot view, such as PCA or t-SNE."
     EMBEDDING_ZOOM = "embeddingZoom", "The zoom level of an embedding scatterplot view."
     EMBEDDING_ROTATION = "embeddingRotation", "The rotation of an embedding scatterplot view."
@@ -96,7 +97,6 @@ class CoordinationType(DocEnum):
     GATING_FEATURE_SELECTION_Y = 'gatingFeatureSelectionY', "Feature for the y-axis of the gating scatterplot."
     FEATURE_VALUE_TRANSFORM_COEFFICIENT = 'featureValueTransformCoefficient', "Coefficient to transform values in the gating scatterplot."
     TOOLTIPS_VISIBLE = 'tooltipVisible', "Boolean for whether or not tooltips are visible, used by the scatterplot, spatial, and heatmap views."
-    OBS_LABELS = 'obsLabelType', "Feature for displaying additional obs sets' data in heatmap/scatterplot/spatial tooltips."
 
 
 class ViewType(DocEnum):

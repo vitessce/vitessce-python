@@ -564,7 +564,7 @@ class AnnDataWrapper(AbstractWrapper):
         # Support legacy provision of single obs labels path
         if (obs_labels_path is not None):
             self._obs_labels_paths = [obs_labels_path]
-            self._obs_labels_names = [obs_labels_path]
+            self._obs_labels_names = [obs_labels_path.split('/')[-1]]
         else:
             self._obs_labels_paths = obs_labels_paths
             self._obs_labels_names = obs_labels_names
@@ -650,10 +650,17 @@ class AnnDataWrapper(AbstractWrapper):
                 options["featureLabels"] = {
                     "path": self._gene_alias
                 }
-            if self._obs_labels_paths is not None and self._obs_labels_names is not None and len(self._obs_labels_paths) == len(self._obs_labels_names):
+            if self._obs_labels_paths is not None:
+                if self._obs_labels_names is not None and len(self._obs_labels_paths) == len(self._obs_labels_names):
+                    # A name was provided for each path element, so use those values.
+                    names = self._obs_labels_names
+                else:
+                    # Names were not provided for each path element,
+                    # so fall back to using the final part of each path for the names.
+                    names = [labels_path.split('/')[-1] for labels_path in self._obs_labels_paths]
                 obs_labels = []
-                for path, obs_type in zip(self._obs_labels_paths, self._obs_labels_names):
-                    obs_labels.append({"path": path, "obsLabelsType": obs_type})
+                for path, name in zip(self._obs_labels_paths, names):
+                    obs_labels.append({"path": path, "obsLabelsType": name})
                 options["obsLabels"] = obs_labels
             if len(options.keys()) > 0:
                 obj_file_def = {

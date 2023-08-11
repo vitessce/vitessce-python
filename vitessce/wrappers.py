@@ -506,7 +506,7 @@ class OmeZarrWrapper(AbstractWrapper):
 
 
 class AnnDataWrapper(AbstractWrapper):
-    def __init__(self, adata_path=None, adata_url=None, obs_feature_matrix_path=None, feature_filter_path=None, initial_feature_filter_path=None, obs_set_paths=None, obs_set_names=None, obs_locations_path=None, obs_segmentations_path=None, obs_embedding_paths=None, obs_embedding_names=None, obs_embedding_dims=None, request_init=None, feature_labels_path=None, obs_labels_path=None, convert_to_dense=True, coordination_values=None, **kwargs):
+    def __init__(self, adata_path=None, adata_url=None, obs_feature_matrix_path=None, feature_filter_path=None, initial_feature_filter_path=None, obs_set_paths=None, obs_set_names=None, obs_locations_path=None, obs_segmentations_path=None, obs_embedding_paths=None, obs_embedding_names=None, obs_embedding_dims=None, request_init=None, feature_labels_path=None, obs_labels_path=None, convert_to_dense=True, coordination_values=None, obs_labels_paths=None, obs_labels_names=None, **kwargs):
         """
         Wrap an AnnData object by creating an instance of the ``AnnDataWrapper`` class.
 
@@ -516,15 +516,17 @@ class AnnDataWrapper(AbstractWrapper):
         :param str feature_filter_path: A string like `var/highly_variable` used in conjunction with `obs_feature_matrix_path` if obs_feature_matrix_path points to a subset of `X` of the full `var` list.
         :param str initial_feature_filter_path: A string like `var/highly_variable` used in conjunction with `obs_feature_matrix_path` if obs_feature_matrix_path points to a subset of `X` of the full `var` list.
         :param list[str] obs_set_paths: Column names like `['obs/louvain', 'obs/cellType']` for showing cell sets
-        :param list[str] obs_set_names: Names to display in place of those in `obs_set_paths`, like `['Louvain', 'Cell Type']
+        :param list[str] obs_set_names: Names to display in place of those in `obs_set_paths`, like `['Louvain', 'Cell Type']`
         :param str obs_locations_path: Column name in `obsm` that contains centroid coordinates for displaying centroids in the spatial viewer
         :param str obs_segmentations_path: Column name in `obsm` that contains polygonal coordinates for displaying outlines in the spatial viewer
         :param list[str] obs_embedding_paths: Column names like `['obsm/X_umap', 'obsm/X_pca']` for showing scatterplots
-        :param list[str] obs_embedding_names: Overriding names like `['UMAP', 'PCA'] for displaying above scatterplots
-        :param list[str] obs_embedding_dims: Dimensions along which to get data for the scatterplot, like [[0, 1], [4, 5]] where [0, 1] is just the normal x and y but [4, 5] could be comparing the third and fourth principal components, for example.
-        :param dict request_init: options to be passed along with every fetch request from the browser, like { "header": { "Authorization": "Bearer dsfjalsdfa1431" } }
+        :param list[str] obs_embedding_names: Overriding names like `['UMAP', 'PCA']` for displaying above scatterplots
+        :param list[str] obs_embedding_dims: Dimensions along which to get data for the scatterplot, like `[[0, 1], [4, 5]]` where `[0, 1]` is just the normal x and y but `[4, 5]` could be comparing the third and fourth principal components, for example.
+        :param dict request_init: options to be passed along with every fetch request from the browser, like `{ "header": { "Authorization": "Bearer dsfjalsdfa1431" } }`
         :param str feature_labels_path: The name of a column containing feature labels (e.g., alternate gene symbols), instead of the default index in `var` of the AnnData store.
-        :param str obs_labels_path: The name of a column containing observation labels (e.g., alternate cell IDs), instead of the default index in `obs` of the AnnData store.
+        :param str obs_labels_path: (DEPRECATED) The name of a column containing observation labels (e.g., alternate cell IDs), instead of the default index in `obs` of the AnnData store. Use `obs_labels_paths` and `obs_labels_names` instead. This arg will be removed in a future release.
+        :param list[str] obs_labels_paths: The names of columns containing observation labels (e.g., alternate cell IDs), instead of the default index in `obs` of the AnnData store.
+        :param list[str] obs_labels_names: The optional display names of columns containing observation labels (e.g., alternate cell IDs), instead of the default index in `obs` of the AnnData store.
         :param bool convert_to_dense: Whether or not to convert `X` to dense the zarr store (dense is faster but takes more disk space).
         :param coordination_values: Coordination values for the file definition.
         :type coordination_values: dict or None
@@ -559,7 +561,13 @@ class AnnDataWrapper(AbstractWrapper):
         self._mappings_obsm_dims = obs_embedding_dims
         self._request_init = request_init
         self._gene_alias = feature_labels_path
-        self._obs_labels_path = obs_labels_path
+        # Support legacy provision of single obs labels path
+        if (obs_labels_path is not None):
+            self._obs_labels_paths = [obs_labels_path]
+            self._obs_labels_names = [obs_labels_path.split('/')[-1]]
+        else:
+            self._obs_labels_paths = obs_labels_paths
+            self._obs_labels_names = obs_labels_names
         self._convert_to_dense = convert_to_dense
         self._coordination_values = coordination_values
 
@@ -642,10 +650,18 @@ class AnnDataWrapper(AbstractWrapper):
                 options["featureLabels"] = {
                     "path": self._gene_alias
                 }
-            if self._obs_labels_path is not None:
-                options["obsLabels"] = {
-                    "path": self._obs_labels_path
-                }
+            if self._obs_labels_paths is not None:
+                if self._obs_labels_names is not None and len(self._obs_labels_paths) == len(self._obs_labels_names):
+                    # A name was provided for each path element, so use those values.
+                    names = self._obs_labels_names
+                else:
+                    # Names were not provided for each path element,
+                    # so fall back to using the final part of each path for the names.
+                    names = [labels_path.split('/')[-1] for labels_path in self._obs_labels_paths]
+                obs_labels = []
+                for path, name in zip(self._obs_labels_paths, names):
+                    obs_labels.append({"path": path, "obsLabelsType": name})
+                options["obsLabels"] = obs_labels
             if len(options.keys()) > 0:
                 obj_file_def = {
                     "fileType": ft.ANNDATA_ZARR.value,

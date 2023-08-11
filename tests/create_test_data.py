@@ -139,10 +139,11 @@ def create_test_anndata_file(h5ad_path):
         'exPFC2',
         'GABA2'
     ]
+    obs_cell_label_arr = [f'{obs_label}-label' for obs_label in obs_celltype_arr]
     obs_df = pd.DataFrame(
         data=[
-            {'index': i, 'CellType': ct}
-            for i, ct in zip(obs_index_arr, obs_celltype_arr)
+            {'index': i, 'CellType': ct, 'CellLabel': cl}
+            for i, ct, cl in zip(obs_index_arr, obs_celltype_arr, obs_cell_label_arr)
         ]
     )
     obsm = {"X_umap": np.array([[0, 1] for c in obs_index_arr])}

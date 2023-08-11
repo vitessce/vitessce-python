@@ -71,7 +71,7 @@ make html
 
 ## Deployment
 
-To deploy a new version, increment the version of the Python package in [`setup.py`](./setup.py).
+To deploy a new version, increment the version of the Python package in [`pyproject.toml`](./pyproject.toml).
 
 Then, when you push or merge the code with the incremented versions to `main`, the GitHub Action `deploy.yml` workflow will build and push the package to PyPI.
 

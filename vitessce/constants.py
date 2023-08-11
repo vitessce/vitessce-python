@@ -23,6 +23,7 @@ class CoordinationType(DocEnum):
     OBS_TYPE = "obsType", "The type of entity represented by each observation."
     FEATURE_TYPE = "featureType", "The type of entity represented by each feature."
     FEATURE_VALUE_TYPE = "featureValueType", "The type of value stored in the observation-by-feature matrix."
+    OBS_LABELS_TYPE = 'obsLabelsType', "Feature for displaying additional obs sets' data in heatmap/scatterplot/spatial tooltips."
     EMBEDDING_TYPE = "embeddingType", "The type of embedding used for a scatterplot view, such as PCA or t-SNE."
     EMBEDDING_ZOOM = "embeddingZoom", "The zoom level of an embedding scatterplot view."
     EMBEDDING_ROTATION = "embeddingRotation", "The rotation of an embedding scatterplot view."
@@ -95,6 +96,7 @@ class CoordinationType(DocEnum):
     GATING_FEATURE_SELECTION_X = 'gatingFeatureSelectionX', "Feature for the x-axis of the gating scatterplot."
     GATING_FEATURE_SELECTION_Y = 'gatingFeatureSelectionY', "Feature for the y-axis of the gating scatterplot."
     FEATURE_VALUE_TRANSFORM_COEFFICIENT = 'featureValueTransformCoefficient', "Coefficient to transform values in the gating scatterplot."
+    TOOLTIPS_VISIBLE = 'tooltipsVisible', "Boolean for whether or not tooltips are visible, used by the scatterplot, spatial, and heatmap views."
 
 
 class ViewType(DocEnum):
@@ -174,3 +176,7 @@ class FileType(DocEnum):
     ANNDATA_CELLS_ZARR = "anndata-cells.zarr", "The Zarr-based cells file type from an anndata object."
     ANNDATA_CELL_SETS_ZARR = "anndata-cell-sets.zarr", "The Zarr-based cell-sets file type from an anndata object."
     ANNDATA_EXPRESSION_MATRIX_ZARR = "anndata-expression-matrix.zarr", "The Zarr-based expression matrix file type from an anndata object."
+    OBS_SEGMENTATIONS_CELLS_JSON = "obsSegmentations.cells.json", "The JSON-based cells file type for obsSegmentations."
+    OBS_LOCATIONS_CELLS_JSON = "obsLocations.cells.json", "The JSON-based cells file type for obsLocations."
+    OBS_EMBEDDING_CELLS_JSON = "obsEmbedding.cells.json", "The JSON-based cells file type for obsEmbedding."
+    OBS_SETS_CELL_SETS_JSON = "obsSets.cell-sets.json", "The JSON-based cell sets file type for obsSets."

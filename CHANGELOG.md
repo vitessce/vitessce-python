@@ -1,3 +1,9 @@
+## 3.0.7 - 2023-08-11
+### Changed
+- Added support for multiple coordination scopes of the same type using the `allow_multiple_scopes_per_type` named arg
+- Added new `CoordinationType`s and `FileType`s
+- Added support for `obs_labels_names` and `obs_labels_paths` in AnndataWrapper
+
 ## 1.0.10
 
 ### Changed

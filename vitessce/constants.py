@@ -96,7 +96,7 @@ class CoordinationType(DocEnum):
     GATING_FEATURE_SELECTION_X = 'gatingFeatureSelectionX', "Feature for the x-axis of the gating scatterplot."
     GATING_FEATURE_SELECTION_Y = 'gatingFeatureSelectionY', "Feature for the y-axis of the gating scatterplot."
     FEATURE_VALUE_TRANSFORM_COEFFICIENT = 'featureValueTransformCoefficient', "Coefficient to transform values in the gating scatterplot."
-    TOOLTIPS_VISIBLE = 'tooltipVisible', "Boolean for whether or not tooltips are visible, used by the scatterplot, spatial, and heatmap views."
+    TOOLTIPS_VISIBLE = 'tooltipsVisible', "Boolean for whether or not tooltips are visible, used by the scatterplot, spatial, and heatmap views."
 
 
 class ViewType(DocEnum):

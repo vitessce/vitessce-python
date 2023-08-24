@@ -1284,6 +1284,46 @@ class VitessceConfig:
         output_val = process_level(input_val)
         return output_val
 
+    def link_views_by_dict(self, views, input_val, meta=True):
+        """
+        A convenience function for setting up multi-level and meta-coordination scopes across a set of views.
+
+        :param views: An array of view objects to link together.
+        :type views: list[VitessceConfigView]
+        :param input_val: A (potentially nested) object with coordination types as keys and values being either the initial coordination value, a ``VitessceConfigCoordinationScope`` instance, or a ``CoordinationLevel`` instance. The CoordinationLevel constructor takes an array of objects as its argument to support nesting.
+        :type input_val: dict
+        :param bool meta: Whether or not to use meta-coordination to link the views. Optional.
+        :returns: Self, to allow chaining.
+        :rtype: VitessceConfig
+
+        .. code-block:: python
+            :emphasize-lines: 7-11
+
+            from vitessce import VitessceConfig, ViewType as vt, CoordinationType as ct
+
+            vc = VitessceConfig(schema_version="1.0.15")
+            my_dataset = vc.add_dataset(name='My Dataset')
+            spatial_view = vc.add_view(vt.SPATIAL, dataset=my_dataset)
+            lc_view = vc.add_view(vt.LAYER_CONTROLLER, dataset=my_dataset)
+            scopes = vc.link_views_by_dict([spatial_view, lc_view], {
+                ct.SPATIAL_ZOOM: 2,
+                ct.SPATIAL_TARGET_X: 0,
+                ct.SPATIAL_TARGET_Y: 0,
+            })
+        """
+        scopes = self.add_coordination_by_dict(input_val)
+        if meta:
+            meta_scope = self.add_meta_coordination()
+            meta_scope.use_coordination_by_dict(scopes)
+
+            for view in views:
+                view.use_meta_coordination(meta_scope)
+        else:
+            for view in views:
+                view.use_coordination_by_dict(scopes)
+
+        return self
+
     def set_coordination_value(self, c_type, c_scope, c_value):
         """
         Set the value for a coordination scope. If a coordination object for the coordination type does not yet exist in the coordination space, it will be created.

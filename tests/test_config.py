@@ -1198,3 +1198,207 @@ def test_config_use_meta_complex_coordination():
         ],
         "initStrategy": "auto"
     }
+
+
+def test_config_link_views_by_dict():
+    vc = VitessceConfig(schema_version="1.0.16", name="My config")
+    dataset = vc.add_dataset(name="My dataset")
+
+    spatial_view = vc.add_view('spatial', dataset=dataset)
+    lc_view = vc.add_view('layerController', dataset=dataset)
+
+    vc.link_views_by_dict([spatial_view, lc_view], {
+        'spatialImageLayer': CL([
+            {
+                'image': 'S-1905-017737_bf',
+                'spatialLayerVisible': True,
+                'spatialLayerOpacity': 1,
+                'spatialImageChannel': CL([
+                    {
+                        'spatialTargetC': 0,
+                        'spatialChannelColor': [255, 0, 0],
+                    },
+                    {
+                        'spatialTargetC': 1,
+                        'spatialChannelColor': [0, 255, 0],
+                    },
+                ]),
+            },
+        ]),
+        'spatialSegmentationLayer': CL([
+            {
+                'image': 'S-1905-017737',
+                'spatialLayerVisible': True,
+                'spatialLayerOpacity': 1,
+                'spatialSegmentationChannel': CL([
+                    {
+                        'obsType': 'Cortical Interstitia',
+                        'spatialTargetC': 0,
+                        'spatialChannelColor': [255, 0, 0],
+                    },
+                    {
+                        'obsType': 'Non-Globally Sclerotic Glomeruli',
+                        'spatialTargetC': 1,
+                        'spatialChannelColor': [255, 0, 0],
+                    },
+                    {
+                        'obsType': 'Globally Sclerotic Glomeruli',
+                        'spatialTargetC': 2,
+                        'spatialChannelColor': [255, 0, 0],
+                    },
+                ]),
+            },
+        ]),
+    })
+
+    vc_dict = vc.to_dict()
+
+    assert vc_dict == {
+        "version": "1.0.16",
+        "name": "My config",
+        "description": "",
+        "datasets": [
+            {
+                "uid": "A",
+                "name": "My dataset",
+                "files": []
+            }
+        ],
+        "coordinationSpace": {
+            "dataset": {
+                "A": "A"
+            },
+            "spatialImageLayer": {
+                "A": "__dummy__"
+            },
+            "image": {
+                "A": "S-1905-017737_bf",
+                "B": "S-1905-017737"
+            },
+            "spatialLayerVisible": {
+                "A": True,
+                "B": True
+            },
+            "spatialLayerOpacity": {
+                "A": 1,
+                "B": 1
+            },
+            "spatialImageChannel": {
+                "A": "__dummy__",
+                "B": "__dummy__"
+            },
+            "spatialTargetC": {
+                "A": 0,
+                "B": 1,
+                "C": 0,
+                "D": 1,
+                "E": 2
+            },
+            "spatialChannelColor": {
+                "A": [255, 0, 0],
+                "B": [0, 255, 0],
+                "C": [255, 0, 0],
+                "D": [255, 0, 0],
+                "E": [255, 0, 0]
+            },
+            "spatialSegmentationLayer": {
+                "A": "__dummy__"
+            },
+            "spatialSegmentationChannel": {
+                "A": "__dummy__",
+                "B": "__dummy__",
+                "C": "__dummy__"
+            },
+            "obsType": {
+                "A": "Cortical Interstitia",
+                "B": "Non-Globally Sclerotic Glomeruli",
+                "C": "Globally Sclerotic Glomeruli"
+            },
+            "metaCoordinationScopes": {
+                "A": {
+                    "spatialImageLayer": ["A"],
+                    "spatialSegmentationLayer": ["A"]
+                }
+            },
+            "metaCoordinationScopesBy": {
+                "A": {
+                    "spatialImageLayer": {
+                        "image": {
+                            "A": "A"
+                        },
+                        "spatialLayerVisible": {
+                            "A": "A"
+                        },
+                        "spatialLayerOpacity": {
+                            "A": "A"
+                        },
+                        "spatialImageChannel": {
+                            "A": ["A", "B"]
+                        }
+                    },
+                    "spatialImageChannel": {
+                        "spatialTargetC": {
+                            "A": "A",
+                            "B": "B"
+                        },
+                        "spatialChannelColor": {
+                            "A": "A",
+                            "B": "B"
+                        }
+                    },
+                    "spatialSegmentationLayer": {
+                        "image": {
+                            "A": "B"
+                        },
+                        "spatialLayerVisible": {
+                            "A": "B"
+                        },
+                        "spatialLayerOpacity": {
+                            "A": "B"
+                        },
+                        "spatialSegmentationChannel": {
+                            "A": ["A", "B", "C"]
+                        }
+                    },
+                    "spatialSegmentationChannel": {
+                        "obsType": {
+                            "A": "A",
+                            "B": "B",
+                            "C": "C"
+                        },
+                        "spatialTargetC": {
+                            "A": "C",
+                            "B": "D",
+                            "C": "E"
+                        },
+                        "spatialChannelColor": {
+                            "A": "C",
+                            "B": "D",
+                            "C": "E"
+                        }
+                    }
+                }
+            }
+        },
+        "layout": [
+            {
+                "component": "spatial",
+                "coordinationScopes": {
+                    "dataset": "A",
+                    "metaCoordinationScopes": ["A"],
+                    "metaCoordinationScopesBy": ["A"]
+                },
+                "x": 0, "y": 0, "w": 1, "h": 1
+            },
+            {
+                "component": "layerController",
+                "coordinationScopes": {
+                    "dataset": "A",
+                    "metaCoordinationScopes": ["A"],
+                    "metaCoordinationScopesBy": ["A"]
+                },
+                "x": 0, "y": 0, "w": 1, "h": 1
+            }
+        ],
+        "initStrategy": "auto"
+    }

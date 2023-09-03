@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import patch, Mock
 from copy import deepcopy
 
-from vitessce import (
+from vitessce.data_utils.ucsc_cellbrowser import (
     CellBrowserToAnndataZarrConverter,
     convert_cell_browser_project_to_anndata,
 )

@@ -79,8 +79,40 @@ testing = []
 linting = []
 notebook = []
 
+# data_utils extras_require
+# These dependencies are required
+# to use the corresponding data_utils sub-packages.
+anndata = [
+  'zarr>=2.5.0',
+  'numcodecs>=0.5.7',
+  'anndata>=0.7.8,<0.9',
+  'scanpy>=1.9.3'
+]
+ome_zarr = [
+  'zarr>=2.5.0',
+  'numcodecs>=0.5.7',
+  'ome-zarr==0.2.1'
+]
+ome_tiff = [
+  'generate-tiff-offsets>=0.1.7',
+  'tifffile>=2020.10.1'
+]
+multivec = [
+  'zarr>=2.5.0',
+  'numcodecs>=0.5.7',
+  'negspy>=0.2.24'
+]
+
 [project.urls]
 repository = "https://github.com/vitessce/vitessce-python"
 
 [tool.setuptools]
-packages = ["vitessce", "vitessce.data_utils"]
+packages = [
+  "vitessce",
+  "vitessce.data_utils",
+  "vitessce.data_utils.anndata",
+  "vitessce.data_utils.multivec",
+  "vitessce.data_utils.ome_tiff",
+  "vitessce.data_utils.ome_zarr",
+  "vitessce.data_utils.ucsc_cellbrowser"
+]

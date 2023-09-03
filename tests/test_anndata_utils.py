@@ -7,11 +7,13 @@ from pathlib import Path
 from scipy.io import mmread
 import zarr
 
-from vitessce.data_utils import (
+from vitessce.data_utils.anndata import (
     optimize_arr,
     optimize_adata,
     sort_var_axis,
     to_uint8,
+)
+from vitessce.data_utils.multivec import (
     adata_to_multivec_zarr,
 )
 

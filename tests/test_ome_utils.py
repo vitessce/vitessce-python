@@ -3,7 +3,7 @@ from pathlib import Path
 import zarr
 import numpy as np
 
-from vitessce.data_utils import (
+from vitessce.data_utils.ome_zarr import (
     rgb_img_to_ome_zarr,
 )
 

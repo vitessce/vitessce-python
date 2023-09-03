@@ -2,10 +2,12 @@ import argparse
 import scanpy as sc
 import numpy as np
 import scipy.cluster
-from vitessce.data_utils import (
+from vitessce.data_utils.anndata import (
     to_diamond,
-    rgb_img_to_ome_zarr,
     optimize_adata,
+)
+from vitessce.data_utils.ome_zarr import (
+    rgb_img_to_ome_zarr,
 )
 
 

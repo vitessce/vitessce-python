@@ -2,7 +2,7 @@ import argparse
 import json
 from anndata import read_h5ad
 import pandas as pd
-from vitessce.data_utils import (
+from vitessce.data_utils.anndata import (
     to_uint8,
     sort_var_axis,
     optimize_adata,

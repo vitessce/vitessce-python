@@ -1,7 +1,7 @@
 import argparse
 import json
 import pandas as pd
-from vitessce.data_utils import to_diamond
+from vitessce.data_utils.anndata import to_diamond
 
 
 def convert_to_csv(args):

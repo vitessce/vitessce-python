@@ -1,6 +1,6 @@
 import argparse
 from anndata import read_h5ad
-from vitessce.data_utils import (
+from vitessce.data_utils.anndata import (
     to_uint8,
     sort_var_axis,
     optimize_adata,

@@ -2,7 +2,7 @@ import argparse
 from anndata import read_h5ad
 import numpy as np
 from scipy import sparse
-from vitessce.data_utils import to_uint8
+from vitessce.data_utils.anndata import to_uint8
 
 
 def convert_h5ad_to_zarr(input_path, output_path):

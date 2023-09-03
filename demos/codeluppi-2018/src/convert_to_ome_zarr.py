@@ -1,7 +1,7 @@
 import argparse
 import h5py
 import numpy as np
-from vitessce.data_utils import (
+from vitessce.data_utils.ome_zarr import (
     multiplex_img_to_ome_zarr,
 )
 

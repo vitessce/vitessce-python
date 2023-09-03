@@ -8,6 +8,7 @@ omit =
     vitessce/repr.py
     vitessce/data_utils/anndata/anndata.py
     vitessce/data_utils/multivec/multivec.py
+    vitessce/data_utils/multivec/entities.py
     vitessce/data_utils/ome_tiff/ome_tiff.py
     vitessce/data_utils/ome_zarr/ome_zarr.py
     vitessce/data_utils/ucsc_cellbrowser/ucsc_cellbrowser.py

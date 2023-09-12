@@ -5,8 +5,10 @@ from uuid import uuid4
 from pathlib import PurePath, PurePosixPath
 
 from .constants import (
+    norm_enum,
     ViewType as cm,
     FileType as ft,
+    DataType as dt,
 )
 from .repr import make_repr
 
@@ -354,7 +356,7 @@ class CsvWrapper(AbstractWrapper):
         self._repr = make_repr(locals())
         self._csv_path = csv_path
         self._csv_url = csv_url
-        self._data_type = data_type
+        self._data_type = norm_enum(data_type, dt)
         self._options = options
         self._coordination_values = coordination_values
         self.is_remote = csv_url is not None

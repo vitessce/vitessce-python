@@ -7,6 +7,7 @@ from .config import (
     VitessceConfigDatasetFile,
     hconcat,
     vconcat,
+    CoordinationLevel,
 )
 
 from .repr import make_repr

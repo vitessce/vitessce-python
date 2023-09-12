@@ -5,6 +5,7 @@ import black
 from collections import OrderedDict
 
 from .constants import (
+    norm_enum,
     CoordinationType as ct,
     ViewType as cm,  # TODO: change to vt
     FileType as ft
@@ -48,7 +49,7 @@ class VitessceConfigDatasetFile:
     A class to represent a file (described by a URL, data type, and file type) in a Vitessce view config dataset.
     """
 
-    def __init__(self, file_type, url=None, coordination_values=None, options=None):
+    def __init__(self, file_type, url=None, coordination_values=None, options=None, data_type=None):
         """
         Not meant to be instantiated directly, but instead created and returned by the ``VitessceConfigDataset.add_file()`` method.
 
@@ -59,6 +60,7 @@ class VitessceConfigDatasetFile:
         :type coordination_values: dict or None
         :param options: Extra options to pass to the file loader class.
         :type options: dict or list or None
+        :param data_type: Deprecated / not used. Only included for backwards compatibility with the old API.
         """
         self.file = {
             "fileType": file_type
@@ -132,7 +134,7 @@ class VitessceConfigDataset:
         """
         return self.dataset["uid"]
 
-    def add_file(self, file_type, url=None, coordination_values=None, options=None):
+    def add_file(self, file_type, url=None, coordination_values=None, options=None, data_type=None):
         """
         Add a new file definition to this dataset instance.
 
@@ -144,6 +146,7 @@ class VitessceConfigDataset:
         :type coordination_values: dict or None
         :param options: Extra options to pass to the file loader class. Optional.
         :type options: dict or list or None
+        :param data_type: Deprecated / not used. Only included for backwards compatibility with the old API.
 
         :returns: Self, to allow function chaining.
         :rtype: VitessceConfigDataset
@@ -164,12 +167,7 @@ class VitessceConfigDataset:
             )
         """
 
-        assert isinstance(file_type, str) or isinstance(file_type, ft)
-
-        if isinstance(file_type, str):
-            file_type_str = file_type
-        else:
-            file_type_str = file_type.value
+        file_type_str = norm_enum(file_type, ft)
 
         self._add_file(VitessceConfigDatasetFile(
             url=url, file_type=file_type_str, coordination_values=coordination_values, options=options))
@@ -315,6 +313,131 @@ def vconcat(*views):
     return VitessceConfigViewVConcat(views)
 
 
+def _use_coordination_by_dict_helper(scopes, coordination_scopes, coordination_scopes_by):
+    """
+    // Set this.coordinationScopes and this.coordinationScopesBy by recursion on `scopes`.
+    /*
+        // Destructured, `scopes` might look like:
+        const {
+        [CoordinationType.SPATIAL_IMAGE_LAYER]: [
+            {
+            scope: imageLayerScope,
+            children: {
+                [CoordinationType.IMAGE]: { scope: imageScope },
+                [CoordinationType.SPATIAL_LAYER_VISIBLE]: { scope: imageVisibleScope },
+                [CoordinationType.SPATIAL_LAYER_OPACITY]: { scope: imageOpacityScope },
+                [CoordinationType.SPATIAL_IMAGE_CHANNEL]: [
+                {
+                    scope: imageChannelScopeR,
+                    children: {
+                    [CoordinationType.SPATIAL_TARGET_C]: { scope: rTargetScope },
+                    [CoordinationType.SPATIAL_CHANNEL_COLOR]: { scope: rColorScope },
+                    },
+                },
+                {
+                    scope: imageChannelScopeG,
+                    children: {
+                    [CoordinationType.SPATIAL_TARGET_C]: { scope: gTargetScope },
+                    [CoordinationType.SPATIAL_CHANNEL_COLOR]: { scope: gColorScope },
+                    },
+                },
+                ],
+            },
+            },
+        ],
+        // ...
+        } = scopes;
+        // This would set the values to:
+        this.coordinationScopes = {
+        // Add the top-level coordination types to `coordinationScopes`.
+        [CoordinationType.SPATIAL_IMAGE_LAYER]: [imageLayerScope.cScope],
+        };
+        this.coordinationScopesBy = {
+        [CoordinationType.SPATIAL_IMAGE_LAYER]: {
+            [CoordinationType.IMAGE]: {
+            [imageLayerScope.cScope]: imageScope.cScope,
+            },
+            [CoordinationType.SPATIAL_LAYER_VISIBLE]: {
+            [imageLayerScope.cScope]: imageVisibleScope.cScope,
+            },
+            [CoordinationType.SPATIAL_LAYER_OPACITY]: {
+            [imageLayerScope.cScope]: imageOpacityScope.cScope,
+            },
+            [CoordinationType.SPATIAL_IMAGE_CHANNEL]: {
+            [imageLayerScope.cScope]: [imageChannelScopeR.cScope, imageChannelScopeG.cScope],
+            },
+        },
+        [CoordinationType.SPATIAL_IMAGE_CHANNEL]: {
+            [CoordinationType.SPATIAL_TARGET_C]: {
+            [imageChannelScopeR.cScope]: rTargetScope.cScope,
+            [imageChannelScopeG.cScope]: gTargetScope.cScope,
+            },
+            [CoordinationType.SPATIAL_CHANNEL_COLOR]: {
+            [imageChannelScopeR.cScope]: rColorScope.cScope,
+            [imageChannelScopeG.cScope]: gColorScope.cScope,
+            },
+        },
+        };
+    */
+    """
+
+    # Recursive inner function.
+    def process_level(parent_type, parent_scope, level_type, level_val):
+        parent_type = norm_enum(parent_type, ct)
+        level_type = norm_enum(level_type, ct)
+
+        if isinstance(level_val, list):
+            coordination_scopes_by[parent_type] = {
+                **coordination_scopes_by.get(parent_type, {}),
+                level_type: {
+                    **coordination_scopes_by.get(parent_type, {}).get(level_type, {}),
+                    parent_scope.c_scope: [child_val["scope"].c_scope for child_val in level_val],
+                },
+            }
+            for child_val in level_val:
+                if "children" in child_val:
+                    # Continue recursion.
+                    for next_level_type, next_level_val in child_val["children"].items():
+                        process_level(level_type, child_val["scope"], next_level_type, next_level_val)
+                # Else is the base case: no children
+        else:
+            coordination_scopes_by[parent_type] = {
+                **coordination_scopes_by.get(parent_type, {}),
+                level_type: {
+                    **coordination_scopes_by.get(parent_type, {}).get(level_type, {}),
+                    parent_scope.c_scope: level_val["scope"].c_scope,
+                },
+            }
+
+            if "children" in level_val:
+                # Continue recursion.
+                for next_level_type, next_level_val in level_val["children"].items():
+                    process_level(level_type, level_val["scope"], next_level_type, next_level_val)
+            # Else is the base case: no children
+    # End process_level inner function
+
+    for top_level_type, top_level_val in scopes.items():
+        top_level_type = norm_enum(top_level_type, ct)
+        if isinstance(top_level_val, list):
+            coordination_scopes[top_level_type] = [level_val["scope"].c_scope for level_val in top_level_val]
+
+            for level_val in top_level_val:
+                if "children" in level_val:
+                    # Begin recursion.
+                    for next_level_type, next_level_val in level_val["children"].items():
+                        process_level(top_level_type, level_val["scope"], next_level_type, next_level_val)
+
+        else:
+            coordination_scopes[top_level_type] = top_level_val["scope"].c_scope
+            if "children" in top_level_val:
+                # Begin recursion.
+                for next_level_type, next_level_val in top_level_val["children"].items():
+                    next_level_type = norm_enum(next_level_type, ct)
+                    process_level(top_level_type, top_level_val["scope"], next_level_type, next_level_val)
+
+    return (coordination_scopes, coordination_scopes_by)
+
+
 class VitessceConfigView:
     """
     A class to represent a view (i.e. visualization component) in the Vitessce view config layout.
@@ -334,6 +457,7 @@ class VitessceConfigView:
         self.view = {
             "component": component,
             "coordinationScopes": coordination_scopes,
+            # "coordinationScopesBy": None, # TODO: initialize from parameter?
             "x": x,
             "y": y,
             "w": w,
@@ -368,7 +492,7 @@ class VitessceConfigView:
         :returns: The coordination scope name.
         :rtype: str or None
         """
-        return self.view["coordinationScopes"].get(c_type)
+        return self.view["coordinationScopes"].get(norm_enum(c_type, ct))
 
     def use_coordination(self, *c_scopes, allow_multiple_scopes_per_type=False):
         """
@@ -412,6 +536,88 @@ class VitessceConfigView:
                     self.view["coordinationScopes"][c_scope.c_type] = [existing_value, new_value]
             else:
                 self.view["coordinationScopes"][c_scope.c_type] = new_value
+        return self
+
+    def use_coordination_by_dict(self, scopes):
+        """
+        Attach potentially multi-level coordination scopes to this view.
+
+        :param scopes: A value returned by ``VitessceConfig.add_coordination_by_dict``. Not intended to be a manually-constructed object.
+        :type scopes: dict
+
+        :returns: Self, to allow chaining.
+        :rtype: VitessceConfigView
+
+        .. code-block:: python
+            :emphasize-lines: 11
+
+            from vitessce import VitessceConfig, ViewType as vt, CoordinationType as ct
+
+            vc = VitessceConfig(schema_version="1.0.15")
+            my_dataset = vc.add_dataset(name='My Dataset')
+            spatial_view = vc.add_view(vt.SPATIAL, dataset=my_dataset)
+            scopes = vc.add_coordination_by_dict({
+                ct.SPATIAL_ZOOM: 2,
+                ct.SPATIAL_TARGET_X: 0,
+                ct.SPATIAL_TARGET_Y: 0,
+            })
+            spatial_view.use_coordination_by_dict(scopes)
+        """
+        if "coordinationScopes" not in self.view["coordinationScopes"] or self.view["coordinationScopes"] is None:
+            self.view["coordinationScopes"] = {}
+
+        if "coordinationScopesBy" not in self.view or self.view["coordinationScopesBy"] is None:
+            self.view["coordinationScopesBy"] = {}
+
+        (next_coordination_scopes, next_coordination_scopes_by) = _use_coordination_by_dict_helper(
+            scopes,
+            self.view["coordinationScopes"],
+            self.view["coordinationScopesBy"],
+        )
+        self.view["coordinationScopes"] = next_coordination_scopes
+        self.view["coordinationScopesBy"] = next_coordination_scopes_by
+        return self
+
+    def use_meta_coordination(self, meta_scope):
+        """
+        Attach meta coordination scopes to this view.
+        :param meta_scope: A meta coordination scope instance.
+        :type meta_scope: VitessceConfigMetaCoordinationScope
+        :returns: Self, to allow chaining.
+        :rtype: VitessceConfigView
+
+        .. code-block:: python
+            :emphasize-lines: 16-17
+
+            from vitessce import VitessceConfig, ViewType as vt, CoordinationType as ct
+
+            vc = VitessceConfig(schema_version="1.0.15")
+            my_dataset = vc.add_dataset(name='My Dataset')
+            spatial_view = vc.add_view(vt.SPATIAL, dataset=my_dataset)
+            lc_view = vc.add_view(vt.LAYER_CONTROLLER, dataset=my_dataset)
+            scopes = vc.add_coordination_by_dict({
+                ct.SPATIAL_ZOOM: 2,
+                ct.SPATIAL_TARGET_X: 0,
+                ct.SPATIAL_TARGET_Y: 0,
+            })
+
+            meta_scopes = vc.add_meta_coordination()
+            meta_scopes.use_coordination_by_dict(scopes)
+
+            spatial_view.use_meta_coordination(meta_scopes)
+            lc_view.use_meta_coordination(meta_scopes)
+        """
+        if self.view["coordinationScopes"] is None:
+            self.view["coordinationScopes"] = {}
+
+        self.view["coordinationScopes"][ct.META_COORDINATION_SCOPES.value] = [
+            *self.view["coordinationScopes"].get(ct.META_COORDINATION_SCOPES.value, []),
+            meta_scope.meta_scope.c_scope,
+        ]
+        self.view["coordinationScopes"][ct.META_COORDINATION_SCOPES_BY.value] = [
+            *self.view["coordinationScopes"].get(ct.META_COORDINATION_SCOPES_BY.value, []),
+            meta_scope.meta_by_scope.c_scope,
+        ]
         return self
 
     def set_xywh(self, x, y, w, h):
@@ -465,6 +671,23 @@ class VitessceConfigView:
     def __truediv__(self, other):
         return vconcat(self, other)
 
+# would import as CL for convenience
+
+
+class CoordinationLevel:
+    def __init__(self, value):
+        self.value = value
+        self.cached_value = None
+
+    def set_cached(self, processed_level):
+        self.cached_value = processed_level
+
+    def get_cached(self):
+        return self.cached_value
+
+    def is_cached(self):
+        return self.cached_value is not None
+
 
 class VitessceConfigCoordinationScope:
     """
@@ -479,7 +702,7 @@ class VitessceConfigCoordinationScope:
         :param str c_scope: The coordination scope name.
         :param c_value: The value for the coordination scope. Optional.
         """
-        self.c_type = c_type
+        self.c_type = norm_enum(c_type, ct)
         self.c_scope = c_scope
         self.c_value = c_value
 
@@ -520,6 +743,89 @@ class VitessceConfigCoordinationScope:
             y_scope.set_value(0)
         """
         self.c_value = c_value
+        return self
+
+
+class VitessceConfigMetaCoordinationScope:
+    """
+    A class representing a pair of coordination scopes, for metaCoordinationScopes and metaCoordinationScopesBy, respectively, in the coordination space.
+    """
+
+    def __init__(self, meta_scope, meta_by_scope):
+        """
+        Not meant to be instantiated directly, but instead created and returned by the ``VitessceConfig.add_meta_coordination()`` method.
+
+        :param str meta_scope: The name of the coordination scope for metaCoordinationScopes.
+        :param str meta_by_scope: The name of the coordination scope for metaCoordinationScopesBy.
+        """
+        self.meta_scope = VitessceConfigCoordinationScope(
+            ct.META_COORDINATION_SCOPES.value,
+            meta_scope,
+        )
+        self.meta_by_scope = VitessceConfigCoordinationScope(
+            ct.META_COORDINATION_SCOPES_BY.value,
+            meta_by_scope,
+        )
+
+    def use_coordination(self, *c_scopes):
+        """
+        Attach coordination scopes to this meta scope.
+
+        :param  \\*c_scopes: A variable number of coordination scope instances.
+        :type \\*c_scopes: VitessceConfigCoordinationScope
+        :returns: Self, to allow chaining.
+        :rtype: VitessceConfigMetaCoordinationScope
+        """
+        meta_scopes_val = self.meta_scope.c_value
+        for c_scope in c_scopes:
+            meta_scopes_val[c_scope.c_type] = c_scope.c_scope
+        self.meta_scope.set_value(meta_scopes_val)
+        return self
+
+    def use_coordination_by_dict(self, scopes):
+        """
+        Attach potentially multi-level coordination scopes to this meta-scopes instance.
+
+        :param scopes: A value returned by ``VitessceConfig.add_coordination_by_dict``. Not intended to be a manually-constructed object.
+        :type scopes: dict
+
+        :returns: Self, to allow chaining.
+        :rtype: VitessceConfigMetaCoordinationScope
+
+        .. code-block:: python
+            :emphasize-lines: 14
+
+            from vitessce import VitessceConfig, ViewType as vt, CoordinationType as ct
+
+            vc = VitessceConfig(schema_version="1.0.15")
+            my_dataset = vc.add_dataset(name='My Dataset')
+            spatial_view = vc.add_view(vt.SPATIAL, dataset=my_dataset)
+            lc_view = vc.add_view(vt.LAYER_CONTROLLER, dataset=my_dataset)
+            scopes = vc.add_coordination_by_dict({
+                ct.SPATIAL_ZOOM: 2,
+                ct.SPATIAL_TARGET_X: 0,
+                ct.SPATIAL_TARGET_Y: 0,
+            })
+
+            meta_scopes = vc.add_meta_coordination()
+            meta_scopes.use_coordination_by_dict(scopes)
+
+            spatial_view.use_meta_coordination(meta_scopes)
+            lc_view.use_meta_coordination(meta_scopes)
+        """
+        if self.meta_scope.c_value is None:
+            self.meta_scope.set_value({})
+
+        if self.meta_by_scope.c_value is None:
+            self.meta_by_scope.set_value({})
+
+        (meta_scopes_val, meta_by_scopes_val) = _use_coordination_by_dict_helper(
+            scopes,
+            self.meta_scope.c_value,
+            self.meta_by_scope.c_value,
+        )
+        self.meta_scope.set_value(meta_scopes_val)
+        self.meta_by_scope.set_value(meta_by_scopes_val)
         return self
 
 
@@ -720,10 +1026,7 @@ class VitessceConfig:
                 raise ValueError(
                     "A dataset with the provided dataset_uid could not be found.")
 
-        if isinstance(component, str):
-            component_str = component
-        else:
-            component_str = component.value
+        component_str = norm_enum(component, cm)
 
         # Find the coordination scope name associated with the dataset
         dataset_matches = [
@@ -790,11 +1093,7 @@ class VitessceConfig:
         """
         result = []
         for c_type in c_types:
-            assert isinstance(c_type, ct) or isinstance(c_type, str)
-            if isinstance(c_type, str):
-                c_type_str = c_type
-            else:
-                c_type_str = c_type.value
+            c_type_str = norm_enum(c_type, ct)
             prev_scopes = list(self.config["coordinationSpace"][c_type_str].keys(
             )) if c_type_str in self.config["coordinationSpace"].keys() else []
             scope = VitessceConfigCoordinationScope(
@@ -804,6 +1103,235 @@ class VitessceConfig:
             self.config["coordinationSpace"][scope.c_type][scope.c_scope] = scope
             result.append(scope)
         return result
+
+    def add_meta_coordination(self):
+        """
+        Initialize a new meta coordination scope in the coordination space, and get a reference to it in the form of a meta coordination scope instance.
+
+        :returns: A new meta coordination scope instance.
+        :rtype: VitessceConfigMetaCoordinationScope
+
+        .. code-block:: python
+            :emphasize-lines: 13
+
+            from vitessce import VitessceConfig, ViewType as vt, CoordinationType as ct
+
+            vc = VitessceConfig(schema_version="1.0.15")
+            my_dataset = vc.add_dataset(name='My Dataset')
+            spatial_view = vc.add_view(vt.SPATIAL, dataset=my_dataset)
+            lc_view = vc.add_view(vt.LAYER_CONTROLLER, dataset=my_dataset)
+            scopes = vc.add_coordination_by_dict({
+                ct.SPATIAL_ZOOM: 2,
+                ct.SPATIAL_TARGET_X: 0,
+                ct.SPATIAL_TARGET_Y: 0,
+            })
+
+            meta_scopes = vc.add_meta_coordination()
+            meta_scopes.use_coordination_by_dict(scopes)
+
+            spatial_view.use_meta_coordination(meta_scopes)
+            lc_view.use_meta_coordination(meta_scopes)
+        """
+        prev_meta_scopes = self.config["coordinationSpace"].get(ct.META_COORDINATION_SCOPES.value, {}).keys()
+        prev_meta_by_scopes = self.config["coordinationSpace"].get(ct.META_COORDINATION_SCOPES_BY.value, {}).keys()
+
+        meta_container = VitessceConfigMetaCoordinationScope(
+            _get_next_scope(prev_meta_scopes),
+            _get_next_scope(prev_meta_by_scopes),
+        )
+        if ct.META_COORDINATION_SCOPES.value not in self.config["coordinationSpace"]:
+            self.config["coordinationSpace"][ct.META_COORDINATION_SCOPES.value] = {}
+        if ct.META_COORDINATION_SCOPES_BY.value not in self.config["coordinationSpace"]:
+            self.config["coordinationSpace"][ct.META_COORDINATION_SCOPES_BY.value] = {}
+        self.config["coordinationSpace"][ct.META_COORDINATION_SCOPES.value][meta_container.meta_scope.c_scope] = meta_container.meta_scope
+        self.config["coordinationSpace"][ct.META_COORDINATION_SCOPES_BY.value][meta_container.meta_by_scope.c_scope] = meta_container.meta_by_scope
+        return meta_container
+
+    def add_coordination_by_dict(self, input_val):
+        """
+        Set up the initial values for multi-level coordination in the coordination space. Get a reference to these values to pass to the ``useCoordinationByObject`` method of either view or meta coordination scope instances.
+
+        :param input_val: A (potentially nested) object with coordination types as keys and values being either the initial coordination value, a ``VitessceConfigCoordinationScope`` instance, or a ``CoordinationLevel`` instance. The CoordinationLevel constructor takes an array of objects as its argument to support nesting.
+        :type input_val: dict
+        :returns: A (potentially nested) object with coordination types as keys and values being either ``{ scope }``, ``{ scope, children }``, or an array of these. Not intended to be manipulated before being passed to a ``useCoordinationByObject`` function.
+        :rtype: dict
+
+        .. code-block:: python
+            :emphasize-lines: 7-11
+
+            from vitessce import VitessceConfig, ViewType as vt, CoordinationType as ct
+
+            vc = VitessceConfig(schema_version="1.0.15")
+            my_dataset = vc.add_dataset(name='My Dataset')
+            spatial_view = vc.add_view(vt.SPATIAL, dataset=my_dataset)
+            lc_view = vc.add_view(vt.LAYER_CONTROLLER, dataset=my_dataset)
+            scopes = vc.add_coordination_by_dict({
+                ct.SPATIAL_ZOOM: 2,
+                ct.SPATIAL_TARGET_X: 0,
+                ct.SPATIAL_TARGET_Y: 0,
+            })
+        """
+
+        # Developer notes
+        """
+        /*
+        // The value for `input` might look like:
+        {
+            [CoordinationType.SPATIAL_IMAGE_LAYER]: CL([
+            {
+                [CoordinationType.IMAGE]: 'S-1905-017737_bf',
+                [CoordinationType.SPATIAL_LAYER_VISIBLE]: true,
+                [CoordinationType.SPATIAL_LAYER_OPACITY]: 1,
+                [CoordinationType.SPATIAL_IMAGE_CHANNEL]: CL([
+                {
+                    [CoordinationType.SPATIAL_TARGET_C]: 0,
+                    [CoordinationType.SPATIAL_CHANNEL_COLOR]: [255, 0, 0],
+                },
+                {
+                    [CoordinationType.SPATIAL_TARGET_C]: 1,
+                    [CoordinationType.SPATIAL_CHANNEL_COLOR]: [0, 255, 0],
+                },
+                ]),
+            },
+            ]),
+            [CoordinationType.SPATIAL_SEGMENTATION_LAYER]: CL([
+            {
+                [CoordinationType.IMAGE]: 'S-1905-017737',
+                [CoordinationType.SPATIAL_LAYER_VISIBLE]: true,
+                [CoordinationType.SPATIAL_LAYER_OPACITY]: 1,
+                [CoordinationType.SPATIAL_SEGMENTATION_CHANNEL]: CL([
+                {
+                    [CoordinationType.OBS_TYPE]: 'Cortical Interstitia',
+                    [CoordinationType.SPATIAL_TARGET_C]: 0,
+                    [CoordinationType.SPATIAL_CHANNEL_COLOR]: [255, 0, 0],
+                },
+                {
+                    [CoordinationType.OBS_TYPE]: 'Non-Globally Sclerotic Glomeruli',
+                    [CoordinationType.SPATIAL_TARGET_C]: 1,
+                    [CoordinationType.SPATIAL_CHANNEL_COLOR]: [255, 0, 0],
+                },
+                {
+                    [CoordinationType.OBS_TYPE]: 'Globally Sclerotic Glomeruli',
+                    [CoordinationType.SPATIAL_TARGET_C]: 2,
+                    [CoordinationType.SPATIAL_CHANNEL_COLOR]: [255, 0, 0],
+                },
+                ]),
+            },
+            ]),
+        }
+        // Which would correspond to this `output`,
+        // a valid input for `VitessceConfigMetaCoordinationScope.useComplexCoordination()`:
+        {
+            [CoordinationType.SPATIAL_IMAGE_LAYER]: [
+            {
+                scope: imageLayerScope,
+                children: {
+                [CoordinationType.IMAGE]: { scope: imageScope },
+                [CoordinationType.SPATIAL_LAYER_VISIBLE]: { scope: imageVisibleScope },
+                [CoordinationType.SPATIAL_LAYER_OPACITY]: { scope: imageOpacityScope },
+                [CoordinationType.SPATIAL_IMAGE_CHANNEL]: [
+                    {
+                    scope: imageChannelScopeR,
+                    children: {
+                        [CoordinationType.SPATIAL_TARGET_C]: { scope: rTargetScope },
+                        [CoordinationType.SPATIAL_CHANNEL_COLOR]: { scope: rColorScope },
+                    },
+                    },
+                    {
+                    scope: imageChannelScopeG,
+                    children: {
+                        [CoordinationType.SPATIAL_TARGET_C]: { scope: gTargetScope },
+                        [CoordinationType.SPATIAL_CHANNEL_COLOR]: { scope: gColorScope },
+                    },
+                    },
+                ],
+                },
+            },
+            ],
+            // ...
+        }
+        */
+        """
+        def process_level(level):
+            result = {}
+            for c_type, next_level_or_initial_value in level.items():
+                c_type_str = norm_enum(c_type, ct)
+                # Check if value of object is instanceof CoordinationLevel
+                # (otherwise assume it is the coordination value).
+                if isinstance(next_level_or_initial_value, CoordinationLevel):
+                    next_level = next_level_or_initial_value.value
+                    if isinstance(next_level, list):
+                        if next_level_or_initial_value.is_cached():
+                            result[c_type_str] = next_level_or_initial_value.get_cached()
+                        else:
+                            def map_func(next_el):
+                                (dummy_scope, ) = self.add_coordination(c_type_str)
+                                # TODO: set a better initial value for dummy cases.
+                                dummy_scope.set_value('__dummy__')
+                                return {
+                                    "scope": dummy_scope,
+                                    "children": process_level(next_el),
+                                }
+                            processed_level = list(map(map_func, next_level))
+                            next_level_or_initial_value.set_cached(processed_level)
+                            result[c_type_str] = processed_level
+                    else:
+                        raise ValueError('Expected CoordinationLevel.value to be an array.')
+                else:
+                    # Base case.
+                    initial_value = next_level_or_initial_value
+                    if isinstance(initial_value, VitessceConfigCoordinationScope):
+                        result[c_type_str] = {"scope": initial_value}
+                    else:
+                        (scope, ) = self.add_coordination(c_type_str)
+                        scope.set_value(initial_value)
+                        result[c_type_str] = {"scope": scope}
+            return result
+        # End process_level function
+
+        # Begin recursion.
+        output_val = process_level(input_val)
+        return output_val
+
+    def link_views_by_dict(self, views, input_val, meta=True):
+        """
+        A convenience function for setting up multi-level and meta-coordination scopes across a set of views.
+
+        :param views: An array of view objects to link together.
+        :type views: list[VitessceConfigView]
+        :param input_val: A (potentially nested) object with coordination types as keys and values being either the initial coordination value, a ``VitessceConfigCoordinationScope`` instance, or a ``CoordinationLevel`` instance. The CoordinationLevel constructor takes an array of objects as its argument to support nesting.
+        :type input_val: dict
+        :param bool meta: Whether or not to use meta-coordination to link the views. Optional.
+        :returns: Self, to allow chaining.
+        :rtype: VitessceConfig
+
+        .. code-block:: python
+            :emphasize-lines: 7-11
+
+            from vitessce import VitessceConfig, ViewType as vt, CoordinationType as ct
+
+            vc = VitessceConfig(schema_version="1.0.15")
+            my_dataset = vc.add_dataset(name='My Dataset')
+            spatial_view = vc.add_view(vt.SPATIAL, dataset=my_dataset)
+            lc_view = vc.add_view(vt.LAYER_CONTROLLER, dataset=my_dataset)
+            scopes = vc.link_views_by_dict([spatial_view, lc_view], {
+                ct.SPATIAL_ZOOM: 2,
+                ct.SPATIAL_TARGET_X: 0,
+                ct.SPATIAL_TARGET_Y: 0,
+            })
+        """
+        scopes = self.add_coordination_by_dict(input_val)
+        if meta:
+            meta_scope = self.add_meta_coordination()
+            meta_scope.use_coordination_by_dict(scopes)
+
+            for view in views:
+                view.use_meta_coordination(meta_scope)
+        else:
+            for view in views:
+                view.use_coordination_by_dict(scopes)
+
+        return self
 
     def set_coordination_value(self, c_type, c_scope, c_value):
         """

@@ -13,6 +13,10 @@ from .constants import (
 from .repr import make_repr
 
 
+def make_unique_filename(file_ext):
+    return f"{str(uuid4())}{file_ext}"
+
+
 def file_path_to_url_path(local_path, prepend_slash=True, path_class=None):
     # force_windows is used in tests
     url_path = str(PurePosixPath(PurePath(local_path) if path_class is None else path_class(local_path)))
@@ -233,8 +237,8 @@ class OmeTiffWrapper(AbstractWrapper):
         self._transformation_matrix = transformation_matrix
         self.is_remote = img_url is not None
         self.is_bitmask = is_bitmask
-        self.local_img_uid = str(uuid4())
-        self.local_offsets_uid = str(uuid4())
+        self.local_img_uid = make_unique_filename(".ome.tif")
+        self.local_offsets_uid = make_unique_filename(".offsets.json")
         if img_url is not None and (img_path is not None or offsets_path is not None):
             raise ValueError(
                 "Did not expect img_path or offsets_path to be provided with img_url")
@@ -360,7 +364,7 @@ class CsvWrapper(AbstractWrapper):
         self._options = options
         self._coordination_values = coordination_values
         self.is_remote = csv_url is not None
-        self.local_csv_uid = str(uuid4())
+        self.local_csv_uid = make_unique_filename(".csv")
         if data_type is None:
             raise ValueError("Expected data_type to be provided")
         if csv_url is not None and csv_path is not None:
@@ -453,7 +457,7 @@ class OmeZarrWrapper(AbstractWrapper):
             self.is_remote = False
         else:
             self.is_remote = True
-        self.local_dir_uid = str(uuid4())
+        self.local_dir_uid = make_unique_filename(".ome.zarr")
 
     def convert_and_save(self, dataset_uid, obj_i, base_dir=None):
         # Only create out-directory if needed
@@ -550,7 +554,7 @@ class AnnDataWrapper(AbstractWrapper):
         else:
             self.is_remote = True
             self.zarr_folder = None
-        self.local_dir_uid = str(uuid4())
+        self.local_dir_uid = make_unique_filename(".adata.zarr")
         self._expression_matrix = obs_feature_matrix_path
         self._cell_set_obs_names = obs_set_names
         self._mappings_obsm_names = obs_embedding_names
@@ -713,7 +717,7 @@ class MultivecZarrWrapper(AbstractWrapper):
             self.is_remote = False
         else:
             self.is_remote = True
-        self.local_dir_uid = str(uuid4())
+        self.local_dir_uid = make_unique_filename(".multivec.zarr")
 
     def convert_and_save(self, dataset_uid, obj_i, base_dir=None):
         # Only create out-directory if needed

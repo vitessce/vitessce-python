@@ -776,6 +776,8 @@ class VitessceConfigMetaCoordinationScope:
         :returns: Self, to allow chaining.
         :rtype: VitessceConfigMetaCoordinationScope
         """
+        if self.meta_scope.c_value is None:
+            self.meta_scope.set_value({})
         meta_scopes_val = self.meta_scope.c_value
         for c_scope in c_scopes:
             meta_scopes_val[c_scope.c_type] = c_scope.c_scope

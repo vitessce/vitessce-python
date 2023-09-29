@@ -1,2 +1,4 @@
 output:
-- data.zarr
+- toy.zarr
+- cosmx_io.zarr
+- mcmicro_io.zarr

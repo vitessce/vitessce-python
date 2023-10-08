@@ -6,7 +6,7 @@ import anndata
 import gzip
 import io
 
-from vitessce.data_utils import (
+from ..anndata import (
     optimize_adata,
 )
 

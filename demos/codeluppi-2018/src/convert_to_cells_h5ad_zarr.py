@@ -5,7 +5,7 @@ import numpy as np
 import scanpy as sc
 import geopandas as gpd
 from shapely.geometry import Polygon
-from vitessce.data_utils import (
+from vitessce.data_utils.anndata import (
     to_uint8,
     sort_var_axis,
     optimize_adata,

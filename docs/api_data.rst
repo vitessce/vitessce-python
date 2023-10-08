@@ -1,4 +1,4 @@
-Data preparation APIs
+Data config APIs
 #####################
 
 Dataset wrapper classes
@@ -22,12 +22,4 @@ vitessce.export
 *****************
 
 .. automodule:: vitessce.export
- :members:
-
-vitessce.data_utils
-*****************
-
-.. automodule:: vitessce.data_utils.ome
- :members:
-.. automodule:: vitessce.data_utils.anndata
  :members:

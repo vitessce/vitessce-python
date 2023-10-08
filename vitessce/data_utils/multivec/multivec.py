@@ -3,7 +3,7 @@ import zarr
 import numpy as np
 import pandas as pd
 
-from .anndata import to_dense
+from ..anndata import to_dense
 from .entities import GenomicProfiles
 
 

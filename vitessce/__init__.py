@@ -22,11 +22,6 @@ from .constants import (
     BASE_URL_PLACEHOLDER,
 )
 
-from .config_converter import (
-    CellBrowserToAnndataZarrConverter,  # only exported for testing.
-    convert_cell_browser_project_to_anndata,
-)
-
 from .wrappers import AbstractWrapper
 
 # We allow installation without all of the dependencies that the widget requires.

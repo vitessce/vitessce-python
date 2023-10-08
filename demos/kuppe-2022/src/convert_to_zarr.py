@@ -4,11 +4,13 @@ import pandas as pd
 import json
 from anndata import read_h5ad, AnnData
 import imageio.v2 as imageio
-from vitessce.data_utils import (
+from vitessce.data_utils.anndata import (
     to_diamond,
     to_uint8,
-    rgb_img_to_ome_zarr,
     optimize_adata,
+)
+from vitessce.data_utils.ome_zarr import (
+    rgb_img_to_ome_zarr,
 )
 
 

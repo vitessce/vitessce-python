@@ -1,0 +1,4 @@
+output:
+# - normalized/toy.zarr
+- normalized/cosmx_io.zarr
+# - normalized/mcmicro_io.zarr

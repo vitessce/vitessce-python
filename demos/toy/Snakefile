@@ -30,7 +30,7 @@ rule normalize_matrix:
         #toy_folder_path = 'C:/Users/darkr/Projects/vitessce-python/demos/toy/data/processed'
         #zarr_files = [os.path.join(toy_folder_path, f) for f in os.listdir(toy_folder_path) if f.endswith('.zarr')]
         #print(f"Found {len(zarr_files)} zarr files in the 'toy' directory.")
-        
+
         def process_and_plot_zarr(zarr_path, before_path, after_path):
             # Read zarr file
             print(f"Processed {zarr_path}.")
@@ -39,8 +39,8 @@ rule normalize_matrix:
             print(sdata.__dict__)
             print(adata)
             sc.pp.normalize_total(adata, target_sum=1e6, inplace=True)\
-            
-                
+
+
             #zarr_basename = os.path.splitext(os.path.basename(zarr_path))[0]
 
             with plt.rc_context():
@@ -48,12 +48,12 @@ rule normalize_matrix:
                 sc.pl.heatmap(adata, var_names=adata.var_names, groupby='fov', use_raw=False, show=False)
                 plt.savefig(before_path)
 
-            
+
                 # Normalize
                 sc.pp.normalize_total(adata, target_sum=1e4)
                 sc.pp.log1p(adata)
 
-            
+
                 # Heatmap after normalization
                 sc.pl.heatmap(adata, var_names=adata.var_names, groupby='fov', use_raw=False, show=False)
                 plt.savefig(after_path)

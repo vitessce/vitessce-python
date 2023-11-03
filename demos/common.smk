@@ -5,8 +5,8 @@ import platform
 IS_O2 = (platform.system() == "Linux")
 
 # Directory / file constants
-SRC_DIR = "src"
-DATA_DIR = ("data" if not IS_O2 else "/n/data1/hms/dbmi/gehlenborg/lab/vitessce-python-demos")
+SRC_DIR = Path("src")
+DATA_DIR = Path("data" if not IS_O2 else "/n/data1/hms/dbmi/gehlenborg/lab/vitessce-python-demos")
 RAW_DIR = DATA_DIR / "raw"
 PROCESSED_DIR = DATA_DIR / "processed"
 

@@ -11,6 +11,7 @@ jobs:
         with:
           python-version: '3.9'
       - run: |
+          pip install "pulp==2.7.0"
           pip install snakemake
           pip install pyyaml
       - name: Install vitessce

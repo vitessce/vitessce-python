@@ -44,6 +44,10 @@ try:
         CsvWrapper,
         AnnDataWrapper,
         MultivecZarrWrapper,
+        ImageOmeTiffWrapper,
+        ObsSegmentationsOmeTiffWrapper,
+        ImageOmeZarrWrapper,
+        ObsSegmentationsOmeZarrWrapper,
     )
 except ModuleNotFoundError as e:  # pragma: no cover
     warn(f'Extra installs are necessary to use wrappers: {e}')

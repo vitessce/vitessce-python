@@ -16,6 +16,10 @@ from vitessce import (
     AnnDataWrapper,
     CsvWrapper,
     MultivecZarrWrapper,
+    ImageOmeTiffWrapper,
+    ObsSegmentationsOmeTiffWrapper,
+    ImageOmeZarrWrapper,
+    ObsSegmentationsOmeZarrWrapper,
 )
 
 from vitessce.wrappers import file_path_to_url_path
@@ -137,6 +141,70 @@ class TestWrappers(unittest.TestCase):
         self.assertEqual(file_def, {
             'fileType': 'image.ome-zarr',
             'url': 'http://localhost:8000/test.ome.zarr'
+        })
+
+    def test_image_ome_tiff(self):
+        w = ImageOmeTiffWrapper(img_path=data_path / 'test.ome.tif')
+        w.local_img_uid = 'test.ome.tif'
+        w.local_offsets_uid = 'test.offsets.json'
+
+        file_def_creator = w.make_raster_file_def_creator(
+            "A",
+            "0"
+        )
+        file_def = file_def_creator('http://localhost:8000')
+        self.assertEqual(file_def, {
+            'fileType': 'image.ome-tiff',
+            'url': 'http://localhost:8000/A/0/test.ome.tif',
+            'options': {
+                'offsetsUrl': 'http://localhost:8000/A/0/test.offsets.json'
+            }
+        })
+
+    def test_image_ome_zarr(self):
+        w = ImageOmeZarrWrapper(img_path=data_path / 'test.ome.zarr')
+        w.local_dir_uid = 'test.ome.zarr'
+
+        file_def_creator = w.make_image_file_def_creator(
+            "A",
+            "0"
+        )
+        file_def = file_def_creator('http://localhost:8000')
+        self.assertEqual(file_def, {
+            'fileType': 'image.ome-zarr',
+            'url': 'http://localhost:8000/A/0/test.ome.zarr'
+        })
+
+    def test_obs_segmentations_ome_tiff(self):
+        w = ObsSegmentationsOmeTiffWrapper(img_path=data_path / 'test.ome.tif')
+        w.local_img_uid = 'test.ome.tif'
+        w.local_offsets_uid = 'test.offsets.json'
+
+        file_def_creator = w.make_raster_file_def_creator(
+            "A",
+            "0"
+        )
+        file_def = file_def_creator('http://localhost:8000')
+        self.assertEqual(file_def, {
+            'fileType': 'obsSegmentations.ome-tiff',
+            'url': 'http://localhost:8000/A/0/test.ome.tif',
+            'options': {
+                'offsetsUrl': 'http://localhost:8000/A/0/test.offsets.json'
+            }
+        })
+
+    def test_obs_segmentations_ome_zarr(self):
+        w = ObsSegmentationsOmeZarrWrapper(img_path=data_path / 'test.ome.zarr')
+        w.local_dir_uid = 'test.ome.zarr'
+
+        file_def_creator = w.make_image_file_def_creator(
+            "A",
+            "0"
+        )
+        file_def = file_def_creator('http://localhost:8000')
+        self.assertEqual(file_def, {
+            'fileType': 'obsSegmentations.ome-zarr',
+            'url': 'http://localhost:8000/A/0/test.ome.zarr'
         })
 
     def test_anndata(self):

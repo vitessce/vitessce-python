@@ -341,6 +341,235 @@ class OmeTiffWrapper(AbstractWrapper):
         return offsets_url
 
 
+class ImageOmeTiffWrapper(AbstractWrapper):
+
+    """
+    Wrap an OME-TIFF File by creating an instance of the ``ImageOmeTiffWrapper`` class. Intended to be used with the spatialBeta and layerControllerBeta views.
+
+    :param str img_path: A local filepath to an OME-TIFF file.
+    :param str offsets_path: A local filepath to an offsets.json file.
+    :param str img_url: A remote URL of an OME-TIFF file.
+    :param str offsets_url: A remote URL of an offsets.json file.
+    :param list coordinate_transformations: A column-major ordered matrix for transforming this image (see http://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices/#homogeneous-coordinates for more information).
+    :param dict coordination_values: Optional coordinationValues to be passed in the file definition.
+    :param \\*\\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
+    """
+
+    def __init__(self, img_path=None, offsets_path=None, img_url=None, offsets_url=None, coordinate_transformations=None, coordination_values=None, **kwargs):
+        super().__init__(**kwargs)
+        self._repr = make_repr(locals())
+        self._img_path = img_path
+        self._img_url = img_url
+        self._offsets_path = offsets_path
+        self._offsets_url = offsets_url
+        self._coordinate_transformations = coordinate_transformations
+        self._coordination_values = coordination_values
+        self.is_remote = img_url is not None
+        self.local_img_uid = make_unique_filename(".ome.tif")
+        self.local_offsets_uid = make_unique_filename(".offsets.json")
+        if img_url is not None and (img_path is not None or offsets_path is not None):
+            raise ValueError(
+                "Did not expect img_path or offsets_path to be provided with img_url")
+
+    def convert_and_save(self, dataset_uid, obj_i, base_dir=None):
+        # Only create out-directory if needed
+        if not self.is_remote:
+            super().convert_and_save(dataset_uid, obj_i, base_dir=base_dir)
+
+        file_def_creator = self.make_raster_file_def_creator(
+            dataset_uid, obj_i)
+        routes = self.make_raster_routes(dataset_uid, obj_i)
+
+        self.file_def_creators.append(file_def_creator)
+        self.routes += routes
+
+    def make_raster_routes(self, dataset_uid, obj_i):
+        if self.is_remote:
+            return []
+        else:
+            # TODO: Move imports back to top when this is factored out.
+            from .routes import range_repsonse, JsonRoute, FileRoute
+            from generate_tiff_offsets import get_offsets
+            from starlette.responses import UJSONResponse
+
+            offsets = get_offsets(self._img_path)
+
+            async def response_func(req):
+                return UJSONResponse(offsets)
+            if self.base_dir is None:
+                local_img_path = self._img_path
+                local_img_route_path = self._get_route_str(dataset_uid, obj_i, self.local_img_uid)
+                local_offsets_route_path = self._get_route_str(dataset_uid, obj_i, self.local_offsets_uid)
+            else:
+                local_img_path = join(self.base_dir, self._img_path)
+                local_img_route_path = file_path_to_url_path(self._img_path)
+                # Do not include offsets in base_dir mode.
+                local_offsets_route_path = None
+
+            routes = [
+                FileRoute(local_img_route_path, lambda req: range_repsonse(req, local_img_path), local_img_path),
+            ]
+            if local_offsets_route_path is not None:
+                # Do not include offsets in base_dir mode.
+                routes.append(JsonRoute(local_offsets_route_path, response_func, offsets))
+
+            return routes
+
+    def make_raster_file_def_creator(self, dataset_uid, obj_i):
+        def raster_file_def_creator(base_url):
+            options = {}
+            if self._coordinate_transformations is not None:
+                options["coordinateTransformations"] = self._coordinate_transformations
+
+            offsets_url = self.get_offsets_url(base_url, dataset_uid, obj_i)
+            if offsets_url is not None and self.base_dir is None:
+                # Do not include offsets in base_dir mode.
+                options["offsetsUrl"] = offsets_url
+
+            file_def = {
+                "fileType": "image.ome-tiff",
+                "url": self.get_img_url(base_url, dataset_uid, obj_i),
+            }
+            if len(options.keys()) > 0:
+                file_def["options"] = options
+            if self._coordination_values is not None:
+                file_def["coordinationValues"] = self._coordination_values
+            return file_def
+        return raster_file_def_creator
+
+    def get_img_url(self, base_url="", dataset_uid="", obj_i=""):
+        if self.is_remote:
+            return self._img_url
+        if self.base_dir is not None:
+            return self._get_url_simple(base_url, file_path_to_url_path(self._img_path, prepend_slash=False))
+        return self._get_url(base_url, dataset_uid,
+                             obj_i, self.local_img_uid)
+
+    def get_offsets_url(self, base_url="", dataset_uid="", obj_i=""):
+        if self._offsets_url is not None or self.is_remote:
+            return self._offsets_url
+        offsets_url = self._get_url(
+            base_url, dataset_uid, obj_i, self.local_offsets_uid)
+        return offsets_url
+
+
+class ObsSegmentationsOmeTiffWrapper(AbstractWrapper):
+
+    """
+    Wrap an OME-TIFF File by creating an instance of the ``ObsSegmentationsOmeTiffWrapper`` class. Intended to be used with the spatialBeta and layerControllerBeta views.
+
+    :param str img_path: A local filepath to an OME-TIFF file.
+    :param str offsets_path: A local filepath to an offsets.json file.
+    :param str img_url: A remote URL of an OME-TIFF file.
+    :param str offsets_url: A remote URL of an offsets.json file.
+    :param list coordinate_transformations: A column-major ordered matrix for transforming this image (see http://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices/#homogeneous-coordinates for more information).
+    :param bool obs_types_from_channel_names: Whether to use the channel names to determine the obs types. Optional.
+    :param dict coordination_values: Optional coordinationValues to be passed in the file definition.
+    :param \\*\\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
+    """
+
+    def __init__(self, img_path=None, offsets_path=None, img_url=None, offsets_url=None, coordinate_transformations=None, obs_types_from_channel_names=None, coordination_values=None, **kwargs):
+        super().__init__(**kwargs)
+        self._repr = make_repr(locals())
+        self._img_path = img_path
+        self._img_url = img_url
+        self._offsets_path = offsets_path
+        self._offsets_url = offsets_url
+        self._coordinate_transformations = coordinate_transformations
+        self._obs_types_from_channel_names = obs_types_from_channel_names
+        self._coordination_values = coordination_values
+        self.is_remote = img_url is not None
+        self.local_img_uid = make_unique_filename(".ome.tif")
+        self.local_offsets_uid = make_unique_filename(".offsets.json")
+        if img_url is not None and (img_path is not None or offsets_path is not None):
+            raise ValueError(
+                "Did not expect img_path or offsets_path to be provided with img_url")
+
+    def convert_and_save(self, dataset_uid, obj_i, base_dir=None):
+        # Only create out-directory if needed
+        if not self.is_remote:
+            super().convert_and_save(dataset_uid, obj_i, base_dir=base_dir)
+
+        file_def_creator = self.make_raster_file_def_creator(
+            dataset_uid, obj_i)
+        routes = self.make_raster_routes(dataset_uid, obj_i)
+
+        self.file_def_creators.append(file_def_creator)
+        self.routes += routes
+
+    def make_raster_routes(self, dataset_uid, obj_i):
+        if self.is_remote:
+            return []
+        else:
+            # TODO: Move imports back to top when this is factored out.
+            from .routes import range_repsonse, JsonRoute, FileRoute
+            from generate_tiff_offsets import get_offsets
+            from starlette.responses import UJSONResponse
+
+            offsets = get_offsets(self._img_path)
+
+            async def response_func(req):
+                return UJSONResponse(offsets)
+            if self.base_dir is None:
+                local_img_path = self._img_path
+                local_img_route_path = self._get_route_str(dataset_uid, obj_i, self.local_img_uid)
+                local_offsets_route_path = self._get_route_str(dataset_uid, obj_i, self.local_offsets_uid)
+            else:
+                local_img_path = join(self.base_dir, self._img_path)
+                local_img_route_path = file_path_to_url_path(self._img_path)
+                # Do not include offsets in base_dir mode.
+                local_offsets_route_path = None
+
+            routes = [
+                FileRoute(local_img_route_path, lambda req: range_repsonse(req, local_img_path), local_img_path),
+            ]
+            if local_offsets_route_path is not None:
+                # Do not include offsets in base_dir mode.
+                routes.append(JsonRoute(local_offsets_route_path, response_func, offsets))
+
+            return routes
+
+    def make_raster_file_def_creator(self, dataset_uid, obj_i):
+        def raster_file_def_creator(base_url):
+            options = {}
+            if self._coordinate_transformations is not None:
+                options["coordinateTransformations"] = self._coordinate_transformations
+
+            if self._obs_types_from_channel_names is not None:
+                options["obsTypesFromChannelNames"] = self._obs_types_from_channel_names
+
+            offsets_url = self.get_offsets_url(base_url, dataset_uid, obj_i)
+            if offsets_url is not None and self.base_dir is None:
+                # Do not include offsets in base_dir mode.
+                options["offsetsUrl"] = offsets_url
+
+            file_def = {
+                "fileType": "obsSegmentations.ome-tiff",
+                "url": self.get_img_url(base_url, dataset_uid, obj_i),
+            }
+            if len(options.keys()) > 0:
+                file_def["options"] = options
+            if self._coordination_values is not None:
+                file_def["coordinationValues"] = self._coordination_values
+            return file_def
+        return raster_file_def_creator
+
+    def get_img_url(self, base_url="", dataset_uid="", obj_i=""):
+        if self.is_remote:
+            return self._img_url
+        if self.base_dir is not None:
+            return self._get_url_simple(base_url, file_path_to_url_path(self._img_path, prepend_slash=False))
+        return self._get_url(base_url, dataset_uid,
+                             obj_i, self.local_img_uid)
+
+    def get_offsets_url(self, base_url="", dataset_uid="", obj_i=""):
+        if self._offsets_url is not None or self.is_remote:
+            return self._offsets_url
+        offsets_url = self._get_url(
+            base_url, dataset_uid, obj_i, self.local_offsets_uid)
+        return offsets_url
+
+
 class CsvWrapper(AbstractWrapper):
 
     """
@@ -509,6 +738,159 @@ class OmeZarrWrapper(AbstractWrapper):
         if len(metadata.keys()) > 0:
             image["metadata"] = metadata
         return image
+
+
+class ImageOmeZarrWrapper(AbstractWrapper):
+
+    """
+    Wrap an OME-NGFF Zarr store by creating an instance of the ``ImageOmeZarrWrapper`` class. Intended to be used with the spatialBeta and layerControllerBeta views.
+
+    :param str img_path: A local filepath to an OME-NGFF Zarr store.
+    :param str img_url: A remote URL of an OME-NGFF Zarr store.
+    :param list coordinate_transformations: A column-major ordered matrix for transforming this image (see http://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices/#homogeneous-coordinates for more information).
+    :param dict coordination_values: Optional coordinationValues to be passed in the file definition.
+    :param \\*\\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
+    """
+
+    def __init__(self, img_path=None, img_url=None, coordinate_transformations=None, coordination_values=None, **kwargs):
+        super().__init__(**kwargs)
+        self._repr = make_repr(locals())
+        if img_url is not None and img_path is not None:
+            raise ValueError(
+                "Did not expect img_path to be provided with img_url")
+        if img_url is None and img_path is None:
+            raise ValueError(
+                "Expected either img_url or img_path to be provided")
+        self._img_path = img_path
+        self._img_url = img_url
+        self._coordinate_transformations = coordinate_transformations
+        self._coordination_values = coordination_values
+        if self._img_path is not None:
+            self.is_remote = False
+        else:
+            self.is_remote = True
+        self.local_dir_uid = make_unique_filename(".ome.zarr")
+
+    def convert_and_save(self, dataset_uid, obj_i, base_dir=None):
+        # Only create out-directory if needed
+        if not self.is_remote:
+            super().convert_and_save(dataset_uid, obj_i, base_dir=base_dir)
+
+        file_def_creator = self.make_image_file_def_creator(
+            dataset_uid, obj_i)
+        routes = self.make_image_routes(dataset_uid, obj_i)
+
+        self.file_def_creators.append(file_def_creator)
+        self.routes += routes
+
+    def make_image_routes(self, dataset_uid, obj_i):
+        if self.is_remote:
+            return []
+        else:
+            return self.get_local_dir_route(dataset_uid, obj_i, self._img_path, self.local_dir_uid)
+
+    def get_img_url(self, base_url="", dataset_uid="", obj_i=""):
+        if self.is_remote:
+            return self._img_url
+        return self.get_local_dir_url(base_url, dataset_uid, obj_i, self._img_path, self.local_dir_uid)
+
+    def make_image_file_def_creator(self, dataset_uid, obj_i):
+        def image_file_def_creator(base_url):
+            options = {}
+            if self._coordinate_transformations is not None:
+                options["coordinateTransformations"] = self._coordinate_transformations
+
+            file_def = {
+                "fileType": "image.ome-zarr",
+                "url": self.get_img_url(base_url, dataset_uid, obj_i)
+            }
+
+            if len(options.keys()) > 0:
+                file_def["options"] = options
+            if self._coordination_values is not None:
+                file_def["coordinationValues"] = self._coordination_values
+            return file_def
+
+        return image_file_def_creator
+
+
+class ObsSegmentationsOmeZarrWrapper(AbstractWrapper):
+
+    """
+    Wrap an OME-NGFF Zarr store by creating an instance of the ``ObsSegmentationsOmeZarrWrapper`` class. Intended to be used with the spatialBeta and layerControllerBeta views.
+
+    :param str img_path: A local filepath to an OME-NGFF Zarr store.
+    :param str img_url: A remote URL of an OME-NGFF Zarr store.
+    :param list coordinate_transformations: A column-major ordered matrix for transforming this image (see http://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices/#homogeneous-coordinates for more information).
+    :param dict coordination_values: Optional coordinationValues to be passed in the file definition.
+    :param bool obs_types_from_channel_names: Whether to use the channel names to determine the obs types. Optional.
+    :param \\*\\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
+    """
+
+    def __init__(self, img_path=None, img_url=None, coordinate_transformations=None, coordination_values=None, obs_types_from_channel_names=None, **kwargs):
+        super().__init__(**kwargs)
+        self._repr = make_repr(locals())
+        if img_url is not None and img_path is not None:
+            raise ValueError(
+                "Did not expect img_path to be provided with img_url")
+        if img_url is None and img_path is None:
+            raise ValueError(
+                "Expected either img_url or img_path to be provided")
+        self._img_path = img_path
+        self._img_url = img_url
+        self._coordinate_transformations = coordinate_transformations
+        self._obs_types_from_channel_names = obs_types_from_channel_names
+        self._coordination_values = coordination_values
+        if self._img_path is not None:
+            self.is_remote = False
+        else:
+            self.is_remote = True
+        self.local_dir_uid = make_unique_filename(".ome.zarr")
+
+    def convert_and_save(self, dataset_uid, obj_i, base_dir=None):
+        # Only create out-directory if needed
+        if not self.is_remote:
+            super().convert_and_save(dataset_uid, obj_i, base_dir=base_dir)
+
+        file_def_creator = self.make_image_file_def_creator(
+            dataset_uid, obj_i)
+        routes = self.make_image_routes(dataset_uid, obj_i)
+
+        self.file_def_creators.append(file_def_creator)
+        self.routes += routes
+
+    def make_image_routes(self, dataset_uid, obj_i):
+        if self.is_remote:
+            return []
+        else:
+            return self.get_local_dir_route(dataset_uid, obj_i, self._img_path, self.local_dir_uid)
+
+    def get_img_url(self, base_url="", dataset_uid="", obj_i=""):
+        if self.is_remote:
+            return self._img_url
+        return self.get_local_dir_url(base_url, dataset_uid, obj_i, self._img_path, self.local_dir_uid)
+
+    def make_image_file_def_creator(self, dataset_uid, obj_i):
+        def image_file_def_creator(base_url):
+            options = {}
+            if self._coordinate_transformations is not None:
+                options["coordinateTransformations"] = self._coordinate_transformations
+
+            if self._obs_types_from_channel_names is not None:
+                options["obsTypesFromChannelNames"] = self._obs_types_from_channel_names
+
+            file_def = {
+                "fileType": "obsSegmentations.ome-zarr",
+                "url": self.get_img_url(base_url, dataset_uid, obj_i)
+            }
+
+            if len(options.keys()) > 0:
+                file_def["options"] = options
+            if self._coordination_values is not None:
+                file_def["coordinationValues"] = self._coordination_values
+            return file_def
+
+        return image_file_def_creator
 
 
 class AnnDataWrapper(AbstractWrapper):

@@ -809,6 +809,7 @@ class ImageOmeZarrWrapper(AbstractWrapper):
                 file_def["options"] = options
             if self._coordination_values is not None:
                 file_def["coordinationValues"] = self._coordination_values
+            return file_def
 
         return image_file_def_creator
 
@@ -887,6 +888,7 @@ class ObsSegmentationsOmeZarrWrapper(AbstractWrapper):
                 file_def["options"] = options
             if self._coordination_values is not None:
                 file_def["coordinationValues"] = self._coordination_values
+            return file_def
 
         return image_file_def_creator
 

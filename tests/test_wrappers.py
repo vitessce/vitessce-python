@@ -155,6 +155,7 @@ class TestWrappers(unittest.TestCase):
         file_def = file_def_creator('http://localhost:8000')
         self.assertEqual(file_def, {
             'fileType': 'image.ome-tiff',
+            'url': 'http://localhost:8000/A/0/test.ome.tif',
             'options': {
                 'offsetsUrl': 'http://localhost:8000/A/0/test.offsets.json'
             }
@@ -186,6 +187,7 @@ class TestWrappers(unittest.TestCase):
         file_def = file_def_creator('http://localhost:8000')
         self.assertEqual(file_def, {
             'fileType': 'obsSegmentations.ome-tiff',
+            'url': 'http://localhost:8000/A/0/test.ome.tif',
             'options': {
                 'offsetsUrl': 'http://localhost:8000/A/0/test.offsets.json'
             }

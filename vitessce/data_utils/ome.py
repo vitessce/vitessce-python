@@ -49,7 +49,7 @@ def multiplex_img_to_ome_tiff(img_arr, channel_names, output_path, axes="CYX"):
     tiff_writer.close()
 
 
-def rgb_img_to_ome_zarr(img_arr, output_path, img_name="Image", chunks=(1, 256, 256), axes="cyx"):
+def rgb_img_to_ome_zarr(img_arr, output_path, img_name="Image", chunks=(1, 256, 256), axes="cyx", **kwargs):
     """
     Convert an RGB image to OME-Zarr v0.3.
 
@@ -75,7 +75,8 @@ def rgb_img_to_ome_zarr(img_arr, output_path, img_name="Image", chunks=(1, 256, 
         image=img_arr,
         group=z_root,
         axes=axes,
-        storage_options=dict(chunks=chunks)
+        storage_options=dict(chunks=chunks),
+        **kwargs,
     )
     z_root.attrs["omero"] = {
         "name": img_name,

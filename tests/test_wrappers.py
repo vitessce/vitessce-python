@@ -142,7 +142,7 @@ class TestWrappers(unittest.TestCase):
             'fileType': 'image.ome-zarr',
             'url': 'http://localhost:8000/test.ome.zarr'
         })
-    
+
     def test_image_ome_tiff(self):
         w = ImageOmeTiffWrapper(img_path=data_path / 'test.ome.tif')
         w.local_img_uid = 'test.ome.tif'
@@ -159,7 +159,7 @@ class TestWrappers(unittest.TestCase):
                 'offsetsUrl': 'http://localhost:8000/A/0/test.offsets.json'
             }
         })
-    
+
     def test_image_ome_zarr(self):
         w = ImageOmeZarrWrapper(img_path=data_path / 'test.ome.zarr')
         w.local_dir_uid = 'test.ome.zarr'
@@ -173,7 +173,7 @@ class TestWrappers(unittest.TestCase):
             'fileType': 'image.ome-zarr',
             'url': 'http://localhost:8000/A/0/test.ome.zarr'
         })
-    
+
     def test_obs_segmentations_ome_tiff(self):
         w = ObsSegmentationsOmeTiffWrapper(img_path=data_path / 'test.ome.tif')
         w.local_img_uid = 'test.ome.tif'
@@ -190,7 +190,7 @@ class TestWrappers(unittest.TestCase):
                 'offsetsUrl': 'http://localhost:8000/A/0/test.offsets.json'
             }
         })
-    
+
     def test_obs_segmentations_ome_zarr(self):
         w = ObsSegmentationsOmeZarrWrapper(img_path=data_path / 'test.ome.zarr')
         w.local_dir_uid = 'test.ome.zarr'

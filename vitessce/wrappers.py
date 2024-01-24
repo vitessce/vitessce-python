@@ -340,6 +340,7 @@ class OmeTiffWrapper(AbstractWrapper):
             base_url, dataset_uid, obj_i, self.local_offsets_uid)
         return offsets_url
 
+
 class ImageOmeTiffWrapper(AbstractWrapper):
 
     """
@@ -451,6 +452,7 @@ class ImageOmeTiffWrapper(AbstractWrapper):
             base_url, dataset_uid, obj_i, self.local_offsets_uid)
         return offsets_url
 
+
 class ObsSegmentationsOmeTiffWrapper(AbstractWrapper):
 
     """
@@ -532,7 +534,7 @@ class ObsSegmentationsOmeTiffWrapper(AbstractWrapper):
             options = {}
             if self._coordinate_transformations is not None:
                 options["coordinateTransformations"] = self._coordinate_transformations
-            
+
             if self._obs_types_from_channel_names is not None:
                 options["obsTypesFromChannelNames"] = self._obs_types_from_channel_names
 
@@ -566,6 +568,7 @@ class ObsSegmentationsOmeTiffWrapper(AbstractWrapper):
         offsets_url = self._get_url(
             base_url, dataset_uid, obj_i, self.local_offsets_uid)
         return offsets_url
+
 
 class CsvWrapper(AbstractWrapper):
 
@@ -736,6 +739,7 @@ class OmeZarrWrapper(AbstractWrapper):
             image["metadata"] = metadata
         return image
 
+
 class ImageOmeZarrWrapper(AbstractWrapper):
 
     """
@@ -808,6 +812,7 @@ class ImageOmeZarrWrapper(AbstractWrapper):
 
         return image_file_def_creator
 
+
 class ObsSegmentationsOmeZarrWrapper(AbstractWrapper):
 
     """
@@ -869,7 +874,7 @@ class ObsSegmentationsOmeZarrWrapper(AbstractWrapper):
             options = {}
             if self._coordinate_transformations is not None:
                 options["coordinateTransformations"] = self._coordinate_transformations
-            
+
             if self._obs_types_from_channel_names is not None:
                 options["obsTypesFromChannelNames"] = self._obs_types_from_channel_names
 
@@ -884,6 +889,7 @@ class ObsSegmentationsOmeZarrWrapper(AbstractWrapper):
                 file_def["coordinationValues"] = self._coordination_values
 
         return image_file_def_creator
+
 
 class AnnDataWrapper(AbstractWrapper):
     def __init__(self, adata_path=None, adata_url=None, obs_feature_matrix_path=None, feature_filter_path=None, initial_feature_filter_path=None, obs_set_paths=None, obs_set_names=None, obs_locations_path=None, obs_segmentations_path=None, obs_embedding_paths=None, obs_embedding_names=None, obs_embedding_dims=None, request_init=None, feature_labels_path=None, obs_labels_path=None, convert_to_dense=True, coordination_values=None, obs_labels_paths=None, obs_labels_names=None, **kwargs):

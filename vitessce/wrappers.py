@@ -512,7 +512,7 @@ class OmeZarrWrapper(AbstractWrapper):
 
 
 class AnnDataWrapper(AbstractWrapper):
-    def __init__(self, adata_path=None, adata_url=None, obs_feature_matrix_path=None, feature_filter_path=None, initial_feature_filter_path=None, obs_set_paths=None, obs_set_names=None, obs_locations_path=None, obs_segmentations_path=None, obs_embedding_paths=None, obs_embedding_names=None, obs_embedding_dims=None, request_init=None, feature_labels_path=None, obs_labels_path=None, convert_to_dense=True, coordination_values=None, obs_labels_paths=None, obs_labels_names=None, **kwargs):
+    def __init__(self, adata_path=None, adata_url=None, obs_feature_matrix_path=None, feature_filter_path=None, initial_feature_filter_path=None, obs_set_paths=None, obs_set_names=None, obs_locations_path=None, obs_segmentations_path=None, obs_embedding_paths=None, obs_embedding_names=None, obs_embedding_dims=None, obs_spots_path=None, obs_points_path=None, request_init=None, feature_labels_path=None, obs_labels_path=None, convert_to_dense=True, coordination_values=None, obs_labels_paths=None, obs_labels_names=None, **kwargs):
         """
         Wrap an AnnData object by creating an instance of the ``AnnDataWrapper`` class.
 
@@ -528,6 +528,8 @@ class AnnDataWrapper(AbstractWrapper):
         :param list[str] obs_embedding_paths: Column names like `['obsm/X_umap', 'obsm/X_pca']` for showing scatterplots
         :param list[str] obs_embedding_names: Overriding names like `['UMAP', 'PCA']` for displaying above scatterplots
         :param list[str] obs_embedding_dims: Dimensions along which to get data for the scatterplot, like `[[0, 1], [4, 5]]` where `[0, 1]` is just the normal x and y but `[4, 5]` could be comparing the third and fourth principal components, for example.
+        :param str obs_spots_path: Column name in `obsm` that contains centroid coordinates for displaying spots in the spatial viewer
+        :param str obs_points_path: Column name in `obsm` that contains centroid coordinates for displaying points in the spatial viewer
         :param dict request_init: options to be passed along with every fetch request from the browser, like `{ "header": { "Authorization": "Bearer dsfjalsdfa1431" } }`
         :param str feature_labels_path: The name of a column containing feature labels (e.g., alternate gene symbols), instead of the default index in `var` of the AnnData store.
         :param str obs_labels_path: (DEPRECATED) The name of a column containing observation labels (e.g., alternate cell IDs), instead of the default index in `obs` of the AnnData store. Use `obs_labels_paths` and `obs_labels_names` instead. This arg will be removed in a future release.
@@ -565,6 +567,8 @@ class AnnDataWrapper(AbstractWrapper):
         self._spatial_polygon_obsm = obs_segmentations_path
         self._mappings_obsm = obs_embedding_paths
         self._mappings_obsm_dims = obs_embedding_dims
+        self._spatial_spots_obsm = obs_spots_path
+        self._spatial_points_obsm = obs_points_path
         self._request_init = request_init
         self._gene_alias = feature_labels_path
         # Support legacy provision of single obs labels path
@@ -611,6 +615,14 @@ class AnnDataWrapper(AbstractWrapper):
             if self._spatial_polygon_obsm is not None:
                 options["obsSegmentations"] = {
                     "path": self._spatial_polygon_obsm
+                }
+            if self._spatial_spots_obsm is not None:
+                options["obsSpots"] = {
+                    "path": self._spatial_spots_obsm
+                }
+            if self._spatial_points_obsm is not None:
+                options["obsPoints"] = {
+                    "path": self._spatial_points_obsm
                 }
             if self._mappings_obsm is not None:
                 options["obsEmbedding"] = []

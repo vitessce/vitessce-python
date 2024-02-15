@@ -1,0 +1,89 @@
+include: "../common.smk"
+configfile: "config.yml"
+
+# TODO: start from the real raw files
+BASE_URL = "https://s3.embl.de/spatialdata/spatialdata-sandbox/{dataset}.zip"
+
+
+rule all:
+    input:
+        [ (PROCESSED_DIR / f) for f in config['output'] ]
+
+
+wildcard_constraints:
+    dataset="\w+" # a-z 0-9
+
+# Normalize the matrix
+rule normalize_matrix:
+    input:
+        PROCESSED_DIR / "{dataset}.zarr"
+    output:
+        directory(PROCESSED_DIR / "normalized" / "{dataset}.zarr"),
+        PROCESSED_DIR / "heatmap_before_{dataset}.png",
+        PROCESSED_DIR / "heatmap_after_{dataset}.png"
+    run:
+        import os
+        import scanpy as sc
+        import spatialdata as sd
+        import matplotlib.pyplot as plt
+
+        #toy_folder_path = 'C:/Users/darkr/Projects/vitessce-python/demos/toy/data/processed'
+        #zarr_files = [os.path.join(toy_folder_path, f) for f in os.listdir(toy_folder_path) if f.endswith('.zarr')]
+        #print(f"Found {len(zarr_files)} zarr files in the 'toy' directory.")
+        
+        def process_and_plot_zarr(zarr_path, before_path, after_path):
+            # Read zarr file
+            print(f"Processed {zarr_path}.")
+            sdata = sd.read_zarr(zarr_path)
+            adata = sdata.table
+            #print(sdata.__dict__)
+            #print(adata)
+            sc.pp.normalize_total(adata, target_sum=1e6, inplace=True)\
+            
+                
+            #zarr_basename = os.path.splitext(os.path.basename(zarr_path))[0]
+
+            with plt.rc_context():
+                # Initial heatmap before normalization
+                sc.pl.heatmap(adata, var_names=adata.var_names, groupby='fov', use_raw=False, show=False)
+                plt.savefig(before_path)
+
+            
+                # Normalize
+                sc.pp.normalize_total(adata, target_sum=1e4)
+                sc.pp.log1p(adata)
+
+            
+                # Heatmap after normalization
+                sc.pl.heatmap(adata, var_names=adata.var_names, groupby='fov', use_raw=False, show=False)
+                plt.savefig(after_path)
+
+
+            print(f"Processed {zarr_path}.")
+            # sdata.table = adata
+            sdata.write(output[0])
+        process_and_plot_zarr(input[0], output[1], output[2])
+
+
+# Unzip the downloaded zip files
+rule unzip_file:
+    input:
+        (RAW_DIR / "{dataset}.zip")
+    output:
+        directory(PROCESSED_DIR / "{dataset}.zarr")
+    shell:
+        """
+        unzip {input} -d data/processed &&\
+        mv data/processed/data.zarr data/processed/{wildcards.dataset}.zarr
+        """
+
+# Download visium .zip file containing single-cell data.
+rule download_data:
+    output:
+        (RAW_DIR / "{dataset}.zip")
+    params:
+        file_url=BASE_URL
+    shell:
+        '''
+        curl -L -o {output} {params.file_url}
+        '''

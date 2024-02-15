@@ -9,7 +9,7 @@ from vitessce.data_utils import (
 def convert_h5ad_to_zarr(input_path, output_path):
     adata = read_h5ad(input_path)
 
-    adata.layers['X_uint8'] = to_uint8(adata.X, norm_along="global")
+    adata.layers['X_uint8'] = to_uint8(adata.X, norm_along="var")
 
     # Vitessce plays nicely with csc matrices
     # TODO: automate conversion to csc in optimize_adata function

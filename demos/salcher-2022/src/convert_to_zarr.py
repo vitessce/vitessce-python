@@ -9,8 +9,10 @@ import dask.array as da
 from dask.distributed import Client, LocalCluster, progress
 import platform
 import os
+import zarr
+import math
 
-def convert_h5ad_to_zarr(input_path, output_path, client):
+def convert_h5ad_to_zarr(input_path, output_path):
     adata = read_h5ad(input_path)
 
     # Clear X so that we can write it ourselves manually
@@ -21,19 +23,31 @@ def convert_h5ad_to_zarr(input_path, output_path, client):
 
     assert isinstance(X, scipy.sparse.spmatrix)
 
-    # Use dask to write the X matrix as a dense matrix
-    X_sparse = sparse.GCXS.from_scipy_sparse(X)
-    print("X_sparse")
-    X_dask = da.from_array(X_sparse, chunks=(3000, 1))
-    print("X_dask")
-    X_dask = X_dask.map_blocks(lambda block: block.todense())
-    print("map_blocks")
-    X_delayed = X_dask.to_zarr(url=output_path, component="/X", overwrite=True, compute=False)
-    print("to_zarr")
-    X_future = client.persist(X_delayed)
+    print(output_path)
 
-    progress(X_future)
+    store = zarr.DirectoryStore(output_path)
+    z = zarr.zeros(shape=X.shape, chunks=(X.shape[0], 10), dtype=X.dtype, store = store, path = "/X", overwrite=True)
 
+    chunk_shape = (10000, 10000)
+    x_chunks = math.ceil(X.shape[0] / chunk_shape[0])
+    y_chunks = math.ceil(X.shape[1] / chunk_shape[1])
+
+
+    for i in range(x_chunks):
+        for j in range(y_chunks):
+            x_start = i * chunk_shape[0]
+            x_end = min((i + 1) * chunk_shape[0], X.shape[0])
+            y_start = j * chunk_shape[1]
+            y_end = min((j + 1) * chunk_shape[1], X.shape[1])
+
+            X_chunk = X[x_start:x_end, y_start:y_end].tocoo(copy=False)
+            z.set_coordinate_selection(
+                # Add x_start and y_start as offsets to the row/chunk coordinates
+                ([cx+x_start for cx in X_chunk.row], [cy+y_start for cy in X_chunk.col]),
+                X_chunk.data
+            )
+
+    print("done")
 
 if __name__ == '__main__':
     # Argparse
@@ -54,22 +68,7 @@ if __name__ == '__main__':
     )
     args = parser.parse_args()
 
-    # Dask
-    # Check if this is running on O2
-    IS_O2 = (platform.system() == "Linux")
-
-    if IS_O2:
-        O2_USER = os.environ["USER"]
-        DASK_TEMP_DIR = f"/n/scratch/users/{O2_USER[0]}/{O2_USER}/vitessce-python-temp"
-        os.makedirs(DASK_TEMP_DIR, exist_ok=True)
-        dask.config.set({ "temporary_directory": DASK_TEMP_DIR })
-
-    # Should request at least 96GB of memory for this job.
-    cluster = LocalCluster(n_workers=2, threads_per_worker=2, memory_limit='4GB')
-    client = Client(cluster)
-
     convert_h5ad_to_zarr(
         args.input,
         args.output,
-        client,
     )

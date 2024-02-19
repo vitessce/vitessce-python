@@ -3,10 +3,6 @@ from anndata import read_h5ad
 import scipy
 import numpy as np
 import pandas as pd
-import sparse
-import dask
-import dask.array as da
-from dask.distributed import Client, LocalCluster, progress
 import platform
 import os
 import zarr

@@ -214,7 +214,38 @@ export async function render(view) {
         : `https://unpkg.com/${pkgName}@${jsPackageVersion}`
     );
 
-    const { Vitessce } = await importWithMap("vitessce", importMap);
+    const {
+        Vitessce,
+        PluginViewType,
+        PluginCoordinationType,
+        z,
+        useCoordination,
+    } = await importWithMap("vitessce", importMap);
+
+    function SpatialQueryView(props) {
+        const {
+            coordinationScopes,
+        } = props;
+        console.log(coordinationScopes);
+        const [{
+            myValue,
+        }, {
+            setMyValue,
+        }] = useCoordination(['myValue'], coordinationScopes);
+
+        return e('div', {}, [
+            e('p', {}, 'Spatial-Query'),
+            e('input', { type: 'range', value: myValue, onChange: (e) => setMyValue(parseFloat(e.target.value)), min: 0, max: 100, step: 1 }),
+        ]);
+    }
+
+    const pluginCoordinationTypes = [
+        new PluginCoordinationType('myValue', 0, z.number().nullable()),
+    ];
+
+    const pluginViewTypes = [
+        new PluginViewType('spatialQuery', SpatialQueryView, ['myValue']),
+    ];
 
     function VitessceWidget(props) {
         const { model } = props;
@@ -277,7 +308,11 @@ export async function render(view) {
             });
         }, []);
 
-        const vitessceProps = { height, theme, config, onConfigChange, validateConfig };
+        const vitessceProps = {
+            height, theme, config, onConfigChange, validateConfig,
+            pluginViewTypes, pluginCoordinationTypes,
+            remountOnUidChange: false,
+        };
 
         return e('div', { ref: divRef, style: { height: height + 'px' } },
             e(React.Suspense, { fallback: e('div', {}, 'Loading...') },

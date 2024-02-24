@@ -160,13 +160,6 @@ const importMap = {
 const React = await importWithMap("react", importMap);
 const { createRoot } = await importWithMap("react-dom/client", importMap);
 
-function asEsModule(component) {
-  return {
-    __esModule: true,
-    default: component,
-  };
-}
-
 const e = React.createElement;
 
 const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -206,6 +199,8 @@ export async function render(view) {
     const jsDevMode = view.model.get('js_dev_mode');
     const jsPackageVersion = view.model.get('js_package_version');
     const customJsUrl = view.model.get('custom_js_url');
+    const pluginEsm = view.model.get('plugin_esm');
+    const remountOnUidChange = view.model.get('remount_on_uid_change');
 
     const pkgName = (jsDevMode ? "@vitessce/dev" : "vitessce");
 
@@ -216,36 +211,42 @@ export async function render(view) {
 
     const {
         Vitessce,
+        PluginFileType,
         PluginViewType,
         PluginCoordinationType,
+        PluginJointFileType,
         z,
         useCoordination,
     } = await importWithMap("vitessce", importMap);
 
-    function SpatialQueryView(props) {
-        const {
-            coordinationScopes,
-        } = props;
-        console.log(coordinationScopes);
-        const [{
-            myValue,
-        }, {
-            setMyValue,
-        }] = useCoordination(['myValue'], coordinationScopes);
+    let pluginViewTypes;
+    let pluginCoordinationTypes;
+    let pluginFileTypes;
+    let pluginJointFileTypes;
 
-        return e('div', {}, [
-            e('p', {}, 'Spatial-Query'),
-            e('input', { type: 'range', value: myValue, onChange: (e) => setMyValue(parseFloat(e.target.value)), min: 0, max: 100, step: 1 }),
-        ]);
+    try {
+        const pluginEsmUrl = URL.createObjectURL(new Blob([pluginEsm], { type: "text/javascript" }));
+        const pluginModule = (await import(pluginEsmUrl)).default;
+        URL.revokeObjectURL(pluginEsmUrl);
+
+        console.log(pluginModule)
+
+        const pluginsObj = await pluginModule.createPlugins({
+            React,
+            PluginFileType,
+            PluginViewType,
+            PluginCoordinationType,
+            PluginJointFileType,
+            z,
+            useCoordination,
+        });
+        pluginViewTypes = pluginsObj.pluginViewTypes;
+        pluginCoordinationTypes = pluginsObj.pluginCoordinationTypes;
+        pluginFileTypes = pluginsObj.pluginFileTypes;
+        pluginJointFileTypes = pluginsObj.pluginJointFileTypes;
+    } catch(e) {
+        console.error(e);
     }
-
-    const pluginCoordinationTypes = [
-        new PluginCoordinationType('myValue', 0, z.number().nullable()),
-    ];
-
-    const pluginViewTypes = [
-        new PluginViewType('spatialQuery', SpatialQueryView, ['myValue']),
-    ];
 
     function VitessceWidget(props) {
         const { model } = props;
@@ -310,8 +311,8 @@ export async function render(view) {
 
         const vitessceProps = {
             height, theme, config, onConfigChange, validateConfig,
-            pluginViewTypes, pluginCoordinationTypes,
-            remountOnUidChange: false,
+            pluginViewTypes, pluginCoordinationTypes, pluginFileTypes, pluginJointFileTypes,
+            remountOnUidChange,
         };
 
         return e('div', { ref: divRef, style: { height: height + 'px' } },
@@ -342,6 +343,26 @@ export async function render(view) {
 }
 """
 
+DEFAULT_PLUGIN_ESM = """
+function createPlugins(utilsForPlugins) {
+    const {
+        React,
+        PluginFileType,
+        PluginViewType,
+        PluginCoordinationType,
+        PluginJointFileType,
+        z,
+        useCoordination,
+    } = utilsForPlugins;
+    return {
+        pluginViewTypes: undefined,
+        pluginFileTypes: undefined,
+        pluginCoordinationTypes: undefined,
+        pluginJointFileTypes: undefined,
+    };
+}
+export default { createPlugins };
+"""
 
 class VitessceWidget(anywidget.AnyWidget):
     """
@@ -365,8 +386,10 @@ class VitessceWidget(anywidget.AnyWidget):
     js_package_version = Unicode('3.3.3').tag(sync=True)
     js_dev_mode = Bool(False).tag(sync=True)
     custom_js_url = Unicode('').tag(sync=True)
+    plugin_esm = Unicode(DEFAULT_PLUGIN_ESM).tag(sync=True)
+    remount_on_uid_change = Bool(True).tag(sync=True)
 
-    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='3.3.3', js_dev_mode=False, custom_js_url=''):
+    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='3.3.3', js_dev_mode=False, custom_js_url='', plugin_esm=DEFAULT_PLUGIN_ESM, remount_on_uid_change=True):
         """
         Construct a new Vitessce widget.
 
@@ -399,6 +422,7 @@ class VitessceWidget(anywidget.AnyWidget):
         super(VitessceWidget, self).__init__(
             config=config_dict, height=height, theme=theme, proxy=proxy,
             js_package_version=js_package_version, js_dev_mode=js_dev_mode, custom_js_url=custom_js_url,
+            plugin_esm=plugin_esm, remount_on_uid_change=remount_on_uid_change,
             uid=uid_str,
         )
 

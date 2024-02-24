@@ -3,6 +3,7 @@ from os.path import join
 import tempfile
 from uuid import uuid4
 from pathlib import PurePath, PurePosixPath
+import zarr
 
 from .constants import (
     norm_enum,
@@ -40,6 +41,7 @@ class AbstractWrapper:
         self.out_dir = kwargs['out_dir'] if 'out_dir' in kwargs else tempfile.mkdtemp(
         )
         self.routes = []
+        self.stores = {}
         self.is_remote = False
         self.file_def_creators = []
         self.base_dir = None
@@ -68,6 +70,9 @@ class AbstractWrapper:
         :rtype: list[starlette.routing.Route]
         """
         return self.routes
+    
+    def get_stores(self):
+        return self.stores
 
     def get_file_defs(self, base_url):
         """
@@ -894,7 +899,7 @@ class ObsSegmentationsOmeZarrWrapper(AbstractWrapper):
 
 
 class AnnDataWrapper(AbstractWrapper):
-    def __init__(self, adata_path=None, adata_url=None, obs_feature_matrix_path=None, feature_filter_path=None, initial_feature_filter_path=None, obs_set_paths=None, obs_set_names=None, obs_locations_path=None, obs_segmentations_path=None, obs_embedding_paths=None, obs_embedding_names=None, obs_embedding_dims=None, obs_spots_path=None, obs_points_path=None, request_init=None, feature_labels_path=None, obs_labels_path=None, convert_to_dense=True, coordination_values=None, obs_labels_paths=None, obs_labels_names=None, **kwargs):
+    def __init__(self, adata_path=None, adata_url=None, obs_feature_matrix_path=None, feature_filter_path=None, initial_feature_filter_path=None, obs_set_paths=None, obs_set_names=None, obs_locations_path=None, obs_segmentations_path=None, obs_embedding_paths=None, obs_embedding_names=None, obs_embedding_dims=None, obs_spots_path=None, obs_points_path=None, request_init=None, feature_labels_path=None, obs_labels_path=None, convert_to_dense=True, coordination_values=None, obs_labels_paths=None, obs_labels_names=None, as_store=False, **kwargs):
         """
         Wrap an AnnData object by creating an instance of the ``AnnDataWrapper`` class.
 
@@ -953,6 +958,7 @@ class AnnDataWrapper(AbstractWrapper):
         self._spatial_points_obsm = obs_points_path
         self._request_init = request_init
         self._gene_alias = feature_labels_path
+        self._as_store = as_store
         # Support legacy provision of single obs labels path
         if (obs_labels_path is not None):
             self._obs_labels_paths = [obs_labels_path]
@@ -974,6 +980,13 @@ class AnnDataWrapper(AbstractWrapper):
 
         self.file_def_creators.append(file_def_creator)
         self.routes += routes
+
+        if self._as_store:
+            if self.is_remote:
+                store = zarr.HTTPStore(self.adata_url)
+            else:
+                store = zarr.DirectoryStore(self.adata_path)
+            self.stores[]
 
     def make_anndata_routes(self, dataset_uid, obj_i):
         if self.is_remote:

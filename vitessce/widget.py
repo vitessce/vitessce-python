@@ -383,13 +383,13 @@ class VitessceWidget(anywidget.AnyWidget):
 
     next_port = DEFAULT_PORT
 
-    js_package_version = Unicode('3.3.3').tag(sync=True)
+    js_package_version = Unicode('3.3.6').tag(sync=True)
     js_dev_mode = Bool(False).tag(sync=True)
     custom_js_url = Unicode('').tag(sync=True)
     plugin_esm = Unicode(DEFAULT_PLUGIN_ESM).tag(sync=True)
     remount_on_uid_change = Bool(True).tag(sync=True)
 
-    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='3.3.3', js_dev_mode=False, custom_js_url='', plugin_esm=DEFAULT_PLUGIN_ESM, remount_on_uid_change=True):
+    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='3.3.6', js_dev_mode=False, custom_js_url='', plugin_esm=DEFAULT_PLUGIN_ESM, remount_on_uid_change=True):
         """
         Construct a new Vitessce widget.
 
@@ -399,6 +399,11 @@ class VitessceWidget(anywidget.AnyWidget):
         :param int height: The height of the widget, in pixels. By default, 600.
         :param int port: The port to use when serving data objects on localhost. By default, 8000.
         :param bool proxy: Is this widget being served through a proxy, for example with a cloud notebook (e.g. Binder)?
+        :param str js_package_version: The version of the NPM package ('vitessce' if not js_dev_mode else '@vitessce/dev').
+        :param bool js_dev_mode: Should @vitessce/dev be used (typically for debugging purposes)? By default, False.
+        :param str custom_js_url: A URL to a JavaScript file to use (instead of 'vitessce' or '@vitessce/dev' NPM package).
+        :param str plugin_esm: JavaScript module that defines a createPlugins function. Optional.
+        :param bool remount_on_uid_change: Passed to the remountOnUidChange prop of the <Vitessce/> React component. By default, True.
 
         .. code-block:: python
             :emphasize-lines: 4
@@ -458,7 +463,7 @@ class VitessceWidget(anywidget.AnyWidget):
 # Launch Vitessce using plain HTML representation (no ipywidgets)
 
 
-def ipython_display(config, height=600, theme='auto', base_url=None, host_name=None, uid=None, port=None, proxy=False, js_package_version='3.3.3', js_dev_mode=False, custom_js_url=''):
+def ipython_display(config, height=600, theme='auto', base_url=None, host_name=None, uid=None, port=None, proxy=False, js_package_version='3.3.6', js_dev_mode=False, custom_js_url=''):
     from IPython.display import display, HTML
     uid_str = "vitessce" + get_uid_str(uid)
 

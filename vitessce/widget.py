@@ -463,7 +463,7 @@ class VitessceWidget(anywidget.AnyWidget):
 # Launch Vitessce using plain HTML representation (no ipywidgets)
 
 
-def ipython_display(config, height=600, theme='auto', base_url=None, host_name=None, uid=None, port=None, proxy=False, js_package_version='3.3.6', js_dev_mode=False, custom_js_url=''):
+def ipython_display(config, height=600, theme='auto', base_url=None, host_name=None, uid=None, port=None, proxy=False, js_package_version='3.3.6', js_dev_mode=False, custom_js_url='', plugin_esm=DEFAULT_PLUGIN_ESM, remount_on_uid_change=True):
     from IPython.display import display, HTML
     uid_str = "vitessce" + get_uid_str(uid)
 
@@ -478,6 +478,8 @@ def ipython_display(config, height=600, theme='auto', base_url=None, host_name=N
         "js_package_version": js_package_version,
         "js_dev_mode": js_dev_mode,
         "custom_js_url": custom_js_url,
+        "plugin_esm": plugin_esm,
+        "remount_on_uid_change": remount_on_uid_change,
         "proxy": proxy,
         "has_host_name": host_name is not None,
         "height": height,

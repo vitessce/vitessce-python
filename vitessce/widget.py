@@ -229,8 +229,6 @@ export async function render(view) {
         const pluginModule = (await import(pluginEsmUrl)).default;
         URL.revokeObjectURL(pluginEsmUrl);
 
-        console.log(pluginModule)
-
         const pluginsObj = await pluginModule.createPlugins({
             React,
             PluginFileType,

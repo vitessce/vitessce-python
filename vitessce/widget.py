@@ -362,6 +362,7 @@ function createPlugins(utilsForPlugins) {
 export default { createPlugins };
 """
 
+
 class VitessceWidget(anywidget.AnyWidget):
     """
     A class to represent a Jupyter widget for Vitessce.

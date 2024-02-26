@@ -160,13 +160,6 @@ const importMap = {
 const React = await importWithMap("react", importMap);
 const { createRoot } = await importWithMap("react-dom/client", importMap);
 
-function asEsModule(component) {
-  return {
-    __esModule: true,
-    default: component,
-  };
-}
-
 const e = React.createElement;
 
 const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -206,6 +199,8 @@ export async function render(view) {
     const jsDevMode = view.model.get('js_dev_mode');
     const jsPackageVersion = view.model.get('js_package_version');
     const customJsUrl = view.model.get('custom_js_url');
+    const pluginEsm = view.model.get('plugin_esm');
+    const remountOnUidChange = view.model.get('remount_on_uid_change');
 
     const pkgName = (jsDevMode ? "@vitessce/dev" : "vitessce");
 
@@ -214,7 +209,44 @@ export async function render(view) {
         : `https://unpkg.com/${pkgName}@${jsPackageVersion}`
     );
 
-    const { Vitessce } = await importWithMap("vitessce", importMap);
+    const {
+        Vitessce,
+        PluginFileType,
+        PluginViewType,
+        PluginCoordinationType,
+        PluginJointFileType,
+        z,
+        useCoordination,
+    } = await importWithMap("vitessce", importMap);
+
+    let pluginViewTypes;
+    let pluginCoordinationTypes;
+    let pluginFileTypes;
+    let pluginJointFileTypes;
+
+    try {
+        const pluginEsmUrl = URL.createObjectURL(new Blob([pluginEsm], { type: "text/javascript" }));
+        const pluginModule = (await import(pluginEsmUrl)).default;
+        URL.revokeObjectURL(pluginEsmUrl);
+
+        console.log(pluginModule)
+
+        const pluginsObj = await pluginModule.createPlugins({
+            React,
+            PluginFileType,
+            PluginViewType,
+            PluginCoordinationType,
+            PluginJointFileType,
+            z,
+            useCoordination,
+        });
+        pluginViewTypes = pluginsObj.pluginViewTypes;
+        pluginCoordinationTypes = pluginsObj.pluginCoordinationTypes;
+        pluginFileTypes = pluginsObj.pluginFileTypes;
+        pluginJointFileTypes = pluginsObj.pluginJointFileTypes;
+    } catch(e) {
+        console.error(e);
+    }
 
     function VitessceWidget(props) {
         const { model } = props;
@@ -277,7 +309,11 @@ export async function render(view) {
             });
         }, []);
 
-        const vitessceProps = { height, theme, config, onConfigChange, validateConfig };
+        const vitessceProps = {
+            height, theme, config, onConfigChange, validateConfig,
+            pluginViewTypes, pluginCoordinationTypes, pluginFileTypes, pluginJointFileTypes,
+            remountOnUidChange,
+        };
 
         return e('div', { ref: divRef, style: { height: height + 'px' } },
             e(React.Suspense, { fallback: e('div', {}, 'Loading...') },
@@ -307,6 +343,26 @@ export async function render(view) {
 }
 """
 
+DEFAULT_PLUGIN_ESM = """
+function createPlugins(utilsForPlugins) {
+    const {
+        React,
+        PluginFileType,
+        PluginViewType,
+        PluginCoordinationType,
+        PluginJointFileType,
+        z,
+        useCoordination,
+    } = utilsForPlugins;
+    return {
+        pluginViewTypes: undefined,
+        pluginFileTypes: undefined,
+        pluginCoordinationTypes: undefined,
+        pluginJointFileTypes: undefined,
+    };
+}
+export default { createPlugins };
+"""
 
 class VitessceWidget(anywidget.AnyWidget):
     """
@@ -327,11 +383,13 @@ class VitessceWidget(anywidget.AnyWidget):
 
     next_port = DEFAULT_PORT
 
-    js_package_version = Unicode('3.3.3').tag(sync=True)
+    js_package_version = Unicode('3.3.6').tag(sync=True)
     js_dev_mode = Bool(False).tag(sync=True)
     custom_js_url = Unicode('').tag(sync=True)
+    plugin_esm = Unicode(DEFAULT_PLUGIN_ESM).tag(sync=True)
+    remount_on_uid_change = Bool(True).tag(sync=True)
 
-    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='3.3.3', js_dev_mode=False, custom_js_url=''):
+    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='3.3.6', js_dev_mode=False, custom_js_url='', plugin_esm=DEFAULT_PLUGIN_ESM, remount_on_uid_change=True):
         """
         Construct a new Vitessce widget.
 
@@ -341,6 +399,11 @@ class VitessceWidget(anywidget.AnyWidget):
         :param int height: The height of the widget, in pixels. By default, 600.
         :param int port: The port to use when serving data objects on localhost. By default, 8000.
         :param bool proxy: Is this widget being served through a proxy, for example with a cloud notebook (e.g. Binder)?
+        :param str js_package_version: The version of the NPM package ('vitessce' if not js_dev_mode else '@vitessce/dev').
+        :param bool js_dev_mode: Should @vitessce/dev be used (typically for debugging purposes)? By default, False.
+        :param str custom_js_url: A URL to a JavaScript file to use (instead of 'vitessce' or '@vitessce/dev' NPM package).
+        :param str plugin_esm: JavaScript module that defines a createPlugins function. Optional.
+        :param bool remount_on_uid_change: Passed to the remountOnUidChange prop of the <Vitessce/> React component. By default, True.
 
         .. code-block:: python
             :emphasize-lines: 4
@@ -364,6 +427,7 @@ class VitessceWidget(anywidget.AnyWidget):
         super(VitessceWidget, self).__init__(
             config=config_dict, height=height, theme=theme, proxy=proxy,
             js_package_version=js_package_version, js_dev_mode=js_dev_mode, custom_js_url=custom_js_url,
+            plugin_esm=plugin_esm, remount_on_uid_change=remount_on_uid_change,
             uid=uid_str,
         )
 
@@ -399,7 +463,7 @@ class VitessceWidget(anywidget.AnyWidget):
 # Launch Vitessce using plain HTML representation (no ipywidgets)
 
 
-def ipython_display(config, height=600, theme='auto', base_url=None, host_name=None, uid=None, port=None, proxy=False, js_package_version='3.3.3', js_dev_mode=False, custom_js_url=''):
+def ipython_display(config, height=600, theme='auto', base_url=None, host_name=None, uid=None, port=None, proxy=False, js_package_version='3.3.6', js_dev_mode=False, custom_js_url=''):
     from IPython.display import display, HTML
     uid_str = "vitessce" + get_uid_str(uid)
 

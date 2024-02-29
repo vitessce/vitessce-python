@@ -12,10 +12,7 @@ from .constants import (
 )
 
 from .repr import make_repr, make_params_repr
-from .utils import (
-    get_next_scope_numeric,
-    create_prefixed_get_next_scope_numeric,
-)
+from .utils import create_prefixed_get_next_scope_numeric
 
 
 def _get_next_scope(prev_scopes):

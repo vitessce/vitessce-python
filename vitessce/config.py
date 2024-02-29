@@ -12,6 +12,7 @@ from .constants import (
 )
 
 from .repr import make_repr, make_params_repr
+from .utils import create_prefixed_get_next_scope_numeric
 
 
 def _get_next_scope(prev_scopes):
@@ -862,6 +863,8 @@ class VitessceConfig:
             "initStrategy": "auto"
         }
 
+        self.get_next_scope = _get_next_scope
+
         if name is None:
             self.config["name"] = ""
         else:
@@ -926,7 +929,7 @@ class VitessceConfig:
                 )
             )
         """
-        uid = uid if uid is not None else _get_next_scope(
+        uid = uid if uid is not None else self.get_next_scope(
             [d.dataset['uid'] for d in self.config["datasets"]])
         assert isinstance(uid, str)
         vcd = VitessceConfigDataset(uid, name, base_dir=self.base_dir)
@@ -1099,7 +1102,7 @@ class VitessceConfig:
             prev_scopes = list(self.config["coordinationSpace"][c_type_str].keys(
             )) if c_type_str in self.config["coordinationSpace"].keys() else []
             scope = VitessceConfigCoordinationScope(
-                c_type_str, _get_next_scope(prev_scopes))
+                c_type_str, self.get_next_scope(prev_scopes))
             if scope.c_type not in self.config["coordinationSpace"]:
                 self.config["coordinationSpace"][scope.c_type] = {}
             self.config["coordinationSpace"][scope.c_type][scope.c_scope] = scope
@@ -1138,8 +1141,8 @@ class VitessceConfig:
         prev_meta_by_scopes = self.config["coordinationSpace"].get(ct.META_COORDINATION_SCOPES_BY.value, {}).keys()
 
         meta_container = VitessceConfigMetaCoordinationScope(
-            _get_next_scope(prev_meta_scopes),
-            _get_next_scope(prev_meta_by_scopes),
+            self.get_next_scope(prev_meta_scopes),
+            self.get_next_scope(prev_meta_by_scopes),
         )
         if ct.META_COORDINATION_SCOPES.value not in self.config["coordinationSpace"]:
             self.config["coordinationSpace"][ct.META_COORDINATION_SCOPES.value] = {}
@@ -1256,6 +1259,8 @@ class VitessceConfig:
         """
         def process_level(level):
             result = {}
+            if level is None:
+                return result
             for c_type, next_level_or_initial_value in level.items():
                 c_type_str = norm_enum(c_type, ct)
                 # Check if value of object is instanceof CoordinationLevel
@@ -1295,7 +1300,7 @@ class VitessceConfig:
         output_val = process_level(input_val)
         return output_val
 
-    def link_views_by_dict(self, views, input_val, meta=True):
+    def link_views_by_dict(self, views, input_val, meta=True, scope_prefix=None):
         """
         A convenience function for setting up multi-level and meta-coordination scopes across a set of views.
 
@@ -1322,6 +1327,8 @@ class VitessceConfig:
                 ct.SPATIAL_TARGET_Y: 0,
             })
         """
+        if scope_prefix:
+            self.get_next_scope = create_prefixed_get_next_scope_numeric(scope_prefix)
         scopes = self.add_coordination_by_dict(input_val)
         if meta:
             meta_scope = self.add_meta_coordination()
@@ -1332,7 +1339,8 @@ class VitessceConfig:
         else:
             for view in views:
                 view.use_coordination_by_dict(scopes)
-
+        if scope_prefix:
+            self.get_next_scope = _get_next_scope
         return self
 
     def set_coordination_value(self, c_type, c_scope, c_value):

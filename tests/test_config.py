@@ -1402,3 +1402,115 @@ def test_config_link_views_by_dict():
         ],
         "initStrategy": "auto"
     }
+
+
+def test_config_link_views_by_dict_with_scope_prefix():
+    vc = VitessceConfig(schema_version="1.0.16", name="My config")
+    dataset = vc.add_dataset(name="My dataset")
+
+    spatial_view = vc.add_view('spatial', dataset=dataset)
+    lc_view = vc.add_view('layerController', dataset=dataset)
+
+    vc.link_views_by_dict([spatial_view, lc_view], {
+        'spatialImageLayer': CL([
+            {
+                'spatialLayerOpacity': 1,
+                'spatialImageChannel': CL([
+                    {
+                        'spatialTargetC': 0,
+                        'spatialChannelColor': [255, 0, 0],
+                    },
+                    {
+                        'spatialTargetC': 1,
+                        'spatialChannelColor': [0, 255, 0],
+                    },
+                ]),
+            },
+        ])
+    }, scope_prefix="SOME_PREFIX_")
+
+    vc_dict = vc.to_dict()
+
+    assert vc_dict == {
+        "version": "1.0.16",
+        "name": "My config",
+        "description": "",
+        "datasets": [
+            {
+                "uid": "A",
+                "name": "My dataset",
+                "files": []
+            }
+        ],
+        "coordinationSpace": {
+            "dataset": {
+                "A": "A"
+            },
+            "spatialImageLayer": {
+                "SOME_PREFIX_0": "__dummy__"
+            },
+            "spatialLayerOpacity": {
+                "SOME_PREFIX_0": 1,
+            },
+            "spatialImageChannel": {
+                "SOME_PREFIX_0": "__dummy__",
+                "SOME_PREFIX_1": "__dummy__"
+            },
+            "spatialTargetC": {
+                "SOME_PREFIX_0": 0,
+                "SOME_PREFIX_1": 1
+            },
+            "spatialChannelColor": {
+                "SOME_PREFIX_0": [255, 0, 0],
+                "SOME_PREFIX_1": [0, 255, 0],
+            },
+            "metaCoordinationScopes": {
+                "SOME_PREFIX_0": {
+                    "spatialImageLayer": ["SOME_PREFIX_0"]
+                }
+            },
+            "metaCoordinationScopesBy": {
+                "SOME_PREFIX_0": {
+                    "spatialImageLayer": {
+                        "spatialLayerOpacity": {
+                            "SOME_PREFIX_0": "SOME_PREFIX_0"
+                        },
+                        "spatialImageChannel": {
+                            "SOME_PREFIX_0": ["SOME_PREFIX_0", "SOME_PREFIX_1"]
+                        }
+                    },
+                    "spatialImageChannel": {
+                        "spatialTargetC": {
+                            "SOME_PREFIX_0": "SOME_PREFIX_0",
+                            "SOME_PREFIX_1": "SOME_PREFIX_1"
+                        },
+                        "spatialChannelColor": {
+                            "SOME_PREFIX_0": "SOME_PREFIX_0",
+                            "SOME_PREFIX_1": "SOME_PREFIX_1"
+                        }
+                    }
+                }
+            }
+        },
+        "layout": [
+            {
+                "component": "spatial",
+                "coordinationScopes": {
+                    "dataset": "A",
+                    "metaCoordinationScopes": ["SOME_PREFIX_0"],
+                    "metaCoordinationScopesBy": ["SOME_PREFIX_0"]
+                },
+                "x": 0, "y": 0, "w": 1, "h": 1
+            },
+            {
+                "component": "layerController",
+                "coordinationScopes": {
+                    "dataset": "A",
+                    "metaCoordinationScopes": ["SOME_PREFIX_0"],
+                    "metaCoordinationScopesBy": ["SOME_PREFIX_0"]
+                },
+                "x": 0, "y": 0, "w": 1, "h": 1
+            }
+        ],
+        "initStrategy": "auto"
+    }

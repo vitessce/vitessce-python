@@ -10,6 +10,11 @@ from .config import (
     CoordinationLevel,
 )
 
+from .utils import (
+    get_initial_coordination_scope_prefix,
+    get_initial_coordination_scope_name,
+)
+
 from .repr import make_repr
 
 from .constants import (

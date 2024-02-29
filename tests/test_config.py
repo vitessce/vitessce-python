@@ -1403,6 +1403,7 @@ def test_config_link_views_by_dict():
         "initStrategy": "auto"
     }
 
+
 def test_config_link_views_by_dict_with_scope_prefix():
     vc = VitessceConfig(schema_version="1.0.16", name="My config")
     dataset = vc.add_dataset(name="My dataset")

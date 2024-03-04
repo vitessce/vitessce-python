@@ -36,8 +36,6 @@ def convert_intervals_to_bins(in_bins_df,
     var_chr_end_rounded = f"{var_chr_end_col}_round"
     # Keep only the interval column
     in_bins_df = in_bins_df[[var_interval_col]]
-    in_bins_df = in_bins_df.rename(
-        columns={var_interval_col: var_interval_col})
     in_bins_df[var_chr_name_col] = in_bins_df[var_interval_col].apply(
         convert_bin_name_to_chr_name)
     in_bins_df[var_chr_start_col] = in_bins_df[var_interval_col].apply(
@@ -99,7 +97,8 @@ def adata_to_multivec_zarr(adata, output_path, obs_set_col, obs_set_name, obs_se
                 var_chr_name_col,
                 var_chr_start_col,
                 var_chr_end_col)
-
+    # Ensure that in_bins_df has a sequential integer index
+    in_bins_df = in_bins_df.reset_index()
     in_mtx = adata.layers[layer_key] if layer_key is not None else adata.X
 
     in_mtx = to_dense(in_mtx)  # TODO: is this necessary?

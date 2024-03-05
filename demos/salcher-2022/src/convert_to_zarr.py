@@ -7,43 +7,17 @@ import platform
 import os
 import zarr
 import math
+from os.path import join
 
 def convert_h5ad_to_zarr(input_path, output_path):
     adata = read_h5ad(input_path)
 
-    # Clear X so that we can write it ourselves manually
-    X = adata.X #.copy()
-    
-    adata.X = None
-    adata.write_zarr(output_path)
+    for adata_size in [10, 100, 1000, 10000, 100000, 1000000]:
+        adata_small = adata[:adata_size, :].copy()
+        adata_small.write_zarr(join(output_path, f"small_{adata_size}.h5ad.zarr"))
+        adata_small.write_csvs(join(output_path, f"small_{adata_size}.csvs_dir"), skip_data=False)
 
-    assert isinstance(X, scipy.sparse.spmatrix)
-
-    print(output_path)
-
-    store = zarr.DirectoryStore(output_path)
-    z = zarr.zeros(shape=X.shape, chunks=(X.shape[0], 10), dtype=X.dtype, store = store, path = "/X", overwrite=True)
-
-    chunk_shape = (10000, 10000)
-    x_chunks = math.ceil(X.shape[0] / chunk_shape[0])
-    y_chunks = math.ceil(X.shape[1] / chunk_shape[1])
-
-
-    for i in range(x_chunks):
-        for j in range(y_chunks):
-            x_start = i * chunk_shape[0]
-            x_end = min((i + 1) * chunk_shape[0], X.shape[0])
-            y_start = j * chunk_shape[1]
-            y_end = min((j + 1) * chunk_shape[1], X.shape[1])
-
-            X_chunk = X[x_start:x_end, y_start:y_end].tocoo(copy=False)
-            z.set_coordinate_selection(
-                # Add x_start and y_start as offsets to the row/chunk coordinates
-                ([cx+x_start for cx in X_chunk.row], [cy+y_start for cy in X_chunk.col]),
-                X_chunk.data
-            )
-
-    print("done")
+        print(f"done for {adata_size}")
 
 if __name__ == '__main__':
     # Argparse
@@ -60,7 +34,7 @@ if __name__ == '__main__':
         '--output',
         type=str,
         required=True,
-        help='Output Zarr store'
+        help='Output directory'
     )
     args = parser.parse_args()
 

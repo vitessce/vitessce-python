@@ -1,0 +1,12 @@
+79098107     76G     ./small_1000000.csvs_dir
+15340216     15G     ./small_1000000.h5ad.zarr
+8036644     7.7G    ./small_100000.csvs_dir
+1759209     1.7G    ./small_100000.h5ad.zarr
+820039     801M    ./small_10000.csvs_dir
+202199     198M    ./small_10000.h5ad.zarr
+82244     81M     ./small_1000.csvs_dir
+18991     19M     ./small_1000.h5ad.zarr
+9918     9.7M    ./small_100.csvs_dir
+3294     3.3M    ./small_100.h5ad.zarr
+2784     2.8M    ./small_10.csvs_dir
+1892     1.9M    ./small_10.h5ad.zarr

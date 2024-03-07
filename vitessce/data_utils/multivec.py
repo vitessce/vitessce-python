@@ -79,11 +79,14 @@ def convert_intervals_to_bins(in_bins_df,
     return in_bins_df
 
 
-
 # Used to export genomic data for GenomicProfiles view
-def adata_to_multivec_zarr(adata, output_path, obs_set_col, obs_set_name, obs_set_vals=None, var_interval_col=None, var_chr_name_col="chr_name", var_chr_start_col="chr_start", var_chr_end_col="chr_end", layer_key=None, assembly="hg38", starting_resolution=5000):
-    in_barcodes_df = adata.obs
+def adata_to_multivec_zarr(adata,
+                           output_path, obs_set_col, obs_set_name,
+                           obs_set_vals=None, var_interval_col=None,
+                           var_chr_name_col="chr_name", var_chr_start_col="chr_start", var_chr_end_col="chr_end",
+                           layer_key=None, assembly="hg38", starting_resolution=5000):
     in_bins_df = adata.var
+    in_barcodes_df = adata.obs
 
     if (var_interval_col is not None):
         if var_interval_col not in adata.var.columns:
@@ -97,8 +100,23 @@ def adata_to_multivec_zarr(adata, output_path, obs_set_col, obs_set_name, obs_se
                 var_chr_name_col,
                 var_chr_start_col,
                 var_chr_end_col)
+    elif var_chr_name_col is None or var_chr_start_col is None or var_chr_end_col is None:
+        raise ValueError(
+            f"var_chr_name_col, var_chr_start_col, and var_chr_end_col must all be provided if var_interval_col is not provided.")
+    else:
+        # Add a placeholder interval column for index use if one is not provided
+        var_interval_col = "intervals"
+        in_bins_df[var_interval_col] = in_bins_df.apply(
+            lambda r: f"{r[var_chr_name_col]}:{r[var_chr_start_col]}-{r[var_chr_end_col]}", axis='columns')
+        # Append one more row to the obs dataframe to hold the interval values
+        print('in_barcodes_df before append', in_barcodes_df.shape)
+        in_barcodes_df = in_barcodes_df.append(
+            pd.Series(name=obs_set_name, dtype=str, index=in_barcodes_df.columns))
+
     # Ensure that in_bins_df has a sequential integer index
     in_bins_df = in_bins_df.reset_index()
+    print('in_barcodes_df', in_barcodes_df.shape)
+    print('in_bins_df', in_bins_df.shape)
     in_mtx = adata.layers[layer_key] if layer_key is not None else adata.X
 
     in_mtx = to_dense(in_mtx)  # TODO: is this necessary?
@@ -120,6 +138,7 @@ def adata_to_multivec_zarr(adata, output_path, obs_set_col, obs_set_name, obs_se
 
     # Create each chromosome dataset.
     for chr_name, chr_len in chrom_name_to_length.items():
+        print(f"Processing chromosome {chr_name} of length {chr_len}.")
         # The bins dataframe frustratingly does not contain every bin.
         # We need to figure out which bins are missing.
 
@@ -132,6 +151,7 @@ def adata_to_multivec_zarr(adata, output_path, obs_set_col, obs_set_name, obs_se
             continue
         # Determine the indices of the matrix at which the bins for this chromosome start and end.
         chr_bin_i_start = int(chr_bins_in_df.head(1).iloc[0].name)
+        # +1 because the end index is exclusive.
         chr_bin_i_end = int(chr_bins_in_df.tail(1).iloc[0].name) + 1
 
         # Extract the part of the matrix corresponding to the current chromosome.
@@ -163,7 +183,7 @@ def adata_to_multivec_zarr(adata, output_path, obs_set_col, obs_set_name, obs_se
 
         # Set the full bin string column as the index of both data frames.
         chr_bins_gt_df = chr_bins_gt_df.set_index(0)
-        chr_bins_in_df = chr_bins_in_df.set_index("interval")
+        chr_bins_in_df = chr_bins_in_df.set_index(var_interval_col)
 
         # Join the input bin subset dataframe right onto the full bin ground truth dataframe.
         chr_bins_in_join_df = chr_bins_in_df.join(
@@ -200,8 +220,12 @@ def adata_to_multivec_zarr(adata, output_path, obs_set_col, obs_set_name, obs_se
         # Obtain the new full data matrix, which contains values for all bins of the chromosome.
         chr_mtx = chr_mtx_join_df.values.T
 
+        print('Starting cluster profile calculation.')
+        print('chr_mtx', chr_mtx.shape)
+
         # Fill in the Zarr store with data for each cluster.
         for cluster_index, cluster_id in enumerate(cluster_ids):
+            print(f"Processing cluster {cluster_id}.")
             # Get the list of cells in the current cluster.
             cluster_df = in_barcodes_df.loc[in_barcodes_df[obs_set_col]
                                             == cluster_id]
@@ -209,8 +233,11 @@ def adata_to_multivec_zarr(adata, output_path, obs_set_col, obs_set_name, obs_se
             cluster_cells_tf = (
                 in_barcodes_df.index.to_series().isin(cluster_cell_ids)).values
 
+            print('cluster_cells_tf', len(cluster_cells_tf))
+
             # Get the rows of the data matrix corresponding to the cells in this cluster.
             cluster_cell_by_bin_mtx = chr_mtx[cluster_cells_tf, :]
+            print('cluster_cell_by_bin_mtx', cluster_cell_by_bin_mtx.shape)
             # Take the sum of this cluster along the cells axis.
             cluster_profile = cluster_cell_by_bin_mtx.sum(axis=0)
 

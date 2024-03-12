@@ -117,7 +117,6 @@ def adata_to_multivec_zarr(adata, output_path, obs_set_col, obs_set_name, obs_se
 
     # Create each chromosome dataset.
     for chr_name in tqdm(chrom_names):
-        assert chr_name in chrom_name_to_length
         chr_len = chrom_name_to_length[chr_name]
         # The bins dataframe frustratingly does not contain every bin.
         # We need to figure out which bins are missing.

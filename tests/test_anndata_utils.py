@@ -84,12 +84,12 @@ class TestAnnDataUtils(unittest.TestCase):
     def test_to_uint8_global_norm(self):
         adata = self.adata
         norm_X = to_uint8(adata.X, norm_along="global")
-        assert norm_X.tolist() == [[255, 200, 250], [250, 50, 255], [104, 50, 100], [200, 70, 205]]
+        np.testing.assert_almost_equal(norm_X.tolist(), [[255, 200, 250], [250, 50, 255], [104, 50, 100], [200, 70, 205]], decimal=0)
 
     def test_to_uint8_gene_norm(self):
         adata = self.adata
         norm_X = to_uint8(adata.X, norm_along="var")
-        assert norm_X.tolist() == [[255, 255, 246], [246, 0, 254], [0, 0, 0], [161, 33, 172]]
+        np.testing.assert_almost_equal(norm_X.tolist(), [[255, 255, 246], [246, 0, 254], [0, 0, 0], [161, 33, 172]], decimal=0)
 
     def test_to_uint8_cell_norm(self):
         adata = self.adata

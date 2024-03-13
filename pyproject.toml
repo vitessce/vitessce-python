@@ -36,7 +36,8 @@ dependencies = [
   'scanpy>=1.9.3',
   'ome-zarr==0.8.3',
   'tifffile>=2020.10.1',
-  'jsonschema>=3.2'
+  'jsonschema>=3.2',
+  'tqdm>=4.1.0'
 ]
 
 [project.optional-dependencies]

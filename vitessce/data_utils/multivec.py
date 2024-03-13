@@ -2,15 +2,43 @@ import math
 import zarr
 import numpy as np
 import pandas as pd
+from tqdm import tqdm
 
 from .anndata import to_dense
 from .entities import GenomicProfiles
 
 
-def adata_to_multivec_zarr(adata, output_path, obs_set_col, obs_set_name, obs_set_vals=None, var_interval_col="interval", layer_key=None, assembly="hg38", starting_resolution=5000):
+def adata_to_multivec_zarr(adata, output_path, obs_set_col, obs_set_name, obs_set_vals=None, var_interval_col="interval", layer_key=None, assembly="hg38", starting_resolution=5000, chr_subset=None):
+    """
+    Convert an AnnData object containing a cell-by-bin matrix to a Multivec-Zarr store.
+
+    :param adata: The object to convert.
+    :type adata: anndata.AnnData
+    :param output_path: The path to the output Zarr store.
+    :type output_path: str
+    :param obs_set_col: The name of the column in adata.obs that contains the cluster IDs.
+    :type obs_set_col: str
+    :param obs_set_name: The name of the cluster set.
+    :type obs_set_name: str
+    :param obs_set_vals: The cluster IDs to include in the output. If None, all cluster IDs will be included. This can be used to override the order of the cluster IDs.
+    :type obs_set_vals: list[str] or None
+    :param var_interval_col: The name of the column in adata.var that contains the bin interval strings. By default, "interval".
+    :type var_interval_col: str
+    :param layer_key: The name of the layer in adata.layers to use. If None, adata.X will be used. By default, None.
+    :type layer_key: str or None
+    :param assembly: The name of the genome assembly. By default, "hg38".
+    :type assembly: str
+    :param starting_resolution: The starting resolution of the data. By default, 5000.
+    :type starting_resolution: int
+    :param chr_subset: For debugging purposes, a subset of chromosomes to process. If None, all chromosomes in the assembly will be processed. By default, None.
+    :type chr_subset: list[str] or None
+    """
     in_mtx = adata.layers[layer_key] if layer_key is not None else adata.X
     in_barcodes_df = adata.obs
     in_bins_df = adata.var
+
+    # Ensure that in_bins_df has a sequential integer index
+    in_bins_df = in_bins_df.reset_index()
 
     in_mtx = to_dense(in_mtx)  # TODO: is this necessary?
 
@@ -84,8 +112,12 @@ def adata_to_multivec_zarr(adata, output_path, obs_set_col, obs_set_name, obs_se
     )
     chrom_name_to_length = genomic_profiles.chrom_name_to_length
 
+    # For debugging purposes, allow the user to specify a subset of chromosomes to process.
+    chrom_names = chr_subset if chr_subset is not None else list(chrom_name_to_length.keys())
+
     # Create each chromosome dataset.
-    for chr_name, chr_len in chrom_name_to_length.items():
+    for chr_name in tqdm(chrom_names):
+        chr_len = chrom_name_to_length[chr_name]
         # The bins dataframe frustratingly does not contain every bin.
         # We need to figure out which bins are missing.
 
@@ -93,11 +125,13 @@ def adata_to_multivec_zarr(adata, output_path, obs_set_col, obs_set_name, obs_se
         # otherwise too much memory is used during the join step.
         chr_bins_in_df = in_bins_df.loc[in_bins_df["chr_name"] == chr_name]
         if chr_bins_in_df.shape[0] == 0:
+            print("Warning: No bins found for chromosome", chr_name)
             # No processing or output is necessary if there is no data for this chromosome.
             # Continue on through all resolutions of this chromosome to the next chromosome.
             continue
         # Determine the indices of the matrix at which the bins for this chromosome start and end.
         chr_bin_i_start = int(chr_bins_in_df.head(1).iloc[0].name)
+        # +1 because the end index is exclusive.
         chr_bin_i_end = int(chr_bins_in_df.tail(1).iloc[0].name) + 1
 
         # Extract the part of the matrix corresponding to the current chromosome.

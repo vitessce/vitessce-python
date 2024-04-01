@@ -18,9 +18,9 @@ rule unzip_file:
         directory(PROCESSED_DIR / "{dataset}.zarr")
     shell:
         """
-        mkdir -p data/{wildcards.dataset} &&\
-        unzip {input} -d data/{wildcards.dataset} &&\
-        mv data/{wildcards.dataset}/data.zarr data/processed/{wildcards.dataset}.zarr
+        mkdir -p {RAW_DIR}/{wildcards.dataset} &&\
+        unzip {input} -d {RAW_DIR}/{wildcards.dataset} &&\
+        mv {RAW_DIR}/{wildcards.dataset}/data.zarr {PROCESSED_DIR}/{wildcards.dataset}.zarr
         """
 
 # Download visium .zip file containing single-cell data.

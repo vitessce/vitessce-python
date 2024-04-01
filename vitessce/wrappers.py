@@ -3,6 +3,7 @@ from os.path import join
 import tempfile
 from uuid import uuid4
 from pathlib import PurePath, PurePosixPath
+from zarr.storage import DirectoryStore
 
 from .constants import (
     norm_enum,
@@ -43,6 +44,7 @@ class AbstractWrapper:
         self.is_remote = False
         self.file_def_creators = []
         self.base_dir = None
+        self.stores = {}
 
     def __repr__(self):
         return self._repr
@@ -68,6 +70,20 @@ class AbstractWrapper:
         :rtype: list[starlette.routing.Route]
         """
         return self.routes
+
+    def get_stores(self, base_url):
+        """
+        Obtain the stores that have been created for this wrapper class.
+
+        :returns: A dictionary that maps file URLs to Zarr Store objects.
+        :rtype: dict[str, zarr.Store]
+        """
+        relative_stores = self.stores
+        absolute_stores = {}
+        for relative_url, store in relative_stores.items():
+            absolute_url = base_url + relative_url
+            absolute_stores[absolute_url] = store
+        return absolute_stores
 
     def get_file_defs(self, base_url):
         """
@@ -108,6 +124,16 @@ class AbstractWrapper:
         if not self.is_remote and self.base_dir is not None:
             return self._get_url_simple(base_url, file_path_to_url_path(local_dir_path, prepend_slash=False))
         return self._get_url(base_url, dataset_uid, obj_i, local_dir_uid)
+
+    def register_local_dir_store(self, dataset_uid, obj_i, local_dir_path, local_dir_uid):
+        if not self.is_remote:
+            if self.base_dir is None:
+                route_path = self._get_route_str(dataset_uid, obj_i, local_dir_uid)
+            else:
+                route_path = file_path_to_url_path(local_dir_path)
+                local_dir_path = join(self.base_dir, local_dir_path)
+            store = DirectoryStore(local_dir_path)
+            self.stores[route_path] = store
 
     def get_local_dir_route(self, dataset_uid, obj_i, local_dir_path, local_dir_uid):
         """
@@ -979,7 +1005,9 @@ class AnnDataWrapper(AbstractWrapper):
         if self.is_remote:
             return []
         else:
-            return self.get_local_dir_route(dataset_uid, obj_i, self._adata_path, self.local_dir_uid)
+            #return self.get_local_dir_route(dataset_uid, obj_i, self._adata_path, self.local_dir_uid)
+            self.register_local_dir_store(dataset_uid, obj_i, self._adata_path, self.local_dir_uid)
+            return []
 
     def get_zarr_url(self, base_url="", dataset_uid="", obj_i=""):
         if self.is_remote:

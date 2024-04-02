@@ -1,3 +1,4 @@
+from functools import partialmethod
 import os
 from os.path import join
 import tempfile
@@ -986,82 +987,102 @@ class AnnDataWrapper(AbstractWrapper):
             return self._adata_url
         else:
             return self.get_local_dir_url(base_url, dataset_uid, obj_i, self._adata_path, self.local_dir_uid)
+    
+    @staticmethod
+    def _gen_obs_embedding_schema(options, paths=None, names=None, dims=None):
+        if paths is not None:
+            if names is not None:
+                for key, mapping in zip(paths, names):
+                    options["obsEmbedding"].append({
+                        "path": mapping,
+                        "dims": [0, 1],
+                        "embeddingType": key
+                    })
+            else:
+                for mapping in paths:
+                    mapping_key = mapping.split('/')[-1]
+                    options["obsEmbedding"].append({
+                        "path": mapping,
+                        "dims": [0, 1],
+                        "embeddingType": mapping_key
+                    })
+        if dims is not None:
+            for dim_i, dim in enumerate(dims):
+                options["obsEmbedding"][dim_i]['dims'] = dim
+        return options
+
+    @staticmethod
+    def _gen_obs_sets_schema(options, paths, names):
+        if paths is not None:
+            options["obsSets"] = []
+            if names is not None:
+                names = names
+            else:
+                names = [obs.split('/')[-1] for obs in paths]
+            for obs, name in zip(paths, names):
+                options["obsSets"].append({
+                    "name": name,
+                    "path": obs
+                })
+        return options
+    
+    @staticmethod
+    def _gen_obs_feature_matrix_schema(options, matrix_path, var_filter_path, init_var_filter_path):
+        if matrix_path is not None:
+            options["obsFeatureMatrix"] = {
+                "path": matrix_path
+            }
+            if var_filter_path is not None:
+                options["obsFeatureMatrix"]["featureFilterPath"] = var_filter_path
+            if init_var_filter_path is not None:
+                options["obsFeatureMatrix"]["initialFeatureFilterPath"] = init_var_filter_path
+        return options
+    
+    @staticmethod
+    def _gen_obs_labels_schema(options, paths, names):
+        if paths is not None:
+            if names is not None and len(paths) == len(names):
+                # A name was provided for each path element, so use those values.
+                names = names
+            else:
+                # Names were not provided for each path element,
+                # so fall back to using the final part of each path for the names.
+                names = [labels_path.split('/')[-1] for labels_path in paths]
+            obs_labels = []
+            for path, name in zip(paths, names):
+                obs_labels.append({"path": path, "obsLabelsType": name})
+            options["obsLabels"] = obs_labels
+        return options
+
+    
+    @staticmethod
+    def _gen_path_schema(key, path, options):
+        if path is not None:
+            options[key] = {
+                "path": path
+            }
+        return options
+    
+    _gen_obs_locations_schema = partialmethod(_gen_path_schema,  "obsLocations")
+    _gen_obs_segmentations_schema = partialmethod(_gen_path_schema,  "obsSegmentations")
+    _gen_obs_spots_schema = partialmethod(_gen_path_schema,  "obsSpots")
+    _gen_obs_points_schema = partialmethod(_gen_path_schema,  "obsPoints")
+    _gen_feature_labels_schema = partialmethod(_gen_path_schema, "featureLabels")
+        
 
     def make_file_def_creator(self, dataset_uid, obj_i):
         def get_anndata_zarr(base_url):
             options = {}
-            if self._spatial_centroid_obsm is not None:
-                options["obsLocations"] = {
-                    "path": self._spatial_centroid_obsm
-                }
-            if self._spatial_polygon_obsm is not None:
-                options["obsSegmentations"] = {
-                    "path": self._spatial_polygon_obsm
-                }
-            if self._spatial_spots_obsm is not None:
-                options["obsSpots"] = {
-                    "path": self._spatial_spots_obsm
-                }
-            if self._spatial_points_obsm is not None:
-                options["obsPoints"] = {
-                    "path": self._spatial_points_obsm
-                }
-            if self._mappings_obsm is not None:
-                options["obsEmbedding"] = []
-                if self._mappings_obsm_names is not None:
-                    for key, mapping in zip(self._mappings_obsm_names, self._mappings_obsm):
-                        options["obsEmbedding"].append({
-                            "path": mapping,
-                            "dims": [0, 1],
-                            "embeddingType": key
-                        })
-                else:
-                    for mapping in self._mappings_obsm:
-                        mapping_key = mapping.split('/')[-1]
-                        self._mappings_obsm_names = mapping_key
-                        options["obsEmbedding"].append({
-                            "path": mapping,
-                            "dims": [0, 1],
-                            "embeddingType": mapping_key
-                        })
-                if self._mappings_obsm_dims is not None:
-                    for dim_i, dim in enumerate(self._mappings_obsm_dims):
-                        options["obsEmbedding"][dim_i]['dims'] = dim
-            if self._cell_set_obs is not None:
-                options["obsSets"] = []
-                if self._cell_set_obs_names is not None:
-                    names = self._cell_set_obs_names
-                else:
-                    names = [obs.split('/')[-1] for obs in self._cell_set_obs]
-                for obs, name in zip(self._cell_set_obs, names):
-                    options["obsSets"].append({
-                        "name": name,
-                        "path": obs
-                    })
-            if self._expression_matrix is not None:
-                options["obsFeatureMatrix"] = {
-                    "path": self._expression_matrix
-                }
-                if self._gene_var_filter is not None:
-                    options["obsFeatureMatrix"]["featureFilterPath"] = self._gene_var_filter
-                if self._matrix_gene_var_filter is not None:
-                    options["obsFeatureMatrix"]["initialFeatureFilterPath"] = self._matrix_gene_var_filter
-            if self._gene_alias is not None:
-                options["featureLabels"] = {
-                    "path": self._gene_alias
-                }
-            if self._obs_labels_paths is not None:
-                if self._obs_labels_names is not None and len(self._obs_labels_paths) == len(self._obs_labels_names):
-                    # A name was provided for each path element, so use those values.
-                    names = self._obs_labels_names
-                else:
-                    # Names were not provided for each path element,
-                    # so fall back to using the final part of each path for the names.
-                    names = [labels_path.split('/')[-1] for labels_path in self._obs_labels_paths]
-                obs_labels = []
-                for path, name in zip(self._obs_labels_paths, names):
-                    obs_labels.append({"path": path, "obsLabelsType": name})
-                options["obsLabels"] = obs_labels
+            options = self._gen_obs_locations_schema(self._spatial_centroid_obsm, options)
+            options = self._gen_obs_segmentations_schema(self._spatial_polygon_obsm, options)
+            options = self._gen_obs_spots_schema(self._spatial_spots_obsm, options)
+            options = self._gen_obs_points_schema(self._spatial_points_obsm, options)
+            options = self._gen_obs_embedding_schema(options, self._mappings_obsm, self._mappings_obsm_names, self._mappings_obsm_dims)
+            options = self._gen_obs_sets_schema(options, self._cell_set_obs, self._cell_set_obs_names)
+            options = self._gen_obs_feature_matrix_schema(options, self._expression_matrix, self._gene_var_filter, self._matrix_gene_var_filter)
+            options = self._gen_feature_labels_schema(self._gene_alias, options)
+            options = self._gen_obs_labels_schema(options, self._obs_labels_paths, self._obs_labels_names)
+
             if len(options.keys()) > 0:
                 obj_file_def = {
                     "fileType": ft.ANNDATA_ZARR.value,

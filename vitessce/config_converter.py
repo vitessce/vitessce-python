@@ -1,10 +1,11 @@
-import requests
-from jsonschema import validate, ValidationError
-import scanpy as sc
-import pandas as pd
-import anndata
 import gzip
 import io
+
+import anndata
+import pandas as pd
+import requests
+import scanpy as sc
+from jsonschema import ValidationError, validate
 
 from vitessce.data_utils import (
     optimize_adata,
@@ -45,10 +46,10 @@ class CellBrowserToAnndataZarrConverter:
                             "properties": {
                                 "fname": {"type": "string"},
                             },
-                            "required": ["fname"]
+                            "required": ["fname"],
                         },
                     },
-                    "required": ["outMatrix"]
+                    "required": ["outMatrix"],
                 },
                 "coords": {
                     "type": "array",
@@ -58,12 +59,12 @@ class CellBrowserToAnndataZarrConverter:
                             "shortLabel": {"type": "string"},
                             "textFname": {"type": "string"},
                         },
-                        "required": ["shortLabel"]
+                        "required": ["shortLabel"],
                     },
-                    "minItems": 1
+                    "minItems": 1,
                 },
             },
-            "required": ["fileVersions", "coords"]
+            "required": ["fileVersions", "coords"],
         }
 
         try:
@@ -82,7 +83,7 @@ class CellBrowserToAnndataZarrConverter:
             self.cellbrowser_config = response.json()
             print(f"Successfully fetched configuration: {config_url}.")
             return self._validate_config()
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             print(f"Could not get configuration for dataset {self.project_name} because: {e}.")
             return False
 
@@ -111,12 +112,12 @@ class CellBrowserToAnndataZarrConverter:
 
         print("Loading expression matrix into Anndata object ...")
 
-        with gzip.open(gzip_file, 'rt') as f:
-            expr_matrix = pd.read_csv(f, sep='\t', index_col=0).T  # transpose it, because of Scanpy
+        with gzip.open(gzip_file, "rt") as f:
+            expr_matrix = pd.read_csv(f, sep="\t", index_col=0).T  # transpose it, because of Scanpy
 
         # Now create anndata object
-        self.adata = anndata.AnnData(X=expr_matrix, dtype='float32')
-        self.adata.var['gene'] = self.adata.var_names
+        self.adata = anndata.AnnData(X=expr_matrix, dtype="float32")
+        self.adata.var["gene"] = self.adata.var_names
 
         # Filter out nan values
         self.adata = self.adata[~self.adata.obs.index.isnull(), :]
@@ -125,7 +126,9 @@ class CellBrowserToAnndataZarrConverter:
         first_gene = list(self.adata.var_names)[0]
         if len(first_gene.split("|")) == 2:
             # TODO: sometimes we might want to keep them both
-            print("This dataset uses the format identifier|symbol for the ad.obs gene names (e.g. “ENSG0123123.3|HOX3”). We are keeping only the symbol.")
+            print(
+                "This dataset uses the format identifier|symbol for the ad.obs gene names (e.g. “ENSG0123123.3|HOX3”). We are keeping only the symbol."
+            )
             self.adata.var_names = [x.split("|")[1] for x in list(self.adata.var_names)]
 
     def _load_coordinates(self):
@@ -138,12 +141,12 @@ class CellBrowserToAnndataZarrConverter:
         in their name will taken into an account.
         """
         coordinate_types = {
-            'tsne': 'X_tsne',
-            't-sne': 'X_tsne',
-            'umap': 'X_umap',
-            'pca': 'X_pca',
-            'spatial': 'X_spatial',
-            'segmentations': 'X_segmentations'
+            "tsne": "X_tsne",
+            "t-sne": "X_tsne",
+            "umap": "X_umap",
+            "pca": "X_pca",
+            "spatial": "X_spatial",
+            "segmentations": "X_segmentations",
         }
 
         coord_urls = {}
@@ -154,8 +157,8 @@ class CellBrowserToAnndataZarrConverter:
             short_label = obj["shortLabel"].lower()
             for term, key in coordinate_types.items():
                 if term in short_label:
-                    if 'textFname' in obj:
-                        coord_urls[key] = obj['textFname']
+                    if "textFname" in obj:
+                        coord_urls[key] = obj["textFname"]
                     else:
                         # if textFname is not defined, that means that the name of file is the shortLabel
                         labels = obj["shortLabel"].split(" ")
@@ -166,15 +169,15 @@ class CellBrowserToAnndataZarrConverter:
 
         print(f"Successful extraction of the following coordinates and URLS: {coord_urls}")
 
-        for (coord_type, url_suffix) in coord_urls.items():
+        for coord_type, url_suffix in coord_urls.items():
             try:
                 print(f"Adding {coord_type} to Anndata object ...")
                 response = requests.get("/".join([self.url_prefix, url_suffix]))
                 response.raise_for_status()
                 embedding_file = io.BytesIO(response.content)
 
-                with gzip.open(embedding_file, 'rt') as f:
-                    coords = pd.read_csv(f, sep='\t', index_col=0)
+                with gzip.open(embedding_file, "rt") as f:
+                    coords = pd.read_csv(f, sep="\t", index_col=0)
 
                 # Ensure the indices are of the same type
                 coords.index = coords.index.astype(str)
@@ -215,7 +218,7 @@ class CellBrowserToAnndataZarrConverter:
             # Create a BytesIO object from the content
             meta_file = io.BytesIO(response.content)
 
-            meta = pd.read_csv(meta_file, sep='\t', index_col=0)
+            meta = pd.read_csv(meta_file, sep="\t", index_col=0)
 
             self.adata.obs = meta
             # remove space from obs column names to avoid Vitessce breaking downstream
@@ -253,7 +256,11 @@ class CellBrowserToAnndataZarrConverter:
         sc.pp.log1p(self.adata)
 
         # If marker genes are defined, keep only marker genes in the Anndata object
-        if "topMarkers" in self.cellbrowser_config and len(self.cellbrowser_config["topMarkers"].keys()) > 0 and self.keep_only_marker_genes:
+        if (
+            "topMarkers" in self.cellbrowser_config
+            and len(self.cellbrowser_config["topMarkers"].keys()) > 0
+            and self.keep_only_marker_genes
+        ):
             print("Filtering out all non-marker genes from Anndata object ...")
             marker_genes = [gene for sublist in self.cellbrowser_config["topMarkers"].values() for gene in sublist]
             self.adata = self.adata[:, self.adata.var_names.isin(marker_genes)]
@@ -293,7 +300,7 @@ class CellBrowserToAnndataZarrConverter:
 
         for col in self.adata.obs.columns.tolist():
             if self.adata.obs[col].dtype == object:
-                self.adata.obs[col] = self.adata.obs[col].astype('category')
+                self.adata.obs[col] = self.adata.obs[col].astype("category")
 
         return optimize_adata(
             self.adata,

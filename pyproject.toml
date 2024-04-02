@@ -51,7 +51,7 @@ dev = [
 docs = [
   'sphinx==4.2.0',
   'sphinx-rtd-theme==1.0.0',
-  
+
   # Pin sub-dependencies of sphinx
   # Reference: https://github.com/sphinx-doc/sphinx/issues/11130
   'sphinxcontrib-applehelp==1.0.4',
@@ -60,7 +60,7 @@ docs = [
   'sphinxcontrib-jsmath==1.0.1',
   'sphinxcontrib-qthelp==1.0.3',
   'sphinxcontrib-serializinghtml==1.1.5',
-  
+
   'nbsphinx==0.8.8',
   'nbclean==0.3.2',
   # Pin sqlalchemy to before 1.4 to fix issue importing nbclean.NotebookCleaner
@@ -99,6 +99,8 @@ packages = ["vitessce", "vitessce.data_utils"]
 [tool.ruff]
 line-length = 120
 src = ["src"]
+exclude = ["docs", "tests", "demos", "binder", "README.md"]
+force-exclude = true
 extend-include = ["*.ipynb"]
 
 [tool.ruff.format]

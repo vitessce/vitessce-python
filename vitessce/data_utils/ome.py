@@ -2,6 +2,7 @@ import numpy as np
 import zarr
 from ome_zarr.writer import write_image
 from tifffile import TiffWriter
+
 from .anndata import cast_arr
 
 
@@ -15,15 +16,15 @@ def rgb_img_to_ome_tiff(img_arr, output_path, img_name="Image", axes="CYX"):
     :param str img_name: The name of the image to include in the omero.name NGFF metadata field.
     :param str axes: The array axis ordering. By default, "CYX"
     """
-    img_arr = img_arr.astype(np.dtype('uint8'))
+    img_arr = img_arr.astype(np.dtype("uint8"))
 
     tiff_writer = TiffWriter(output_path, ome=True)
     tiff_writer.write(
         img_arr,
         metadata={
-            'axes': axes,
-            'Channel': {'Name': ['R', 'G', 'B']},
-        }
+            "axes": axes,
+            "Channel": {"Name": ["R", "G", "B"]},
+        },
     )
     tiff_writer.close()
 
@@ -42,9 +43,9 @@ def multiplex_img_to_ome_tiff(img_arr, channel_names, output_path, axes="CYX"):
     tiff_writer.write(
         img_arr,
         metadata={
-            'axes': axes,
-            'Channel': {'Name': channel_names},
-        }
+            "axes": axes,
+            "Channel": {"Name": channel_names},
+        },
     )
     tiff_writer.close()
 
@@ -60,14 +61,9 @@ def rgb_img_to_ome_zarr(img_arr, output_path, img_name="Image", chunks=(1, 256, 
     :param tuple[int] chunks: The chunk sizes of each axis. By default, (1, 256, 256).
     :param str axes: The array axis ordering. By default, "cyx"
     """
-    img_arr = img_arr.astype(np.dtype('uint8'))
+    img_arr = img_arr.astype(np.dtype("uint8"))
 
-    default_window = {
-        "start": 0,
-        "min": 0,
-        "max": 255,
-        "end": 255
-    }
+    default_window = {"start": 0, "min": 0, "max": 255, "end": 255}
 
     z_root = zarr.open_group(output_path, mode="w")
 
@@ -83,26 +79,16 @@ def rgb_img_to_ome_zarr(img_arr, output_path, img_name="Image", chunks=(1, 256, 
         "version": "0.3",
         "rdefs": {},
         "channels": [
-            {
-                "label": "R",
-                "color": "FF0000",
-                "window": default_window
-            },
-            {
-                "label": "G",
-                "color": "00FF00",
-                "window": default_window
-            },
-            {
-                "label": "B",
-                "color": "0000FF",
-                "window": default_window
-            }
-        ]
+            {"label": "R", "color": "FF0000", "window": default_window},
+            {"label": "G", "color": "00FF00", "window": default_window},
+            {"label": "B", "color": "0000FF", "window": default_window},
+        ],
     }
 
 
-def multiplex_img_to_ome_zarr(img_arr, channel_names, output_path, img_name="Image", chunks=(1, 256, 256), axes="cyx", channel_colors=None):
+def multiplex_img_to_ome_zarr(
+    img_arr, channel_names, output_path, img_name="Image", chunks=(1, 256, 256), axes="cyx", channel_colors=None
+):
     """
     Convert a multiplexed image to OME-Zarr v0.3.
 
@@ -118,23 +104,15 @@ def multiplex_img_to_ome_zarr(img_arr, channel_names, output_path, img_name="Ima
     """
     img_arr = cast_arr(img_arr)
 
-    dtype_info = np.iinfo(img_arr.dtype) if img_arr.dtype.kind == 'u' or img_arr.dtype.kind == 'i' else np.finfo(img_arr.dtype)
+    dtype_info = (
+        np.iinfo(img_arr.dtype) if img_arr.dtype.kind == "u" or img_arr.dtype.kind == "i" else np.finfo(img_arr.dtype)
+    )
 
-    default_window = {
-        "start": 0,
-        "min": 0,
-        "max": dtype_info.max,
-        "end": dtype_info.max
-    }
+    default_window = {"start": 0, "min": 0, "max": dtype_info.max, "end": dtype_info.max}
 
     z_root = zarr.open_group(output_path, mode="w")
 
-    write_image(
-        image=img_arr,
-        group=z_root,
-        axes=axes,
-        storage_options=dict(chunks=chunks)
-    )
+    write_image(image=img_arr, group=z_root, axes=axes, storage_options=dict(chunks=chunks))
     z_root.attrs["omero"] = {
         "name": img_name,
         "version": "0.3",
@@ -143,9 +121,8 @@ def multiplex_img_to_ome_zarr(img_arr, channel_names, output_path, img_name="Ima
             {
                 "label": channel_name,
                 "color": channel_colors[channel_name] if channel_colors is not None else "FFFFFF",
-                "window": default_window
+                "window": default_window,
             }
-            for channel_name
-            in channel_names
-        ]
+            for channel_name in channel_names
+        ],
     }

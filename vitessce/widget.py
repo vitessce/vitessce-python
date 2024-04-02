@@ -1,21 +1,20 @@
 import importlib.util
-from urllib.parse import quote_plus
 import json
+import socket
+import time
+import uuid
+from threading import Thread
+from urllib.parse import quote_plus
 
 # Widget dependencies
 import anywidget
-from traitlets import Unicode, Dict, Int, Bool
-import time
-import uuid
-
-# Server dependencies
-from uvicorn import Config, Server
-
 from starlette.applications import Starlette
 from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
-from threading import Thread
-import socket
+from traitlets import Bool, Dict, Int, Unicode
+
+# Server dependencies
+from uvicorn import Config, Server
 
 MAX_PORT_TRIES = 1000
 DEFAULT_PORT = 8000
@@ -25,8 +24,7 @@ class BackgroundServer:
     # Reference: https://github.com/gosling-lang/gos/blob/main/gosling/data/_background_server.py#L10
     def __init__(self, routes):
         middleware = [
-            Middleware(CORSMiddleware, allow_origins=[
-                       '*'], allow_methods=["OPTIONS", "GET"], allow_headers=['Range'])
+            Middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["OPTIONS", "GET"], allow_headers=["Range"])
         ]
         self.app = Starlette(debug=True, routes=routes, middleware=middleware)
         self.port = None
@@ -49,12 +47,7 @@ class BackgroundServer:
         if self.thread is not None:
             return self
 
-        config = Config(
-            app=self.app,
-            port=port,
-            timeout_keep_alive=timeout,
-            log_level=log_level
-        )
+        config = Config(app=self.app, port=port, timeout_keep_alive=timeout, log_level=log_level)
         self.port = config.port
         self.server = Server(config=config)
         self.thread = Thread(target=self.server.run, daemon=daemon)
@@ -87,7 +80,7 @@ data_server = VitessceDataServer()
 
 def is_port_in_use(port):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        return s.connect_ex(('localhost', port)) == 0
+        return s.connect_ex(("localhost", port)) == 0
 
 
 def get_base_url_and_port(port, next_port, proxy=False, base_url=None, host_name=None):
@@ -104,9 +97,8 @@ def get_base_url_and_port(port, next_port, proxy=False, base_url=None, host_name
 
     if base_url is None:
         if proxy:
-            if importlib.util.find_spec('jupyter_server_proxy') is None:
-                raise ValueError(
-                    "To use the widget through a proxy, jupyter-server-proxy must be installed.")
+            if importlib.util.find_spec("jupyter_server_proxy") is None:
+                raise ValueError("To use the widget through a proxy, jupyter-server-proxy must be installed.")
             if host_name is None:
                 base_url = f"proxy/{use_port}"
             else:
@@ -125,15 +117,16 @@ def serve_routes(config, routes, use_port):
         server.start(port=use_port)
 
 
-def launch_vitessce_io(config, theme='light', port=None, base_url=None, host_name=None, proxy=False, open=True):
+def launch_vitessce_io(config, theme="light", port=None, base_url=None, host_name=None, proxy=False, open=True):
     import webbrowser
+
     base_url, use_port, _ = get_base_url_and_port(
-        port, DEFAULT_PORT, proxy=proxy, base_url=base_url, host_name=host_name)
+        port, DEFAULT_PORT, proxy=proxy, base_url=base_url, host_name=host_name
+    )
     config_dict = config.to_dict(base_url=base_url)
     routes = config.get_routes()
     serve_routes(config, routes, use_port)
-    vitessce_url = f"http://vitessce.io/#?theme={theme}&url=data:," + quote_plus(
-        json.dumps(config_dict))
+    vitessce_url = f"http://vitessce.io/#?theme={theme}&url=data:," + quote_plus(json.dumps(config_dict))
     if open:
         webbrowser.open(vitessce_url)
     return vitessce_url
@@ -368,6 +361,7 @@ class VitessceWidget(anywidget.AnyWidget):
     """
     A class to represent a Jupyter widget for Vitessce.
     """
+
     _esm = ESM
 
     # Widget specific property.
@@ -376,20 +370,33 @@ class VitessceWidget(anywidget.AnyWidget):
     # It is synced back to Python from the frontend *any* time the model is touched.
     config = Dict({}).tag(sync=True)
     height = Int(600).tag(sync=True)
-    theme = Unicode('auto').tag(sync=True)
+    theme = Unicode("auto").tag(sync=True)
     proxy = Bool(False).tag(sync=True)
-    uid = Unicode('').tag(sync=True)
+    uid = Unicode("").tag(sync=True)
     has_host_name = Bool(False).tag(sync=True)
 
     next_port = DEFAULT_PORT
 
-    js_package_version = Unicode('3.3.7').tag(sync=True)
+    js_package_version = Unicode("3.3.7").tag(sync=True)
     js_dev_mode = Bool(False).tag(sync=True)
-    custom_js_url = Unicode('').tag(sync=True)
+    custom_js_url = Unicode("").tag(sync=True)
     plugin_esm = Unicode(DEFAULT_PLUGIN_ESM).tag(sync=True)
     remount_on_uid_change = Bool(True).tag(sync=True)
 
-    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='3.3.7', js_dev_mode=False, custom_js_url='', plugin_esm=DEFAULT_PLUGIN_ESM, remount_on_uid_change=True):
+    def __init__(
+        self,
+        config,
+        height=600,
+        theme="auto",
+        uid=None,
+        port=None,
+        proxy=False,
+        js_package_version="3.3.7",
+        js_dev_mode=False,
+        custom_js_url="",
+        plugin_esm=DEFAULT_PLUGIN_ESM,
+        remount_on_uid_change=True,
+    ):
         """
         Construct a new Vitessce widget.
 
@@ -414,9 +421,9 @@ class VitessceWidget(anywidget.AnyWidget):
             vw = vc.widget()
             vw
         """
-
         base_url, use_port, VitessceWidget.next_port = get_base_url_and_port(
-            port, VitessceWidget.next_port, proxy=proxy)
+            port, VitessceWidget.next_port, proxy=proxy
+        )
         self.config_obj = config
         self.port = use_port
         config_dict = config.to_dict(base_url=base_url)
@@ -424,51 +431,75 @@ class VitessceWidget(anywidget.AnyWidget):
 
         uid_str = get_uid_str(uid)
 
-        super(VitessceWidget, self).__init__(
-            config=config_dict, height=height, theme=theme, proxy=proxy,
-            js_package_version=js_package_version, js_dev_mode=js_dev_mode, custom_js_url=custom_js_url,
-            plugin_esm=plugin_esm, remount_on_uid_change=remount_on_uid_change,
+        super(VitessceWidget, self).__init__(  # noqa: UP008
+            config=config_dict,
+            height=height,
+            theme=theme,
+            proxy=proxy,
+            js_package_version=js_package_version,
+            js_dev_mode=js_dev_mode,
+            custom_js_url=custom_js_url,
+            plugin_esm=plugin_esm,
+            remount_on_uid_change=remount_on_uid_change,
             uid=uid_str,
         )
 
         serve_routes(config, routes, use_port)
 
     def _get_coordination_value(self, coordination_type, coordination_scope):
-        obj = self.config['coordinationSpace'][coordination_type]
+        obj = self.config["coordinationSpace"][coordination_type]
         obj_scopes = list(obj.keys())
         if coordination_scope is not None:
             if coordination_scope in obj_scopes:
                 return obj[coordination_scope]
             else:
                 raise ValueError(
-                    f"The specified coordination scope '{coordination_scope}' could not be found for the coordination type '{coordination_type}'. Known coordination scopes are {obj_scopes}")
+                    f"The specified coordination scope '{coordination_scope}' could not be found for the coordination type '{coordination_type}'. Known coordination scopes are {obj_scopes}"
+                )
         else:
             if len(obj_scopes) == 1:
                 auto_coordination_scope = obj_scopes[0]
                 return obj[auto_coordination_scope]
             elif len(obj_scopes) > 1:
                 raise ValueError(
-                    f"The coordination scope could not be automatically determined because multiple coordination scopes exist for the coordination type '{coordination_type}'. Please specify one of {obj_scopes} using the scope parameter.")
+                    f"The coordination scope could not be automatically determined because multiple coordination scopes exist for the coordination type '{coordination_type}'. Please specify one of {obj_scopes} using the scope parameter."
+                )
             else:
-                raise ValueError(
-                    f"No coordination scopes were found for the coordination type '{coordination_type}'.")
+                raise ValueError(f"No coordination scopes were found for the coordination type '{coordination_type}'.")
 
     def get_cell_selection(self, scope=None):
-        return self._get_coordination_value('cellSelection', scope)
+        return self._get_coordination_value("cellSelection", scope)
 
     def close(self):
         self.config_obj.stop_server(self.port)
         super().close()
 
+
 # Launch Vitessce using plain HTML representation (no ipywidgets)
 
 
-def ipython_display(config, height=600, theme='auto', base_url=None, host_name=None, uid=None, port=None, proxy=False, js_package_version='3.3.7', js_dev_mode=False, custom_js_url='', plugin_esm=DEFAULT_PLUGIN_ESM, remount_on_uid_change=True):
-    from IPython.display import display, HTML
+def ipython_display(
+    config,
+    height=600,
+    theme="auto",
+    base_url=None,
+    host_name=None,
+    uid=None,
+    port=None,
+    proxy=False,
+    js_package_version="3.3.7",
+    js_dev_mode=False,
+    custom_js_url="",
+    plugin_esm=DEFAULT_PLUGIN_ESM,
+    remount_on_uid_change=True,
+):
+    from IPython.display import HTML, display
+
     uid_str = "vitessce" + get_uid_str(uid)
 
     base_url, use_port, _ = get_base_url_and_port(
-        port, DEFAULT_PORT, proxy=proxy, base_url=base_url, host_name=host_name)
+        port, DEFAULT_PORT, proxy=proxy, base_url=base_url, host_name=host_name
+    )
     config_dict = config.to_dict(base_url=base_url)
     routes = config.get_routes()
     serve_routes(config, routes, use_port)
@@ -533,21 +564,28 @@ def ipython_display(config, height=600, theme='auto', base_url=None, host_name=N
         }
     """
 
-    HTML_STR = f"""
+    HTML_STR = (
+        f"""
         <div id="{uid_str}"></div>
 
         <script type="module">
 
             const nextWidgetEl = document.getElementById("{uid_str}");
 
-            """ + ESM + """
+            """
+        + ESM
+        + """
 
-            """ + CLEANUP_STR + """
+            """
+        + CLEANUP_STR
+        + """
 
             const nextCleanupFunction = render({
                 model: {
                     get: (key) => {
-                        const vals = """ + json.dumps(model_vals) + """;
+                        const vals = """
+        + json.dumps(model_vals)
+        + """;
                         return vals[key];
                     },
                     set: () => {},
@@ -565,5 +603,6 @@ def ipython_display(config, height=600, theme='auto', base_url=None, host_name=N
             }
         </script>
     """
+    )
 
     display(HTML(HTML_STR))

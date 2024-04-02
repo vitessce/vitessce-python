@@ -1,22 +1,20 @@
-import sys
-import inspect
 import copy as copy_module
-import black
+import inspect
+import sys
 from collections import OrderedDict
 
-from .constants import (
-    norm_enum,
-    CoordinationType as ct,
-    ViewType as cm,  # TODO: change to vt
-    FileType as ft
-)
+import black
 
-from .repr import make_repr, make_params_repr
+from .constants import CoordinationType as ct
+from .constants import FileType as ft
+from .constants import ViewType as cm  # TODO: change to vt
+from .constants import norm_enum
+from .repr import make_params_repr, make_repr
 from .utils import create_prefixed_get_next_scope_numeric
 
 
 def _get_next_scope(prev_scopes):
-    chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     next_char_indices = [0]
 
     def next():
@@ -63,9 +61,7 @@ class VitessceConfigDatasetFile:
         :type options: dict or list or None
         :param data_type: Deprecated / not used. Only included for backwards compatibility with the old API.
         """
-        self.file = {
-            "fileType": file_type
-        }
+        self.file = {"fileType": file_type}
         if url:
             self.file["url"] = url
         if options:
@@ -112,10 +108,7 @@ class VitessceConfigDataset:
         self.base_dir = base_dir
 
     def _to_py_params(self):
-        return {
-            "uid": self.dataset["uid"],
-            "name": self.dataset["name"]
-        }
+        return {"uid": self.dataset["uid"], "name": self.dataset["name"]}
 
     def get_name(self):
         """
@@ -157,21 +150,20 @@ class VitessceConfigDataset:
 
             from vitessce import VitessceConfig, DataType as dt, FileType as ft
 
-            vc = VitessceConfig(schema_version="1.0.15", name='My Config')
-            my_dataset = (
-                vc.add_dataset(name='My Dataset')
-                .add_file(
-                    url="http://example.com/cells.json",
-                    data_type=dt.CELLS,
-                    file_type=ft.CELLS_JSON,
-                )
+            vc = VitessceConfig(schema_version="1.0.15", name="My Config")
+            my_dataset = vc.add_dataset(name="My Dataset").add_file(
+                url="http://example.com/cells.json",
+                data_type=dt.CELLS,
+                file_type=ft.CELLS_JSON,
             )
         """
-
         file_type_str = norm_enum(file_type, ft)
 
-        self._add_file(VitessceConfigDatasetFile(
-            url=url, file_type=file_type_str, coordination_values=coordination_values, options=options))
+        self._add_file(
+            VitessceConfigDatasetFile(
+                url=url, file_type=file_type_str, coordination_values=coordination_values, options=options
+            )
+        )
         return self
 
     def _add_file(self, obj):
@@ -262,7 +254,7 @@ def hconcat(*views):
         from vitessce import VitessceConfig, ViewType as vt, hconcat, vconcat
 
         vc = VitessceConfig(schema_version="1.0.15")
-        my_dataset = vc.add_dataset(name='My Dataset')
+        my_dataset = vc.add_dataset(name="My Dataset")
         v1 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
         v2 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
         v3 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
@@ -305,7 +297,7 @@ def vconcat(*views):
         from vitessce import VitessceConfig, ViewType as vt, hconcat, vconcat
 
         vc = VitessceConfig(schema_version="1.0.15")
-        my_dataset = vc.add_dataset(name='My Dataset')
+        my_dataset = vc.add_dataset(name="My Dataset")
         v1 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
         v2 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
         v3 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
@@ -415,6 +407,7 @@ def _use_coordination_by_dict_helper(scopes, coordination_scopes, coordination_s
                 for next_level_type, next_level_val in level_val["children"].items():
                     process_level(level_type, level_val["scope"], next_level_type, next_level_val)
             # Else is the base case: no children
+
     # End process_level inner function
 
     for top_level_type, top_level_val in scopes.items():
@@ -462,7 +455,7 @@ class VitessceConfigView:
             "x": x,
             "y": y,
             "w": w,
-            "h": h
+            "h": h,
         }
 
     def _to_py_params(self):
@@ -471,14 +464,12 @@ class VitessceConfigView:
             "x": self.view["x"],
             "y": self.view["y"],
             "w": self.view["w"],
-            "h": self.view["h"]
+            "h": self.view["h"],
         }
         # Only include coordination_scopes if there are coordination scopes other than
         # the coorindation scope for the 'dataset' coordination type.
         non_dataset_coordination_scopes = {
-            c_type: c_scope
-            for c_type, c_scope in self.view["coordinationScopes"].items()
-            if c_type != ct.DATASET.value
+            c_type: c_scope for c_type, c_scope in self.view["coordinationScopes"].items() if c_type != ct.DATASET.value
         }
         if len(non_dataset_coordination_scopes) > 0:
             params_dict["coordination_scopes"] = non_dataset_coordination_scopes
@@ -512,7 +503,7 @@ class VitessceConfigView:
             from vitessce import VitessceConfig, ViewType as vt, CoordinationType as ct
 
             vc = VitessceConfig(schema_version="1.0.15")
-            my_dataset = vc.add_dataset(name='My Dataset')
+            my_dataset = vc.add_dataset(name="My Dataset")
             v1 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
             v2 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
             zoom_scope, x_scope, y_scope = vc.add_coordination(
@@ -530,8 +521,8 @@ class VitessceConfigView:
             assert isinstance(c_scope, VitessceConfigCoordinationScope)
             existing_value = self.view["coordinationScopes"].get(c_scope.c_type)
             new_value = c_scope.c_scope
-            if (existing_value is not None and allow_multiple_scopes_per_type):
-                if (isinstance(existing_value, list)):
+            if existing_value is not None and allow_multiple_scopes_per_type:
+                if isinstance(existing_value, list):
                     self.view["coordinationScopes"][c_scope.c_type] = existing_value + [new_value]
                 else:
                     self.view["coordinationScopes"][c_scope.c_type] = [existing_value, new_value]
@@ -555,13 +546,15 @@ class VitessceConfigView:
             from vitessce import VitessceConfig, ViewType as vt, CoordinationType as ct
 
             vc = VitessceConfig(schema_version="1.0.15")
-            my_dataset = vc.add_dataset(name='My Dataset')
+            my_dataset = vc.add_dataset(name="My Dataset")
             spatial_view = vc.add_view(vt.SPATIAL, dataset=my_dataset)
-            scopes = vc.add_coordination_by_dict({
-                ct.SPATIAL_ZOOM: 2,
-                ct.SPATIAL_TARGET_X: 0,
-                ct.SPATIAL_TARGET_Y: 0,
-            })
+            scopes = vc.add_coordination_by_dict(
+                {
+                    ct.SPATIAL_ZOOM: 2,
+                    ct.SPATIAL_TARGET_X: 0,
+                    ct.SPATIAL_TARGET_Y: 0,
+                }
+            )
             spatial_view.use_coordination_by_dict(scopes)
         """
         if "coordinationScopes" not in self.view["coordinationScopes"] or self.view["coordinationScopes"] is None:
@@ -593,14 +586,16 @@ class VitessceConfigView:
             from vitessce import VitessceConfig, ViewType as vt, CoordinationType as ct
 
             vc = VitessceConfig(schema_version="1.0.15")
-            my_dataset = vc.add_dataset(name='My Dataset')
+            my_dataset = vc.add_dataset(name="My Dataset")
             spatial_view = vc.add_view(vt.SPATIAL, dataset=my_dataset)
             lc_view = vc.add_view(vt.LAYER_CONTROLLER, dataset=my_dataset)
-            scopes = vc.add_coordination_by_dict({
-                ct.SPATIAL_ZOOM: 2,
-                ct.SPATIAL_TARGET_X: 0,
-                ct.SPATIAL_TARGET_Y: 0,
-            })
+            scopes = vc.add_coordination_by_dict(
+                {
+                    ct.SPATIAL_ZOOM: 2,
+                    ct.SPATIAL_TARGET_X: 0,
+                    ct.SPATIAL_TARGET_Y: 0,
+                }
+            )
 
             meta_scopes = vc.add_meta_coordination()
             meta_scopes.use_coordination_by_dict(scopes)
@@ -672,6 +667,7 @@ class VitessceConfigView:
     def __truediv__(self, other):
         return vconcat(self, other)
 
+
 # would import as CL for convenience
 
 
@@ -729,7 +725,7 @@ class VitessceConfigCoordinationScope:
             from vitessce import VitessceConfig, ViewType as vt, CoordinationType as ct
 
             vc = VitessceConfig(schema_version="1.0.15")
-            my_dataset = vc.add_dataset(name='My Dataset')
+            my_dataset = vc.add_dataset(name="My Dataset")
             v1 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
             v2 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
             zoom_scope, x_scope, y_scope = vc.add_coordination(
@@ -801,14 +797,16 @@ class VitessceConfigMetaCoordinationScope:
             from vitessce import VitessceConfig, ViewType as vt, CoordinationType as ct
 
             vc = VitessceConfig(schema_version="1.0.15")
-            my_dataset = vc.add_dataset(name='My Dataset')
+            my_dataset = vc.add_dataset(name="My Dataset")
             spatial_view = vc.add_view(vt.SPATIAL, dataset=my_dataset)
             lc_view = vc.add_view(vt.LAYER_CONTROLLER, dataset=my_dataset)
-            scopes = vc.add_coordination_by_dict({
-                ct.SPATIAL_ZOOM: 2,
-                ct.SPATIAL_TARGET_X: 0,
-                ct.SPATIAL_TARGET_Y: 0,
-            })
+            scopes = vc.add_coordination_by_dict(
+                {
+                    ct.SPATIAL_ZOOM: 2,
+                    ct.SPATIAL_TARGET_X: 0,
+                    ct.SPATIAL_TARGET_Y: 0,
+                }
+            )
 
             meta_scopes = vc.add_meta_coordination()
             meta_scopes.use_coordination_by_dict(scopes)
@@ -851,7 +849,7 @@ class VitessceConfig:
 
             from vitessce import VitessceConfig
 
-            vc = VitessceConfig(schema_version="1.0.15", name='My Config')
+            vc = VitessceConfig(schema_version="1.0.15", name="My Config")
         """
         self.config = {
             "version": schema_version,
@@ -860,7 +858,7 @@ class VitessceConfig:
             "datasets": [],
             "coordinationSpace": {},
             "layout": [],
-            "initStrategy": "auto"
+            "initStrategy": "auto",
         }
 
         self.get_next_scope = _get_next_scope
@@ -920,17 +918,13 @@ class VitessceConfig:
 
             from vitessce import VitessceConfig, DataType as dt, FileType as ft
 
-            vc = VitessceConfig(schema_version="1.0.15", name='My Config')
-            my_dataset = (
-                vc.add_dataset(name='My Dataset')
-                .add_file(
-                    url="http://example.com/cells.json",
-                    file_type=ft.CELLS_JSON,
-                )
+            vc = VitessceConfig(schema_version="1.0.15", name="My Config")
+            my_dataset = vc.add_dataset(name="My Dataset").add_file(
+                url="http://example.com/cells.json",
+                file_type=ft.CELLS_JSON,
             )
         """
-        uid = uid if uid is not None else self.get_next_scope(
-            [d.dataset['uid'] for d in self.config["datasets"]])
+        uid = uid if uid is not None else self.get_next_scope([d.dataset["uid"] for d in self.config["datasets"]])
         assert isinstance(uid, str)
         vcd = VitessceConfigDataset(uid, name, base_dir=self.base_dir)
         self.config["datasets"].append(vcd)
@@ -984,7 +978,19 @@ class VitessceConfig:
         """
         return self.config["datasets"]
 
-    def add_view(self, view_type, dataset=None, dataset_uid=None, x=0, y=0, w=1, h=1, mapping=None, coordination_scopes=None, props=None):
+    def add_view(
+        self,
+        view_type,
+        dataset=None,
+        dataset_uid=None,
+        x=0,
+        y=0,
+        w=1,
+        h=1,
+        mapping=None,
+        coordination_scopes=None,
+        props=None,
+    ):
         """
         Add a view to the config.
 
@@ -1014,13 +1020,12 @@ class VitessceConfig:
             from vitessce import VitessceConfig, ViewType as vt
 
             vc = VitessceConfig(schema_version="1.0.15")
-            my_dataset = vc.add_dataset(name='My Dataset')
+            my_dataset = vc.add_dataset(name="My Dataset")
             v1 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
             v2 = vc.add_view(vt.SCATTERPLOT, dataset=my_dataset, mapping="X_umap")
         """
         # User should only provide dataset or dataset_uid, but not both.
-        assert isinstance(dataset, VitessceConfigDataset) or isinstance(
-            dataset_uid, str)
+        assert isinstance(dataset, VitessceConfigDataset) or isinstance(dataset_uid, str)
         assert dataset is None or dataset_uid is None
         component = view_type
         assert type(component) in [str, cm]
@@ -1028,31 +1033,32 @@ class VitessceConfig:
         if dataset is None:
             dataset = self.get_dataset_by_uid(dataset_uid)
             if dataset is None:
-                raise ValueError(
-                    "A dataset with the provided dataset_uid could not be found.")
+                raise ValueError("A dataset with the provided dataset_uid could not be found.")
 
         component_str = norm_enum(component, cm)
 
         # Find the coordination scope name associated with the dataset
-        dataset_matches = [
-            scope_name
-            for scope_name, dataset_scope in self.config["coordinationSpace"][ct.DATASET.value].items()
-            if dataset_scope.c_value == dataset.dataset["uid"]
-        ] if ct.DATASET.value in self.config["coordinationSpace"].keys() else []
+        dataset_matches = (
+            [
+                scope_name
+                for scope_name, dataset_scope in self.config["coordinationSpace"][ct.DATASET.value].items()
+                if dataset_scope.c_value == dataset.dataset["uid"]
+            ]
+            if ct.DATASET.value in self.config["coordinationSpace"].keys()
+            else []
+        )
         if len(dataset_matches) == 1:
             dataset_scope = dataset_matches[0]
         else:
             raise ValueError(
-                "No coordination scope matching the dataset parameter could be found in the coordination space.")
+                "No coordination scope matching the dataset parameter could be found in the coordination space."
+            )
 
         # Set up the view's dataset coordination scope based on the dataset parameter.
-        internal_coordination_scopes = {
-            ct.DATASET.value: dataset_scope
-        }
+        internal_coordination_scopes = {ct.DATASET.value: dataset_scope}
         if coordination_scopes is not None:
             internal_coordination_scopes.update(coordination_scopes)
-        vcv = VitessceConfigView(
-            component_str, internal_coordination_scopes, x, y, w, h)
+        vcv = VitessceConfigView(component_str, internal_coordination_scopes, x, y, w, h)
 
         # Use the mapping parameter if component is scatterplot and the mapping is not None
         if mapping is not None:
@@ -1082,7 +1088,7 @@ class VitessceConfig:
             from vitessce import VitessceConfig, ViewType as vt, CoordinationType as ct
 
             vc = VitessceConfig(schema_version="1.0.15")
-            my_dataset = vc.add_dataset(name='My Dataset')
+            my_dataset = vc.add_dataset(name="My Dataset")
             v1 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
             v2 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
             zoom_scope, x_scope, y_scope = vc.add_coordination(
@@ -1099,10 +1105,12 @@ class VitessceConfig:
         result = []
         for c_type in c_types:
             c_type_str = norm_enum(c_type, ct)
-            prev_scopes = list(self.config["coordinationSpace"][c_type_str].keys(
-            )) if c_type_str in self.config["coordinationSpace"].keys() else []
-            scope = VitessceConfigCoordinationScope(
-                c_type_str, self.get_next_scope(prev_scopes))
+            prev_scopes = (
+                list(self.config["coordinationSpace"][c_type_str].keys())
+                if c_type_str in self.config["coordinationSpace"].keys()
+                else []
+            )
+            scope = VitessceConfigCoordinationScope(c_type_str, self.get_next_scope(prev_scopes))
             if scope.c_type not in self.config["coordinationSpace"]:
                 self.config["coordinationSpace"][scope.c_type] = {}
             self.config["coordinationSpace"][scope.c_type][scope.c_scope] = scope
@@ -1122,14 +1130,16 @@ class VitessceConfig:
             from vitessce import VitessceConfig, ViewType as vt, CoordinationType as ct
 
             vc = VitessceConfig(schema_version="1.0.15")
-            my_dataset = vc.add_dataset(name='My Dataset')
+            my_dataset = vc.add_dataset(name="My Dataset")
             spatial_view = vc.add_view(vt.SPATIAL, dataset=my_dataset)
             lc_view = vc.add_view(vt.LAYER_CONTROLLER, dataset=my_dataset)
-            scopes = vc.add_coordination_by_dict({
-                ct.SPATIAL_ZOOM: 2,
-                ct.SPATIAL_TARGET_X: 0,
-                ct.SPATIAL_TARGET_Y: 0,
-            })
+            scopes = vc.add_coordination_by_dict(
+                {
+                    ct.SPATIAL_ZOOM: 2,
+                    ct.SPATIAL_TARGET_X: 0,
+                    ct.SPATIAL_TARGET_Y: 0,
+                }
+            )
 
             meta_scopes = vc.add_meta_coordination()
             meta_scopes.use_coordination_by_dict(scopes)
@@ -1148,8 +1158,12 @@ class VitessceConfig:
             self.config["coordinationSpace"][ct.META_COORDINATION_SCOPES.value] = {}
         if ct.META_COORDINATION_SCOPES_BY.value not in self.config["coordinationSpace"]:
             self.config["coordinationSpace"][ct.META_COORDINATION_SCOPES_BY.value] = {}
-        self.config["coordinationSpace"][ct.META_COORDINATION_SCOPES.value][meta_container.meta_scope.c_scope] = meta_container.meta_scope
-        self.config["coordinationSpace"][ct.META_COORDINATION_SCOPES_BY.value][meta_container.meta_by_scope.c_scope] = meta_container.meta_by_scope
+        self.config["coordinationSpace"][ct.META_COORDINATION_SCOPES.value][meta_container.meta_scope.c_scope] = (
+            meta_container.meta_scope
+        )
+        self.config["coordinationSpace"][ct.META_COORDINATION_SCOPES_BY.value][meta_container.meta_by_scope.c_scope] = (
+            meta_container.meta_by_scope
+        )
         return meta_container
 
     def add_coordination_by_dict(self, input_val):
@@ -1167,16 +1181,17 @@ class VitessceConfig:
             from vitessce import VitessceConfig, ViewType as vt, CoordinationType as ct
 
             vc = VitessceConfig(schema_version="1.0.15")
-            my_dataset = vc.add_dataset(name='My Dataset')
+            my_dataset = vc.add_dataset(name="My Dataset")
             spatial_view = vc.add_view(vt.SPATIAL, dataset=my_dataset)
             lc_view = vc.add_view(vt.LAYER_CONTROLLER, dataset=my_dataset)
-            scopes = vc.add_coordination_by_dict({
-                ct.SPATIAL_ZOOM: 2,
-                ct.SPATIAL_TARGET_X: 0,
-                ct.SPATIAL_TARGET_Y: 0,
-            })
+            scopes = vc.add_coordination_by_dict(
+                {
+                    ct.SPATIAL_ZOOM: 2,
+                    ct.SPATIAL_TARGET_X: 0,
+                    ct.SPATIAL_TARGET_Y: 0,
+                }
+            )
         """
-
         # Developer notes
         """
         /*
@@ -1257,6 +1272,7 @@ class VitessceConfig:
         }
         */
         """
+
         def process_level(level):
             result = {}
             if level is None:
@@ -1271,29 +1287,32 @@ class VitessceConfig:
                         if next_level_or_initial_value.is_cached():
                             result[c_type_str] = next_level_or_initial_value.get_cached()
                         else:
+
                             def map_func(next_el):
-                                (dummy_scope, ) = self.add_coordination(c_type_str)
+                                (dummy_scope,) = self.add_coordination(c_type_str)  # noqa: B023
                                 # TODO: set a better initial value for dummy cases.
-                                dummy_scope.set_value('__dummy__')
+                                dummy_scope.set_value("__dummy__")
                                 return {
                                     "scope": dummy_scope,
                                     "children": process_level(next_el),
                                 }
+
                             processed_level = list(map(map_func, next_level))
                             next_level_or_initial_value.set_cached(processed_level)
                             result[c_type_str] = processed_level
                     else:
-                        raise ValueError('Expected CoordinationLevel.value to be an array.')
+                        raise ValueError("Expected CoordinationLevel.value to be an array.")
                 else:
                     # Base case.
                     initial_value = next_level_or_initial_value
                     if isinstance(initial_value, VitessceConfigCoordinationScope):
                         result[c_type_str] = {"scope": initial_value}
                     else:
-                        (scope, ) = self.add_coordination(c_type_str)
+                        (scope,) = self.add_coordination(c_type_str)
                         scope.set_value(initial_value)
                         result[c_type_str] = {"scope": scope}
             return result
+
         # End process_level function
 
         # Begin recursion.
@@ -1318,14 +1337,17 @@ class VitessceConfig:
             from vitessce import VitessceConfig, ViewType as vt, CoordinationType as ct
 
             vc = VitessceConfig(schema_version="1.0.15")
-            my_dataset = vc.add_dataset(name='My Dataset')
+            my_dataset = vc.add_dataset(name="My Dataset")
             spatial_view = vc.add_view(vt.SPATIAL, dataset=my_dataset)
             lc_view = vc.add_view(vt.LAYER_CONTROLLER, dataset=my_dataset)
-            scopes = vc.link_views_by_dict([spatial_view, lc_view], {
-                ct.SPATIAL_ZOOM: 2,
-                ct.SPATIAL_TARGET_X: 0,
-                ct.SPATIAL_TARGET_Y: 0,
-            })
+            scopes = vc.link_views_by_dict(
+                [spatial_view, lc_view],
+                {
+                    ct.SPATIAL_ZOOM: 2,
+                    ct.SPATIAL_TARGET_X: 0,
+                    ct.SPATIAL_TARGET_Y: 0,
+                },
+            )
         """
         if scope_prefix:
             self.get_next_scope = create_prefixed_get_next_scope_numeric(scope_prefix)
@@ -1401,7 +1423,7 @@ class VitessceConfig:
             from vitessce import VitessceConfig, ViewType as vt, hconcat, vconcat
 
             vc = VitessceConfig(schema_version="1.0.15")
-            my_dataset = vc.add_dataset(name='My Dataset')
+            my_dataset = vc.add_dataset(name="My Dataset")
             v1 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
             v2 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
             v3 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
@@ -1413,11 +1435,11 @@ class VitessceConfig:
             from vitessce import VitessceConfig, ViewType as vt
 
             vc = VitessceConfig(schema_version="1.0.15")
-            my_dataset = vc.add_dataset(name='My Dataset')
+            my_dataset = vc.add_dataset(name="My Dataset")
             v1 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
             v2 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
             v3 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
-            vc.layout(v1 | (v2 / v3)) # * magic * (alternative syntax)
+            vc.layout(v1 | (v2 / v3))  # * magic * (alternative syntax)
         """
 
         def _layout(obj, x_min, x_max, y_min, y_max):
@@ -1429,13 +1451,7 @@ class VitessceConfig:
                 views = obj.views
                 num_views = len(views)
                 for i in range(num_views):
-                    _layout(
-                        views[i],
-                        x_min + (w / num_views) * i,
-                        x_min + (w / num_views) * (i + 1),
-                        y_min,
-                        y_max
-                    )
+                    _layout(views[i], x_min + (w / num_views) * i, x_min + (w / num_views) * (i + 1), y_min, y_max)
             elif isinstance(obj, VitessceConfigViewVConcat):
                 views = obj.views
                 num_views = len(views)
@@ -1468,13 +1484,14 @@ class VitessceConfig:
         return {
             **self.config,
             "datasets": [d.to_dict(base_url) for d in self.config["datasets"]],
-            "coordinationSpace": dict([
-                (c_type, dict([
-                    (c_scope_name, c_scope.c_value) for c_scope_name, c_scope in c_scopes.items()
-                ])) for c_type, c_scopes in self.config["coordinationSpace"].items()
-            ]),
+            "coordinationSpace": dict(  # noqa: C404
+                [
+                    (c_type, dict([(c_scope_name, c_scope.c_value) for c_scope_name, c_scope in c_scopes.items()]))  # noqa: C404
+                    for c_type, c_scopes in self.config["coordinationSpace"].items()
+                ]
+            ),
             # TODO: compute the x,y,w,h values if not explicitly defined
-            "layout": [c.to_dict() for c in self.config["layout"]]
+            "layout": [c.to_dict() for c in self.config["layout"]],
         }
 
     def get_routes(self):
@@ -1498,48 +1515,43 @@ class VitessceConfig:
         """
         classes_to_import = OrderedDict()
         classes_to_import[VitessceChainableConfig.__name__] = True
-        code_block = f'{VitessceChainableConfig.__name__}({make_params_repr(self._to_py_params())})'
+        code_block = f"{VitessceChainableConfig.__name__}({make_params_repr(self._to_py_params())})"
 
         for vcd in self.config["datasets"]:
-            vcd_file_list_contents = ', '.join(
-                [repr(f) for f in vcd._get_files()])
-            vcd_obj_list_contents = ', '.join(
-                [repr(f) for f in vcd._get_objects()])
+            vcd_file_list_contents = ", ".join([repr(f) for f in vcd._get_files()])
+            vcd_obj_list_contents = ", ".join([repr(f) for f in vcd._get_objects()])
             add_dataset_func = self.add_dataset.__name__
             add_dataset_params_list = [
                 make_params_repr(vcd._to_py_params()),
             ]
             if len(vcd._get_files()) > 0:
-                add_dataset_params_list.append(
-                    f'files=[{vcd_file_list_contents}]')
+                add_dataset_params_list.append(f"files=[{vcd_file_list_contents}]")
                 classes_to_import[VitessceConfigDatasetFile.__name__] = True
             if len(vcd._get_objects()) > 0:
-                add_dataset_params_list.append(
-                    f'objs=[{vcd_obj_list_contents}]')
-            add_dataset_params = ', '.join(add_dataset_params_list)
-            code_block += f'.{add_dataset_func}({add_dataset_params})'
+                add_dataset_params_list.append(f"objs=[{vcd_obj_list_contents}]")
+            add_dataset_params = ", ".join(add_dataset_params_list)
+            code_block += f".{add_dataset_func}({add_dataset_params})"
             for obj in vcd._get_objects():
-                if "vitessce" in sys.modules and obj.__class__.__name__ in dict(inspect.getmembers(sys.modules["vitessce"])):
+                if "vitessce" in sys.modules and obj.__class__.__name__ in dict(
+                    inspect.getmembers(sys.modules["vitessce"])
+                ):
                     classes_to_import[obj.__class__.__name__] = True
         for c_type, c_obj in self.config["coordinationSpace"].items():
             if c_type != ct.DATASET.value:
-                for c_scope_name, c_scope in c_obj.items():
+                for c_scope_name, c_scope in c_obj.items():  # noqa:B007
                     set_coordination_func = self.set_coordination_value.__name__
-                    set_coordination_params = make_params_repr(
-                        c_scope._to_py_params())
-                    code_block += f'.{set_coordination_func}({set_coordination_params})'
+                    set_coordination_params = make_params_repr(c_scope._to_py_params())
+                    code_block += f".{set_coordination_func}({set_coordination_params})"
 
         for vcv in self.config["layout"]:
-            dataset_for_view = self.get_dataset_by_coordination_scope_name(
-                vcv.get_coordination_scope(ct.DATASET.value))
+            dataset_for_view = self.get_dataset_by_coordination_scope_name(vcv.get_coordination_scope(ct.DATASET.value))
             if dataset_for_view is not None:
                 dataset_uid = dataset_for_view.get_uid()
             elif len(self.config["datasets"]) == 1:
                 # If there is only one dataset available, assume it is the dataset for this view.
                 dataset_uid = self.config["datasets"][0].get_uid()
             else:
-                raise ValueError(
-                    "At least one dataset must be present in the config before adding a view.")
+                raise ValueError("At least one dataset must be present in the config before adding a view.")
             add_view_params_dict = {
                 "dataset_uid": dataset_uid,
             }
@@ -1548,9 +1560,8 @@ class VitessceConfig:
                 add_view_params_dict["props"] = vcv.get_props()
             add_view_func = self.add_view.__name__
             add_view_params = make_params_repr(add_view_params_dict)
-            code_block += f'.{add_view_func}({add_view_params})'
-        formatted_code_block = black.format_str(
-            code_block, mode=black.FileMode())
+            code_block += f".{add_view_func}({add_view_params})"
+        formatted_code_block = black.format_str(code_block, mode=black.FileMode())
         return list(classes_to_import), formatted_code_block
 
     @staticmethod
@@ -1570,8 +1581,7 @@ class VitessceConfig:
 
             vc = VitessceConfig.from_dict(my_existing_config)
         """
-        vc = VitessceConfig(
-            schema_version=config["version"], name=config["name"], description=config["description"])
+        vc = VitessceConfig(schema_version=config["version"], name=config["name"], description=config["description"])
 
         # Add each dataset from the incoming config.
         for d in config["datasets"]:
@@ -1581,30 +1591,28 @@ class VitessceConfig:
                     file_type=f["fileType"],
                     url=f.get("url"),
                     coordination_values=f.get("coordinationValues"),
-                    options=f.get("options")
+                    options=f.get("options"),
                 )
-        if 'coordinationSpace' in config:
-            for c_type in config['coordinationSpace'].keys():
+        if "coordinationSpace" in config:
+            for c_type in config["coordinationSpace"].keys():
                 if c_type != ct.DATASET.value:
-                    c_obj = config['coordinationSpace'][c_type]
-                    vc.config['coordinationSpace'][c_type] = {}
+                    c_obj = config["coordinationSpace"][c_type]
+                    vc.config["coordinationSpace"][c_type] = {}
                     for c_scope_name, c_scope_value in c_obj.items():
-                        scope = VitessceConfigCoordinationScope(
-                            c_type, c_scope_name)
+                        scope = VitessceConfigCoordinationScope(c_type, c_scope_name)
                         scope.set_value(c_scope_value)
-                        vc.config['coordinationSpace'][c_type][c_scope_name] = scope
+                        vc.config["coordinationSpace"][c_type][c_scope_name] = scope
 
-        for c in config['layout']:
-            c_coord_scopes = c['coordinationScopes'] if 'coordinationScopes' in c.keys() else {
-            }
+        for c in config["layout"]:
+            c_coord_scopes = c["coordinationScopes"] if "coordinationScopes" in c.keys() else {}
             if len(config["datasets"]) > 1 and ct.DATASET.value not in c_coord_scopes:
                 raise ValueError(
-                    "Multiple datasets are present, so every view must have an explicit dataset coordination scope.")
-            new_view = VitessceConfigView(
-                c['component'], c_coord_scopes, c['x'], c['y'], c['w'], c['h'])
-            if 'props' in c.keys():
-                new_view.set_props(**c['props'])
-            vc.config['layout'].append(new_view)
+                    "Multiple datasets are present, so every view must have an explicit dataset coordination scope."
+                )
+            new_view = VitessceConfigView(c["component"], c_coord_scopes, c["x"], c["y"], c["w"], c["h"])
+            if "props" in c.keys():
+                new_view.set_props(**c["props"])
+            vc.config["layout"].append(new_view)
 
         return vc
 
@@ -1653,13 +1661,14 @@ class VitessceConfig:
             from vitessce import VitessceConfig, ViewType as vt, CoordinationType as ct
 
             vc = VitessceConfig(schema_version="1.0.15")
-            my_dataset = vc.add_dataset(name='My Dataset')
+            my_dataset = vc.add_dataset(name="My Dataset")
             v1 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
             vc.layout(v1)
             vw = vc.widget()
             vw
         """
         from .widget import VitessceWidget  # TODO: Move import back to top when this is factored out.
+
         return VitessceWidget(self, **kwargs)
 
     def web_app(self, **kwargs):
@@ -1685,12 +1694,13 @@ class VitessceConfig:
             from vitessce import VitessceConfig, ViewType as vt, CoordinationType as ct
 
             vc = VitessceConfig(schema_version="1.0.15")
-            my_dataset = vc.add_dataset(name='My Dataset')
+            my_dataset = vc.add_dataset(name="My Dataset")
             v1 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
             vc.layout(v1)
             vc.web_app()
         """
         from .widget import launch_vitessce_io  # TODO: Move import back to top when this is factored out.
+
         return launch_vitessce_io(self, **kwargs)
 
     def display(self, **kwargs):
@@ -1711,12 +1721,13 @@ class VitessceConfig:
             from vitessce import VitessceConfig, ViewType as vt, CoordinationType as ct
 
             vc = VitessceConfig(schema_version="1.0.15")
-            my_dataset = vc.add_dataset(name='My Dataset')
+            my_dataset = vc.add_dataset(name="My Dataset")
             v1 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
             vc.layout(v1)
             vc.display()
         """
         from .widget import ipython_display
+
         return ipython_display(self, **kwargs)
 
     def export(self, to, *args, **kwargs):
@@ -1734,13 +1745,14 @@ class VitessceConfig:
             from vitessce import VitessceConfig, ViewType as cvtm, CoordinationType as ct
 
             vc = VitessceConfig(schema_version="1.0.15")
-            my_dataset = vc.add_dataset(name='My Dataset')
+            my_dataset = vc.add_dataset(name="My Dataset")
             v1 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
             vc.layout(v1)
 
             config_dict = vc.export(to="S3")
         """
-        from .export import (export_to_s3, export_to_files)  # TODO: Move import back to top when this is factored out.
+        from .export import export_to_files, export_to_s3  # TODO: Move import back to top when this is factored out.
+
         if to == "S3":
             return export_to_s3(self, *args, **kwargs)
         elif to == "files":
@@ -1765,13 +1777,14 @@ class VitessceChainableConfig(VitessceConfig):
 
             from vitessce import VitessceChainableConfig
 
-            vc = VitessceChainableConfig(schema_version='1.0.15', name='My Config')
+            vc = VitessceChainableConfig(schema_version="1.0.15", name="My Config")
         """
         super().__init__(schema_version, **kwargs)
 
     def __copy__(self):
         new_vc = VitessceChainableConfig(
-            schema_version=self.config["version"], name=self.config["name"], description=self.config["description"])
+            schema_version=self.config["version"], name=self.config["name"], description=self.config["description"]
+        )
         new_vc.config = self.config.copy()
         return new_vc
 

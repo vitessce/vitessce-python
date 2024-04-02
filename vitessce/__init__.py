@@ -2,36 +2,33 @@ import sys
 from warnings import warn
 
 from .config import (
-    VitessceConfig,
+    CoordinationLevel,
     VitessceChainableConfig,
+    VitessceConfig,
     VitessceConfigDatasetFile,
     hconcat,
     vconcat,
-    CoordinationLevel,
 )
-
-from .utils import (
-    get_initial_coordination_scope_prefix,
-    get_initial_coordination_scope_name,
-)
-
-from .repr import make_repr
-
-from .constants import (
-    CoordinationType,
-    ViewType,
-    DataType,
-    FileType,
-    # For backwards compatibility, also export ViewType as Component
-    ViewType as Component,
-    BASE_URL_PLACEHOLDER,
-)
-
 from .config_converter import (
     CellBrowserToAnndataZarrConverter,  # only exported for testing.
     convert_cell_browser_project_to_anndata,
 )
-
+from .constants import (
+    BASE_URL_PLACEHOLDER,
+    CoordinationType,
+    DataType,
+    FileType,
+    ViewType,
+)
+from .constants import (
+    # For backwards compatibility, also export ViewType as Component
+    ViewType as Component,
+)
+from .repr import make_repr
+from .utils import (
+    get_initial_coordination_scope_name,
+    get_initial_coordination_scope_prefix,
+)
 from .wrappers import AbstractWrapper
 
 # We allow installation without all of the dependencies that the widget requires.
@@ -39,28 +36,28 @@ from .wrappers import AbstractWrapper
 try:
     from .widget import VitessceWidget, data_server
 except ModuleNotFoundError as e:  # pragma: no cover
-    warn(f'Extra installs are necessary to use widgets: {e}')
+    warn(f"Extra installs are necessary to use widgets: {e}")
 
 try:
     from .wrappers import (
+        AnnDataWrapper,
+        CsvWrapper,
+        ImageOmeTiffWrapper,
+        ImageOmeZarrWrapper,
+        MultiImageWrapper,
+        MultivecZarrWrapper,
+        ObsSegmentationsOmeTiffWrapper,
+        ObsSegmentationsOmeZarrWrapper,
         OmeTiffWrapper,
         OmeZarrWrapper,
-        MultiImageWrapper,
-        CsvWrapper,
-        AnnDataWrapper,
-        MultivecZarrWrapper,
-        ImageOmeTiffWrapper,
-        ObsSegmentationsOmeTiffWrapper,
-        ImageOmeZarrWrapper,
-        ObsSegmentationsOmeZarrWrapper,
     )
 except ModuleNotFoundError as e:  # pragma: no cover
-    warn(f'Extra installs are necessary to use wrappers: {e}')
+    warn(f"Extra installs are necessary to use wrappers: {e}")
 
 try:
     from .export import (
-        export_to_s3,
         export_to_files,
+        export_to_s3,
     )
 except ModuleNotFoundError as e:  # pragma: no cover
-    warn(f'Extra installs are necessary to use exports: {e}')
+    warn(f"Extra installs are necessary to use exports: {e}")

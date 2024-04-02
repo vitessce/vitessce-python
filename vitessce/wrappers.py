@@ -1113,6 +1113,49 @@ class AnnDataWrapper(AbstractWrapper):
         else:
             vc.layout((scatterplot | (cell_sets / genes))
                       / heatmap)
+            
+class SpatialDataWrapper(AnnDataWrapper):
+
+    def __init__(self, path, *args, **kwargs):
+        self._path = path
+        self._args = args
+        self._kwargs = kwargs
+
+    @staticmethod
+    def _gen_image_schema(options, path, transformation):
+        if path is not None:
+            options["image"] = {
+                "path": path
+            }
+            if transformation is not None:
+                options['coordinateTransformations'] = transformation
+        return options
+
+    def make_file_def_creator(self, dataset_uid, obj_i):
+        def generator(base_url):
+            options = {}
+            options = self._gen_obs_labels_schema(options, self._obs_labels_paths, self._obs_labels_names)
+            options = self._gen_obs_feature_matrix_schema(options, self._expression_matrix, self._gene_var_filter, self._matrix_gene_var_filter)
+            options = self._gen_obs_sets_schema(options, self._cell_set_obs, self._cell_set_obs_names)
+            options = self._gen_obs_spots_schema(self._spatial_spots_obsm, options)
+            options = self._gen_image_schema(options, self._image_path, self._transformation)
+
+            if len(options.keys()) > 0:
+                obj_file_def = {
+                    "fileType": ft.SPATIALDATA_ZARR.value,
+                    "url": self.get_zarr_url(base_url, dataset_uid, obj_i),
+                    "options": options
+                }
+                if self._request_init is not None:
+                    obj_file_def['requestInit'] = self._request_init
+                if self._coordination_values is not None:
+                    obj_file_def['coordinationValues'] = self._coordination_values
+                return obj_file_def
+            return None
+
+        return generator
+
+    
 
 
 class MultivecZarrWrapper(AbstractWrapper):

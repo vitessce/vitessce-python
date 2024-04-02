@@ -14,7 +14,7 @@ class DocEnum(Enum):
 
 
 def norm_enum(enum_val, expected_enum_class=None):
-    assert isinstance(enum_val, str) or isinstance(enum_val, expected_enum_class)
+    # assert isinstance(enum_val, str) or isinstance(enum_val, expected_enum_class), f"enum_val was {type(enum_val)} and not a string or expected value {type(expected_enum_class)}"
     # We don't actually use the expected_enum_class,
     # since it would not account for things like plugin coordination types, etc.
     # But we can pass it around anyway and in the future could use

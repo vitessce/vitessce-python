@@ -1023,7 +1023,7 @@ class VitessceConfig:
             dataset_uid, str)
         assert dataset is None or dataset_uid is None
         component = view_type
-        assert type(component) in [str, cm]
+        # assert type(component) in [str, cm]
 
         if dataset is None:
             dataset = self.get_dataset_by_uid(dataset_uid)

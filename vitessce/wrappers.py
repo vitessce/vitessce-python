@@ -2,8 +2,11 @@ from functools import partialmethod
 import os
 from os.path import join
 import tempfile
+from typing import Optional
 from uuid import uuid4
 from pathlib import PurePath, PurePosixPath
+
+import numpy as np
 
 from .constants import (
     norm_enum,
@@ -925,8 +928,8 @@ class AnnDataWrapper(AbstractWrapper):
         """
         super().__init__(**kwargs)
         self._repr = make_repr(locals())
-        self._adata_path = adata_path
-        self._adata_url = adata_url
+        self._path = adata_path
+        self._url = adata_url
         if adata_url is not None and (adata_path is not None):
             raise ValueError(
                 "Did not expect adata_url to be provided with adata_path")
@@ -971,22 +974,22 @@ class AnnDataWrapper(AbstractWrapper):
 
         file_def_creator = self.make_file_def_creator(
             dataset_uid, obj_i)
-        routes = self.make_anndata_routes(dataset_uid, obj_i)
+        routes = self.make_routes(dataset_uid, obj_i)
 
         self.file_def_creators.append(file_def_creator)
         self.routes += routes
 
-    def make_anndata_routes(self, dataset_uid, obj_i):
+    def make_routes(self, dataset_uid, obj_i):
         if self.is_remote:
             return []
         else:
-            return self.get_local_dir_route(dataset_uid, obj_i, self._adata_path, self.local_dir_uid)
+            return self.get_local_dir_route(dataset_uid, obj_i, self._path, self.local_dir_uid)
 
     def get_zarr_url(self, base_url="", dataset_uid="", obj_i=""):
         if self.is_remote:
-            return self._adata_url
+            return self._url
         else:
-            return self.get_local_dir_url(base_url, dataset_uid, obj_i, self._adata_path, self.local_dir_uid)
+            return self.get_local_dir_url(base_url, dataset_uid, obj_i, self._path, self.local_dir_uid)
     
     @staticmethod
     def _gen_obs_embedding_schema(options, paths=None, names=None, dims=None):
@@ -1116,30 +1119,60 @@ class AnnDataWrapper(AbstractWrapper):
             
 class SpatialDataWrapper(AnnDataWrapper):
 
-    def __init__(self, path, *args, **kwargs):
-        self._path = path
-        self._args = args
+    def __init__(self, *, spatialdata_path: str, image_path: str="", affine_transformation: Optional[np.ndarray] = None, shapes_path: Optional[str] = None, **kwargs):
+        super().__init__(adata_path=spatialdata_path, **kwargs) # HACK to use adata_path
+        self.local_dir_uid = make_unique_filename(".spatialdata.zarr") # correct?
+        self._image_path = image_path
+        self._affine_transformation = affine_transformation
         self._kwargs = kwargs
+        self._shapes_path = shapes_path
+        # TODO(unify this better with common arguments)
+        self._path = spatialdata_path
+        self._url = None
+        if self._path is not None and (self._url is not None):
+            raise ValueError(
+                "Did not expect path to be provided with url")
+        if self._url is None and (self._path is None):
+            raise ValueError(
+                "Expected either url or path to be provided")
+        if self._url is None:
+            self.is_remote = False
+            self.zarr_folder = 'spatialdata.zarr'
+        else:
+            self.is_remote = True
+            self.zarr_folder = None
 
     @staticmethod
-    def _gen_image_schema(options, path, transformation):
+    def _gen_image_schema(options, path: str, affine_transformation: Optional[np.ndarray] = None):
         if path is not None:
             options["image"] = {
                 "path": path
             }
-            if transformation is not None:
-                options['coordinateTransformations'] = transformation
+            if affine_transformation is not None:
+                options['coordinateTransformations'] = affine_transformation
+        return options
+    
+    @staticmethod
+    def _gen_obs_spots_schema(options, shapes_path):
+        if shapes_path is not None:
+            options['obsSpots'] = {
+                "path": shapes_path,
+                "tablePath": "table/table",
+                "region": "region"
+            }
         return options
 
-    def make_file_def_creator(self, dataset_uid, obj_i):
+
+    
+    def make_file_def_creator(self, dataset_uid: str, obj_i: str):
         def generator(base_url):
             options = {}
             options = self._gen_obs_labels_schema(options, self._obs_labels_paths, self._obs_labels_names)
             options = self._gen_obs_feature_matrix_schema(options, self._expression_matrix, self._gene_var_filter, self._matrix_gene_var_filter)
             options = self._gen_obs_sets_schema(options, self._cell_set_obs, self._cell_set_obs_names)
-            options = self._gen_obs_spots_schema(self._spatial_spots_obsm, options)
-            options = self._gen_image_schema(options, self._image_path, self._transformation)
-
+            options = self._gen_obs_spots_schema(options, self._shapes_path)
+            options = self._gen_image_schema(options, self._image_path, self._affine_transformation)
+            options = self._gen_feature_labels_schema(self._gene_alias, options)
             if len(options.keys()) > 0:
                 obj_file_def = {
                     "fileType": ft.SPATIALDATA_ZARR.value,

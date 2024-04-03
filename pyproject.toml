@@ -153,6 +153,6 @@ convention = "numpy"
 
 [tool.ruff.lint.per-file-ignores]
 "docs/*" = ["I"]
-"vitessce/constants.py" = ["D"]
+"vitessce/*" = ["D"]
 "tests/*" = ["D"]
 "*/__init__.py" = ["F401"]

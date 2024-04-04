@@ -4,13 +4,13 @@ import tempfile
 from uuid import uuid4
 from pathlib import PurePath, PurePosixPath
 
-from .constants import (
+from vitessce.constants import (
     norm_enum,
     ViewType as cm,
     FileType as ft,
     DataType as dt,
 )
-from .repr import make_repr
+from vitessce.repr import make_repr
 
 
 def make_unique_filename(file_ext):
@@ -894,7 +894,7 @@ class ObsSegmentationsOmeZarrWrapper(AbstractWrapper):
 
 
 class AnnDataWrapper(AbstractWrapper):
-    def __init__(self, adata_path=None, adata_url=None, obs_feature_matrix_path=None, feature_filter_path=None, initial_feature_filter_path=None, obs_set_paths=None, obs_set_names=None, obs_locations_path=None, obs_segmentations_path=None, obs_embedding_paths=None, obs_embedding_names=None, obs_embedding_dims=None, obs_spots_path=None, obs_points_path=None, request_init=None, feature_labels_path=None, obs_labels_path=None, convert_to_dense=True, coordination_values=None, obs_labels_paths=None, obs_labels_names=None, **kwargs):
+    def __init__(self, adata_path=None, adata_url=None, adata=None, obs_feature_matrix_path=None, feature_filter_path=None, initial_feature_filter_path=None, obs_set_paths=None, obs_set_names=None, obs_locations_path=None, obs_segmentations_path=None, obs_embedding_paths=None, obs_embedding_names=None, obs_embedding_dims=None, obs_spots_path=None, obs_points_path=None, request_init=None, feature_labels_path=None, obs_labels_path=None, convert_to_dense=True, coordination_values=None, obs_labels_paths=None, obs_labels_names=None, **kwargs):
         """
         Wrap an AnnData object by creating an instance of the ``AnnDataWrapper`` class.
 
@@ -926,6 +926,7 @@ class AnnDataWrapper(AbstractWrapper):
         self._repr = make_repr(locals())
         self._adata_path = adata_path
         self._adata_url = adata_url
+        self._adata = adata
         if adata_url is not None and (adata_path is not None):
             raise ValueError(
                 "Did not expect adata_url to be provided with adata_path")
@@ -939,27 +940,37 @@ class AnnDataWrapper(AbstractWrapper):
             self.is_remote = True
             self.zarr_folder = None
         self.local_dir_uid = make_unique_filename(".adata.zarr")
-        self._expression_matrix = obs_feature_matrix_path
-        self._cell_set_obs_names = obs_set_names
-        self._mappings_obsm_names = obs_embedding_names
-        self._gene_var_filter = feature_filter_path
-        self._matrix_gene_var_filter = initial_feature_filter_path
-        self._cell_set_obs = obs_set_paths
+        if adata is None:
+            self._expression_matrix = obs_feature_matrix_path
+            self._cell_set_obs_names = obs_set_names
+            self._mappings_obsm_names = obs_embedding_names
+            self._gene_var_filter = feature_filter_path
+            self._matrix_gene_var_filter = initial_feature_filter_path
+            self._cell_set_obs = obs_set_paths
+        else:
+            sorted_dtypes = self._adata.obs.dtypes.astype(str).sort_values()
+            obs_dtype_dict = {str(dtype): list(columns.index) for dtype, columns in sorted_dtypes.groupby(sorted_dtypes)}
+            self._cell_set_obs = ["obs/" + x for x in obs_dtype_dict['category']]
+            self._mappings_obsm = ["obsm/" + x for x in self._adata.obsm.keys()]
+            print("For mapping you can choose from: ", list(self._adata.obsm.keys()))
+            self._expression_matrix = "X"
+            self._cell_set_obs_names = obs_dtype_dict['category']
+            self._mappings_obsm_names = self._adata.obsm.keys()
+            self._gene_var_filter = feature_filter_path
+            sorted_dtypes = self._adata.var.dtypes.astype(str).sort_values()
+            var_dtype_dict = {str(dtype): list(columns.index) for dtype, columns in sorted_dtypes.groupby(sorted_dtypes)}
+            self._matrix_gene_var_filter = ["var/" + x for x in var_dtype_dict['bool'] if "highly" in x][-1] if initial_feature_filter_path is None else initial_feature_filter_path
+            print(f"For gene filtering the chosen filter is: {self._matrix_gene_var_filter}, specify yourself if this is not wanted")
         self._spatial_centroid_obsm = obs_locations_path
         self._spatial_polygon_obsm = obs_segmentations_path
-        self._mappings_obsm = obs_embedding_paths
         self._mappings_obsm_dims = obs_embedding_dims
         self._spatial_spots_obsm = obs_spots_path
         self._spatial_points_obsm = obs_points_path
         self._request_init = request_init
         self._gene_alias = feature_labels_path
         # Support legacy provision of single obs labels path
-        if (obs_labels_path is not None):
-            self._obs_labels_paths = [obs_labels_path]
-            self._obs_labels_names = [obs_labels_path.split('/')[-1]]
-        else:
-            self._obs_labels_paths = obs_labels_paths
-            self._obs_labels_names = obs_labels_names
+        self._obs_labels_paths = [obs_labels_path] if obs_labels_path is not None else obs_labels_paths
+        self._obs_labels_names = [obs_labels_path.split('/')[-1]] if obs_labels_path is not None else obs_labels_names
         self._convert_to_dense = convert_to_dense
         self._coordination_values = coordination_values
 
@@ -971,7 +982,7 @@ class AnnDataWrapper(AbstractWrapper):
         file_def_creator = self.make_file_def_creator(
             dataset_uid, obj_i)
         routes = self.make_anndata_routes(dataset_uid, obj_i)
-
+        
         self.file_def_creators.append(file_def_creator)
         self.routes += routes
 
@@ -980,6 +991,7 @@ class AnnDataWrapper(AbstractWrapper):
             return []
         else:
             return self.get_local_dir_route(dataset_uid, obj_i, self._adata_path, self.local_dir_uid)
+        
 
     def get_zarr_url(self, base_url="", dataset_uid="", obj_i=""):
         if self.is_remote:

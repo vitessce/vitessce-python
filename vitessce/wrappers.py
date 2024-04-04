@@ -2,11 +2,13 @@ from functools import partialmethod
 import os
 from os.path import join
 import tempfile
-from typing import Optional
+from typing import Callable, Optional, Type, TypeVar
 from uuid import uuid4
 from pathlib import PurePath, PurePosixPath
 
 import numpy as np
+from spatialdata import SpatialData
+from datatree import DataTree
 
 from .constants import (
     norm_enum,
@@ -1116,10 +1118,11 @@ class AnnDataWrapper(AbstractWrapper):
         else:
             vc.layout((scatterplot | (cell_sets / genes))
                       / heatmap)
-            
+
+SpatialDataWrapperType = TypeVar('SpatialDataWrapperType', bound='SpatialDataWrapper')    
 class SpatialDataWrapper(AnnDataWrapper):
 
-    def __init__(self, *, spatialdata_path: str, image_path: str="", affine_transformation: Optional[np.ndarray] = None, shapes_path: Optional[str] = None, **kwargs):
+    def __init__(self, *, spatialdata_path: str, image_path: Optional[str]=None, affine_transformation: Optional[np.ndarray] = None, shapes_path: Optional[str] = None, labels_path:  Optional[str] = None, **kwargs):
         super().__init__(adata_path=spatialdata_path, **kwargs) # HACK to use adata_path
         self.local_dir_uid = make_unique_filename(".spatialdata.zarr") # correct?
         self._image_path = image_path
@@ -1143,7 +1146,7 @@ class SpatialDataWrapper(AnnDataWrapper):
             self.zarr_folder = None
 
     @staticmethod
-    def _gen_image_schema(options, path: str, affine_transformation: Optional[np.ndarray] = None):
+    def _gen_image_schema(options, path: str, affine_transformation: Optional[np.ndarray] = None) -> dict:
         if path is not None:
             options["image"] = {
                 "path": path
@@ -1153,7 +1156,7 @@ class SpatialDataWrapper(AnnDataWrapper):
         return options
     
     @staticmethod
-    def _gen_obs_spots_schema(options, shapes_path):
+    def _gen_obs_spots_schema(options: dict, shapes_path: str) -> dict:
         if shapes_path is not None:
             options['obsSpots'] = {
                 "path": shapes_path,
@@ -1161,10 +1164,41 @@ class SpatialDataWrapper(AnnDataWrapper):
                 "region": "region"
             }
         return options
-
-
     
-    def make_file_def_creator(self, dataset_uid: str, obj_i: str):
+    @classmethod
+    def from_spatialdata_object(cls: Type[SpatialDataWrapperType], sdata: SpatialData) -> list[SpatialDataWrapperType]:
+        wrappers = []
+        shapes_path = None
+        image_path = None
+        labels_path = None
+        obs_feature_matrix_path = None
+        for table in sdata.tables:
+            spatialdata_attr = table.uns['spatialdata_attrs']
+            region = spatialdata_attr['region']
+            if isinstance(region, list):
+                if len(region) > 1:
+                    raise ValueError("Vitessce cannot subset AnnData objects on the flow")
+                region = region[0]
+            if hasattr(sdata, "shapes"):
+                shapes_path = sdata.path / "shapes" / region
+            if hasattr(sdata, "images"):
+                image_path = sdata.path / "images" / region # this is definitely wrong, but what is right?
+            if hasattr(sdata, "labels"):
+                labels_path = sdata.path / "labels" / region
+            obs_feature_matrix_path = sdata.path / "tables" / table / "X"
+            wrappers += [
+                cls(
+                    spatialdata_path = str(sdata.path),
+                    image_path = str(image_path),
+                    labels_path = str(labels_path),
+                    obs_feature_matrix_path = str(obs_feature_matrix_path),
+                    shapes_path = str(shapes_path),
+                    coordination_values={"obsType":"spot"} # TODO: should we remove?
+                )
+            ]
+        return wrappers
+            
+    def make_file_def_creator(self, dataset_uid: str, obj_i: str) -> Optional[Callable]:
         def generator(base_url):
             options = {}
             options = self._gen_obs_labels_schema(options, self._obs_labels_paths, self._obs_labels_names)

@@ -36,6 +36,7 @@ class AbstractWrapper:
         Abstract constructor to be inherited by dataset wrapper classes.
 
         :param str out_dir: The path to a local directory used for data processing outputs. By default, uses a temp. directory.
+        :param dict request_init: options to be passed along with every fetch request from the browser, like `{ "header": { "Authorization": "Bearer dsfjalsdfa1431" } }`
         """
         self.out_dir = kwargs['out_dir'] if 'out_dir' in kwargs else tempfile.mkdtemp(
         )
@@ -43,6 +44,7 @@ class AbstractWrapper:
         self.is_remote = False
         self.file_def_creators = []
         self.base_dir = None
+        self._request_init = kwargs['request_init'] if 'request_init' in kwargs else None
 
     def __repr__(self):
         return self._repr
@@ -894,7 +896,7 @@ class ObsSegmentationsOmeZarrWrapper(AbstractWrapper):
 
 
 class AnnDataWrapper(AbstractWrapper):
-    def __init__(self, adata_path=None, adata_url=None, obs_feature_matrix_path=None, feature_filter_path=None, initial_feature_filter_path=None, obs_set_paths=None, obs_set_names=None, obs_locations_path=None, obs_segmentations_path=None, obs_embedding_paths=None, obs_embedding_names=None, obs_embedding_dims=None, obs_spots_path=None, obs_points_path=None, request_init=None, feature_labels_path=None, obs_labels_path=None, convert_to_dense=True, coordination_values=None, obs_labels_paths=None, obs_labels_names=None, **kwargs):
+    def __init__(self, adata_path=None, adata_url=None, obs_feature_matrix_path=None, feature_filter_path=None, initial_feature_filter_path=None, obs_set_paths=None, obs_set_names=None, obs_locations_path=None, obs_segmentations_path=None, obs_embedding_paths=None, obs_embedding_names=None, obs_embedding_dims=None, obs_spots_path=None, obs_points_path=None, feature_labels_path=None, obs_labels_path=None, convert_to_dense=True, coordination_values=None, obs_labels_paths=None, obs_labels_names=None, **kwargs):
         """
         Wrap an AnnData object by creating an instance of the ``AnnDataWrapper`` class.
 
@@ -912,7 +914,6 @@ class AnnDataWrapper(AbstractWrapper):
         :param list[str] obs_embedding_dims: Dimensions along which to get data for the scatterplot, like `[[0, 1], [4, 5]]` where `[0, 1]` is just the normal x and y but `[4, 5]` could be comparing the third and fourth principal components, for example.
         :param str obs_spots_path: Column name in `obsm` that contains centroid coordinates for displaying spots in the spatial viewer
         :param str obs_points_path: Column name in `obsm` that contains centroid coordinates for displaying points in the spatial viewer
-        :param dict request_init: options to be passed along with every fetch request from the browser, like `{ "header": { "Authorization": "Bearer dsfjalsdfa1431" } }`
         :param str feature_labels_path: The name of a column containing feature labels (e.g., alternate gene symbols), instead of the default index in `var` of the AnnData store.
         :param str obs_labels_path: (DEPRECATED) The name of a column containing observation labels (e.g., alternate cell IDs), instead of the default index in `obs` of the AnnData store. Use `obs_labels_paths` and `obs_labels_names` instead. This arg will be removed in a future release.
         :param list[str] obs_labels_paths: The names of columns containing observation labels (e.g., alternate cell IDs), instead of the default index in `obs` of the AnnData store.
@@ -951,7 +952,6 @@ class AnnDataWrapper(AbstractWrapper):
         self._mappings_obsm_dims = obs_embedding_dims
         self._spatial_spots_obsm = obs_spots_path
         self._spatial_points_obsm = obs_points_path
-        self._request_init = request_init
         self._gene_alias = feature_labels_path
         # Support legacy provision of single obs labels path
         if (obs_labels_path is not None):
@@ -1138,8 +1138,11 @@ class MultivecZarrWrapper(AbstractWrapper):
 
     def make_genomic_profiles_file_def_creator(self, dataset_uid, obj_i):
         def genomic_profiles_file_def_creator(base_url):
-            return {
+            obj_file_def = {
                 "fileType": "genomic-profiles.zarr",
                 "url": self.get_zarr_url(base_url, dataset_uid, obj_i)
             }
+            if self._request_init is not None:
+                obj_file_def['requestInit'] = self._request_init
+            return obj_file_def
         return genomic_profiles_file_def_creator

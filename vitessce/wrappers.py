@@ -1,14 +1,15 @@
-from functools import partialmethod
+from collections import defaultdict
 import os
 from os.path import join
 import tempfile
-from typing import Callable, Optional, Type, TypeVar
+from typing import Callable, Optional, Type, TypeVar, Union
 from uuid import uuid4
 from pathlib import PurePath, PurePosixPath
 
 import numpy as np
 from spatialdata import SpatialData
-from datatree import DataTree
+
+from vitessce.utils import gen_obs_locations_schema, gen_obs_segmentations_schema, gen_obs_spots_schema, gen_obs_points_schema, gen_obs_embedding_schema, gen_feature_labels_schema, gen_obs_spots_schema, gen_feature_labels_schema, gen_image_schema, gen_obs_feature_matrix_schema, gen_obs_labels_schema, gen_obs_sets_schema
 
 from .constants import (
     norm_enum,
@@ -992,101 +993,20 @@ class AnnDataWrapper(AbstractWrapper):
             return self._url
         else:
             return self.get_local_dir_url(base_url, dataset_uid, obj_i, self._path, self.local_dir_uid)
-    
-    @staticmethod
-    def _gen_obs_embedding_schema(options, paths=None, names=None, dims=None):
-        if paths is not None:
-            if names is not None:
-                for key, mapping in zip(paths, names):
-                    options["obsEmbedding"].append({
-                        "path": mapping,
-                        "dims": [0, 1],
-                        "embeddingType": key
-                    })
-            else:
-                for mapping in paths:
-                    mapping_key = mapping.split('/')[-1]
-                    options["obsEmbedding"].append({
-                        "path": mapping,
-                        "dims": [0, 1],
-                        "embeddingType": mapping_key
-                    })
-        if dims is not None:
-            for dim_i, dim in enumerate(dims):
-                options["obsEmbedding"][dim_i]['dims'] = dim
-        return options
-
-    @staticmethod
-    def _gen_obs_sets_schema(options, paths, names):
-        if paths is not None:
-            options["obsSets"] = []
-            if names is not None:
-                names = names
-            else:
-                names = [obs.split('/')[-1] for obs in paths]
-            for obs, name in zip(paths, names):
-                options["obsSets"].append({
-                    "name": name,
-                    "path": obs
-                })
-        return options
-    
-    @staticmethod
-    def _gen_obs_feature_matrix_schema(options, matrix_path, var_filter_path, init_var_filter_path):
-        if matrix_path is not None:
-            options["obsFeatureMatrix"] = {
-                "path": matrix_path
-            }
-            if var_filter_path is not None:
-                options["obsFeatureMatrix"]["featureFilterPath"] = var_filter_path
-            if init_var_filter_path is not None:
-                options["obsFeatureMatrix"]["initialFeatureFilterPath"] = init_var_filter_path
-        return options
-    
-    @staticmethod
-    def _gen_obs_labels_schema(options, paths, names):
-        if paths is not None:
-            if names is not None and len(paths) == len(names):
-                # A name was provided for each path element, so use those values.
-                names = names
-            else:
-                # Names were not provided for each path element,
-                # so fall back to using the final part of each path for the names.
-                names = [labels_path.split('/')[-1] for labels_path in paths]
-            obs_labels = []
-            for path, name in zip(paths, names):
-                obs_labels.append({"path": path, "obsLabelsType": name})
-            options["obsLabels"] = obs_labels
-        return options
-
-    
-    @staticmethod
-    def _gen_path_schema(key, path, options):
-        if path is not None:
-            options[key] = {
-                "path": path
-            }
-        return options
-    
-    _gen_obs_locations_schema = partialmethod(_gen_path_schema,  "obsLocations")
-    _gen_obs_segmentations_schema = partialmethod(_gen_path_schema,  "obsSegmentations")
-    _gen_obs_spots_schema = partialmethod(_gen_path_schema,  "obsSpots")
-    _gen_obs_points_schema = partialmethod(_gen_path_schema,  "obsPoints")
-    _gen_feature_labels_schema = partialmethod(_gen_path_schema, "featureLabels")
         
 
     def make_file_def_creator(self, dataset_uid, obj_i):
         def get_anndata_zarr(base_url):
             options = {}
-            options = self._gen_obs_locations_schema(self._spatial_centroid_obsm, options)
-            options = self._gen_obs_segmentations_schema(self._spatial_polygon_obsm, options)
-            options = self._gen_obs_spots_schema(self._spatial_spots_obsm, options)
-            options = self._gen_obs_points_schema(self._spatial_points_obsm, options)
-            options = self._gen_obs_embedding_schema(options, self._mappings_obsm, self._mappings_obsm_names, self._mappings_obsm_dims)
-            options = self._gen_obs_sets_schema(options, self._cell_set_obs, self._cell_set_obs_names)
-            options = self._gen_obs_feature_matrix_schema(options, self._expression_matrix, self._gene_var_filter, self._matrix_gene_var_filter)
-            options = self._gen_feature_labels_schema(self._gene_alias, options)
-            options = self._gen_obs_labels_schema(options, self._obs_labels_paths, self._obs_labels_names)
+            options = gen_obs_locations_schema(self._spatial_centroid_obsm, options)
+            options = gen_obs_segmentations_schema(self._spatial_polygon_obsm, options)
+            options = gen_obs_spots_schema(self._spatial_spots_obsm, options)
+            options = gen_obs_points_schema(self._spatial_points_obsm, options)
+            options = gen_obs_embedding_schema(options, self._mappings_obsm, self._mappings_obsm_names, self._mappings_obsm_dims)
+            options = gen_obs_sets_schema(options, self._cell_set_obs, self._cell_set_obs_names)
+            options = gen_obs_feature_matrix_schema(options, self._expression_matrix, self._gene_var_filter, self._matrix_gene_var_filter)
+            options = gen_feature_labels_schema(self._gene_alias, options)
+            options = gen_obs_labels_schema(options, self._obs_labels_paths, self._obs_labels_names)
 
             if len(options.keys()) > 0:
                 obj_file_def = {
@@ -1144,55 +1064,61 @@ class SpatialDataWrapper(AnnDataWrapper):
         else:
             self.is_remote = True
             self.zarr_folder = None
-
-    @staticmethod
-    def _gen_image_schema(options, path: str, affine_transformation: Optional[np.ndarray] = None) -> dict:
-        if path is not None:
-            options["image"] = {
-                "path": path
-            }
-            if affine_transformation is not None:
-                options['coordinateTransformations'] = affine_transformation
-        return options
-    
-    @staticmethod
-    def _gen_obs_spots_schema(options: dict, shapes_path: str) -> dict:
-        if shapes_path is not None:
-            options['obsSpots'] = {
-                "path": shapes_path,
-                "tablePath": "table/table",
-                "region": "region"
-            }
-        return options
     
     @classmethod
-    def from_spatialdata_object(cls: Type[SpatialDataWrapperType], sdata: SpatialData) -> list[SpatialDataWrapperType]:
+    def from_spatialdata_object(cls: Type[SpatialDataWrapperType], sdata: SpatialData, table_keys_to_image_paths: dict[str, Union[str,None]] = defaultdict(type(None)), table_keys_to_regions: dict[str, Union[str,None]] = defaultdict(type(None))) -> list[SpatialDataWrapperType]:
+        """Instantiate a wrapper for SpatialData stores, one per table, directly from the SpatialData object.
+        By default, we "show everything" that can reasonable be inferred given the information.  If you wish to have more control,
+        consider instantiating the object directly.  This function will error if something cannot be inferred i.e., the user does not present
+        regions explicitly but there is more than one for a given table.
+        
+
+        Parameters
+        ----------
+        cls : Type[SpatialDataWrapperType]
+            _description_
+        sdata : SpatialData
+            _description_
+        table_keys_to_image_paths : dict[str, str], optional
+            which image paths to use for a given table for the visualization, by default None for each table key.
+        table_keys_to_regions : dict[str, str], optional
+            which regions to use for a given table for the visualization, by default None for each table key.
+
+        Returns
+        -------
+        list[SpatialDataWrapperType]
+
+        Raises
+        ------
+        ValueError
+        """
         wrappers = []
-        shapes_path = None
-        image_path = None
-        labels_path = None
-        obs_feature_matrix_path = None
-        for table in sdata.tables:
+        for table_key, table in sdata.tables.items():
+            shapes_path = None
+            image_path = table_keys_to_image_paths[table_key]
+            labels_path = None
             spatialdata_attr = table.uns['spatialdata_attrs']
-            region = spatialdata_attr['region']
+            region = table_keys_to_regions[table_key]
+            if region is not None:
+                assert region in spatialdata_attr['region']
+            else:
+                region = spatialdata_attr['region']
             if isinstance(region, list):
                 if len(region) > 1:
-                    raise ValueError("Vitessce cannot subset AnnData objects on the flow")
+                    raise ValueError("Vitessce cannot subset AnnData objects on the fly.  Please provide an explicit region")
                 region = region[0]
-            if hasattr(sdata, "shapes"):
-                shapes_path = sdata.path / "shapes" / region
-            if hasattr(sdata, "images"):
-                image_path = sdata.path / "images" / region # this is definitely wrong, but what is right?
-            if hasattr(sdata, "labels"):
-                labels_path = sdata.path / "labels" / region
-            obs_feature_matrix_path = sdata.path / "tables" / table / "X"
+            if region in sdata.shapes:
+                shapes_path = f"shapes/{region}"
+            if region in sdata.labels:
+                labels_path = f"labels/{region}"
+            obs_feature_matrix_path = f"table/{table_key}/X" # TODO: fix first key needing to be "table" in vitessce-js
             wrappers += [
                 cls(
                     spatialdata_path = str(sdata.path),
-                    image_path = str(image_path),
-                    labels_path = str(labels_path),
+                    image_path = str(image_path) if image_path is not None else None,
+                    labels_path = str(labels_path) if labels_path is not None else None,
                     obs_feature_matrix_path = str(obs_feature_matrix_path),
-                    shapes_path = str(shapes_path),
+                    shapes_path = str(shapes_path) if shapes_path is not None else None,
                     coordination_values={"obsType":"spot"} # TODO: should we remove?
                 )
             ]
@@ -1201,12 +1127,12 @@ class SpatialDataWrapper(AnnDataWrapper):
     def make_file_def_creator(self, dataset_uid: str, obj_i: str) -> Optional[Callable]:
         def generator(base_url):
             options = {}
-            options = self._gen_obs_labels_schema(options, self._obs_labels_paths, self._obs_labels_names)
-            options = self._gen_obs_feature_matrix_schema(options, self._expression_matrix, self._gene_var_filter, self._matrix_gene_var_filter)
-            options = self._gen_obs_sets_schema(options, self._cell_set_obs, self._cell_set_obs_names)
-            options = self._gen_obs_spots_schema(options, self._shapes_path)
-            options = self._gen_image_schema(options, self._image_path, self._affine_transformation)
-            options = self._gen_feature_labels_schema(self._gene_alias, options)
+            options = gen_obs_labels_schema(options, self._obs_labels_paths, self._obs_labels_names)
+            options = gen_obs_feature_matrix_schema(options, self._expression_matrix, self._gene_var_filter, self._matrix_gene_var_filter)
+            options = gen_obs_sets_schema(options, self._cell_set_obs, self._cell_set_obs_names)
+            options = gen_obs_spots_schema(options, self._shapes_path)
+            options = gen_image_schema(options, self._image_path, self._affine_transformation)
+            options = gen_feature_labels_schema(self._gene_alias, options)
             if len(options.keys()) > 0:
                 obj_file_def = {
                     "fileType": ft.SPATIALDATA_ZARR.value,

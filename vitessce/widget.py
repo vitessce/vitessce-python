@@ -7,6 +7,7 @@ import anywidget
 from traitlets import Unicode, Dict, Int, Bool
 import time
 import uuid
+from esbuild_py import transform
 
 # Server dependencies
 from uvicorn import Config, Server

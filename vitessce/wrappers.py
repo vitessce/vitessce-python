@@ -1042,16 +1042,17 @@ class AnnDataWrapper(AbstractWrapper):
 SpatialDataWrapperType = TypeVar('SpatialDataWrapperType', bound='SpatialDataWrapper')    
 class SpatialDataWrapper(AnnDataWrapper):
 
-    def __init__(self, *, spatialdata_path: str, image_path: Optional[str]=None, affine_transformation: Optional[np.ndarray] = None, shapes_path: Optional[str] = None, labels_path:  Optional[str] = None, **kwargs):
-        super().__init__(adata_path=spatialdata_path, **kwargs) # HACK to use adata_path
+    def __init__(self, *, spatialdata_url: Optional[str]=None, spatialdata_path: Optional[str]=None, image_path: Optional[str]=None, affine_transformation: Optional[np.ndarray] = None, shapes_path: Optional[str] = None, labels_path: Optional[str] = None, **kwargs):
+        super().__init__(adata_path=spatialdata_path, adata_url=spatialdata_url, **kwargs) # HACK to use adata_path
         self.local_dir_uid = make_unique_filename(".spatialdata.zarr") # correct?
         self._image_path = image_path
         self._affine_transformation = affine_transformation
         self._kwargs = kwargs
         self._shapes_path = shapes_path
+        self._labels_path = labels_path
         # TODO(unify this better with common arguments)
         self._path = spatialdata_path
-        self._url = None
+        self._url = spatialdata_url
         if self._path is not None and (self._url is not None):
             raise ValueError(
                 "Did not expect path to be provided with url")

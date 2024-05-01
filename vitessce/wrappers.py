@@ -41,8 +41,8 @@ class AbstractWrapper:
         self.out_dir = kwargs['out_dir'] if 'out_dir' in kwargs else tempfile.mkdtemp(
         )
         self.routes = []
-        self.is_remote = False # TODO: change to needs_localhost_serving for clarity
-        self.is_store = False # TODO: change to needs_store_registration for clarity
+        self.is_remote = False  # TODO: change to needs_localhost_serving for clarity
+        self.is_store = False  # TODO: change to needs_store_registration for clarity
         self.file_def_creators = []
         self.base_dir = None
         self.stores = {}
@@ -139,7 +139,7 @@ class AbstractWrapper:
                 # A store instance was passed directly, so there is no local directory path.
                 # Instead we just make one up using _get_route_str but it could be any string.
                 local_dir_path = self._get_route_str(dataset_uid, obj_i, local_dir_uid)
-            
+
             # Register the store on the same route path
             # that will be used for the "url" field in the file definition.
             if self.base_dir is None:
@@ -147,7 +147,7 @@ class AbstractWrapper:
             else:
                 route_path = file_path_to_url_path(local_dir_path)
                 local_dir_path = join(self.base_dir, local_dir_path)
-            
+
             self.stores[route_path] = store
 
     def get_local_dir_route(self, dataset_uid, obj_i, local_dir_path, local_dir_uid):
@@ -978,7 +978,6 @@ class AnnDataWrapper(AbstractWrapper):
         if num_inputs == 0:
             raise ValueError(
                 "Expected one of adata_path, adata_url, or adata_store to be provided")
-        
 
         if adata_path is not None:
             self.is_remote = False
@@ -993,7 +992,7 @@ class AnnDataWrapper(AbstractWrapper):
             self.is_remote = False
             self.is_store = True
             self.zarr_folder = None
-        
+
         self.local_dir_uid = make_unique_filename(".adata.zarr")
         self._expression_matrix = obs_feature_matrix_path
         self._cell_set_obs_names = obs_set_names

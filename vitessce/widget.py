@@ -478,7 +478,7 @@ class VitessceWidget(anywidget.AnyWidget):
     def close(self):
         self.config_obj.stop_server(self.port)
         super().close()
-    
+
     @anywidget.experimental.command
     def _zarr_get(self, params, buffers):
         [store_url, key] = params
@@ -487,7 +487,7 @@ class VitessceWidget(anywidget.AnyWidget):
             buffers = [store[key.lstrip("/")]]
         except KeyError:
             buffers = []
-        return { "success": len(buffers) == 1 }, buffers
+        return {"success": len(buffers) == 1}, buffers
 
 # Launch Vitessce using plain HTML representation (no ipywidgets)
 

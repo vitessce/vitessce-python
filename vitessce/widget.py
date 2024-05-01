@@ -237,7 +237,6 @@ async function render(view) {
             }
         ])),
     );
-    console.log(stores);
 
     try {
         const pluginEsmUrl = URL.createObjectURL(new Blob([pluginEsm], { type: "text/javascript" }));
@@ -514,6 +513,7 @@ def ipython_display(config, height=600, theme='auto', base_url=None, host_name=N
         "height": height,
         "theme": theme,
         "config": config_dict,
+        "store_urls": [],
     }
 
     # We need to clean up the React and DOM state in any case in which

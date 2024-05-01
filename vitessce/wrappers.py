@@ -3,6 +3,7 @@ from os.path import join
 import tempfile
 from uuid import uuid4
 from pathlib import PurePath, PurePosixPath
+import zarr
 
 from .constants import (
     norm_enum,
@@ -41,9 +42,11 @@ class AbstractWrapper:
         self.out_dir = kwargs['out_dir'] if 'out_dir' in kwargs else tempfile.mkdtemp(
         )
         self.routes = []
-        self.is_remote = False
+        self.is_remote = False  # TODO: change to needs_localhost_serving for clarity
+        self.is_store = False  # TODO: change to needs_store_registration for clarity
         self.file_def_creators = []
         self.base_dir = None
+        self.stores = {}
         self._request_init = kwargs['request_init'] if 'request_init' in kwargs else None
 
     def __repr__(self):
@@ -70,6 +73,20 @@ class AbstractWrapper:
         :rtype: list[starlette.routing.Route]
         """
         return self.routes
+
+    def get_stores(self, base_url):
+        """
+        Obtain the stores that have been created for this wrapper class.
+
+        :returns: A dictionary that maps file URLs to Zarr Store objects.
+        :rtype: dict[str, zarr.Store]
+        """
+        relative_stores = self.stores
+        absolute_stores = {}
+        for relative_url, store in relative_stores.items():
+            absolute_url = base_url + relative_url
+            absolute_stores[absolute_url] = store
+        return absolute_stores
 
     def get_file_defs(self, base_url):
         """
@@ -110,6 +127,30 @@ class AbstractWrapper:
         if not self.is_remote and self.base_dir is not None:
             return self._get_url_simple(base_url, file_path_to_url_path(local_dir_path, prepend_slash=False))
         return self._get_url(base_url, dataset_uid, obj_i, local_dir_uid)
+
+    def register_zarr_store(self, dataset_uid, obj_i, store_or_local_dir_path, local_dir_uid):
+        if not self.is_remote and self.is_store:
+            # Set up `store` and `local_dir_path` variables.
+            if isinstance(store_or_local_dir_path, str):
+                # TODO: use zarr.FSStore if fsspec is installed?
+                store = zarr.DirectoryStore(store_or_local_dir_path)
+                local_dir_path = store_or_local_dir_path
+            else:
+                # TODO: check that store_or_local_dir_path is a zarr.Store or StoreLike?
+                store = store_or_local_dir_path
+                # A store instance was passed directly, so there is no local directory path.
+                # Instead we just make one up using _get_route_str but it could be any string.
+                local_dir_path = self._get_route_str(dataset_uid, obj_i, local_dir_uid)
+
+            # Register the store on the same route path
+            # that will be used for the "url" field in the file definition.
+            if self.base_dir is None:
+                route_path = self._get_route_str(dataset_uid, obj_i, local_dir_uid)
+            else:
+                route_path = file_path_to_url_path(local_dir_path)
+                local_dir_path = join(self.base_dir, local_dir_path)
+
+            self.stores[route_path] = store
 
     def get_local_dir_route(self, dataset_uid, obj_i, local_dir_path, local_dir_uid):
         """
@@ -896,12 +937,14 @@ class ObsSegmentationsOmeZarrWrapper(AbstractWrapper):
 
 
 class AnnDataWrapper(AbstractWrapper):
-    def __init__(self, adata_path=None, adata_url=None, obs_feature_matrix_path=None, feature_filter_path=None, initial_feature_filter_path=None, obs_set_paths=None, obs_set_names=None, obs_locations_path=None, obs_segmentations_path=None, obs_embedding_paths=None, obs_embedding_names=None, obs_embedding_dims=None, obs_spots_path=None, obs_points_path=None, feature_labels_path=None, obs_labels_path=None, convert_to_dense=True, coordination_values=None, obs_labels_paths=None, obs_labels_names=None, **kwargs):
+    def __init__(self, adata_path=None, adata_url=None, adata_store=None, obs_feature_matrix_path=None, feature_filter_path=None, initial_feature_filter_path=None, obs_set_paths=None, obs_set_names=None, obs_locations_path=None, obs_segmentations_path=None, obs_embedding_paths=None, obs_embedding_names=None, obs_embedding_dims=None, obs_spots_path=None, obs_points_path=None, feature_labels_path=None, obs_labels_path=None, convert_to_dense=True, coordination_values=None, obs_labels_paths=None, obs_labels_names=None, **kwargs):
         """
         Wrap an AnnData object by creating an instance of the ``AnnDataWrapper`` class.
 
         :param str adata_path: A path to an AnnData object written to a Zarr store containing single-cell experiment data.
         :param str adata_url: A remote url pointing to a zarr-backed AnnData store.
+        :param adata_store: A path to pass to zarr.FSStore, or an existing store instance.
+        :type adata_store: str or zarr.Storage
         :param str obs_feature_matrix_path: Location of the expression (cell x gene) matrix, like `X` or `obsm/highly_variable_genes_subset`
         :param str feature_filter_path: A string like `var/highly_variable` used in conjunction with `obs_feature_matrix_path` if obs_feature_matrix_path points to a subset of `X` of the full `var` list.
         :param str initial_feature_filter_path: A string like `var/highly_variable` used in conjunction with `obs_feature_matrix_path` if obs_feature_matrix_path points to a subset of `X` of the full `var` list.
@@ -927,18 +970,30 @@ class AnnDataWrapper(AbstractWrapper):
         self._repr = make_repr(locals())
         self._adata_path = adata_path
         self._adata_url = adata_url
-        if adata_url is not None and (adata_path is not None):
+        self._adata_store = adata_store
+
+        num_inputs = sum([1 for x in [adata_path, adata_url, adata_store] if x is not None])
+        if num_inputs > 1:
             raise ValueError(
-                "Did not expect adata_url to be provided with adata_path")
-        if adata_url is None and (adata_path is None):
+                "Expected only one of adata_path, adata_url, or adata_store to be provided")
+        if num_inputs == 0:
             raise ValueError(
-                "Expected either adata_url or adata_path to be provided")
+                "Expected one of adata_path, adata_url, or adata_store to be provided")
+
         if adata_path is not None:
             self.is_remote = False
+            self.is_store = False
             self.zarr_folder = 'anndata.zarr'
-        else:
+        elif adata_url is not None:
             self.is_remote = True
+            self.is_store = False
             self.zarr_folder = None
+        else:
+            # Store case
+            self.is_remote = False
+            self.is_store = True
+            self.zarr_folder = None
+
         self.local_dir_uid = make_unique_filename(".adata.zarr")
         self._expression_matrix = obs_feature_matrix_path
         self._cell_set_obs_names = obs_set_names
@@ -977,6 +1032,9 @@ class AnnDataWrapper(AbstractWrapper):
 
     def make_anndata_routes(self, dataset_uid, obj_i):
         if self.is_remote:
+            return []
+        elif self.is_store:
+            self.register_zarr_store(dataset_uid, obj_i, self._adata_store, self.local_dir_uid)
             return []
         else:
             return self.get_local_dir_route(dataset_uid, obj_i, self._adata_path, self.local_dir_uid)

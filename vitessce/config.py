@@ -226,7 +226,7 @@ class VitessceConfigDataset:
             routes += obj.get_routes()
 
         return routes
-    
+
     def get_stores(self, base_url=None):
         stores = {}
         for obj in self.objs:

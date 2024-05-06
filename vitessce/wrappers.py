@@ -894,12 +894,12 @@ class ObsSegmentationsOmeZarrWrapper(AbstractWrapper):
 
 
 class AnnDataWrapper(AbstractWrapper):
-    def __init__(self, adata_path=None, adata_url=None, obs_feature_matrix_path=None, feature_filter_path=None, initial_feature_filter_path=None, obs_set_paths=None, obs_set_names=None, obs_locations_path=None, obs_segmentations_path=None, obs_embedding_paths=None, obs_embedding_names=None, obs_embedding_dims=None, obs_spots_path=None, obs_points_path=None, request_init=None, feature_labels_path=None, obs_labels_path=None, convert_to_dense=True, coordination_values=None, obs_labels_paths=None, obs_labels_names=None, **kwargs):
+    def __init__(self, base_path=None, base_url=None, obs_feature_matrix_path=None, feature_filter_path=None, initial_feature_filter_path=None, obs_set_paths=None, obs_set_names=None, obs_locations_path=None, obs_segmentations_path=None, obs_embedding_paths=None, obs_embedding_names=None, obs_embedding_dims=None, obs_spots_path=None, obs_points_path=None, request_init=None, feature_labels_path=None, obs_labels_path=None, convert_to_dense=True, coordination_values=None, obs_labels_paths=None, obs_labels_names=None, **kwargs):
         """
         Wrap an AnnData object by creating an instance of the ``AnnDataWrapper`` class.
 
-        :param str adata_path: A path to an AnnData object written to a Zarr store containing single-cell experiment data.
-        :param str adata_url: A remote url pointing to a zarr-backed AnnData store.
+        :param str base_path: A path to an AnnData object written to a Zarr store containing single-cell experiment data.
+        :param str base_url: A remote url pointing to a zarr-backed AnnData store.
         :param str obs_feature_matrix_path: Location of the expression (cell x gene) matrix, like `X` or `obsm/highly_variable_genes_subset`
         :param str feature_filter_path: A string like `var/highly_variable` used in conjunction with `obs_feature_matrix_path` if obs_feature_matrix_path points to a subset of `X` of the full `var` list.
         :param str initial_feature_filter_path: A string like `var/highly_variable` used in conjunction with `obs_feature_matrix_path` if obs_feature_matrix_path points to a subset of `X` of the full `var` list.
@@ -924,15 +924,15 @@ class AnnDataWrapper(AbstractWrapper):
         """
         super().__init__(**kwargs)
         self._repr = make_repr(locals())
-        self._adata_path = adata_path
-        self._adata_url = adata_url
-        if adata_url is not None and (adata_path is not None):
+        self._path = base_path
+        self._url = base_url
+        if base_url is not None and (base_path is not None):
             raise ValueError(
-                "Did not expect adata_url to be provided with adata_path")
-        if adata_url is None and (adata_path is None):
+                "Did not expect base_url to be provided with base_path")
+        if base_url is None and (base_path is None):
             raise ValueError(
-                "Expected either adata_url or adata_path to be provided")
-        if adata_path is not None:
+                "Expected either base_url or base_path to be provided")
+        if base_path is not None:
             self.is_remote = False
             self.zarr_folder = 'anndata.zarr'
         else:
@@ -952,7 +952,7 @@ class AnnDataWrapper(AbstractWrapper):
         self._spatial_spots_obsm = obs_spots_path
         self._spatial_points_obsm = obs_points_path
         self._request_init = request_init
-        self._gene_alias = feature_labels_path
+        self._feature_labels = feature_labels_path
         # Support legacy provision of single obs labels path
         if (obs_labels_path is not None):
             self._obs_labels_paths = [obs_labels_path]
@@ -970,22 +970,22 @@ class AnnDataWrapper(AbstractWrapper):
 
         file_def_creator = self.make_file_def_creator(
             dataset_uid, obj_i)
-        routes = self.make_anndata_routes(dataset_uid, obj_i)
+        routes = self.make_routes(dataset_uid, obj_i)
 
         self.file_def_creators.append(file_def_creator)
         self.routes += routes
 
-    def make_anndata_routes(self, dataset_uid, obj_i):
+    def make_routes(self, dataset_uid, obj_i):
         if self.is_remote:
             return []
         else:
-            return self.get_local_dir_route(dataset_uid, obj_i, self._adata_path, self.local_dir_uid)
+            return self.get_local_dir_route(dataset_uid, obj_i, self._path, self.local_dir_uid)
 
     def get_zarr_url(self, base_url="", dataset_uid="", obj_i=""):
         if self.is_remote:
-            return self._adata_url
+            return self._url
         else:
-            return self.get_local_dir_url(base_url, dataset_uid, obj_i, self._adata_path, self.local_dir_uid)
+            return self.get_local_dir_url(base_url, dataset_uid, obj_i, self._path, self.local_dir_uid)
 
     def make_file_def_creator(self, dataset_uid, obj_i):
         def get_anndata_zarr(base_url):
@@ -1046,9 +1046,9 @@ class AnnDataWrapper(AbstractWrapper):
                     options["obsFeatureMatrix"]["featureFilterPath"] = self._gene_var_filter
                 if self._matrix_gene_var_filter is not None:
                     options["obsFeatureMatrix"]["initialFeatureFilterPath"] = self._matrix_gene_var_filter
-            if self._gene_alias is not None:
+            if self._feature_labels is not None:
                 options["featureLabels"] = {
-                    "path": self._gene_alias
+                    "path": self._feature_labels
                 }
             if self._obs_labels_paths is not None:
                 if self._obs_labels_names is not None and len(self._obs_labels_paths) == len(self._obs_labels_names):

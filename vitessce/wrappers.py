@@ -4,6 +4,7 @@ import tempfile
 from uuid import uuid4
 from pathlib import PurePath, PurePosixPath
 import warnings
+import zarr
 
 from .constants import (
     norm_enum,
@@ -37,13 +38,17 @@ class AbstractWrapper:
         Abstract constructor to be inherited by dataset wrapper classes.
 
         :param str out_dir: The path to a local directory used for data processing outputs. By default, uses a temp. directory.
+        :param dict request_init: options to be passed along with every fetch request from the browser, like `{ "header": { "Authorization": "Bearer dsfjalsdfa1431" } }`
         """
         self.out_dir = kwargs['out_dir'] if 'out_dir' in kwargs else tempfile.mkdtemp(
         )
         self.routes = []
-        self.is_remote = False
+        self.is_remote = False  # TODO: change to needs_localhost_serving for clarity
+        self.is_store = False  # TODO: change to needs_store_registration for clarity
         self.file_def_creators = []
         self.base_dir = None
+        self.stores = {}
+        self._request_init = kwargs['request_init'] if 'request_init' in kwargs else None
 
     def __repr__(self):
         return self._repr
@@ -69,6 +74,20 @@ class AbstractWrapper:
         :rtype: list[starlette.routing.Route]
         """
         return self.routes
+
+    def get_stores(self, base_url):
+        """
+        Obtain the stores that have been created for this wrapper class.
+
+        :returns: A dictionary that maps file URLs to Zarr Store objects.
+        :rtype: dict[str, zarr.Store]
+        """
+        relative_stores = self.stores
+        absolute_stores = {}
+        for relative_url, store in relative_stores.items():
+            absolute_url = base_url + relative_url
+            absolute_stores[absolute_url] = store
+        return absolute_stores
 
     def get_file_defs(self, base_url):
         """
@@ -109,6 +128,30 @@ class AbstractWrapper:
         if not self.is_remote and self.base_dir is not None:
             return self._get_url_simple(base_url, file_path_to_url_path(local_dir_path, prepend_slash=False))
         return self._get_url(base_url, dataset_uid, obj_i, local_dir_uid)
+
+    def register_zarr_store(self, dataset_uid, obj_i, store_or_local_dir_path, local_dir_uid):
+        if not self.is_remote and self.is_store:
+            # Set up `store` and `local_dir_path` variables.
+            if isinstance(store_or_local_dir_path, str):
+                # TODO: use zarr.FSStore if fsspec is installed?
+                store = zarr.DirectoryStore(store_or_local_dir_path)
+                local_dir_path = store_or_local_dir_path
+            else:
+                # TODO: check that store_or_local_dir_path is a zarr.Store or StoreLike?
+                store = store_or_local_dir_path
+                # A store instance was passed directly, so there is no local directory path.
+                # Instead we just make one up using _get_route_str but it could be any string.
+                local_dir_path = self._get_route_str(dataset_uid, obj_i, local_dir_uid)
+
+            # Register the store on the same route path
+            # that will be used for the "url" field in the file definition.
+            if self.base_dir is None:
+                route_path = self._get_route_str(dataset_uid, obj_i, local_dir_uid)
+            else:
+                route_path = file_path_to_url_path(local_dir_path)
+                local_dir_path = join(self.base_dir, local_dir_path)
+
+            self.stores[route_path] = store
 
     def get_local_dir_route(self, dataset_uid, obj_i, local_dir_path, local_dir_uid):
         """
@@ -895,12 +938,14 @@ class ObsSegmentationsOmeZarrWrapper(AbstractWrapper):
 
 
 class AnnDataWrapper(AbstractWrapper):
-    def __init__(self, base_path=None, base_url=None, obs_feature_matrix_elem=None, feature_filter_elem=None, initial_feature_filter_elem=None, obs_set_elems=None, obs_set_names=None, obs_locations_elem=None, obs_segmentations_elem=None, obs_embedding_elems=None, obs_embedding_names=None, obs_embedding_dims=None, obs_spots_elem=None, obs_points_elem=None, request_init=None, feature_labels_elem=None, obs_labels_path=None, convert_to_dense=True, coordination_values=None, obs_labels_elems=None, obs_labels_names=None, **kwargs):
+    def __init__(self, base_path=None, base_url=None, base_store=None, obs_feature_matrix_elem=None, feature_filter_elem=None, initial_feature_filter_elem=None, obs_set_elems=None, obs_set_names=None, obs_locations_elem=None, obs_segmentations_elem=None, obs_embedding_elems=None, obs_embedding_names=None, obs_embedding_dims=None, obs_spots_elem=None, obs_points_elem=None, request_init=None, feature_labels_elem=None, obs_labels_path=None, convert_to_dense=True, coordination_values=None, obs_labels_elems=None, obs_labels_names=None, **kwargs):
         """
         Wrap an AnnData object by creating an instance of the ``AnnDataWrapper`` class.
 
         :param str base_path: A path to an AnnData object written to a Zarr store containing single-cell experiment data.
         :param str base_url: A remote url pointing to a zarr-backed AnnData store.
+        :param base_store: A path to pass to zarr.FSStore, or an existing store instance.
+        :type base_store: str or zarr.Storage
         :param str obs_feature_matrix_elem: Location of the expression (cell x gene) matrix, like `X` or `obsm/highly_variable_genes_subset`
         :param str feature_filter_elem: A string like `var/highly_variable` used in conjunction with `obs_feature_matrix_elem` if obs_feature_matrix_elem points to a subset of `X` of the full `var` list.
         :param str initial_feature_filter_elem: A string like `var/highly_variable` used in conjunction with `obs_feature_matrix_elem` if obs_feature_matrix_elem points to a subset of `X` of the full `var` list.
@@ -927,18 +972,30 @@ class AnnDataWrapper(AbstractWrapper):
         self._repr = make_repr(locals())
         self._path = base_path
         self._url = base_url
-        if base_url is not None and (base_path is not None):
+        self._base_store = base_store
+
+        num_inputs = sum([1 for x in [base_path, base_url, base_store] if x is not None])
+        if num_inputs > 1:
             raise ValueError(
-                "Did not expect base_url to be provided with base_path")
-        if base_url is None and (base_path is None):
+                "Expected only one of base_path, base_url, or base_store to be provided")
+        if num_inputs == 0:
             raise ValueError(
-                "Expected either base_url or base_path to be provided")
+                "Expected one of base_path, base_url, or base_store to be provided")
+
         if base_path is not None:
             self.is_remote = False
+            self.is_store = False
             self.zarr_folder = 'anndata.zarr'
-        else:
+        elif adata_url is not None:
             self.is_remote = True
+            self.is_store = False
             self.zarr_folder = None
+        else:
+            # Store case
+            self.is_remote = False
+            self.is_store = True
+            self.zarr_folder = None
+
         self.local_dir_uid = make_unique_filename(".adata.zarr")
         self._expression_matrix = obs_feature_matrix_elem
         self._cell_set_obs_names = obs_set_names
@@ -979,6 +1036,9 @@ class AnnDataWrapper(AbstractWrapper):
 
     def make_routes(self, dataset_uid, obj_i):
         if self.is_remote:
+            return []
+        elif self.is_store:
+            self.register_zarr_store(dataset_uid, obj_i, self._base_store, self.local_dir_uid)
             return []
         else:
             return self.get_local_dir_route(dataset_uid, obj_i, self._path, self.local_dir_uid)
@@ -1140,8 +1200,11 @@ class MultivecZarrWrapper(AbstractWrapper):
 
     def make_genomic_profiles_file_def_creator(self, dataset_uid, obj_i):
         def genomic_profiles_file_def_creator(base_url):
-            return {
+            obj_file_def = {
                 "fileType": "genomic-profiles.zarr",
                 "url": self.get_zarr_url(base_url, dataset_uid, obj_i)
             }
+            if self._request_init is not None:
+                obj_file_def['requestInit'] = self._request_init
+            return obj_file_def
         return genomic_profiles_file_def_creator

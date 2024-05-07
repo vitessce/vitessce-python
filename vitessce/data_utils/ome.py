@@ -71,7 +71,7 @@ def rgb_img_to_ome_zarr(img_arr, output_path, img_name="Image", chunks=(1, 256, 
         image=img_arr,
         group=z_root,
         axes=axes,
-        storage_options=dict(chunks=chunks),
+        storage_options={"chunks": chunks},
         **kwargs,
     )
     z_root.attrs["omero"] = {
@@ -112,7 +112,7 @@ def multiplex_img_to_ome_zarr(
 
     z_root = zarr.open_group(output_path, mode="w")
 
-    write_image(image=img_arr, group=z_root, axes=axes, storage_options=dict(chunks=chunks))
+    write_image(image=img_arr, group=z_root, axes=axes, storage_options={"chunks": chunks})
     z_root.attrs["omero"] = {
         "name": img_name,
         "version": "0.3",

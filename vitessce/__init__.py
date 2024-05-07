@@ -36,7 +36,7 @@ from .wrappers import AbstractWrapper
 try:
     from .widget import VitessceWidget, data_server
 except ModuleNotFoundError as e:  # pragma: no cover
-    warn(f"Extra installs are necessary to use widgets: {e}")
+    warn(f"Extra installs are necessary to use widgets: {e}", stacklevel=1)
 
 try:
     from .wrappers import (
@@ -52,7 +52,7 @@ try:
         OmeZarrWrapper,
     )
 except ModuleNotFoundError as e:  # pragma: no cover
-    warn(f"Extra installs are necessary to use wrappers: {e}")
+    warn(f"Extra installs are necessary to use wrappers: {e}", stacklevel=1)
 
 try:
     from .export import (
@@ -60,4 +60,4 @@ try:
         export_to_s3,
     )
 except ModuleNotFoundError as e:  # pragma: no cover
-    warn(f"Extra installs are necessary to use exports: {e}")
+    warn(f"Extra installs are necessary to use exports: {e}", stacklevel=1)

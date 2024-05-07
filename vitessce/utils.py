@@ -11,7 +11,6 @@ def get_next_scope_numeric(prev_scopes):
 
 
 def create_prefixed_get_next_scope_numeric(prefix):
-
     def inner_get_next_scope(prev_scopes):
         next_scope_int = 0
         next_scope_str = None

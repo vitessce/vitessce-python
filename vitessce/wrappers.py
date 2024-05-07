@@ -1,15 +1,22 @@
 import os
-from os.path import join
 import tempfile
-from uuid import uuid4
+from os.path import join
 from pathlib import PurePath, PurePosixPath
+from uuid import uuid4
+
 import zarr
 
 from .constants import (
-    norm_enum,
-    ViewType as cm,
-    FileType as ft,
     DataType as dt,
+)
+from .constants import (
+    FileType as ft,
+)
+from .constants import (
+    ViewType as cm,
+)
+from .constants import (
+    norm_enum,
 )
 from .repr import make_repr
 
@@ -39,15 +46,14 @@ class AbstractWrapper:
         :param str out_dir: The path to a local directory used for data processing outputs. By default, uses a temp. directory.
         :param dict request_init: options to be passed along with every fetch request from the browser, like `{ "header": { "Authorization": "Bearer dsfjalsdfa1431" } }`
         """
-        self.out_dir = kwargs['out_dir'] if 'out_dir' in kwargs else tempfile.mkdtemp(
-        )
+        self.out_dir = kwargs["out_dir"] if "out_dir" in kwargs else tempfile.mkdtemp()
         self.routes = []
         self.is_remote = False  # TODO: change to needs_localhost_serving for clarity
         self.is_store = False  # TODO: change to needs_store_registration for clarity
         self.file_def_creators = []
         self.base_dir = None
         self.stores = {}
-        self._request_init = kwargs['request_init'] if 'request_init' in kwargs else None
+        self._request_init = kwargs["request_init"] if "request_init" in kwargs else None
 
     def __repr__(self):
         return self._repr
@@ -117,10 +123,10 @@ class AbstractWrapper:
         if not self.is_remote:
             out_dir = self._get_out_dir(dataset_uid, obj_i)
             # TODO: Move imports back to top when this is factored out.
-            from starlette.staticfiles import StaticFiles
             from starlette.routing import Mount
-            return [Mount(self._get_route_str(dataset_uid, obj_i),
-                          app=StaticFiles(directory=out_dir, html=False))]
+            from starlette.staticfiles import StaticFiles
+
+            return [Mount(self._get_route_str(dataset_uid, obj_i), app=StaticFiles(directory=out_dir, html=False))]
         return []
 
     def get_local_dir_url(self, base_url, dataset_uid, obj_i, local_dir_path, local_dir_uid):
@@ -171,10 +177,10 @@ class AbstractWrapper:
                 route_path = file_path_to_url_path(local_dir_path)
                 local_dir_path = join(self.base_dir, local_dir_path)
             # TODO: Move imports back to top when this is factored out.
-            from starlette.staticfiles import StaticFiles
             from starlette.routing import Mount
-            return [Mount(route_path,
-                          app=StaticFiles(directory=local_dir_path, html=False))]
+            from starlette.staticfiles import StaticFiles
+
+            return [Mount(route_path, app=StaticFiles(directory=local_dir_path, html=False))]
         return []
 
     def _get_url(self, base_url, dataset_uid, obj_i, *args):
@@ -200,7 +206,8 @@ class AbstractWrapper:
         :type vc: VitessceConfig
         """
         raise NotImplementedError(
-            "Auto view configuration has not yet been implemented for this data object wrapper class.")
+            "Auto view configuration has not yet been implemented for this data object wrapper class."
+        )
 
 
 class MultiImageWrapper(AbstractWrapper):
@@ -220,42 +227,36 @@ class MultiImageWrapper(AbstractWrapper):
     def convert_and_save(self, dataset_uid, obj_i, base_dir=None):
         for image in self.image_wrappers:
             image.convert_and_save(dataset_uid, obj_i, base_dir=base_dir)
-        file_def_creator = self.make_raster_file_def_creator(
-            dataset_uid, obj_i)
+        file_def_creator = self.make_raster_file_def_creator(dataset_uid, obj_i)
         routes = self.make_raster_routes()
         self.file_def_creators.append(file_def_creator)
         self.routes += routes
 
     def make_raster_routes(self):
         obj_routes = []
-        for num, image in enumerate(self.image_wrappers):
+        for num, image in enumerate(self.image_wrappers):  # noqa: B007
             obj_routes = obj_routes + image.get_routes()
         return obj_routes
 
     def make_raster_file_def_creator(self, dataset_uid, obj_i):
-
         def raster_file_def_creator(base_url):
             raster_json = {
                 "schemaVersion": "0.0.2",
                 "usePhysicalSizeScaling": self.use_physical_size_scaling,
                 "images": [],
-                "renderLayers": []
+                "renderLayers": [],
             }
             for image in self.image_wrappers:
                 image_json = image.make_image_def(dataset_uid, obj_i, base_url)
-                raster_json['images'].append(image_json)
-                raster_json['renderLayers'].append(image.name)
+                raster_json["images"].append(image_json)
+                raster_json["renderLayers"].append(image.name)
 
-            return {
-                "fileType": ft.RASTER_JSON.value,
-                "options": raster_json
-            }
+            return {"fileType": ft.RASTER_JSON.value, "options": raster_json}
 
         return raster_file_def_creator
 
 
 class OmeTiffWrapper(AbstractWrapper):
-
     """
     Wrap an OME-TIFF File by creating an instance of the ``OmeTiffWrapper`` class.
 
@@ -269,8 +270,17 @@ class OmeTiffWrapper(AbstractWrapper):
     :param \\*\\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
     """
 
-    def __init__(self, img_path=None, offsets_path=None, img_url=None, offsets_url=None, name="", transformation_matrix=None, is_bitmask=False,
-                 **kwargs):
+    def __init__(
+        self,
+        img_path=None,
+        offsets_path=None,
+        img_url=None,
+        offsets_url=None,
+        name="",
+        transformation_matrix=None,
+        is_bitmask=False,
+        **kwargs,
+    ):
         super().__init__(**kwargs)
         self._repr = make_repr(locals())
         self.name = name
@@ -283,16 +293,14 @@ class OmeTiffWrapper(AbstractWrapper):
         self.local_img_uid = make_unique_filename(".ome.tif")
         self.local_offsets_uid = make_unique_filename(".offsets.json")
         if img_url is not None and (img_path is not None or offsets_path is not None):
-            raise ValueError(
-                "Did not expect img_path or offsets_path to be provided with img_url")
+            raise ValueError("Did not expect img_path or offsets_path to be provided with img_url")
 
     def convert_and_save(self, dataset_uid, obj_i, base_dir=None):
         # Only create out-directory if needed
         if not self.is_remote:
             super().convert_and_save(dataset_uid, obj_i, base_dir=base_dir)
 
-        file_def_creator = self.make_raster_file_def_creator(
-            dataset_uid, obj_i)
+        file_def_creator = self.make_raster_file_def_creator(dataset_uid, obj_i)
         routes = self.make_raster_routes(dataset_uid, obj_i)
 
         self.file_def_creators.append(file_def_creator)
@@ -303,14 +311,16 @@ class OmeTiffWrapper(AbstractWrapper):
             return []
         else:
             # TODO: Move imports back to top when this is factored out.
-            from .routes import range_repsonse, JsonRoute, FileRoute
             from generate_tiff_offsets import get_offsets
             from starlette.responses import UJSONResponse
+
+            from .routes import FileRoute, JsonRoute, range_repsonse
 
             offsets = get_offsets(self._img_path)
 
             async def response_func(req):
                 return UJSONResponse(offsets)
+
             if self.base_dir is None:
                 local_img_path = self._img_path
                 local_img_route_path = self._get_route_str(dataset_uid, obj_i, self.local_img_uid)
@@ -342,10 +352,8 @@ class OmeTiffWrapper(AbstractWrapper):
                 "images": [self.make_image_def(dataset_uid, obj_i, base_url)],
             }
 
-            return {
-                "fileType": ft.RASTER_JSON.value,
-                "options": raster_json
-            }
+            return {"fileType": ft.RASTER_JSON.value, "options": raster_json}
+
         return raster_file_def_creator
 
     def create_image_json(self, img_url, offsets_url=None):
@@ -359,9 +367,7 @@ class OmeTiffWrapper(AbstractWrapper):
             # Do not include offsets in base_dir mode.
             metadata["omeTiffOffsetsUrl"] = offsets_url
         if self._transformation_matrix is not None:
-            metadata["transform"] = {
-                "matrix": self._transformation_matrix
-            }
+            metadata["transform"] = {"matrix": self._transformation_matrix}
         metadata["isBitmask"] = self.is_bitmask
         # Only attach metadata if there is some - otherwise schema validation fails.
         if len(metadata.keys()) > 0:
@@ -373,19 +379,16 @@ class OmeTiffWrapper(AbstractWrapper):
             return self._img_url
         if self.base_dir is not None:
             return self._get_url_simple(base_url, file_path_to_url_path(self._img_path, prepend_slash=False))
-        return self._get_url(base_url, dataset_uid,
-                             obj_i, self.local_img_uid)
+        return self._get_url(base_url, dataset_uid, obj_i, self.local_img_uid)
 
     def get_offsets_url(self, base_url="", dataset_uid="", obj_i=""):
         if self._offsets_url is not None or self.is_remote:
             return self._offsets_url
-        offsets_url = self._get_url(
-            base_url, dataset_uid, obj_i, self.local_offsets_uid)
+        offsets_url = self._get_url(base_url, dataset_uid, obj_i, self.local_offsets_uid)
         return offsets_url
 
 
 class ImageOmeTiffWrapper(AbstractWrapper):
-
     """
     Wrap an OME-TIFF File by creating an instance of the ``ImageOmeTiffWrapper`` class. Intended to be used with the spatialBeta and layerControllerBeta views.
 
@@ -398,7 +401,16 @@ class ImageOmeTiffWrapper(AbstractWrapper):
     :param \\*\\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
     """
 
-    def __init__(self, img_path=None, offsets_path=None, img_url=None, offsets_url=None, coordinate_transformations=None, coordination_values=None, **kwargs):
+    def __init__(
+        self,
+        img_path=None,
+        offsets_path=None,
+        img_url=None,
+        offsets_url=None,
+        coordinate_transformations=None,
+        coordination_values=None,
+        **kwargs,
+    ):
         super().__init__(**kwargs)
         self._repr = make_repr(locals())
         self._img_path = img_path
@@ -411,16 +423,14 @@ class ImageOmeTiffWrapper(AbstractWrapper):
         self.local_img_uid = make_unique_filename(".ome.tif")
         self.local_offsets_uid = make_unique_filename(".offsets.json")
         if img_url is not None and (img_path is not None or offsets_path is not None):
-            raise ValueError(
-                "Did not expect img_path or offsets_path to be provided with img_url")
+            raise ValueError("Did not expect img_path or offsets_path to be provided with img_url")
 
     def convert_and_save(self, dataset_uid, obj_i, base_dir=None):
         # Only create out-directory if needed
         if not self.is_remote:
             super().convert_and_save(dataset_uid, obj_i, base_dir=base_dir)
 
-        file_def_creator = self.make_raster_file_def_creator(
-            dataset_uid, obj_i)
+        file_def_creator = self.make_raster_file_def_creator(dataset_uid, obj_i)
         routes = self.make_raster_routes(dataset_uid, obj_i)
 
         self.file_def_creators.append(file_def_creator)
@@ -431,14 +441,16 @@ class ImageOmeTiffWrapper(AbstractWrapper):
             return []
         else:
             # TODO: Move imports back to top when this is factored out.
-            from .routes import range_repsonse, JsonRoute, FileRoute
             from generate_tiff_offsets import get_offsets
             from starlette.responses import UJSONResponse
+
+            from .routes import FileRoute, JsonRoute, range_repsonse
 
             offsets = get_offsets(self._img_path)
 
             async def response_func(req):
                 return UJSONResponse(offsets)
+
             if self.base_dir is None:
                 local_img_path = self._img_path
                 local_img_route_path = self._get_route_str(dataset_uid, obj_i, self.local_img_uid)
@@ -478,6 +490,7 @@ class ImageOmeTiffWrapper(AbstractWrapper):
             if self._coordination_values is not None:
                 file_def["coordinationValues"] = self._coordination_values
             return file_def
+
         return raster_file_def_creator
 
     def get_img_url(self, base_url="", dataset_uid="", obj_i=""):
@@ -485,19 +498,16 @@ class ImageOmeTiffWrapper(AbstractWrapper):
             return self._img_url
         if self.base_dir is not None:
             return self._get_url_simple(base_url, file_path_to_url_path(self._img_path, prepend_slash=False))
-        return self._get_url(base_url, dataset_uid,
-                             obj_i, self.local_img_uid)
+        return self._get_url(base_url, dataset_uid, obj_i, self.local_img_uid)
 
     def get_offsets_url(self, base_url="", dataset_uid="", obj_i=""):
         if self._offsets_url is not None or self.is_remote:
             return self._offsets_url
-        offsets_url = self._get_url(
-            base_url, dataset_uid, obj_i, self.local_offsets_uid)
+        offsets_url = self._get_url(base_url, dataset_uid, obj_i, self.local_offsets_uid)
         return offsets_url
 
 
 class ObsSegmentationsOmeTiffWrapper(AbstractWrapper):
-
     """
     Wrap an OME-TIFF File by creating an instance of the ``ObsSegmentationsOmeTiffWrapper`` class. Intended to be used with the spatialBeta and layerControllerBeta views.
 
@@ -511,7 +521,17 @@ class ObsSegmentationsOmeTiffWrapper(AbstractWrapper):
     :param \\*\\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
     """
 
-    def __init__(self, img_path=None, offsets_path=None, img_url=None, offsets_url=None, coordinate_transformations=None, obs_types_from_channel_names=None, coordination_values=None, **kwargs):
+    def __init__(
+        self,
+        img_path=None,
+        offsets_path=None,
+        img_url=None,
+        offsets_url=None,
+        coordinate_transformations=None,
+        obs_types_from_channel_names=None,
+        coordination_values=None,
+        **kwargs,
+    ):
         super().__init__(**kwargs)
         self._repr = make_repr(locals())
         self._img_path = img_path
@@ -525,16 +545,14 @@ class ObsSegmentationsOmeTiffWrapper(AbstractWrapper):
         self.local_img_uid = make_unique_filename(".ome.tif")
         self.local_offsets_uid = make_unique_filename(".offsets.json")
         if img_url is not None and (img_path is not None or offsets_path is not None):
-            raise ValueError(
-                "Did not expect img_path or offsets_path to be provided with img_url")
+            raise ValueError("Did not expect img_path or offsets_path to be provided with img_url")
 
     def convert_and_save(self, dataset_uid, obj_i, base_dir=None):
         # Only create out-directory if needed
         if not self.is_remote:
             super().convert_and_save(dataset_uid, obj_i, base_dir=base_dir)
 
-        file_def_creator = self.make_raster_file_def_creator(
-            dataset_uid, obj_i)
+        file_def_creator = self.make_raster_file_def_creator(dataset_uid, obj_i)
         routes = self.make_raster_routes(dataset_uid, obj_i)
 
         self.file_def_creators.append(file_def_creator)
@@ -545,14 +563,16 @@ class ObsSegmentationsOmeTiffWrapper(AbstractWrapper):
             return []
         else:
             # TODO: Move imports back to top when this is factored out.
-            from .routes import range_repsonse, JsonRoute, FileRoute
             from generate_tiff_offsets import get_offsets
             from starlette.responses import UJSONResponse
+
+            from .routes import FileRoute, JsonRoute, range_repsonse
 
             offsets = get_offsets(self._img_path)
 
             async def response_func(req):
                 return UJSONResponse(offsets)
+
             if self.base_dir is None:
                 local_img_path = self._img_path
                 local_img_route_path = self._get_route_str(dataset_uid, obj_i, self.local_img_uid)
@@ -595,6 +615,7 @@ class ObsSegmentationsOmeTiffWrapper(AbstractWrapper):
             if self._coordination_values is not None:
                 file_def["coordinationValues"] = self._coordination_values
             return file_def
+
         return raster_file_def_creator
 
     def get_img_url(self, base_url="", dataset_uid="", obj_i=""):
@@ -602,19 +623,16 @@ class ObsSegmentationsOmeTiffWrapper(AbstractWrapper):
             return self._img_url
         if self.base_dir is not None:
             return self._get_url_simple(base_url, file_path_to_url_path(self._img_path, prepend_slash=False))
-        return self._get_url(base_url, dataset_uid,
-                             obj_i, self.local_img_uid)
+        return self._get_url(base_url, dataset_uid, obj_i, self.local_img_uid)
 
     def get_offsets_url(self, base_url="", dataset_uid="", obj_i=""):
         if self._offsets_url is not None or self.is_remote:
             return self._offsets_url
-        offsets_url = self._get_url(
-            base_url, dataset_uid, obj_i, self.local_offsets_uid)
+        offsets_url = self._get_url(base_url, dataset_uid, obj_i, self.local_offsets_uid)
         return offsets_url
 
 
 class CsvWrapper(AbstractWrapper):
-
     """
     Wrap a CSV file by creating an instance of the ``CsvWrapper`` class.
 
@@ -626,8 +644,7 @@ class CsvWrapper(AbstractWrapper):
     :param \\*\\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
     """
 
-    def __init__(self, csv_path=None, csv_url=None, data_type=None, options=None, coordination_values=None,
-                 **kwargs):
+    def __init__(self, csv_path=None, csv_url=None, data_type=None, options=None, coordination_values=None, **kwargs):
         super().__init__(**kwargs)
         self._repr = make_repr(locals())
         self._csv_path = csv_path
@@ -640,19 +657,16 @@ class CsvWrapper(AbstractWrapper):
         if data_type is None:
             raise ValueError("Expected data_type to be provided")
         if csv_url is not None and csv_path is not None:
-            raise ValueError(
-                "Did not expect csv_url to be provided with csv_path")
+            raise ValueError("Did not expect csv_url to be provided with csv_path")
         if csv_url is None and csv_path is None:
-            raise ValueError(
-                "Expected csv_url or csv_path to be provided")
+            raise ValueError("Expected csv_url or csv_path to be provided")
 
     def convert_and_save(self, dataset_uid, obj_i, base_dir=None):
         # Only create out-directory if needed
         if not self.is_remote:
             super().convert_and_save(dataset_uid, obj_i, base_dir=base_dir)
 
-        file_def_creator = self.make_csv_file_def_creator(
-            dataset_uid, obj_i)
+        file_def_creator = self.make_csv_file_def_creator(dataset_uid, obj_i)
         routes = self.make_csv_routes(dataset_uid, obj_i)
 
         self.file_def_creators.append(file_def_creator)
@@ -663,8 +677,9 @@ class CsvWrapper(AbstractWrapper):
             return []
         else:
             # TODO: Move imports back to top when this is factored out.
-            from .routes import FileRoute
             from starlette.responses import FileResponse
+
+            from .routes import FileRoute
 
             if self.base_dir is not None:
                 local_csv_path = join(self.base_dir, self._csv_path)
@@ -675,6 +690,7 @@ class CsvWrapper(AbstractWrapper):
 
             async def response_func(req):
                 return FileResponse(local_csv_path, filename=os.path.basename(self._csv_path))
+
             routes = [
                 FileRoute(local_csv_route_path, response_func, local_csv_path),
             ]
@@ -691,6 +707,7 @@ class CsvWrapper(AbstractWrapper):
             if self._coordination_values is not None:
                 file_def["coordinationValues"] = self._coordination_values
             return file_def
+
         return csv_file_def_creator
 
     def get_csv_url(self, base_url="", dataset_uid="", obj_i=""):
@@ -698,12 +715,10 @@ class CsvWrapper(AbstractWrapper):
             return self._csv_url
         if self.base_dir is not None:
             return self._get_url_simple(base_url, file_path_to_url_path(self._csv_path, prepend_slash=False))
-        return self._get_url(base_url, dataset_uid,
-                             obj_i, self.local_csv_uid)
+        return self._get_url(base_url, dataset_uid, obj_i, self.local_csv_uid)
 
 
 class OmeZarrWrapper(AbstractWrapper):
-
     """
     Wrap an OME-NGFF Zarr store by creating an instance of the ``OmeZarrWrapper`` class.
 
@@ -716,11 +731,9 @@ class OmeZarrWrapper(AbstractWrapper):
         super().__init__(**kwargs)
         self._repr = make_repr(locals())
         if img_url is not None and img_path is not None:
-            raise ValueError(
-                "Did not expect img_path to be provided with img_url")
+            raise ValueError("Did not expect img_path to be provided with img_url")
         if img_url is None and img_path is None:
-            raise ValueError(
-                "Expected either img_url or img_path to be provided")
+            raise ValueError("Expected either img_url or img_path to be provided")
         self._img_path = img_path
         self._img_url = img_url
         self.name = name
@@ -736,8 +749,7 @@ class OmeZarrWrapper(AbstractWrapper):
         if not self.is_remote:
             super().convert_and_save(dataset_uid, obj_i, base_dir=base_dir)
 
-        file_def_creator = self.make_image_file_def_creator(
-            dataset_uid, obj_i)
+        file_def_creator = self.make_image_file_def_creator(dataset_uid, obj_i)
         routes = self.make_image_routes(dataset_uid, obj_i)
 
         self.file_def_creators.append(file_def_creator)
@@ -756,10 +768,8 @@ class OmeZarrWrapper(AbstractWrapper):
 
     def make_image_file_def_creator(self, dataset_uid, obj_i):
         def image_file_def_creator(base_url):
-            return {
-                "fileType": "image.ome-zarr",
-                "url": self.get_img_url(base_url, dataset_uid, obj_i)
-            }
+            return {"fileType": "image.ome-zarr", "url": self.get_img_url(base_url, dataset_uid, obj_i)}
+
         return image_file_def_creator
 
     # The following two functions will be used when OmeZarrWrapper
@@ -784,7 +794,6 @@ class OmeZarrWrapper(AbstractWrapper):
 
 
 class ImageOmeZarrWrapper(AbstractWrapper):
-
     """
     Wrap an OME-NGFF Zarr store by creating an instance of the ``ImageOmeZarrWrapper`` class. Intended to be used with the spatialBeta and layerControllerBeta views.
 
@@ -795,15 +804,15 @@ class ImageOmeZarrWrapper(AbstractWrapper):
     :param \\*\\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
     """
 
-    def __init__(self, img_path=None, img_url=None, coordinate_transformations=None, coordination_values=None, **kwargs):
+    def __init__(
+        self, img_path=None, img_url=None, coordinate_transformations=None, coordination_values=None, **kwargs
+    ):
         super().__init__(**kwargs)
         self._repr = make_repr(locals())
         if img_url is not None and img_path is not None:
-            raise ValueError(
-                "Did not expect img_path to be provided with img_url")
+            raise ValueError("Did not expect img_path to be provided with img_url")
         if img_url is None and img_path is None:
-            raise ValueError(
-                "Expected either img_url or img_path to be provided")
+            raise ValueError("Expected either img_url or img_path to be provided")
         self._img_path = img_path
         self._img_url = img_url
         self._coordinate_transformations = coordinate_transformations
@@ -819,8 +828,7 @@ class ImageOmeZarrWrapper(AbstractWrapper):
         if not self.is_remote:
             super().convert_and_save(dataset_uid, obj_i, base_dir=base_dir)
 
-        file_def_creator = self.make_image_file_def_creator(
-            dataset_uid, obj_i)
+        file_def_creator = self.make_image_file_def_creator(dataset_uid, obj_i)
         routes = self.make_image_routes(dataset_uid, obj_i)
 
         self.file_def_creators.append(file_def_creator)
@@ -843,10 +851,7 @@ class ImageOmeZarrWrapper(AbstractWrapper):
             if self._coordinate_transformations is not None:
                 options["coordinateTransformations"] = self._coordinate_transformations
 
-            file_def = {
-                "fileType": "image.ome-zarr",
-                "url": self.get_img_url(base_url, dataset_uid, obj_i)
-            }
+            file_def = {"fileType": "image.ome-zarr", "url": self.get_img_url(base_url, dataset_uid, obj_i)}
 
             if len(options.keys()) > 0:
                 file_def["options"] = options
@@ -858,7 +863,6 @@ class ImageOmeZarrWrapper(AbstractWrapper):
 
 
 class ObsSegmentationsOmeZarrWrapper(AbstractWrapper):
-
     """
     Wrap an OME-NGFF Zarr store by creating an instance of the ``ObsSegmentationsOmeZarrWrapper`` class. Intended to be used with the spatialBeta and layerControllerBeta views.
 
@@ -870,15 +874,21 @@ class ObsSegmentationsOmeZarrWrapper(AbstractWrapper):
     :param \\*\\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
     """
 
-    def __init__(self, img_path=None, img_url=None, coordinate_transformations=None, coordination_values=None, obs_types_from_channel_names=None, **kwargs):
+    def __init__(
+        self,
+        img_path=None,
+        img_url=None,
+        coordinate_transformations=None,
+        coordination_values=None,
+        obs_types_from_channel_names=None,
+        **kwargs,
+    ):
         super().__init__(**kwargs)
         self._repr = make_repr(locals())
         if img_url is not None and img_path is not None:
-            raise ValueError(
-                "Did not expect img_path to be provided with img_url")
+            raise ValueError("Did not expect img_path to be provided with img_url")
         if img_url is None and img_path is None:
-            raise ValueError(
-                "Expected either img_url or img_path to be provided")
+            raise ValueError("Expected either img_url or img_path to be provided")
         self._img_path = img_path
         self._img_url = img_url
         self._coordinate_transformations = coordinate_transformations
@@ -895,8 +905,7 @@ class ObsSegmentationsOmeZarrWrapper(AbstractWrapper):
         if not self.is_remote:
             super().convert_and_save(dataset_uid, obj_i, base_dir=base_dir)
 
-        file_def_creator = self.make_image_file_def_creator(
-            dataset_uid, obj_i)
+        file_def_creator = self.make_image_file_def_creator(dataset_uid, obj_i)
         routes = self.make_image_routes(dataset_uid, obj_i)
 
         self.file_def_creators.append(file_def_creator)
@@ -922,10 +931,7 @@ class ObsSegmentationsOmeZarrWrapper(AbstractWrapper):
             if self._obs_types_from_channel_names is not None:
                 options["obsTypesFromChannelNames"] = self._obs_types_from_channel_names
 
-            file_def = {
-                "fileType": "obsSegmentations.ome-zarr",
-                "url": self.get_img_url(base_url, dataset_uid, obj_i)
-            }
+            file_def = {"fileType": "obsSegmentations.ome-zarr", "url": self.get_img_url(base_url, dataset_uid, obj_i)}
 
             if len(options.keys()) > 0:
                 file_def["options"] = options
@@ -937,7 +943,31 @@ class ObsSegmentationsOmeZarrWrapper(AbstractWrapper):
 
 
 class AnnDataWrapper(AbstractWrapper):
-    def __init__(self, adata_path=None, adata_url=None, adata_store=None, obs_feature_matrix_path=None, feature_filter_path=None, initial_feature_filter_path=None, obs_set_paths=None, obs_set_names=None, obs_locations_path=None, obs_segmentations_path=None, obs_embedding_paths=None, obs_embedding_names=None, obs_embedding_dims=None, obs_spots_path=None, obs_points_path=None, feature_labels_path=None, obs_labels_path=None, convert_to_dense=True, coordination_values=None, obs_labels_paths=None, obs_labels_names=None, **kwargs):
+    def __init__(
+        self,
+        adata_path=None,
+        adata_url=None,
+        adata_store=None,
+        obs_feature_matrix_path=None,
+        feature_filter_path=None,
+        initial_feature_filter_path=None,
+        obs_set_paths=None,
+        obs_set_names=None,
+        obs_locations_path=None,
+        obs_segmentations_path=None,
+        obs_embedding_paths=None,
+        obs_embedding_names=None,
+        obs_embedding_dims=None,
+        obs_spots_path=None,
+        obs_points_path=None,
+        feature_labels_path=None,
+        obs_labels_path=None,
+        convert_to_dense=True,
+        coordination_values=None,
+        obs_labels_paths=None,
+        obs_labels_names=None,
+        **kwargs,
+    ):
         """
         Wrap an AnnData object by creating an instance of the ``AnnDataWrapper`` class.
 
@@ -974,16 +1004,14 @@ class AnnDataWrapper(AbstractWrapper):
 
         num_inputs = sum([1 for x in [adata_path, adata_url, adata_store] if x is not None])
         if num_inputs > 1:
-            raise ValueError(
-                "Expected only one of adata_path, adata_url, or adata_store to be provided")
+            raise ValueError("Expected only one of adata_path, adata_url, or adata_store to be provided")
         if num_inputs == 0:
-            raise ValueError(
-                "Expected one of adata_path, adata_url, or adata_store to be provided")
+            raise ValueError("Expected one of adata_path, adata_url, or adata_store to be provided")
 
         if adata_path is not None:
             self.is_remote = False
             self.is_store = False
-            self.zarr_folder = 'anndata.zarr'
+            self.zarr_folder = "anndata.zarr"
         elif adata_url is not None:
             self.is_remote = True
             self.is_store = False
@@ -1009,9 +1037,9 @@ class AnnDataWrapper(AbstractWrapper):
         self._spatial_points_obsm = obs_points_path
         self._gene_alias = feature_labels_path
         # Support legacy provision of single obs labels path
-        if (obs_labels_path is not None):
+        if obs_labels_path is not None:
             self._obs_labels_paths = [obs_labels_path]
-            self._obs_labels_names = [obs_labels_path.split('/')[-1]]
+            self._obs_labels_names = [obs_labels_path.split("/")[-1]]
         else:
             self._obs_labels_paths = obs_labels_paths
             self._obs_labels_names = obs_labels_names
@@ -1023,8 +1051,7 @@ class AnnDataWrapper(AbstractWrapper):
         if not self.is_remote:
             super().convert_and_save(dataset_uid, obj_i, base_dir=base_dir)
 
-        file_def_creator = self.make_file_def_creator(
-            dataset_uid, obj_i)
+        file_def_creator = self.make_file_def_creator(dataset_uid, obj_i)
         routes = self.make_anndata_routes(dataset_uid, obj_i)
 
         self.file_def_creators.append(file_def_creator)
@@ -1049,65 +1076,42 @@ class AnnDataWrapper(AbstractWrapper):
         def get_anndata_zarr(base_url):
             options = {}
             if self._spatial_centroid_obsm is not None:
-                options["obsLocations"] = {
-                    "path": self._spatial_centroid_obsm
-                }
+                options["obsLocations"] = {"path": self._spatial_centroid_obsm}
             if self._spatial_polygon_obsm is not None:
-                options["obsSegmentations"] = {
-                    "path": self._spatial_polygon_obsm
-                }
+                options["obsSegmentations"] = {"path": self._spatial_polygon_obsm}
             if self._spatial_spots_obsm is not None:
-                options["obsSpots"] = {
-                    "path": self._spatial_spots_obsm
-                }
+                options["obsSpots"] = {"path": self._spatial_spots_obsm}
             if self._spatial_points_obsm is not None:
-                options["obsPoints"] = {
-                    "path": self._spatial_points_obsm
-                }
+                options["obsPoints"] = {"path": self._spatial_points_obsm}
             if self._mappings_obsm is not None:
                 options["obsEmbedding"] = []
                 if self._mappings_obsm_names is not None:
                     for key, mapping in zip(self._mappings_obsm_names, self._mappings_obsm):
-                        options["obsEmbedding"].append({
-                            "path": mapping,
-                            "dims": [0, 1],
-                            "embeddingType": key
-                        })
+                        options["obsEmbedding"].append({"path": mapping, "dims": [0, 1], "embeddingType": key})
                 else:
                     for mapping in self._mappings_obsm:
-                        mapping_key = mapping.split('/')[-1]
+                        mapping_key = mapping.split("/")[-1]
                         self._mappings_obsm_names = mapping_key
-                        options["obsEmbedding"].append({
-                            "path": mapping,
-                            "dims": [0, 1],
-                            "embeddingType": mapping_key
-                        })
+                        options["obsEmbedding"].append({"path": mapping, "dims": [0, 1], "embeddingType": mapping_key})
                 if self._mappings_obsm_dims is not None:
                     for dim_i, dim in enumerate(self._mappings_obsm_dims):
-                        options["obsEmbedding"][dim_i]['dims'] = dim
+                        options["obsEmbedding"][dim_i]["dims"] = dim
             if self._cell_set_obs is not None:
                 options["obsSets"] = []
                 if self._cell_set_obs_names is not None:
                     names = self._cell_set_obs_names
                 else:
-                    names = [obs.split('/')[-1] for obs in self._cell_set_obs]
+                    names = [obs.split("/")[-1] for obs in self._cell_set_obs]
                 for obs, name in zip(self._cell_set_obs, names):
-                    options["obsSets"].append({
-                        "name": name,
-                        "path": obs
-                    })
+                    options["obsSets"].append({"name": name, "path": obs})
             if self._expression_matrix is not None:
-                options["obsFeatureMatrix"] = {
-                    "path": self._expression_matrix
-                }
+                options["obsFeatureMatrix"] = {"path": self._expression_matrix}
                 if self._gene_var_filter is not None:
                     options["obsFeatureMatrix"]["featureFilterPath"] = self._gene_var_filter
                 if self._matrix_gene_var_filter is not None:
                     options["obsFeatureMatrix"]["initialFeatureFilterPath"] = self._matrix_gene_var_filter
             if self._gene_alias is not None:
-                options["featureLabels"] = {
-                    "path": self._gene_alias
-                }
+                options["featureLabels"] = {"path": self._gene_alias}
             if self._obs_labels_paths is not None:
                 if self._obs_labels_names is not None and len(self._obs_labels_paths) == len(self._obs_labels_names):
                     # A name was provided for each path element, so use those values.
@@ -1115,7 +1119,7 @@ class AnnDataWrapper(AbstractWrapper):
                 else:
                     # Names were not provided for each path element,
                     # so fall back to using the final part of each path for the names.
-                    names = [labels_path.split('/')[-1] for labels_path in self._obs_labels_paths]
+                    names = [labels_path.split("/")[-1] for labels_path in self._obs_labels_paths]
                 obs_labels = []
                 for path, name in zip(self._obs_labels_paths, names):
                     obs_labels.append({"path": path, "obsLabelsType": name})
@@ -1124,45 +1128,43 @@ class AnnDataWrapper(AbstractWrapper):
                 obj_file_def = {
                     "fileType": ft.ANNDATA_ZARR.value,
                     "url": self.get_zarr_url(base_url, dataset_uid, obj_i),
-                    "options": options
+                    "options": options,
                 }
                 if self._request_init is not None:
-                    obj_file_def['requestInit'] = self._request_init
+                    obj_file_def["requestInit"] = self._request_init
                 if self._coordination_values is not None:
-                    obj_file_def['coordinationValues'] = self._coordination_values
+                    obj_file_def["coordinationValues"] = self._coordination_values
                 return obj_file_def
             return None
+
         return get_anndata_zarr
 
     def auto_view_config(self, vc):
         dataset = vc.add_dataset().add_object(self)
-        mapping_name = self._mappings_obsm_names[0] if (
-            self._mappings_obsm_names is not None) else self._mappings_obsm[0].split('/')[-1]
-        scatterplot = vc.add_view(
-            cm.SCATTERPLOT, dataset=dataset, mapping=mapping_name)
+        mapping_name = (
+            self._mappings_obsm_names[0]
+            if (self._mappings_obsm_names is not None)
+            else self._mappings_obsm[0].split("/")[-1]
+        )
+        scatterplot = vc.add_view(cm.SCATTERPLOT, dataset=dataset, mapping=mapping_name)
         cell_sets = vc.add_view(cm.OBS_SETS, dataset=dataset)
         genes = vc.add_view(cm.FEATURE_LIST, dataset=dataset)
         heatmap = vc.add_view(cm.HEATMAP, dataset=dataset)
         if self._spatial_polygon_obsm is not None or self._spatial_centroid_obsm is not None:
             spatial = vc.add_view(cm.SPATIAL, dataset=dataset)
-            vc.layout((scatterplot | spatial)
-                      / (heatmap | (cell_sets / genes)))
+            vc.layout((scatterplot | spatial) / (heatmap | (cell_sets / genes)))
         else:
-            vc.layout((scatterplot | (cell_sets / genes))
-                      / heatmap)
+            vc.layout((scatterplot | (cell_sets / genes)) / heatmap)
 
 
 class MultivecZarrWrapper(AbstractWrapper):
-
     def __init__(self, zarr_path=None, zarr_url=None, **kwargs):
         super().__init__(**kwargs)
         self._repr = make_repr(locals())
         if zarr_url is not None and zarr_path is not None:
-            raise ValueError(
-                "Did not expect zarr_path to be provided with zarr_url")
+            raise ValueError("Did not expect zarr_path to be provided with zarr_url")
         if zarr_url is None and zarr_path is None:
-            raise ValueError(
-                "Expected either zarr_url or zarr_path to be provided")
+            raise ValueError("Expected either zarr_url or zarr_path to be provided")
         self._zarr_path = zarr_path
         self._zarr_url = zarr_url
         if self._zarr_path is not None:
@@ -1176,8 +1178,7 @@ class MultivecZarrWrapper(AbstractWrapper):
         if not self.is_remote:
             super().convert_and_save(dataset_uid, obj_i, base_dir=base_dir)
 
-        file_def_creator = self.make_genomic_profiles_file_def_creator(
-            dataset_uid, obj_i)
+        file_def_creator = self.make_genomic_profiles_file_def_creator(dataset_uid, obj_i)
         routes = self.make_genomic_profiles_routes(dataset_uid, obj_i)
 
         self.file_def_creators.append(file_def_creator)
@@ -1196,11 +1197,9 @@ class MultivecZarrWrapper(AbstractWrapper):
 
     def make_genomic_profiles_file_def_creator(self, dataset_uid, obj_i):
         def genomic_profiles_file_def_creator(base_url):
-            obj_file_def = {
-                "fileType": "genomic-profiles.zarr",
-                "url": self.get_zarr_url(base_url, dataset_uid, obj_i)
-            }
+            obj_file_def = {"fileType": "genomic-profiles.zarr", "url": self.get_zarr_url(base_url, dataset_uid, obj_i)}
             if self._request_init is not None:
-                obj_file_def['requestInit'] = self._request_init
+                obj_file_def["requestInit"] = self._request_init
             return obj_file_def
+
         return genomic_profiles_file_def_creator

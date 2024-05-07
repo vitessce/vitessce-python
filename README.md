@@ -43,22 +43,8 @@ In this repository, there are multiple conda environments for different purposes
 ## Linting and testing
 
 ```sh
-flake8
+pre-commit run --all
 pytest
-```
-
-### Formatting
-
-One file:
-
-```sh
-autopep8 --in-place --aggressive ./path/to/file.py
-```
-
-All `.py` files:
-
-```sh
-find . -name '*.py' -exec autopep8 --in-place --aggressive '{}' \;
 ```
 
 
@@ -115,7 +101,7 @@ vw = vc.widget(proxy=True)
 vw
 ```
 
-or 
+or
 
 ```py
 vc.display(proxy=True, host_name="http://localhost:8888")

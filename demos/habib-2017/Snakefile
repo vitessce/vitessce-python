@@ -35,4 +35,3 @@ rule download_data:
         '''
         curl -L -o {output} {params.file_url}
         '''
-

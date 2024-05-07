@@ -1,6 +1,6 @@
 import numpy as np
-from anndata import AnnData
 import scipy.cluster
+from anndata import AnnData
 from scipy.sparse import issparse
 
 VAR_CHUNK_SIZE = 10
@@ -21,35 +21,39 @@ def cast_arr(arr):
     orig_min = np.min(arr)
 
     # Try casting float to int for better downstream compression.
-    if arr.dtype.kind == 'f':
-        cast_arr = arr.astype(f'<i{arr.dtype.itemsize}')
+    if arr.dtype.kind == "f":
+        cast_arr = arr.astype(f"<i{arr.dtype.itemsize}")
         cast_sum = np.sum(cast_arr)
         if np.abs(orig_sum - cast_sum) < 1e-2:
             arr = cast_arr
 
     # Try casting signed int to unsigned int.
-    if arr.dtype.kind == 'i':
+    if arr.dtype.kind == "i":
         # If signed int dtype but no values are less than zero,
         # convert to unsigned int dtype.
         if arr.min() >= 0:
-            arr = arr.astype(f'<u{arr.dtype.itemsize}')
+            arr = arr.astype(f"<u{arr.dtype.itemsize}")
 
     # Try casting to a smaller itemsize.
-    if arr.dtype.kind == 'u' or arr.dtype.kind == 'i' or arr.dtype.kind == 'f':
-        next_itemsizes = [4] if arr.dtype.kind == 'f' else [4, 2, 1]
+    if arr.dtype.kind == "u" or arr.dtype.kind == "i" or arr.dtype.kind == "f":
+        next_itemsizes = [4] if arr.dtype.kind == "f" else [4, 2, 1]
         for next_itemsize in next_itemsizes:
             if arr.dtype.itemsize > next_itemsize:
-                next_dtype = np.dtype(f'<{arr.dtype.kind}{next_itemsize}')
-                next_dtype_info = np.iinfo(next_dtype) if arr.dtype.kind == 'u' or arr.dtype.kind == 'i' else np.finfo(next_dtype)
+                next_dtype = np.dtype(f"<{arr.dtype.kind}{next_itemsize}")
+                next_dtype_info = (
+                    np.iinfo(next_dtype) if arr.dtype.kind == "u" or arr.dtype.kind == "i" else np.finfo(next_dtype)
+                )
                 if next_dtype_info.min <= orig_min and next_dtype_info.max >= orig_max:
                     arr = arr.astype(next_dtype)
-                elif arr.dtype.itemsize == 8 and (arr.dtype.kind == 'u' or arr.dtype.kind == 'i'):
-                    print(f"WARNING: Not casting array with dtype {arr.dtype.name}, but Zarr.js suggests avoiding int64 and uint64")
+                elif arr.dtype.itemsize == 8 and (arr.dtype.kind == "u" or arr.dtype.kind == "i"):
+                    print(
+                        f"WARNING: Not casting array with dtype {arr.dtype.name}, but Zarr.js suggests avoiding int64 and uint64"
+                    )
 
     # Check for float16 usage.
-    if arr.dtype.kind == 'f' and arr.dtype.itemsize == 2:
+    if arr.dtype.kind == "f" and arr.dtype.itemsize == 2:
         # Zarr.js does not have a Float16Array type
-        arr = arr.astype('<f4')
+        arr = arr.astype("<f4")
 
     return arr
 
@@ -70,7 +74,18 @@ def optimize_arr(arr):
     return arr
 
 
-def optimize_adata(adata, obs_cols=None, obsm_keys=None, var_cols=None, varm_keys=None, layer_keys=None, remove_X=False, optimize_X=False, to_dense_X=False, to_sparse_X=False):
+def optimize_adata(
+    adata,
+    obs_cols=None,
+    obsm_keys=None,
+    var_cols=None,
+    varm_keys=None,
+    layer_keys=None,
+    remove_X=False,
+    optimize_X=False,
+    to_dense_X=False,
+    to_sparse_X=False,
+):
     """
     Given an AnnData object, optimize for usage with Vitessce and return a new object.
 
@@ -106,8 +121,7 @@ def optimize_adata(adata, obs_cols=None, obsm_keys=None, var_cols=None, varm_key
             if to_sparse_X:
                 new_X = new_X.tocsc()
             if to_dense_X and to_sparse_X:
-                raise ValueError(
-                    "Did not expect both to_dense_X and to_sparse_X to be True")
+                raise ValueError("Did not expect both to_dense_X and to_sparse_X to be True")
             # If the user has not asked for their matrix to be converted to dense or sparse,
             # we still want to ensure that, if the original matrix was sparse, it
             # uses the CSC sparse format.
@@ -133,25 +147,13 @@ def optimize_adata(adata, obs_cols=None, obsm_keys=None, var_cols=None, varm_key
     # Only keep the subset of obsm and varm items required.
     if obsm_keys is None:
         obsm_keys = adata.obsm.keys()
-    new_obsm = {
-        obsm_key: optimize_arr(adata.obsm[obsm_key])
-        for obsm_key
-        in obsm_keys
-    }
+    new_obsm = {obsm_key: optimize_arr(adata.obsm[obsm_key]) for obsm_key in obsm_keys}
     if varm_keys is None:
         varm_keys = adata.varm.keys()
-    new_varm = {
-        varm_key: optimize_arr(adata.varm[varm_key])
-        for varm_key
-        in varm_keys
-    }
+    new_varm = {varm_key: optimize_arr(adata.varm[varm_key]) for varm_key in varm_keys}
     if layer_keys is None:
         layer_keys = adata.layers.keys()
-    new_layers = {
-        layer_key: optimize_arr(adata.layers[layer_key])
-        for layer_key
-        in layer_keys
-    }
+    new_layers = {layer_key: optimize_arr(adata.layers[layer_key]) for layer_key in layer_keys}
     adata = AnnData(X=new_X, obs=new_obs, var=new_var, obsm=new_obsm, varm=new_varm, layers=new_layers)
     return adata
 
@@ -216,8 +218,7 @@ def to_uint8(arr, norm_along=None):
         ratio_per_gene = 255.0 / range_per_gene
 
         norm_arr = np.multiply(
-            (arr - np.tile(min_along_genes, (num_cells, 1))),
-            np.tile(ratio_per_gene, (num_cells, 1))
+            (arr - np.tile(min_along_genes, (num_cells, 1))), np.tile(ratio_per_gene, (num_cells, 1))
         )
     elif norm_along == "obs":
         # Normalize along cell axis
@@ -229,12 +230,11 @@ def to_uint8(arr, norm_along=None):
         ratio_per_cell = 255.0 / range_per_cell
 
         norm_arr = np.multiply(
-            (arr.T - np.tile(min_along_cells, (num_genes, 1))),
-            np.tile(ratio_per_cell, (num_genes, 1))
+            (arr.T - np.tile(min_along_cells, (num_genes, 1))), np.tile(ratio_per_cell, (num_genes, 1))
         ).T
     else:
         raise ValueError("to_uint8 received unknown norm_along value")
-    return norm_arr.astype('u1')
+    return norm_arr.astype("u1")
 
 
 def sort_var_axis(adata_X, orig_var_index, full_var_index=None):

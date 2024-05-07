@@ -6,10 +6,10 @@ from shutil import copyfile
 from starlette.routing import Mount
 from starlette.staticfiles import StaticFiles
 
-from .routes import JsonRoute, FileRoute
+from .routes import FileRoute, JsonRoute
 
 
-def export_to_s3(config, s3, bucket_name, prefix=''):
+def export_to_s3(config, s3, bucket_name, prefix=""):
     """
     :param config: The Vitessce view config to export to S3.
     :type config: VitessceConfig
@@ -21,9 +21,7 @@ def export_to_s3(config, s3, bucket_name, prefix=''):
     :returns: The config as a dict, with S3 urls filled in.
     :rtype: dict
     """
-
-    base_url = f"https://{bucket_name}.s3.amazonaws.com" + \
-        ("/" + prefix if len(prefix) > 0 else "")
+    base_url = f"https://{bucket_name}.s3.amazonaws.com" + ("/" + prefix if len(prefix) > 0 else "")
     bucket = s3.Bucket(bucket_name)
     config_dict = config.to_dict(base_url=base_url)
     routes = config.get_routes()
@@ -50,16 +48,15 @@ def export_to_s3(config, s3, bucket_name, prefix=''):
                 if route not in uploaded_routes:
                     uploaded_routes.append(route)
                     static_dir = route_app.directory
-                    for root, dirs, files in os.walk(static_dir):
+                    for root, dirs, files in os.walk(static_dir):  # noqa: B007
                         for filename in files:
-                            file_key = key + \
-                                join(root, filename)[len(static_dir):]
+                            file_key = key + join(root, filename)[len(static_dir) :]
                             bucket.upload_file(join(root, filename), file_key)
 
     return config_dict
 
 
-def export_to_files(config, base_url, out_dir='.'):
+def export_to_files(config, base_url, out_dir="."):
     """
     :param config: The Vitessce view config to export to files.
     :type config: VitessceConfig
@@ -69,7 +66,6 @@ def export_to_files(config, base_url, out_dir='.'):
     :returns: The config as a dict, with urls filled in.
     :rtype: dict
     """
-
     config_dict = config.to_dict(base_url=base_url)
     routes = config.get_routes()
     for route in routes:
@@ -79,7 +75,7 @@ def export_to_files(config, base_url, out_dir='.'):
         if isinstance(route, JsonRoute):
             data_json = route.data_json
             os.makedirs(os.path.dirname(out_path), exist_ok=True)
-            with open(out_path, 'w') as f:
+            with open(out_path, "w") as f:
                 json.dump(data_json, f)
         elif isinstance(route, FileRoute):
             local_file_path = route.file_path
@@ -90,10 +86,9 @@ def export_to_files(config, base_url, out_dir='.'):
             if isinstance(route_app, StaticFiles):
                 static_dir = route_app.directory
 
-                for root, dirs, files in os.walk(static_dir):
+                for root, dirs, files in os.walk(static_dir):  # noqa: B007
                     for filename in files:
-                        file_key = out_path + \
-                            join(root, filename)[len(static_dir):]
+                        file_key = out_path + join(root, filename)[len(static_dir) :]
                         os.makedirs(os.path.dirname(file_key), exist_ok=True)
                         copyfile(join(root, filename), file_key)
 

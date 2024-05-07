@@ -208,11 +208,11 @@ class TestWrappers(unittest.TestCase):
         })
 
     def test_anndata(self):
-        adata_path = data_path / 'test.h5ad.zarr'
-        w = AnnDataWrapper(adata_path,
-                           obs_set_paths=['obs/CellType'], obs_set_names=['Cell Type'],
-                           obs_labels_names=['Cell Label'], obs_labels_paths=['obs/CellLabel'],
-                           obs_embedding_paths=['obsm/X_umap'], obs_embedding_names=['UMAP'])
+        base_path = data_path / 'test.h5ad.zarr'
+        w = AnnDataWrapper(base_path,
+                           obs_set_elems=['obs/CellType'], obs_set_names=['Cell Type'],
+                           obs_labels_names=['Cell Label'], obs_labels_elems=['obs/CellLabel'],
+                           obs_embedding_elems=['obsm/X_umap'], obs_embedding_names=['UMAP'])
         w.local_dir_uid = 'anndata.zarr'
 
         file_def_creator = w.make_file_def_creator('A', 0)
@@ -225,8 +225,8 @@ class TestWrappers(unittest.TestCase):
                                     }})
 
     def test_anndata_with_base_dir(self):
-        adata_path = 'test.h5ad.zarr'
-        w = AnnDataWrapper(adata_path, obs_set_paths=['obs/CellType'], obs_set_names=['Cell Type'], obs_embedding_paths=[
+        base_path = 'test.h5ad.zarr'
+        w = AnnDataWrapper(base_path, obs_set_elems=['obs/CellType'], obs_set_names=['Cell Type'], obs_embedding_elems=[
                            'obsm/X_umap'], obs_embedding_names=['UMAP'])
         w.base_dir = data_path
         w.local_dir_uid = 'anndata.zarr'

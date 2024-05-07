@@ -227,6 +227,16 @@ class VitessceConfigDataset:
 
         return routes
 
+    def get_stores(self, base_url=None):
+        stores = {}
+        for obj in self.objs:
+            stores = {
+                **stores,
+                **obj.get_stores(base_url)
+            }
+
+        return stores
+
 
 class VitessceConfigViewHConcat:
     """
@@ -1488,6 +1498,21 @@ class VitessceConfig:
         for d in self.config["datasets"]:
             routes += d.get_routes()
         return routes
+
+    def get_stores(self, base_url=None):
+        """
+        Convert the routes for this view config from the datasets.
+
+        :returns: A list of server routes.
+        :rtype: list[starlette.routing.Route]
+        """
+        stores = {}
+        for d in self.config["datasets"]:
+            stores = {
+                **stores,
+                **d.get_stores(base_url)
+            }
+        return stores
 
     def to_python(self):
         """

@@ -5,6 +5,8 @@ import tempfile
 from typing import Callable, Optional, Type, TypeVar, Union
 from uuid import uuid4
 from pathlib import PurePath, PurePosixPath
+import warnings
+import zarr
 
 import numpy as np
 from spatialdata import SpatialData
@@ -43,13 +45,17 @@ class AbstractWrapper:
         Abstract constructor to be inherited by dataset wrapper classes.
 
         :param str out_dir: The path to a local directory used for data processing outputs. By default, uses a temp. directory.
+        :param dict request_init: options to be passed along with every fetch request from the browser, like `{ "header": { "Authorization": "Bearer dsfjalsdfa1431" } }`
         """
         self.out_dir = kwargs['out_dir'] if 'out_dir' in kwargs else tempfile.mkdtemp(
         )
         self.routes = []
-        self.is_remote = False
+        self.is_remote = False  # TODO: change to needs_localhost_serving for clarity
+        self.is_store = False  # TODO: change to needs_store_registration for clarity
         self.file_def_creators = []
         self.base_dir = None
+        self.stores = {}
+        self._request_init = kwargs['request_init'] if 'request_init' in kwargs else None
 
     def __repr__(self):
         return self._repr
@@ -75,6 +81,20 @@ class AbstractWrapper:
         :rtype: list[starlette.routing.Route]
         """
         return self.routes
+
+    def get_stores(self, base_url):
+        """
+        Obtain the stores that have been created for this wrapper class.
+
+        :returns: A dictionary that maps file URLs to Zarr Store objects.
+        :rtype: dict[str, zarr.Store]
+        """
+        relative_stores = self.stores
+        absolute_stores = {}
+        for relative_url, store in relative_stores.items():
+            absolute_url = base_url + relative_url
+            absolute_stores[absolute_url] = store
+        return absolute_stores
 
     def get_file_defs(self, base_url):
         """
@@ -115,6 +135,30 @@ class AbstractWrapper:
         if not self.is_remote and self.base_dir is not None:
             return self._get_url_simple(base_url, file_path_to_url_path(local_dir_path, prepend_slash=False))
         return self._get_url(base_url, dataset_uid, obj_i, local_dir_uid)
+
+    def register_zarr_store(self, dataset_uid, obj_i, store_or_local_dir_path, local_dir_uid):
+        if not self.is_remote and self.is_store:
+            # Set up `store` and `local_dir_path` variables.
+            if isinstance(store_or_local_dir_path, str):
+                # TODO: use zarr.FSStore if fsspec is installed?
+                store = zarr.DirectoryStore(store_or_local_dir_path)
+                local_dir_path = store_or_local_dir_path
+            else:
+                # TODO: check that store_or_local_dir_path is a zarr.Store or StoreLike?
+                store = store_or_local_dir_path
+                # A store instance was passed directly, so there is no local directory path.
+                # Instead we just make one up using _get_route_str but it could be any string.
+                local_dir_path = self._get_route_str(dataset_uid, obj_i, local_dir_uid)
+
+            # Register the store on the same route path
+            # that will be used for the "url" field in the file definition.
+            if self.base_dir is None:
+                route_path = self._get_route_str(dataset_uid, obj_i, local_dir_uid)
+            else:
+                route_path = file_path_to_url_path(local_dir_path)
+                local_dir_path = join(self.base_dir, local_dir_path)
+
+            self.stores[route_path] = store
 
     def get_local_dir_route(self, dataset_uid, obj_i, local_dir_path, local_dir_uid):
         """
@@ -901,28 +945,30 @@ class ObsSegmentationsOmeZarrWrapper(AbstractWrapper):
 
 
 class AnnDataWrapper(AbstractWrapper):
-    def __init__(self, adata_path=None, adata_url=None, obs_feature_matrix_path=None, feature_filter_path=None, initial_feature_filter_path=None, obs_set_paths=None, obs_set_names=None, obs_locations_path=None, obs_segmentations_path=None, obs_embedding_paths=None, obs_embedding_names=None, obs_embedding_dims=None, obs_spots_path=None, obs_points_path=None, request_init=None, feature_labels_path=None, obs_labels_path=None, convert_to_dense=True, coordination_values=None, obs_labels_paths=None, obs_labels_names=None, **kwargs):
+    def __init__(self, base_path=None, base_url=None, base_store=None, obs_feature_matrix_elem=None, feature_filter_elem=None, initial_feature_filter_elem=None, obs_set_elems=None, obs_set_names=None, obs_locations_elem=None, obs_segmentations_elem=None, obs_embedding_elems=None, obs_embedding_names=None, obs_embedding_dims=None, obs_spots_elem=None, obs_points_elem=None, request_init=None, feature_labels_elem=None, obs_labels_path=None, convert_to_dense=True, coordination_values=None, obs_labels_elems=None, obs_labels_names=None, **kwargs):
         """
         Wrap an AnnData object by creating an instance of the ``AnnDataWrapper`` class.
 
-        :param str adata_path: A path to an AnnData object written to a Zarr store containing single-cell experiment data.
-        :param str adata_url: A remote url pointing to a zarr-backed AnnData store.
-        :param str obs_feature_matrix_path: Location of the expression (cell x gene) matrix, like `X` or `obsm/highly_variable_genes_subset`
-        :param str feature_filter_path: A string like `var/highly_variable` used in conjunction with `obs_feature_matrix_path` if obs_feature_matrix_path points to a subset of `X` of the full `var` list.
-        :param str initial_feature_filter_path: A string like `var/highly_variable` used in conjunction with `obs_feature_matrix_path` if obs_feature_matrix_path points to a subset of `X` of the full `var` list.
-        :param list[str] obs_set_paths: Column names like `['obs/louvain', 'obs/cellType']` for showing cell sets
-        :param list[str] obs_set_names: Names to display in place of those in `obs_set_paths`, like `['Louvain', 'Cell Type']`
-        :param str obs_locations_path: Column name in `obsm` that contains centroid coordinates for displaying centroids in the spatial viewer
-        :param str obs_segmentations_path: Column name in `obsm` that contains polygonal coordinates for displaying outlines in the spatial viewer
-        :param list[str] obs_embedding_paths: Column names like `['obsm/X_umap', 'obsm/X_pca']` for showing scatterplots
+        :param str base_path: A path to an AnnData object written to a Zarr store containing single-cell experiment data.
+        :param str base_url: A remote url pointing to a zarr-backed AnnData store.
+        :param base_store: A path to pass to zarr.FSStore, or an existing store instance.
+        :type base_store: str or zarr.Storage
+        :param str obs_feature_matrix_elem: Location of the expression (cell x gene) matrix, like `X` or `obsm/highly_variable_genes_subset`
+        :param str feature_filter_elem: A string like `var/highly_variable` used in conjunction with `obs_feature_matrix_elem` if obs_feature_matrix_elem points to a subset of `X` of the full `var` list.
+        :param str initial_feature_filter_elem: A string like `var/highly_variable` used in conjunction with `obs_feature_matrix_elem` if obs_feature_matrix_elem points to a subset of `X` of the full `var` list.
+        :param list[str] obs_set_elems: Column names like `['obs/louvain', 'obs/cellType']` for showing cell sets
+        :param list[str] obs_set_names: Names to display in place of those in `obs_set_elems`, like `['Louvain', 'Cell Type']`
+        :param str obs_locations_elem: Column name in `obsm` that contains centroid coordinates for displaying centroids in the spatial viewer
+        :param str obs_segmentations_elem: Column name in `obsm` that contains polygonal coordinates for displaying outlines in the spatial viewer
+        :param list[str] obs_embedding_elems: Column names like `['obsm/X_umap', 'obsm/X_pca']` for showing scatterplots
         :param list[str] obs_embedding_names: Overriding names like `['UMAP', 'PCA']` for displaying above scatterplots
         :param list[str] obs_embedding_dims: Dimensions along which to get data for the scatterplot, like `[[0, 1], [4, 5]]` where `[0, 1]` is just the normal x and y but `[4, 5]` could be comparing the third and fourth principal components, for example.
-        :param str obs_spots_path: Column name in `obsm` that contains centroid coordinates for displaying spots in the spatial viewer
-        :param str obs_points_path: Column name in `obsm` that contains centroid coordinates for displaying points in the spatial viewer
+        :param str obs_spots_elem: Column name in `obsm` that contains centroid coordinates for displaying spots in the spatial viewer
+        :param str obs_points_elem: Column name in `obsm` that contains centroid coordinates for displaying points in the spatial viewer
         :param dict request_init: options to be passed along with every fetch request from the browser, like `{ "header": { "Authorization": "Bearer dsfjalsdfa1431" } }`
-        :param str feature_labels_path: The name of a column containing feature labels (e.g., alternate gene symbols), instead of the default index in `var` of the AnnData store.
-        :param str obs_labels_path: (DEPRECATED) The name of a column containing observation labels (e.g., alternate cell IDs), instead of the default index in `obs` of the AnnData store. Use `obs_labels_paths` and `obs_labels_names` instead. This arg will be removed in a future release.
-        :param list[str] obs_labels_paths: The names of columns containing observation labels (e.g., alternate cell IDs), instead of the default index in `obs` of the AnnData store.
+        :param str feature_labels_elem: The name of a column containing feature labels (e.g., alternate gene symbols), instead of the default index in `var` of the AnnData store.
+        :param str obs_labels_path: (DEPRECATED) The name of a column containing observation labels (e.g., alternate cell IDs), instead of the default index in `obs` of the AnnData store. Use `obs_labels_elems` and `obs_labels_names` instead. This arg will be removed in a future release.
+        :param list[str] obs_labels_elems: The names of columns containing observation labels (e.g., alternate cell IDs), instead of the default index in `obs` of the AnnData store.
         :param list[str] obs_labels_names: The optional display names of columns containing observation labels (e.g., alternate cell IDs), instead of the default index in `obs` of the AnnData store.
         :param bool convert_to_dense: Whether or not to convert `X` to dense the zarr store (dense is faster but takes more disk space).
         :param coordination_values: Coordination values for the file definition.
@@ -931,41 +977,54 @@ class AnnDataWrapper(AbstractWrapper):
         """
         super().__init__(**kwargs)
         self._repr = make_repr(locals())
-        self._path = adata_path
-        self._url = adata_url
-        if adata_url is not None and (adata_path is not None):
+        self._path = base_path
+        self._url = base_url
+        self._base_store = base_store
+
+        num_inputs = sum([1 for x in [base_path, base_url, base_store] if x is not None])
+        if num_inputs > 1:
             raise ValueError(
-                "Did not expect adata_url to be provided with adata_path")
-        if adata_url is None and (adata_path is None):
+                "Expected only one of base_path, base_url, or base_store to be provided")
+        if num_inputs == 0:
             raise ValueError(
-                "Expected either adata_url or adata_path to be provided")
-        if adata_path is not None:
+                "Expected one of base_path, base_url, or base_store to be provided")
+
+        if base_path is not None:
             self.is_remote = False
+            self.is_store = False
             self.zarr_folder = 'anndata.zarr'
-        else:
+        elif adata_url is not None:
             self.is_remote = True
+            self.is_store = False
             self.zarr_folder = None
+        else:
+            # Store case
+            self.is_remote = False
+            self.is_store = True
+            self.zarr_folder = None
+
         self.local_dir_uid = make_unique_filename(".adata.zarr")
-        self._expression_matrix = obs_feature_matrix_path
+        self._expression_matrix = obs_feature_matrix_elem
         self._cell_set_obs_names = obs_set_names
         self._mappings_obsm_names = obs_embedding_names
-        self._gene_var_filter = feature_filter_path
-        self._matrix_gene_var_filter = initial_feature_filter_path
-        self._cell_set_obs = obs_set_paths
-        self._spatial_centroid_obsm = obs_locations_path
-        self._spatial_polygon_obsm = obs_segmentations_path
-        self._mappings_obsm = obs_embedding_paths
+        self._gene_var_filter = feature_filter_elem
+        self._matrix_gene_var_filter = initial_feature_filter_elem
+        self._cell_set_obs = obs_set_elems
+        self._spatial_centroid_obsm = obs_locations_elem
+        self._spatial_polygon_obsm = obs_segmentations_elem
+        self._mappings_obsm = obs_embedding_elems
         self._mappings_obsm_dims = obs_embedding_dims
-        self._spatial_spots_obsm = obs_spots_path
-        self._spatial_points_obsm = obs_points_path
+        self._spatial_spots_obsm = obs_spots_elem
+        self._spatial_points_obsm = obs_points_elem
         self._request_init = request_init
-        self._gene_alias = feature_labels_path
+        self._feature_labels = feature_labels_elem
         # Support legacy provision of single obs labels path
         if (obs_labels_path is not None):
-            self._obs_labels_paths = [obs_labels_path]
+            warnings.warn("`obs_labels_path` will be deprecated in a future release.", DeprecationWarning)
+            self._obs_labels_elems = [obs_labels_path]
             self._obs_labels_names = [obs_labels_path.split('/')[-1]]
         else:
-            self._obs_labels_paths = obs_labels_paths
+            self._obs_labels_elems = obs_labels_elems
             self._obs_labels_names = obs_labels_names
         self._convert_to_dense = convert_to_dense
         self._coordination_values = coordination_values
@@ -985,6 +1044,9 @@ class AnnDataWrapper(AbstractWrapper):
     def make_routes(self, dataset_uid, obj_i):
         if self.is_remote:
             return []
+        elif self.is_store:
+            self.register_zarr_store(dataset_uid, obj_i, self._base_store, self.local_dir_uid)
+            return []
         else:
             return self.get_local_dir_route(dataset_uid, obj_i, self._path, self.local_dir_uid)
 
@@ -993,7 +1055,6 @@ class AnnDataWrapper(AbstractWrapper):
             return self._url
         else:
             return self.get_local_dir_url(base_url, dataset_uid, obj_i, self._path, self.local_dir_uid)
-        
 
     def make_file_def_creator(self, dataset_uid, obj_i):
         def get_anndata_zarr(base_url):
@@ -1196,8 +1257,11 @@ class MultivecZarrWrapper(AbstractWrapper):
 
     def make_genomic_profiles_file_def_creator(self, dataset_uid, obj_i):
         def genomic_profiles_file_def_creator(base_url):
-            return {
+            obj_file_def = {
                 "fileType": "genomic-profiles.zarr",
                 "url": self.get_zarr_url(base_url, dataset_uid, obj_i)
             }
+            if self._request_init is not None:
+                obj_file_def['requestInit'] = self._request_init
+            return obj_file_def
         return genomic_profiles_file_def_creator

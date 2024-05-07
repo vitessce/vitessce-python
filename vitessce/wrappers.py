@@ -986,7 +986,7 @@ class AnnDataWrapper(AbstractWrapper):
             self.is_remote = False
             self.is_store = False
             self.zarr_folder = 'anndata.zarr'
-        elif adata_url is not None:
+        elif base_url is not None:
             self.is_remote = True
             self.is_store = False
             self.zarr_folder = None
@@ -998,11 +998,11 @@ class AnnDataWrapper(AbstractWrapper):
 
         self.local_dir_uid = make_unique_filename(".adata.zarr")
         self._expression_matrix = obs_feature_matrix_elem
-        self._cell_set_obs_names = obs_set_names
+        self._obs_set_names = obs_set_names
         self._mappings_obsm_names = obs_embedding_names
         self._gene_var_filter = feature_filter_elem
         self._matrix_gene_var_filter = initial_feature_filter_elem
-        self._cell_set_obs = obs_set_elems
+        self._obs_set_elems = obs_set_elems
         self._spatial_centroid_obsm = obs_locations_elem
         self._spatial_polygon_obsm = obs_segmentations_elem
         self._mappings_obsm = obs_embedding_elems
@@ -1089,13 +1089,13 @@ class AnnDataWrapper(AbstractWrapper):
                 if self._mappings_obsm_dims is not None:
                     for dim_i, dim in enumerate(self._mappings_obsm_dims):
                         options["obsEmbedding"][dim_i]['dims'] = dim
-            if self._cell_set_obs is not None:
+            if self._obs_set_elems is not None:
                 options["obsSets"] = []
-                if self._cell_set_obs_names is not None:
-                    names = self._cell_set_obs_names
+                if self._obs_set_names is not None:
+                    names = self._obs_set_names
                 else:
-                    names = [obs.split('/')[-1] for obs in self._cell_set_obs]
-                for obs, name in zip(self._cell_set_obs, names):
+                    names = [obs.split('/')[-1] for obs in self._obs_set_elems]
+                for obs, name in zip(self._obs_set_elems, names):
                     options["obsSets"].append({
                         "name": name,
                         "path": obs

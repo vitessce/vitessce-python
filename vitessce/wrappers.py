@@ -1005,7 +1005,7 @@ class AnnDataWrapper(AbstractWrapper):
 
         self.local_dir_uid = make_unique_filename(".adata.zarr")
         self._expression_matrix = obs_feature_matrix_elem
-        self._set_obs_set_names = obs_set_names
+        self._obs_set_names = obs_set_names
         self._mappings_obsm_names = obs_embedding_names
         self._gene_var_filter = feature_filter_elem
         self._matrix_gene_var_filter = initial_feature_filter_elem
@@ -1064,7 +1064,7 @@ class AnnDataWrapper(AbstractWrapper):
             options = gen_obs_spots_schema(self._spatial_spots_obsm, options)
             options = gen_obs_points_schema(self._spatial_points_obsm, options)
             options = gen_obs_embedding_schema(options, self._mappings_obsm, self._mappings_obsm_names, self._mappings_obsm_dims)
-            options = gen_obs_sets_schema(options, self._obs_set_elems, self._set_obs_set_names)
+            options = gen_obs_sets_schema(options, self._obs_set_elems, self._obs_set_names)
             options = gen_obs_feature_matrix_schema(options, self._expression_matrix, self._gene_var_filter, self._matrix_gene_var_filter)
             options = gen_feature_labels_schema(self._feature_labels, options)
             options = gen_obs_labels_schema(options, self._obs_labels_elems, self._obs_labels_names)
@@ -1196,7 +1196,7 @@ class SpatialDataWrapper(AnnDataWrapper):
             options = {}
             options = gen_obs_labels_schema(options, self._obs_labels_elems, self._obs_labels_names)
             options = gen_obs_feature_matrix_schema(options, self._expression_matrix, self._gene_var_filter, self._matrix_gene_var_filter)
-            options = gen_obs_sets_schema(options, self._obs_set_elems, self._set_obs_set_names)
+            options = gen_obs_sets_schema(options, self._obs_set_elems, self._obs_set_names)
             options['obsSets'] = { 'obsSets': options['obsSets'] } # see https://github.com/vitessce/vitessce/blob/cd7e81956786a8130658d6745ff03986e2e6f806/packages/schemas/src/file-def-options.ts#L138-L146 for nested structure
             options = gen_obs_spots_schema(options, self._shapes_elem)
             options = gen_image_schema(options, self._image_elem, self._affine_transformation)

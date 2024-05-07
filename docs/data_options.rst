@@ -105,6 +105,3 @@ Jupyter process: remote service like Colab/Binder; Files: remote & accessed via 
 ===================================================================================
 
 Unfortunately, this will not work because the remote server cannot access the files that are on another machine behind SSH.
-
-
-

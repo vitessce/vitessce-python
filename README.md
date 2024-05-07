@@ -115,7 +115,7 @@ vw = vc.widget(proxy=True)
 vw
 ```
 
-or 
+or
 
 ```py
 vc.display(proxy=True, host_name="http://localhost:8888")

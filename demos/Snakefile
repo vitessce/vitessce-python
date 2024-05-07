@@ -26,7 +26,7 @@ subworkflow codeluppi_2018:
 subworkflow codeluppi_2018_via_zarr:
     workdir:
         "codeluppi-2018-via-zarr"
-        
+
 subworkflow combat_2022:
     workdir:
         "combat-2022"

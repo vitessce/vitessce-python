@@ -20,4 +20,3 @@ rule create_zarr:
             -oa {output.adata} \
             -oi {output.img}
         '''
-

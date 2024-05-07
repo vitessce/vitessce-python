@@ -1,6 +1,6 @@
 ## Processing scripts for Vitessce demo datasets
 
-Previously, we developed custom processing scripts for Vitessce demo data in the `vitessce-data` repository. 
+Previously, we developed custom processing scripts for Vitessce demo data in the `vitessce-data` repository.
 
 However, now that there are consensus single-cell file formats (e.g., h5ad) and an ecosystem of data processing packages in the community, we aim to leverage those. Writing demo dataset processing code using Scanpy and AnnData in small Snakemake workflows in this repository should allow us to iterate more quickly and share more demos.
 

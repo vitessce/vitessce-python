@@ -11,8 +11,9 @@ import anywidget
 from starlette.applications import Starlette
 from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
-from traitlets import Bool, Dict, Int, Unicode
+from traitlets import Bool, Dict, Int, List, Unicode
 
+# Server dependencies
 # Server dependencies
 from uvicorn import Config, Server
 
@@ -194,6 +195,7 @@ async function render(view) {
     const customJsUrl = view.model.get('custom_js_url');
     const pluginEsm = view.model.get('plugin_esm');
     const remountOnUidChange = view.model.get('remount_on_uid_change');
+    const storeUrls = view.model.get('store_urls');
 
     const pkgName = (jsDevMode ? "@vitessce/dev" : "vitessce");
 
@@ -216,6 +218,19 @@ async function render(view) {
     let pluginCoordinationTypes;
     let pluginFileTypes;
     let pluginJointFileTypes;
+
+    const stores = Object.fromEntries(
+        storeUrls.map(storeUrl => ([
+            storeUrl,
+            {
+                async get(key) {
+                    const [data, buffers] = await view.experimental.invoke("_zarr_get", [storeUrl, key]);
+                    if (!data.success) return undefined;
+                    return buffers[0].buffer;
+                },
+            }
+        ])),
+    );
 
     try {
         const pluginEsmUrl = URL.createObjectURL(new Blob([pluginEsm], { type: "text/javascript" }));
@@ -303,7 +318,7 @@ async function render(view) {
         const vitessceProps = {
             height, theme, config, onConfigChange, validateConfig,
             pluginViewTypes, pluginCoordinationTypes, pluginFileTypes, pluginJointFileTypes,
-            remountOnUidChange,
+            remountOnUidChange, stores,
         };
 
         return e('div', { ref: divRef, style: { height: height + 'px' } },
@@ -377,11 +392,13 @@ class VitessceWidget(anywidget.AnyWidget):
 
     next_port = DEFAULT_PORT
 
-    js_package_version = Unicode("3.3.7").tag(sync=True)
+    js_package_version = Unicode("3.3.12").tag(sync=True)
     js_dev_mode = Bool(False).tag(sync=True)
     custom_js_url = Unicode("").tag(sync=True)
     plugin_esm = Unicode(DEFAULT_PLUGIN_ESM).tag(sync=True)
     remount_on_uid_change = Bool(True).tag(sync=True)
+
+    store_urls = List(trait=Unicode(""), default_value=[]).tag(sync=True)
 
     def __init__(
         self,
@@ -391,7 +408,7 @@ class VitessceWidget(anywidget.AnyWidget):
         uid=None,
         port=None,
         proxy=False,
-        js_package_version="3.3.7",
+        js_package_version="3.3.12",
         js_dev_mode=False,
         custom_js_url="",
         plugin_esm=DEFAULT_PLUGIN_ESM,
@@ -429,9 +446,11 @@ class VitessceWidget(anywidget.AnyWidget):
         config_dict = config.to_dict(base_url=base_url)
         routes = config.get_routes()
 
+        self._stores = config.get_stores(base_url=base_url)
+
         uid_str = get_uid_str(uid)
 
-        super(VitessceWidget, self).__init__(  # noqa: UP008
+        super().__init__(
             config=config_dict,
             height=height,
             theme=theme,
@@ -442,6 +461,7 @@ class VitessceWidget(anywidget.AnyWidget):
             plugin_esm=plugin_esm,
             remount_on_uid_change=remount_on_uid_change,
             uid=uid_str,
+            store_urls=list(self._stores.keys()),
         )
 
         serve_routes(config, routes, use_port)
@@ -474,6 +494,16 @@ class VitessceWidget(anywidget.AnyWidget):
         self.config_obj.stop_server(self.port)
         super().close()
 
+    @anywidget.experimental.command
+    def _zarr_get(self, params, buffers):
+        [store_url, key] = params
+        store = self._stores[store_url]
+        try:
+            buffers = [store[key.lstrip("/")]]
+        except KeyError:
+            buffers = []
+        return {"success": len(buffers) == 1}, buffers
+
 
 # Launch Vitessce using plain HTML representation (no ipywidgets)
 
@@ -487,7 +517,7 @@ def ipython_display(
     uid=None,
     port=None,
     proxy=False,
-    js_package_version="3.3.7",
+    js_package_version="3.3.12",
     js_dev_mode=False,
     custom_js_url="",
     plugin_esm=DEFAULT_PLUGIN_ESM,
@@ -516,6 +546,7 @@ def ipython_display(
         "height": height,
         "theme": theme,
         "config": config_dict,
+        "store_urls": [],
     }
 
     # We need to clean up the React and DOM state in any case in which

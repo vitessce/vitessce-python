@@ -1,6 +1,6 @@
 from esbuild_py import transform
 
-plugin_esm = transform("""
+PLUGIN_ESM = transform("""
 function createPlugins(utilsForPlugins) {
     const {
         React,
@@ -35,3 +35,16 @@ function createPlugins(utilsForPlugins) {
 }
 export default { createPlugins };
 """)
+"""
+Example of a minimal plugin view that gets the obsType coordination value from the coordination space and renders a button.
+This plugin view is not meant to be useful for end-users, but rather to demonstrate how to develop a plugin view that uses coordination (and uses eslint_py for JSX transformation).
+
+:meta hide-value:
+
+.. code-block:: python
+    
+    from vitessce.widget_plugins import demo_plugin_esm
+
+    # ...
+    vc.widget(plugin_esm=demo_plugin_esm)
+"""

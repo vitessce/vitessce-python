@@ -106,5 +106,44 @@ Jupyter process: remote service like Colab/Binder; Files: remote & accessed via 
 
 Unfortunately, this will not work because the remote server cannot access the files that are on another machine behind SSH.
 
+========================================================================
+Jupyter process: anywhere; Files: anywhere that can be accessed via Zarr
+========================================================================
 
+If the data is readable via Zarr (i.e., `zarr.storage.*Store`) and the Jupyter process can access the store contents, then the Vitessce widget can access the data by specifying the Zarr store as the data source for Vitessce data wrapper class instances.
+This is currently supported for the ``AnnDataWrapper`` class using the ``adata_store`` parameter (as opposed to ``adata_path`` or ``adata_url``).
+
+.. code-block:: python
+
+    from vitessce import VitessceConfig, AnnDataWrapper
+
+    # ...
+    adata.write_zarr("my_store.adata.zarr")
+
+    vc = VitessceConfig(name="My Vitessce Configuration")
+    vc.add_dataset(name="My Dataset").add_object(AnnDataWrapper(
+        adata_store="my_store.adata.zarr",
+        # ...
+    ))
+    # ...
+    vc.widget()
+
+
+Or, with a Zarr store instance (instead of a local string path to a DirectoryStore):
+
+.. code-block:: python
+
+    import zarr
+    from vitessce import VitessceConfig, AnnDataWrapper
+
+    # ...
+    store = zarr.storage.FSStore("s3://my_bucket/path/to/my_store.adata.zarr")
+
+    vc = VitessceConfig(name="My Vitessce Configuration")
+    vc.add_dataset(name="My Dataset").add_object(AnnDataWrapper(
+        adata_store=store,
+        # ...
+    ))
+    # ...
+    vc.widget()
 

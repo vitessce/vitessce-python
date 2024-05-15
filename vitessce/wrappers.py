@@ -943,7 +943,7 @@ class AnnDataWrapper(AbstractWrapper):
 
         :param str adata_path: A path to an AnnData object written to a Zarr store containing single-cell experiment data.
         :param str adata_url: A remote url pointing to a zarr-backed AnnData store.
-        :param adata_store: A path to pass to zarr.FSStore, or an existing store instance.
+        :param adata_store: A path to pass to zarr.DirectoryStore, or an existing store instance.
         :type adata_store: str or zarr.Storage
         :param str obs_feature_matrix_path: Location of the expression (cell x gene) matrix, like `X` or `obsm/highly_variable_genes_subset`
         :param str feature_filter_path: A string like `var/highly_variable` used in conjunction with `obs_feature_matrix_path` if obs_feature_matrix_path points to a subset of `X` of the full `var` list.

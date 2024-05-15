@@ -42,7 +42,7 @@ This plugin view is not meant to be useful for end-users, but rather to demonstr
 :meta hide-value:
 
 .. code-block:: python
-    
+
     from vitessce.widget_plugins import demo_plugin_esm
 
     # ...

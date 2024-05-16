@@ -938,14 +938,14 @@ class ObsSegmentationsOmeZarrWrapper(AbstractWrapper):
 
 
 class AnnDataWrapper(AbstractWrapper):
-    def __init__(self, adata_path=None, adata_url=None, adata_store=None, obs_feature_matrix_path=None, feature_filter_path=None, initial_feature_filter_path=None, obs_set_paths=None, obs_set_names=None, obs_locations_path=None, obs_segmentations_path=None, obs_embedding_paths=None, obs_embedding_names=None, obs_embedding_dims=None, obs_spots_path=None, obs_points_path=None, request_init=None, feature_labels_path=None, obs_labels_path=None, convert_to_dense=True, coordination_values=None, obs_labels_paths=None, obs_labels_names=None, **kwargs):
+    def __init__(self, adata_path=None, adata_url=None, adata_store=None, obs_feature_matrix_path=None, feature_filter_path=None, initial_feature_filter_path=None, obs_set_paths=None, obs_set_names=None, obs_locations_path=None, obs_segmentations_path=None, obs_embedding_paths=None, obs_embedding_names=None, obs_embedding_dims=None, obs_spots_path=None, obs_points_path=None, feature_labels_path=None, obs_labels_path=None, convert_to_dense=True, coordination_values=None, obs_labels_paths=None, obs_labels_names=None, **kwargs):
         """
         Wrap an AnnData object by creating an instance of the ``AnnDataWrapper`` class.
 
-        :param str base_path: A path to an AnnData object written to a Zarr store containing single-cell experiment data.
-        :param str base_url: A remote url pointing to a zarr-backed AnnData store.
-        :param base_store: A path to pass to zarr.FSStore, or an existing store instance.
-        :type base_store: str or zarr.Storage
+        :param str adata_path: A path to an AnnData object written to a Zarr store containing single-cell experiment data.
+        :param str adata_url: A remote url pointing to a zarr-backed AnnData store.
+        :param adata_store: A path to pass to zarr.FSStore, or an existing store instance.
+        :type adata_store: str or zarr.Storage
         :param str obs_feature_matrix_path: Location of the expression (cell x gene) matrix, like `X` or `obsm/highly_variable_genes_subset`
         :param str feature_filter_path: A string like `var/highly_variable` used in conjunction with `obs_feature_matrix_path` if obs_feature_matrix_path points to a subset of `X` of the full `var` list.
         :param str initial_feature_filter_path: A string like `var/highly_variable` used in conjunction with `obs_feature_matrix_path` if obs_feature_matrix_path points to a subset of `X` of the full `var` list.
@@ -958,7 +958,6 @@ class AnnDataWrapper(AbstractWrapper):
         :param list[str] obs_embedding_dims: Dimensions along which to get data for the scatterplot, like `[[0, 1], [4, 5]]` where `[0, 1]` is just the normal x and y but `[4, 5]` could be comparing the third and fourth principal components, for example.
         :param str obs_spots_path: Column name in `obsm` that contains centroid coordinates for displaying spots in the spatial viewer
         :param str obs_points_path: Column name in `obsm` that contains centroid coordinates for displaying points in the spatial viewer
-        :param dict request_init: options to be passed along with every fetch request from the browser, like `{ "header": { "Authorization": "Bearer dsfjalsdfa1431" } }`
         :param str feature_labels_path: The name of a column containing feature labels (e.g., alternate gene symbols), instead of the default index in `var` of the AnnData store.
         :param str obs_labels_path: (DEPRECATED) The name of a column containing observation labels (e.g., alternate cell IDs), instead of the default index in `obs` of the AnnData store. Use `obs_labels_paths` and `obs_labels_names` instead. This arg will be removed in a future release.
         :param list[str] obs_labels_paths: The names of columns containing observation labels (e.g., alternate cell IDs), instead of the default index in `obs` of the AnnData store.
@@ -977,10 +976,10 @@ class AnnDataWrapper(AbstractWrapper):
         num_inputs = sum([1 for x in [adata_path, adata_url, adata_store] if x is not None])
         if num_inputs > 1:
             raise ValueError(
-                "Expected only one of base_path, base_url, or base_store to be provided")
+                "Expected only one of adataa_path, adata_url, or adata_store to be provided")
         if num_inputs == 0:
             raise ValueError(
-                "Expected one of base_path, base_url, or base_store to be provided")
+                "Expected one of adataa_path, adata_url, or adata_store to be provided")
 
         if adata_path is not None:
             self.is_remote = False

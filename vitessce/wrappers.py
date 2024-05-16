@@ -976,10 +976,10 @@ class AnnDataWrapper(AbstractWrapper):
         num_inputs = sum([1 for x in [adata_path, adata_url, adata_store] if x is not None])
         if num_inputs > 1:
             raise ValueError(
-                "Expected only one of adataa_path, adata_url, or adata_store to be provided")
+                "Expected only one of adata_path, adata_url, or adata_store to be provided")
         if num_inputs == 0:
             raise ValueError(
-                "Expected one of adataa_path, adata_url, or adata_store to be provided")
+                "Expected one of adata_path, adata_url, or adata_store to be provided")
 
         if adata_path is not None:
             self.is_remote = False

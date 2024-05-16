@@ -1177,13 +1177,13 @@ class SpatialDataWrapper(AnnDataWrapper):
             obs_set_elems = [f"table/{table_key}/obs/{elem}" for elem in table.obs if table.obs[elem].dtype == 'category']
             wrappers += [
                 cls(
-                    base_path = str(sdata.path),
-                    image_elem = str(image_elem) if image_elem is not None else None,
-                    labels_elem = str(labels_elem) if labels_elem is not None else None,
-                    obs_feature_matrix_elem = str(obs_feature_matrix_elem),
-                    shapes_elem = str(shapes_elem) if shapes_elem is not None else None,
-                    initial_feature_filter_elem = initial_feature_filter_elem,
-                    obs_set_elems = obs_set_elems,
+                    adata_path = str(sdata.path),
+                    image_path = str(image_elem) if image_elem is not None else None,
+                    labels_path = str(labels_elem) if labels_elem is not None else None,
+                    obs_feature_matrix_path = str(obs_feature_matrix_elem),
+                    shapes_path = str(shapes_elem) if shapes_elem is not None else None,
+                    initial_feature_filter_path = initial_feature_filter_elem,
+                    obs_set_paths = obs_set_elems,
                     coordination_values={"obsType":"spot"} # TODO: should we remove?
                 )
             ]

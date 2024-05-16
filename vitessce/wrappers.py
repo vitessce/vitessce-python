@@ -1008,7 +1008,6 @@ class AnnDataWrapper(AbstractWrapper):
         self._mappings_obsm_dims = obs_embedding_dims
         self._spatial_spots_obsm = obs_spots_path
         self._spatial_points_obsm = obs_points_path
-        self._request_init = request_init
         self._feature_labels = feature_labels_path
         # Support legacy provision of single obs labels path
         if (obs_labels_path is not None):

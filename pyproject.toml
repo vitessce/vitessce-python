@@ -33,7 +33,7 @@ dependencies = [
   'black>=21.11b1',
   'numpy>=1.21.2',
   'anndata>=0.7.8,<0.11',
-  'spatialdata>=0.1.2'
+  'spatialdata>=0.1.2',
   'scanpy>=1.9.3',
   'ome-zarr==0.8.3',
   'tifffile>=2020.10.1',

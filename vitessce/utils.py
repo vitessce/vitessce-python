@@ -48,9 +48,9 @@ def gen_obs_embedding_schema(options: dict, paths: Optional[list[str]] = None, n
         if names is not None:
             for key, mapping in zip(paths, names):
                 options["obsEmbedding"].append({
-                    "path": mapping,
+                    "path": key,
                     "dims": [0, 1],
-                    "embeddingType": key
+                    "embeddingType": mapping
                 })
         else:
             for mapping in paths:

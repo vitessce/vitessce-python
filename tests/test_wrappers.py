@@ -233,10 +233,27 @@ class TestWrappers(unittest.TestCase):
 
         file_def_creator = w.make_file_def_creator('A', 0)
         file_def = file_def_creator('http://localhost:8000')
+        print(file_def)
         self.assertEqual(file_def, {'fileType': 'anndata.zarr', 'url': 'http://localhost:8000/test.h5ad.zarr',
                                     'options': {
-                                        'obsEmbedding': [{'path': 'obsm/X_umap', 'embeddingType': 'UMAP', 'dims': [0, 1]}],
-                                        'obsSets': [{'path': 'obs/CellType', 'name': 'Cell Type'}]
+                                        'obsEmbedding': [{'path': 'obsm/X_umap', 'dims': [0, 1], 'embeddingType': 'UMAP'}],
+                                        'obsSets': [{'name': 'Cell Type', 'path': 'obs/CellType'}]
+                                    }})
+        
+    def test_anndata_with_base_dir_no_names(self):
+        adata_path = 'test.h5ad.zarr'
+        w = AnnDataWrapper(adata_path, obs_set_paths=['obs/CellType'], obs_embedding_paths=[
+                           'obsm/X_umap'])
+        w.base_dir = data_path
+        w.local_dir_uid = 'anndata.zarr'
+
+        file_def_creator = w.make_file_def_creator('A', 0)
+        file_def = file_def_creator('http://localhost:8000')
+        print(file_def)
+        self.assertEqual(file_def, {'fileType': 'anndata.zarr', 'url': 'http://localhost:8000/test.h5ad.zarr',
+                                    'options': {
+                                        'obsEmbedding': [{'path': 'obsm/X_umap', 'dims': [0, 1], 'embeddingType': 'X_umap'}],
+                                        'obsSets': [{'name': 'CellType', 'path': 'obs/CellType'}]
                                     }})
 
     def test_csv(self):

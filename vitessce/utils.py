@@ -43,6 +43,8 @@ def get_initial_coordination_scope_name(dataset_uid, data_type, i=None):
 
 def gen_obs_embedding_schema(options: dict, paths: Optional[list[str]] = None, names: Optional[list[str]] = None, dims: Optional[list[list[int]]] = None):
     if paths is not None:
+        if "obsEmbedding" not in options:
+            options["obsEmbedding"] = []
         if names is not None:
             for key, mapping in zip(paths, names):
                 options["obsEmbedding"].append({
@@ -59,6 +61,8 @@ def gen_obs_embedding_schema(options: dict, paths: Optional[list[str]] = None, n
                     "embeddingType": mapping_key
                 })
     if dims is not None:
+        if "obsEmbedding" not in options:
+            options["obsEmbedding"] = []
         for dim_i, dim in enumerate(dims):
             options["obsEmbedding"][dim_i]['dims'] = dim
     return options
@@ -132,7 +136,7 @@ def gen_image_schema(options, path: str, affine_transformation: Optional[np.ndar
     return options
 
 
-def gen_obs_spots_schema(options: dict, shapes_path: Optional[str] = None) -> dict:
+def gen_obs_spots_from_shapes_schema(options: dict, shapes_path: Optional[str] = None) -> dict:
     if shapes_path is not None:
         options['obsSpots'] = {
             "path": shapes_path,

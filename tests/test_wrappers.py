@@ -239,7 +239,7 @@ class TestWrappers(unittest.TestCase):
                                         'obsEmbedding': [{'path': 'obsm/X_umap', 'dims': [0, 1], 'embeddingType': 'UMAP'}],
                                         'obsSets': [{'name': 'Cell Type', 'path': 'obs/CellType'}]
                                     }})
-        
+
     def test_anndata_with_base_dir_no_names(self):
         adata_path = 'test.h5ad.zarr'
         w = AnnDataWrapper(adata_path, obs_set_paths=['obs/CellType'], obs_embedding_paths=[

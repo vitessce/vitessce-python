@@ -41,7 +41,6 @@ def get_initial_coordination_scope_name(dataset_uid, data_type, i=None):
     return f"{prefix}{0 if i is None else i}"
 
 
-
 def gen_obs_embedding_schema(options: dict, paths: Optional[list[str]] = None, names: Optional[list[str]] = None, dims: Optional[list[list[int]]] = None):
     if paths is not None:
         if names is not None:
@@ -64,6 +63,7 @@ def gen_obs_embedding_schema(options: dict, paths: Optional[list[str]] = None, n
             options["obsEmbedding"][dim_i]['dims'] = dim
     return options
 
+
 def gen_obs_sets_schema(options: dict, paths: Optional[list[str]] = None, names: Optional[list[str]] = None):
     if paths is not None:
         options["obsSets"] = []
@@ -78,6 +78,7 @@ def gen_obs_sets_schema(options: dict, paths: Optional[list[str]] = None, names:
             })
     return options
 
+
 def gen_obs_feature_matrix_schema(options: dict, matrix_path: Optional[str] = None, var_filter_path: Optional[str] = None, init_var_filter_path: Optional[str] = None):
     if matrix_path is not None:
         options["obsFeatureMatrix"] = {
@@ -88,6 +89,7 @@ def gen_obs_feature_matrix_schema(options: dict, matrix_path: Optional[str] = No
         if init_var_filter_path is not None:
             options["obsFeatureMatrix"]["initialFeatureFilterPath"] = init_var_filter_path
     return options
+
 
 def gen_obs_labels_schema(options: dict, paths: Optional[list[str]] = None, names: Optional[list[str]] = None):
     if paths is not None:
@@ -112,11 +114,13 @@ def gen_path_schema(key: str, path: Optional[str], options: dict):
         }
     return options
 
-gen_obs_locations_schema = partial(gen_path_schema,  "obsLocations")
-gen_obs_segmentations_schema = partial(gen_path_schema,  "obsSegmentations")
-gen_obs_spots_schema = partial(gen_path_schema,  "obsSpots")
-gen_obs_points_schema = partial(gen_path_schema,  "obsPoints")
+
+gen_obs_locations_schema = partial(gen_path_schema, "obsLocations")
+gen_obs_segmentations_schema = partial(gen_path_schema, "obsSegmentations")
+gen_obs_spots_schema = partial(gen_path_schema, "obsSpots")
+gen_obs_points_schema = partial(gen_path_schema, "obsPoints")
 gen_feature_labels_schema = partial(gen_path_schema, "featureLabels")
+
 
 def gen_image_schema(options, path: str, affine_transformation: Optional[np.ndarray] = None) -> dict:
     if path is not None:
@@ -126,6 +130,7 @@ def gen_image_schema(options, path: str, affine_transformation: Optional[np.ndar
         if affine_transformation is not None:
             options['coordinateTransformations'] = affine_transformation
     return options
+
 
 def gen_obs_spots_schema(options: dict, shapes_path: Optional[str] = None) -> dict:
     if shapes_path is not None:

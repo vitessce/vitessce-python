@@ -1100,12 +1100,15 @@ class AnnDataWrapper(AbstractWrapper):
             vc.layout((scatterplot | (cell_sets / genes))
                       / heatmap)
 
-SpatialDataWrapperType = TypeVar('SpatialDataWrapperType', bound='SpatialDataWrapper')    
+
+SpatialDataWrapperType = TypeVar('SpatialDataWrapperType', bound='SpatialDataWrapper')
+
+
 class SpatialDataWrapper(AnnDataWrapper):
 
-    def __init__(self, *, image_elem: Optional[str]=None, affine_transformation: Optional[np.ndarray] = None, shapes_elem: Optional[str] = None, labels_elem: Optional[str] = None, **kwargs):
-        super().__init__(**kwargs) # HACK to use adata_path
-        self.local_dir_uid = make_unique_filename(".spatialdata.zarr") # correct?
+    def __init__(self, *, image_elem: Optional[str] = None, affine_transformation: Optional[np.ndarray] = None, shapes_elem: Optional[str] = None, labels_elem: Optional[str] = None, **kwargs):
+        super().__init__(**kwargs)  # HACK to use adata_path
+        self.local_dir_uid = make_unique_filename(".spatialdata.zarr")  # correct?
         self._image_elem = image_elem
         self._affine_transformation = affine_transformation
         self._kwargs = kwargs
@@ -1123,14 +1126,14 @@ class SpatialDataWrapper(AnnDataWrapper):
         else:
             self.is_remote = True
             self.zarr_folder = None
-    
+
     @classmethod
-    def from_object(cls: Type[SpatialDataWrapperType], sdata: SpatialData, table_keys_to_image_elems: dict[str, Union[str,None]] = defaultdict(type(None)), table_keys_to_regions: dict[str, Union[str,None]] = defaultdict(type(None))) -> list[SpatialDataWrapperType]:
+    def from_object(cls: Type[SpatialDataWrapperType], sdata: SpatialData, table_keys_to_image_elems: dict[str, Union[str, None]] = defaultdict(type(None)), table_keys_to_regions: dict[str, Union[str, None]] = defaultdict(type(None))) -> list[SpatialDataWrapperType]:
         """Instantiate a wrapper for SpatialData stores, one per table, directly from the SpatialData object.
         By default, we "show everything" that can reasonable be inferred given the information.  If you wish to have more control,
         consider instantiating the object directly.  This function will error if something cannot be inferred i.e., the user does not present
         regions explicitly but there is more than one for a given table.
-        
+
 
         Parameters
         ----------
@@ -1172,32 +1175,32 @@ class SpatialDataWrapper(AnnDataWrapper):
                 labels_elem = f"labels/{region}"
             obs_feature_matrix_elem = f"table/{table_key}/X"
             if 'highly_variable' in table.var:
-                 # TODO: fix first key needing to be "table" in vitessce-js
+                # TODO: fix first key needing to be "table" in vitessce-js
                 initial_feature_filter_elem = 'highly_variable'
             else:
                 initial_feature_filter_elem = None
             obs_set_elems = [f"table/{table_key}/obs/{elem}" for elem in table.obs if table.obs[elem].dtype == 'category']
             wrappers += [
                 cls(
-                    adata_path = str(sdata.path),
-                    image_path = str(image_elem) if image_elem is not None else None,
-                    labels_path = str(labels_elem) if labels_elem is not None else None,
-                    obs_feature_matrix_path = str(obs_feature_matrix_elem),
-                    shapes_path = str(shapes_elem) if shapes_elem is not None else None,
-                    initial_feature_filter_path = initial_feature_filter_elem,
-                    obs_set_paths = obs_set_elems,
-                    coordination_values={"obsType":"spot"} # TODO: should we remove?
+                    adata_path=str(sdata.path),
+                    image_path=str(image_elem) if image_elem is not None else None,
+                    labels_path=str(labels_elem) if labels_elem is not None else None,
+                    obs_feature_matrix_path=str(obs_feature_matrix_elem),
+                    shapes_path=str(shapes_elem) if shapes_elem is not None else None,
+                    initial_feature_filter_path=initial_feature_filter_elem,
+                    obs_set_paths=obs_set_elems,
+                    coordination_values={"obsType": "spot"}  # TODO: should we remove?
                 )
             ]
         return wrappers
-            
+
     def make_file_def_creator(self, dataset_uid: str, obj_i: str) -> Optional[Callable]:
         def generator(base_url):
             options = {}
             options = gen_obs_labels_schema(options, self._obs_labels_elems, self._obs_labels_names)
             options = gen_obs_feature_matrix_schema(options, self._expression_matrix, self._gene_var_filter, self._matrix_gene_var_filter)
             options = gen_obs_sets_schema(options, self._obs_set_elems, self._obs_set_names)
-            options['obsSets'] = { 'obsSets': options['obsSets'] } # see https://github.com/vitessce/vitessce/blob/cd7e81956786a8130658d6745ff03986e2e6f806/packages/schemas/src/file-def-options.ts#L138-L146 for nested structure
+            options['obsSets'] = {'obsSets': options['obsSets']}  # see https://github.com/vitessce/vitessce/blob/cd7e81956786a8130658d6745ff03986e2e6f806/packages/schemas/src/file-def-options.ts#L138-L146 for nested structure
             options = gen_obs_spots_schema(options, self._shapes_elem)
             options = gen_image_schema(options, self._image_elem, self._affine_transformation)
             options = gen_feature_labels_schema(self._feature_labels, options)
@@ -1215,8 +1218,6 @@ class SpatialDataWrapper(AnnDataWrapper):
             return None
 
         return generator
-
-    
 
 
 class MultivecZarrWrapper(AbstractWrapper):

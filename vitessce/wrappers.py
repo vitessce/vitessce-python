@@ -13,7 +13,7 @@ import zarr
 import numpy as np
 from spatialdata import SpatialData
 
-from vitessce.utils import gen_obs_locations_schema, gen_obs_segmentations_schema, gen_obs_spots_schema, gen_obs_points_schema, gen_obs_embedding_schema, gen_feature_labels_schema, gen_obs_spots_schema, gen_feature_labels_schema, gen_image_schema, gen_obs_feature_matrix_schema, gen_obs_labels_schema, gen_obs_sets_schema
+from vitessce.utils import gen_obs_locations_schema, gen_obs_segmentations_schema, gen_obs_spots_from_shapes_schema, gen_obs_spots_schema, gen_obs_points_schema, gen_obs_embedding_schema, gen_feature_labels_schema, gen_image_schema, gen_obs_feature_matrix_schema, gen_obs_labels_schema, gen_obs_sets_schema
 
 from .constants import (
     norm_enum,
@@ -1201,7 +1201,7 @@ class SpatialDataWrapper(AnnDataWrapper):
             options = gen_obs_feature_matrix_schema(options, self._expression_matrix, self._gene_var_filter, self._matrix_gene_var_filter)
             options = gen_obs_sets_schema(options, self._obs_set_elems, self._obs_set_names)
             options['obsSets'] = {'obsSets': options['obsSets']}  # see https://github.com/vitessce/vitessce/blob/cd7e81956786a8130658d6745ff03986e2e6f806/packages/schemas/src/file-def-options.ts#L138-L146 for nested structure
-            options = gen_obs_spots_schema(options, self._shapes_elem)
+            options = gen_obs_spots_from_shapes_schema(options, self._shapes_elem)
             options = gen_image_schema(options, self._image_elem, self._affine_transformation)
             options = gen_feature_labels_schema(self._feature_labels, options)
             if len(options.keys()) > 0:

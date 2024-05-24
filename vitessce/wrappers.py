@@ -1106,8 +1106,8 @@ SpatialDataWrapperType = TypeVar('SpatialDataWrapperType', bound='SpatialDataWra
 
 class SpatialDataWrapper(AnnDataWrapper):
 
-    def __init__(self, *, image_elem: Optional[str] = None, affine_transformation: Optional[np.ndarray] = None, shapes_elem: Optional[str] = None, labels_elem: Optional[str] = None, **kwargs):
-        super().__init__(**kwargs)  # HACK to use adata_path
+    def __init__(self, spatialdata_path: Optional[str] = None, spatialdata_url: Optional[str] = None, spatialdata_store: Optional[str] = None, image_elem: Optional[str] = None, affine_transformation: Optional[np.ndarray] = None, shapes_elem: Optional[str] = None, labels_elem: Optional[str] = None, **kwargs):
+        super().__init__(adata_path=spatialdata_path, adata_url=spatialdata_url, adata_store=spatialdata_store, **kwargs)
         self.local_dir_uid = make_unique_filename(".spatialdata.zarr")  # correct?
         self._image_elem = image_elem
         self._affine_transformation = affine_transformation
@@ -1128,7 +1128,7 @@ class SpatialDataWrapper(AnnDataWrapper):
             self.zarr_folder = None
 
     @classmethod
-    def from_object(cls: Type[SpatialDataWrapperType], sdata: SpatialData, table_keys_to_image_elems: dict[str, Union[str, None]] = defaultdict(type(None)), table_keys_to_regions: dict[str, Union[str, None]] = defaultdict(type(None))) -> list[SpatialDataWrapperType]:
+    def from_object(cls: Type[SpatialDataWrapperType], spatialdata: SpatialData, table_keys_to_image_elems: dict[str, Union[str, None]] = defaultdict(type(None)), table_keys_to_regions: dict[str, Union[str, None]] = defaultdict(type(None))) -> list[SpatialDataWrapperType]:
         """Instantiate a wrapper for SpatialData stores, one per table, directly from the SpatialData object.
         By default, we "show everything" that can reasonable be inferred given the information.  If you wish to have more control,
         consider instantiating the object directly.  This function will error if something cannot be inferred i.e., the user does not present
@@ -1139,7 +1139,7 @@ class SpatialDataWrapper(AnnDataWrapper):
         ----------
         cls : Type[SpatialDataWrapperType]
             _description_
-        sdata : SpatialData
+        spatialdata : SpatialData
             _description_
         table_keys_to_image_elems : dict[str, str], optional
             which image paths to use for a given table for the visualization, by default None for each table key.
@@ -1155,7 +1155,7 @@ class SpatialDataWrapper(AnnDataWrapper):
         ValueError
         """
         wrappers = []
-        for table_key, table in sdata.tables.items():
+        for table_key, table in spatialdata.tables.items():
             shapes_elem = None
             image_elem = table_keys_to_image_elems[table_key]
             labels_elem = None
@@ -1169,9 +1169,9 @@ class SpatialDataWrapper(AnnDataWrapper):
                 if len(region) > 1:
                     raise ValueError("Vitessce cannot subset AnnData objects on the fly.  Please provide an explicit region")
                 region = region[0]
-            if region in sdata.shapes:
+            if region in spatialdata.shapes:
                 shapes_elem = f"shapes/{region}"
-            if region in sdata.labels:
+            if region in spatialdata.labels:
                 labels_elem = f"labels/{region}"
             obs_feature_matrix_elem = f"table/{table_key}/X"
             if 'highly_variable' in table.var:
@@ -1182,7 +1182,7 @@ class SpatialDataWrapper(AnnDataWrapper):
             obs_set_elems = [f"table/{table_key}/obs/{elem}" for elem in table.obs if table.obs[elem].dtype == 'category']
             wrappers += [
                 cls(
-                    adata_path=str(sdata.path),
+                    spatialdata_path=str(spatialdata.path),
                     image_path=str(image_elem) if image_elem is not None else None,
                     labels_path=str(labels_elem) if labels_elem is not None else None,
                     obs_feature_matrix_path=str(obs_feature_matrix_elem),

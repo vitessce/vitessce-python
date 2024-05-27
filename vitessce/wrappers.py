@@ -945,6 +945,15 @@ class ObsSegmentationsOmeZarrWrapper(AbstractWrapper):
 
         return image_file_def_creator
 
+def raise_error_if_more_than_one_none(inputs):
+    num_inputs = sum([1 for x in inputs if x is not None])
+    if num_inputs > 1:
+        raise ValueError(
+            "Expected only one of adata_path, adata_url, or adata_store to be provided")
+    if num_inputs == 0:
+        raise ValueError(
+                "Expected one of adata_path, adata_url, or adata_store to be provided")
+    return True
 
 class AnnDataWrapper(AbstractWrapper):
     def __init__(self, adata_path=None, adata_url=None, adata_store=None, obs_feature_matrix_path=None, feature_filter_path=None, initial_feature_filter_path=None, obs_set_paths=None, obs_set_names=None, obs_locations_path=None, obs_segmentations_path=None, obs_embedding_paths=None, obs_embedding_names=None, obs_embedding_dims=None, obs_spots_path=None, obs_points_path=None, feature_labels_path=None, obs_labels_path=None, convert_to_dense=True, coordination_values=None, obs_labels_paths=None, obs_labels_names=None, **kwargs):
@@ -982,13 +991,7 @@ class AnnDataWrapper(AbstractWrapper):
         self._url = adata_url
         self._store = adata_store
 
-        num_inputs = sum([1 for x in [adata_path, adata_url, adata_store] if x is not None])
-        if num_inputs > 1:
-            raise ValueError(
-                "Expected only one of adata_path, adata_url, or adata_store to be provided")
-        if num_inputs == 0:
-            raise ValueError(
-                "Expected one of adata_path, adata_url, or adata_store to be provided")
+        raise_error_if_more_than_one_none([adata_path, adata_url, adata_store])
 
         if adata_path is not None:
             self.is_remote = False
@@ -1107,6 +1110,40 @@ SpatialDataWrapperType = TypeVar('SpatialDataWrapperType', bound='SpatialDataWra
 class SpatialDataWrapper(AnnDataWrapper):
 
     def __init__(self, spatialdata_path: Optional[str] = None, spatialdata_url: Optional[str] = None, spatialdata_store: Optional[str] = None, image_elem: Optional[str] = None, affine_transformation: Optional[np.ndarray] = None, shapes_elem: Optional[str] = None, labels_elem: Optional[str] = None, **kwargs):
+        """_summary_
+
+        Parameters
+        ----------
+        spatialdata_path : Optional[str], optional
+            SpatialData path, exclusive with other `{spatialdata,adata}_xxxx` arguments, by default None
+        spatialdata_url : Optional[str], optional
+            SpatialData url, exclusive with other `{spatialdata,adata}_xxxx` arguments, by default None
+        spatialdata_store : Optional[str], optional
+            SpatialData store, exclusive with other `{spatialdata,adata}_xxxx` arguments, by default None
+        image_elem : Optional[str], optional
+            location of the image, by default None
+        affine_transformation : Optional[np.ndarray], optional
+            transformation to be applied to the image, by default None
+        shapes_elem : Optional[str], optional
+            location of the shapes, by default None
+        labels_elem : Optional[str], optional
+            location of the labels, by default None
+
+        Raises
+        ------
+        ValueError
+            If more than one of `{spatialdata,adata}_xxxx` is not `None` or all are.
+        """
+        raise_error_if_more_than_one_none(
+            [
+                spatialdata_path,
+                kwargs.get('adata_path', None),
+                spatialdata_url,
+                kwargs.get('adata_url', None),
+                spatialdata_store,
+                kwargs.get('adata_store', None)
+            ]
+        )
         super().__init__(adata_path=spatialdata_path, adata_url=spatialdata_url, adata_store=spatialdata_store, **kwargs)
         self.local_dir_uid = make_unique_filename(".spatialdata.zarr")  # correct?
         self._image_elem = image_elem

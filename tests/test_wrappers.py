@@ -355,7 +355,7 @@ class TestWrappers(unittest.TestCase):
     def test_spatial_data_with_base_dir(self):
 
         spatial_data_path = 'test.spatialdata.zarr'
-        w = SpatialDataWrapper(adata_path=spatial_data_path, image_elem="picture", obs_set_paths=['obs/CellType'], obs_set_names=['Cell Type'], obs_embedding_paths=[
+        w = SpatialDataWrapper(spatialdata_path=spatial_data_path, image_elem="picture", obs_set_paths=['obs/CellType'], obs_set_names=['Cell Type'], obs_embedding_paths=[
             'obsm/X_umap'], obs_embedding_names=['UMAP'])
         w.base_dir = data_path
         w.local_dir_uid = 'spatialdata.zarr'

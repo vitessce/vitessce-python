@@ -945,15 +945,19 @@ class ObsSegmentationsOmeZarrWrapper(AbstractWrapper):
 
         return image_file_def_creator
 
+
 def raise_error_if_more_than_one_none(inputs):
     num_inputs = sum([1 for x in inputs if x is not None])
     if num_inputs > 1:
         raise ValueError(
-            "Expected only one of adata_path, adata_url, or adata_store to be provided")
+            "Expected only one of adata_path, adata_url, or adata_store to be provided"
+        )
     if num_inputs == 0:
         raise ValueError(
-                "Expected one of adata_path, adata_url, or adata_store to be provided")
+            "Expected one of adata_path, adata_url, or adata_store to be provided"
+        )
     return True
+
 
 class AnnDataWrapper(AbstractWrapper):
     def __init__(self, adata_path=None, adata_url=None, adata_store=None, obs_feature_matrix_path=None, feature_filter_path=None, initial_feature_filter_path=None, obs_set_paths=None, obs_set_names=None, obs_locations_path=None, obs_segmentations_path=None, obs_embedding_paths=None, obs_embedding_names=None, obs_embedding_dims=None, obs_spots_path=None, obs_points_path=None, feature_labels_path=None, obs_labels_path=None, convert_to_dense=True, coordination_values=None, obs_labels_paths=None, obs_labels_names=None, **kwargs):

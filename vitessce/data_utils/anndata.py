@@ -237,7 +237,7 @@ def to_uint8(arr, norm_along=None):
     return norm_arr.astype('u1')
 
 
-def sort_var_axis(adata_X, orig_var_index, full_var_index=None):
+def sort_var_axis(adata_X, orig_var_index, full_var_index=None, linkage_method="ward", linkage_metric="euclidean", optimal_ordering=False):
     """
     Sort the var index by performing hierarchical clustering.
 
@@ -254,7 +254,12 @@ def sort_var_axis(adata_X, orig_var_index, full_var_index=None):
     gexp_arr = to_dense(adata_X)
 
     # Perform hierarchical clustering along the genes axis.
-    Z = scipy.cluster.hierarchy.linkage(gexp_arr.T, method="ward")
+    Z = scipy.cluster.hierarchy.linkage(
+        gexp_arr.T,
+        method=linkage_method,
+        metric=linkage_metric,
+        optimal_ordering=optimal_ordering,
+    )
 
     # Get the hierarchy-based ordering of genes.
     leaf_index_list = scipy.cluster.hierarchy.leaves_list(Z)

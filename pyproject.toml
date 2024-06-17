@@ -31,7 +31,7 @@ dependencies = [
   'negspy>=0.2.24',
   'pandas>=1.1.2',
   'black>=21.11b1',
-  'numpy>=1.21.2',
+  'numpy>=1.21.2,<2.0',
   'anndata>=0.7.8,<0.11',
   'scanpy>=1.9.3',
   'ome-zarr==0.8.3',

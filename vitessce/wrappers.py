@@ -3,6 +3,7 @@ from os.path import join
 import tempfile
 from uuid import uuid4
 from pathlib import PurePath, PurePosixPath
+import warnings
 import zarr
 
 from .constants import (
@@ -968,9 +969,9 @@ class AnnDataWrapper(AbstractWrapper):
         """
         super().__init__(**kwargs)
         self._repr = make_repr(locals())
-        self._adata_path = adata_path
-        self._adata_url = adata_url
-        self._adata_store = adata_store
+        self._path = adata_path
+        self._url = adata_url
+        self._store = adata_store
 
         num_inputs = sum([1 for x in [adata_path, adata_url, adata_store] if x is not None])
         if num_inputs > 1:
@@ -996,24 +997,25 @@ class AnnDataWrapper(AbstractWrapper):
 
         self.local_dir_uid = make_unique_filename(".adata.zarr")
         self._expression_matrix = obs_feature_matrix_path
-        self._cell_set_obs_names = obs_set_names
+        self._obs_set_names = obs_set_names
         self._mappings_obsm_names = obs_embedding_names
         self._gene_var_filter = feature_filter_path
         self._matrix_gene_var_filter = initial_feature_filter_path
-        self._cell_set_obs = obs_set_paths
+        self._obs_set_elems = obs_set_paths
         self._spatial_centroid_obsm = obs_locations_path
         self._spatial_polygon_obsm = obs_segmentations_path
         self._mappings_obsm = obs_embedding_paths
         self._mappings_obsm_dims = obs_embedding_dims
         self._spatial_spots_obsm = obs_spots_path
         self._spatial_points_obsm = obs_points_path
-        self._gene_alias = feature_labels_path
+        self._feature_labels = feature_labels_path
         # Support legacy provision of single obs labels path
         if (obs_labels_path is not None):
-            self._obs_labels_paths = [obs_labels_path]
+            warnings.warn("`obs_labels_path` will be deprecated in a future release.", DeprecationWarning)
+            self._obs_labels_elems = [obs_labels_path]
             self._obs_labels_names = [obs_labels_path.split('/')[-1]]
         else:
-            self._obs_labels_paths = obs_labels_paths
+            self._obs_labels_elems = obs_labels_paths
             self._obs_labels_names = obs_labels_names
         self._convert_to_dense = convert_to_dense
         self._coordination_values = coordination_values
@@ -1025,25 +1027,25 @@ class AnnDataWrapper(AbstractWrapper):
 
         file_def_creator = self.make_file_def_creator(
             dataset_uid, obj_i)
-        routes = self.make_anndata_routes(dataset_uid, obj_i)
+        routes = self.make_routes(dataset_uid, obj_i)
 
         self.file_def_creators.append(file_def_creator)
         self.routes += routes
 
-    def make_anndata_routes(self, dataset_uid, obj_i):
+    def make_routes(self, dataset_uid, obj_i):
         if self.is_remote:
             return []
         elif self.is_store:
-            self.register_zarr_store(dataset_uid, obj_i, self._adata_store, self.local_dir_uid)
+            self.register_zarr_store(dataset_uid, obj_i, self._store, self.local_dir_uid)
             return []
         else:
-            return self.get_local_dir_route(dataset_uid, obj_i, self._adata_path, self.local_dir_uid)
+            return self.get_local_dir_route(dataset_uid, obj_i, self._path, self.local_dir_uid)
 
     def get_zarr_url(self, base_url="", dataset_uid="", obj_i=""):
         if self.is_remote:
-            return self._adata_url
+            return self._url
         else:
-            return self.get_local_dir_url(base_url, dataset_uid, obj_i, self._adata_path, self.local_dir_uid)
+            return self.get_local_dir_url(base_url, dataset_uid, obj_i, self._path, self.local_dir_uid)
 
     def make_file_def_creator(self, dataset_uid, obj_i):
         def get_anndata_zarr(base_url):
@@ -1085,13 +1087,13 @@ class AnnDataWrapper(AbstractWrapper):
                 if self._mappings_obsm_dims is not None:
                     for dim_i, dim in enumerate(self._mappings_obsm_dims):
                         options["obsEmbedding"][dim_i]['dims'] = dim
-            if self._cell_set_obs is not None:
+            if self._obs_set_elems is not None:
                 options["obsSets"] = []
-                if self._cell_set_obs_names is not None:
-                    names = self._cell_set_obs_names
+                if self._obs_set_names is not None:
+                    names = self._obs_set_names
                 else:
-                    names = [obs.split('/')[-1] for obs in self._cell_set_obs]
-                for obs, name in zip(self._cell_set_obs, names):
+                    names = [obs.split('/')[-1] for obs in self._obs_set_elems]
+                for obs, name in zip(self._obs_set_elems, names):
                     options["obsSets"].append({
                         "name": name,
                         "path": obs
@@ -1104,20 +1106,20 @@ class AnnDataWrapper(AbstractWrapper):
                     options["obsFeatureMatrix"]["featureFilterPath"] = self._gene_var_filter
                 if self._matrix_gene_var_filter is not None:
                     options["obsFeatureMatrix"]["initialFeatureFilterPath"] = self._matrix_gene_var_filter
-            if self._gene_alias is not None:
+            if self._feature_labels is not None:
                 options["featureLabels"] = {
-                    "path": self._gene_alias
+                    "path": self._feature_labels
                 }
-            if self._obs_labels_paths is not None:
-                if self._obs_labels_names is not None and len(self._obs_labels_paths) == len(self._obs_labels_names):
+            if self._obs_labels_elems is not None:
+                if self._obs_labels_names is not None and len(self._obs_labels_elems) == len(self._obs_labels_names):
                     # A name was provided for each path element, so use those values.
                     names = self._obs_labels_names
                 else:
                     # Names were not provided for each path element,
                     # so fall back to using the final part of each path for the names.
-                    names = [labels_path.split('/')[-1] for labels_path in self._obs_labels_paths]
+                    names = [labels_path.split('/')[-1] for labels_path in self._obs_labels_elems]
                 obs_labels = []
-                for path, name in zip(self._obs_labels_paths, names):
+                for path, name in zip(self._obs_labels_elems, names):
                     obs_labels.append({"path": path, "obsLabelsType": name})
                 options["obsLabels"] = obs_labels
             if len(options.keys()) > 0:

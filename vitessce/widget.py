@@ -199,7 +199,7 @@ async function render(view) {
     const jsDevMode = view.model.get('js_dev_mode');
     const jsPackageVersion = view.model.get('js_package_version');
     const customJsUrl = view.model.get('custom_js_url');
-    const pluginEsm = view.model.get('plugin_esm');
+    const pluginEsmArr = view.model.get('plugin_esm');
     const remountOnUidChange = view.model.get('remount_on_uid_change');
     const storeUrls = view.model.get('store_urls');
 
@@ -220,10 +220,10 @@ async function render(view) {
         useCoordination,
     } = await importWithMap("vitessce", importMap);
 
-    let pluginViewTypes;
-    let pluginCoordinationTypes;
-    let pluginFileTypes;
-    let pluginJointFileTypes;
+    let pluginViewTypes = [];
+    let pluginCoordinationTypes = [];
+    let pluginFileTypes = [];
+    let pluginJointFileTypes = [];
 
     const stores = Object.fromEntries(
         storeUrls.map(storeUrl => ([
@@ -238,27 +238,29 @@ async function render(view) {
         ])),
     );
 
-    try {
-        const pluginEsmUrl = URL.createObjectURL(new Blob([pluginEsm], { type: "text/javascript" }));
-        const pluginModule = (await import(pluginEsmUrl)).default;
-        URL.revokeObjectURL(pluginEsmUrl);
+    pluginEsmArr.forEach((pluginEsm) => {
+        try {
+            const pluginEsmUrl = URL.createObjectURL(new Blob([pluginEsm], { type: "text/javascript" }));
+            const pluginModule = (await import(pluginEsmUrl)).default;
+            URL.revokeObjectURL(pluginEsmUrl);
 
-        const pluginsObj = await pluginModule.createPlugins({
-            React,
-            PluginFileType,
-            PluginViewType,
-            PluginCoordinationType,
-            PluginJointFileType,
-            z,
-            useCoordination,
-        });
-        pluginViewTypes = pluginsObj.pluginViewTypes;
-        pluginCoordinationTypes = pluginsObj.pluginCoordinationTypes;
-        pluginFileTypes = pluginsObj.pluginFileTypes;
-        pluginJointFileTypes = pluginsObj.pluginJointFileTypes;
-    } catch(e) {
-        console.error(e);
-    }
+            const pluginsObj = await pluginModule.createPlugins({
+                React,
+                PluginFileType,
+                PluginViewType,
+                PluginCoordinationType,
+                PluginJointFileType,
+                z,
+                useCoordination,
+            });
+            pluginViewTypes = [...pluginViewTypes, pluginsObj.pluginViewTypes];
+            pluginCoordinationTypes = [...pluginCoordinationTypes, pluginsObj.pluginCoordinationTypes];
+            pluginFileTypes = [...pluginFileTypes, pluginsObj.pluginFileTypes];
+            pluginJointFileTypes = [...pluginJointFileTypes, pluginsObj.pluginJointFileTypes];
+        } catch(e) {
+            console.error(e);
+        }
+    });
 
     function VitessceWidget(props) {
         const { model } = props;
@@ -377,6 +379,14 @@ function createPlugins(utilsForPlugins) {
 export default { createPlugins };
 """
 
+# Abstract class for widget plugins to subclass
+class VitesscePlugin:
+    plugin_esm = DEFAULT_PLUGIN_ESM
+
+    commands = {}
+
+    def on_config_change(self, new_config):
+        raise NotImplementedError("on_config_change may optionally be implemented by subclasses.")
 
 class VitessceWidget(anywidget.AnyWidget):
     """
@@ -400,12 +410,12 @@ class VitessceWidget(anywidget.AnyWidget):
     js_package_version = Unicode('3.3.12').tag(sync=True)
     js_dev_mode = Bool(False).tag(sync=True)
     custom_js_url = Unicode('').tag(sync=True)
-    plugin_esm = Unicode(DEFAULT_PLUGIN_ESM).tag(sync=True)
+    plugin_esm = List(trait=Unicode(''), default_value=[]).tag(sync=True)
     remount_on_uid_change = Bool(True).tag(sync=True)
 
     store_urls = List(trait=Unicode(''), default_value=[]).tag(sync=True)
 
-    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='3.3.12', js_dev_mode=False, custom_js_url='', plugin_esm=DEFAULT_PLUGIN_ESM, remount_on_uid_change=True):
+    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='3.3.12', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True):
         """
         Construct a new Vitessce widget.
 
@@ -418,7 +428,7 @@ class VitessceWidget(anywidget.AnyWidget):
         :param str js_package_version: The version of the NPM package ('vitessce' if not js_dev_mode else '@vitessce/dev').
         :param bool js_dev_mode: Should @vitessce/dev be used (typically for debugging purposes)? By default, False.
         :param str custom_js_url: A URL to a JavaScript file to use (instead of 'vitessce' or '@vitessce/dev' NPM package).
-        :param str plugin_esm: JavaScript module that defines a createPlugins function. Optional.
+        :param list[WidgetPlugin] plugins: A list of subclasses of WidgetPlugin, defining plugin_esm (string) and/or on_config_change (function). Optional.
         :param bool remount_on_uid_change: Passed to the remountOnUidChange prop of the <Vitessce/> React component. By default, True.
 
         .. code-block:: python
@@ -439,6 +449,12 @@ class VitessceWidget(anywidget.AnyWidget):
         routes = config.get_routes()
 
         self._stores = config.get_stores(base_url=base_url)
+        self._plugins = plugins or []
+
+        plugin_esm = [p.plugin_esm for p in self._plugins]
+        self._plugin_commands = {}
+        for plugin in self._plugins:
+            self._plugin_commands.update(plugin.commands)
 
         uid_str = get_uid_str(uid)
 
@@ -487,6 +503,12 @@ class VitessceWidget(anywidget.AnyWidget):
         except KeyError:
             buffers = []
         return {"success": len(buffers) == 1}, buffers
+
+    @anywidget.experimental.command
+    def _plugin_command(self, params, buffers):
+        [command_name, command_params] = params
+        command_func = self._plugin_commands[command_name]
+        return command_func(command_params, buffers)
 
 # Launch Vitessce using plain HTML representation (no ipywidgets)
 

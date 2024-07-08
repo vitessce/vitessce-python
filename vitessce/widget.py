@@ -238,7 +238,11 @@ async function render(view) {
         ])),
     );
 
-    pluginEsmArr.forEach((pluginEsm) => {
+    function invokePluginCommand(commandName, commandParams, commandBuffers) {
+        return view.experimental.invoke("_plugin_command", [commandName, commandParams], commandBuffers);
+    }
+
+    pluginEsmArr.forEach(async (pluginEsm) => {
         try {
             const pluginEsmUrl = URL.createObjectURL(new Blob([pluginEsm], { type: "text/javascript" }));
             const pluginModule = (await import(pluginEsmUrl)).default;
@@ -252,11 +256,20 @@ async function render(view) {
                 PluginJointFileType,
                 z,
                 useCoordination,
+                invokeCommand: invokePluginCommand,
             });
-            pluginViewTypes = [...pluginViewTypes, pluginsObj.pluginViewTypes];
-            pluginCoordinationTypes = [...pluginCoordinationTypes, pluginsObj.pluginCoordinationTypes];
-            pluginFileTypes = [...pluginFileTypes, pluginsObj.pluginFileTypes];
-            pluginJointFileTypes = [...pluginJointFileTypes, pluginsObj.pluginJointFileTypes];
+            if(Array.isArray(pluginsObj.pluginViewTypes)) {
+                pluginViewTypes = [...pluginViewTypes, ...pluginsObj.pluginViewTypes];
+            }
+            if(Array.isArray(pluginsObj.pluginCoordinationTypes)) {
+                pluginCoordinationTypes = [...pluginCoordinationTypes, ...pluginsObj.pluginCoordinationTypes];
+            }
+            if(Array.isArray(pluginsObj.pluginFileTypes)) {
+                pluginFileTypes = [...pluginFileTypes, ...pluginsObj.pluginFileTypes];
+            }
+            if(Array.isArray(pluginsObj.pluginJointFileTypes)) {
+                pluginJointFileTypes = [...pluginJointFileTypes, ...pluginsObj.pluginJointFileTypes];
+            }
         } catch(e) {
             console.error(e);
         }
@@ -368,6 +381,7 @@ function createPlugins(utilsForPlugins) {
         PluginJointFileType,
         z,
         useCoordination,
+        invokeCommand,
     } = utilsForPlugins;
     return {
         pluginViewTypes: undefined,
@@ -382,7 +396,6 @@ export default { createPlugins };
 # Abstract class for widget plugins to subclass
 class VitesscePlugin:
     plugin_esm = DEFAULT_PLUGIN_ESM
-
     commands = {}
 
     def on_config_change(self, new_config):
@@ -465,7 +478,22 @@ class VitessceWidget(anywidget.AnyWidget):
             uid=uid_str, store_urls=list(self._stores.keys())
         )
 
+        # Register chained plugin on_config_change functions with a change observer.
+        def handle_config_change(change):
+            new_config = change.new
+            for plugin in self._plugins:
+                try:
+                    new_config = plugin.on_config_change(new_config)
+                except NotImplementedError:
+                    # It is optional for plugins to implement on_config_change.
+                    pass
+            if new_config is not None:
+                self.config = new_config
+        
+        self.observe(handle_config_change, names=['config'])
+
         serve_routes(config, routes, use_port)
+        
 
     def _get_coordination_value(self, coordination_type, coordination_scope):
         obj = self.config['coordinationSpace'][coordination_type]

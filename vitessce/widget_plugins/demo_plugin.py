@@ -1,4 +1,6 @@
 from esbuild_py import transform
+from ..widget import VitesscePlugin
+
 
 PLUGIN_ESM = transform("""
 function createPlugins(utilsForPlugins) {
@@ -10,6 +12,7 @@ function createPlugins(utilsForPlugins) {
         PluginJointFileType,
         z,
         useCoordination,
+        invokeCommand,
     } = utilsForPlugins;
     function DemoView(props) {
         const { coordinationScopes } = props;
@@ -18,12 +21,16 @@ function createPlugins(utilsForPlugins) {
         }, {
             setObsType,
         }] = useCoordination(['obsType'], coordinationScopes);
+                       
+        function handleClick() {
+            console.log(invokeCommand('demo_command', "Hello from command", []));
+        }
 
         return (
             <div className="demo">
                 <p>Demo plugin view</p>
                 <p>obsType: {obsType}</p>
-                <button>This is an example button</button>
+                <button onClick={handleClick}>This is an example button</button>
             </div>
         );
     }
@@ -35,6 +42,12 @@ function createPlugins(utilsForPlugins) {
 }
 export default { createPlugins };
 """)
+
+
+def handle_demo_command(message, buffers):
+    return message.upper(), []
+
+
 """
 Example of a minimal plugin view that gets the obsType coordination value from the coordination space and renders a button.
 This plugin view is not meant to be useful for end-users, but rather to demonstrate how to develop a plugin view that uses coordination (and uses eslint_py for JSX transformation).
@@ -48,3 +61,8 @@ This plugin view is not meant to be useful for end-users, but rather to demonstr
     # ...
     vc.widget(plugin_esm=demo_plugin_esm)
 """
+class DemoPlugin(VitesscePlugin):
+    plugin_esm = PLUGIN_ESM
+    commands = {
+        "demo_command": handle_demo_command,
+    }

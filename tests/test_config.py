@@ -522,7 +522,12 @@ def test_config_from_dict():
                 'files': [
                     {
                         'url': 'http://cells.json',
-                        'fileType': 'cells.json'
+                        'fileType': 'cells.json',
+                        'requestInit': {
+                            'headers': {
+                                'Authorization': 'Bearer token'
+                            }
+                        }
                     }
                 ]
             }
@@ -568,7 +573,12 @@ def test_config_from_dict():
                 'files': [
                     {
                         'url': 'http://cells.json',
-                        'fileType': 'cells.json'
+                        'fileType': 'cells.json',
+                        'requestInit': {
+                            'headers': {
+                                'Authorization': 'Bearer token'
+                            }
+                        }
                     }
                 ]
             },

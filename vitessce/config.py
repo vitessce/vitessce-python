@@ -50,7 +50,7 @@ class VitessceConfigDatasetFile:
     A class to represent a file (described by a URL, data type, and file type) in a Vitessce view config dataset.
     """
 
-    def __init__(self, file_type, url=None, coordination_values=None, options=None, data_type=None):
+    def __init__(self, file_type, url=None, coordination_values=None, options=None, data_type=None, request_init=None):
         """
         Not meant to be instantiated directly, but instead created and returned by the ``VitessceConfigDataset.add_file()`` method.
 
@@ -62,6 +62,8 @@ class VitessceConfigDatasetFile:
         :param options: Extra options to pass to the file loader class.
         :type options: dict or list or None
         :param data_type: Deprecated / not used. Only included for backwards compatibility with the old API.
+        :param request_init: Optional request init object to pass to the fetch API.
+        :type request_init: dict or None
         """
         self.file = {
             "fileType": file_type
@@ -72,6 +74,8 @@ class VitessceConfigDatasetFile:
             self.file["options"] = options
         if coordination_values:
             self.file["coordinationValues"] = coordination_values
+        if request_init:
+            self.file["requestInit"] = request_init
 
     def __repr__(self):
         repr_dict = {
@@ -83,6 +87,8 @@ class VitessceConfigDatasetFile:
             repr_dict["coordination_values"] = self.file["coordinationValues"]
         if "options" in self.file:
             repr_dict["options"] = self.file["options"]
+        if "requestInit" in self.file:
+            repr_dict["request_init"] = self.file["requestInit"]
 
         return make_repr(repr_dict, class_def=self.__class__)
 
@@ -135,7 +141,7 @@ class VitessceConfigDataset:
         """
         return self.dataset["uid"]
 
-    def add_file(self, file_type, url=None, coordination_values=None, options=None, data_type=None):
+    def add_file(self, file_type, url=None, coordination_values=None, options=None, data_type=None, request_init=None):
         """
         Add a new file definition to this dataset instance.
 
@@ -148,6 +154,8 @@ class VitessceConfigDataset:
         :param options: Extra options to pass to the file loader class. Optional.
         :type options: dict or list or None
         :param data_type: Deprecated / not used. Only included for backwards compatibility with the old API.
+        :param request_init: Optional request init object to pass to the fetch API.
+        :type request_init: dict or None
 
         :returns: Self, to allow function chaining.
         :rtype: VitessceConfigDataset
@@ -171,7 +179,7 @@ class VitessceConfigDataset:
         file_type_str = norm_enum(file_type, ft)
 
         self._add_file(VitessceConfigDatasetFile(
-            url=url, file_type=file_type_str, coordination_values=coordination_values, options=options))
+            url=url, file_type=file_type_str, coordination_values=coordination_values, options=options, request_init=request_init))
         return self
 
     def _add_file(self, obj):
@@ -1606,7 +1614,8 @@ class VitessceConfig:
                     file_type=f["fileType"],
                     url=f.get("url"),
                     coordination_values=f.get("coordinationValues"),
-                    options=f.get("options")
+                    options=f.get("options"),
+                    request_init=f.get("requestInit")
                 )
         if 'coordinationSpace' in config:
             for c_type in config['coordinationSpace'].keys():

@@ -242,7 +242,7 @@ async function render(view) {
         return view.experimental.invoke("_plugin_command", [commandName, commandParams], commandBuffers);
     }
 
-    pluginEsmArr.forEach(async (pluginEsm) => {
+    for (const pluginEsm of pluginEsmArr) {
         try {
             const pluginEsmUrl = URL.createObjectURL(new Blob([pluginEsm], { type: "text/javascript" }));
             const pluginModule = (await import(pluginEsmUrl)).default;
@@ -273,7 +273,7 @@ async function render(view) {
         } catch(e) {
             console.error(e);
         }
-    });
+    }
 
     function VitessceWidget(props) {
         const { model } = props;

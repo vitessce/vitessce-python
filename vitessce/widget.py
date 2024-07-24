@@ -394,12 +394,15 @@ export default { createPlugins };
 """
 
 # Abstract class for widget plugins to subclass
+
+
 class VitesscePlugin:
     plugin_esm = DEFAULT_PLUGIN_ESM
     commands = {}
 
     def on_config_change(self, new_config):
         raise NotImplementedError("on_config_change may optionally be implemented by subclasses.")
+
 
 class VitessceWidget(anywidget.AnyWidget):
     """
@@ -489,11 +492,10 @@ class VitessceWidget(anywidget.AnyWidget):
                     pass
             if new_config is not None:
                 self.config = new_config
-        
+
         self.observe(handle_config_change, names=['config'])
 
         serve_routes(config, routes, use_port)
-        
 
     def _get_coordination_value(self, coordination_type, coordination_scope):
         obj = self.config['coordinationSpace'][coordination_type]

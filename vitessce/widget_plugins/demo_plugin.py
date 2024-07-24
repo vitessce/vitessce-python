@@ -21,7 +21,7 @@ function createPlugins(utilsForPlugins) {
         }, {
             setObsType,
         }] = useCoordination(['obsType'], coordinationScopes);
-                       
+
         function handleClick() {
             console.log(invokeCommand('demo_command', "Hello from command", []));
         }
@@ -61,6 +61,8 @@ This plugin view is not meant to be useful for end-users, but rather to demonstr
     # ...
     vc.widget(plugin_esm=demo_plugin_esm)
 """
+
+
 class DemoPlugin(VitesscePlugin):
     plugin_esm = PLUGIN_ESM
     commands = {

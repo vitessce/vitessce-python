@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vitessce"
-version = "3.2.8"
+version = "3.3.0"
 authors = [
   { name="Mark Keller", email="mark_keller@hms.harvard.edu" },
 ]
@@ -19,10 +19,11 @@ classifiers = [
   'Intended Audience :: Developers',
   'Intended Audience :: Science/Research',
   'Topic :: Multimedia :: Graphics',
-  'Programming Language :: Python :: 3.7',
   'Programming Language :: Python :: 3.8',
   'Programming Language :: Python :: 3.9',
   'Programming Language :: Python :: 3.10',
+  'Programming Language :: Python :: 3.11',
+  'Programming Language :: Python :: 3.12',
 ]
 dependencies = [
   'zarr>=2.5.0',

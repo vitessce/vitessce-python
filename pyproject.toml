@@ -96,4 +96,4 @@ notebook = []
 repository = "https://github.com/vitessce/vitessce-python"
 
 [tool.setuptools]
-packages = ["vitessce", "vitessce.data_utils"]
+packages = ["vitessce", "vitessce.data_utils", "vitessce.widget_plugins"]

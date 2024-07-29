@@ -285,4 +285,4 @@ class SpatialQueryPlugin(VitesscePlugin):
             query_uuid = query_params.get("uuid", None)
             if new_config["uid"] != f"with_query_{query_uuid}":
                 return self.run_sq(new_config)
-        return new_config
+        return None

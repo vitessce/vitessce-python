@@ -494,7 +494,6 @@ class VitessceWidget(anywidget.AnyWidget):
     page_mode = Bool(False).tag(sync=True)
     page_esm = Unicode('').tag(sync=True)
 
-
     store_urls = List(trait=Unicode(''), default_value=[]).tag(sync=True)
 
     def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='3.3.12', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, page_mode=False, page_esm=None):
@@ -610,6 +609,8 @@ class VitessceWidget(anywidget.AnyWidget):
         return command_func(command_params, buffers)
 
 # Launch Vitessce using plain HTML representation (no ipywidgets)
+
+
 def ipython_display(config, height=600, theme='auto', base_url=None, host_name=None, uid=None, port=None, proxy=False, js_package_version='3.3.12', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, page_mode=False, page_esm=None):
     from IPython.display import display, HTML
     uid_str = "vitessce" + get_uid_str(uid)

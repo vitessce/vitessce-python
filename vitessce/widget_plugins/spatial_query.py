@@ -122,23 +122,23 @@ class SpatialQueryPlugin(VitesscePlugin):
 
     def __init__(self, adata, spatial_key="X_spatial", label_key="predicted.ASCT.celltype"):
         from SpatialQuery.spatial_query import spatial_query
-        import matplotlib.pyplot as plt # Add as dependency / optional dependency?
+        import matplotlib.pyplot as plt  # Add as dependency / optional dependency?
 
         self.adata = adata
         self.spatial_key = spatial_key
         self.label_key = label_key
 
-        self.tt = spatial_query(adata=adata, dataset = 'test', spatial_key=spatial_key, label_key=label_key, leaf_size=10)
+        self.tt = spatial_query(adata=adata, dataset='test', spatial_key=spatial_key, label_key=label_key, leaf_size=10)
 
-        self.tab20_rgb = [ [int(r*255),int(g*255),int(b*255)] for (r, g, b, a) in [plt.cm.tab20(i) for i in range(20)]]
-    
+        self.tab20_rgb = [[int(r * 255), int(g * 255), int(b * 255)] for (r, g, b, a) in [plt.cm.tab20(i) for i in range(20)]]
+
         self.additional_obs_sets = {
             "version": "0.1.3",
             "tree": [
                 {
                     "name": "Spatial-Query Results",
                     "children": [
-                        
+
                     ]
                 }
             ]
@@ -168,9 +168,9 @@ class SpatialQueryPlugin(VitesscePlugin):
 
         self.cell_i_to_cell_id = dict(zip(range(adata.obs.shape[0]), adata.obs.index.tolist()))
         self.cell_id_to_cell_type = dict(zip(adata.obs.index.tolist(), adata.obs[label_key].tolist()))
-    
+
     def get_matching_cell_ids(self, cell_type, cell_i):
-        cell_ids = [ self.cell_i_to_cell_id[i] for i in cell_i ]
+        cell_ids = [self.cell_i_to_cell_id[i] for i in cell_i]
         matches = []
         for cell_id in cell_ids:
             cell_ct = self.cell_id_to_cell_type[cell_id]
@@ -185,20 +185,20 @@ class SpatialQueryPlugin(VitesscePlugin):
                 {
                     "name": f"Spatial-Query Results {sq_id}",
                     "children": [
-                        
+
                     ]
                 }
             ]
         }
 
         obs_set_color = []
-        
+
         for row_i, row in fp_tree.iterrows():
             motif = row["itemsets"]
             cell_i = row["cell_id"]
-        
+
             motif_name = str(list(motif))
-        
+
             additional_obs_sets["tree"][0]["children"].append({
                 "name": motif_name,
                 "children": [
@@ -209,12 +209,12 @@ class SpatialQueryPlugin(VitesscePlugin):
                     for cell_type in motif
                 ]
             })
-        
+
             obs_set_color.append({
                 "color": [255, 255, 255],
                 "path": [additional_obs_sets["tree"][0]["name"], motif_name]
             })
-        
+
             for cell_type in motif:
                 color = self.ct_to_color[cell_type]
                 path = [additional_obs_sets["tree"][0]["name"], motif_name, cell_type]
@@ -223,7 +223,7 @@ class SpatialQueryPlugin(VitesscePlugin):
                     "path": path
                 })
         return (additional_obs_sets, obs_set_color)
-        
+
     def run_sq(self, prev_config):
         query_params = prev_config["coordinationSpace"]["queryParams"]["A"]
 
@@ -231,7 +231,7 @@ class SpatialQueryPlugin(VitesscePlugin):
         min_size = query_params.get("minSize", 4)
         min_count = query_params.get("minCount", 10)
         min_support = query_params.get("minSupport", 0.5)
-        dis_duplicates = query_params.get("disDuplicates", False) # if distinguish duplicates of cell types in neighborhood
+        dis_duplicates = query_params.get("disDuplicates", False)  # if distinguish duplicates of cell types in neighborhood
         query_type = query_params.get("queryType", "grid")
 
         query_uuid = query_params["uuid"]
@@ -240,10 +240,10 @@ class SpatialQueryPlugin(VitesscePlugin):
             max_dist=max_dist,
             min_size=min_size,
             min_count=min_count,
-            min_support=min_support, 
+            min_support=min_support,
             dis_duplicates=dis_duplicates,
             if_display=True,
-            fig_size = (9, 6),
+            fig_size=(9, 6),
             return_cellID=True,
         )
         print(params_dict)
@@ -255,14 +255,14 @@ class SpatialQueryPlugin(VitesscePlugin):
             params_dict["return_grid"] = True
             fp_tree, grid_pos = self.tt.find_patterns_grid(**params_dict)
         # TODO: support query_type == "ct-center"
-        
+
         # Previous values
         additional_obs_sets = prev_config["coordinationSpace"]["additionalObsSets"]["A"]
         obs_set_color = prev_config["coordinationSpace"]["obsSetColor"]["A"]
 
-        # Perform query 
+        # Perform query
         (new_additional_obs_sets, new_obs_set_color) = self.fp_tree_to_obs_sets_tree(fp_tree, query_uuid)
-        
+
         additional_obs_sets["tree"][0] = new_additional_obs_sets["tree"][0]
         prev_config["coordinationSpace"]["additionalObsSets"]["A"] = additional_obs_sets
 
@@ -270,13 +270,12 @@ class SpatialQueryPlugin(VitesscePlugin):
         prev_config["coordinationSpace"]["obsSetColor"]["A"] = obs_set_color
 
         motif_to_select = new_additional_obs_sets["tree"][0]["children"][0]["name"]
-        new_obs_set_selection = [ [new_additional_obs_sets["tree"][0]["name"], motif_to_select, node["name"]] for node in new_additional_obs_sets["tree"][0]["children"][0]["children"] ]
+        new_obs_set_selection = [[new_additional_obs_sets["tree"][0]["name"], motif_to_select, node["name"]] for node in new_additional_obs_sets["tree"][0]["children"][0]["children"]]
         prev_config["coordinationSpace"]["obsSetSelection"]["A"] = new_obs_set_selection
 
         # TODO: set obsSetExpansion
 
-        return { **prev_config, "uid": f"with_query_{query_uuid}" }
-        
+        return {**prev_config, "uid": f"with_query_{query_uuid}"}
 
     def on_config_change(self, new_config):
         query_params = new_config["coordinationSpace"]["queryParams"]["A"]

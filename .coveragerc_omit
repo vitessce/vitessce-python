@@ -12,4 +12,4 @@ omit =
     vitessce/data_utils/entities.py
     vitessce/data_utils/multivec.py
     vitessce/widget_plugins/demo_plugin.py
-    vitessce/widget_plugins/spatial_query_plugin.py
+    vitessce/widget_plugins/spatial_query.py

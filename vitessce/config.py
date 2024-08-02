@@ -480,7 +480,7 @@ class VitessceConfigView:
             "x": x,
             "y": y,
             "w": w,
-            "h": h,
+            "h": h
         }
         if uid is not None:
             self.view["uid"] = uid
@@ -491,9 +491,8 @@ class VitessceConfigView:
             "x": self.view["x"],
             "y": self.view["y"],
             "w": self.view["w"],
+            "h": self.view["h"],
         }
-        if "uid" in self.view:
-            params_dict["uid"] = self.view["uid"]
         # Only include coordination_scopes if there are coordination scopes other than
         # the coorindation scope for the 'dataset' coordination type.
         non_dataset_coordination_scopes = {
@@ -503,6 +502,8 @@ class VitessceConfigView:
         }
         if len(non_dataset_coordination_scopes) > 0:
             params_dict["coordination_scopes"] = non_dataset_coordination_scopes
+        if "uid" in self.view:
+            params_dict["uid"] = self.view["uid"]
         return params_dict
 
     def get_coordination_scope(self, c_type):
@@ -1005,7 +1006,7 @@ class VitessceConfig:
         """
         return self.config["datasets"]
 
-    def add_view(self, view_type, dataset=None, dataset_uid=None, x=0, y=0, w=1, h=1, mapping=None, uid=None, coordination_scopes=None, props=None):
+    def add_view(self, view_type, dataset=None, dataset_uid=None, x=0, y=0, w=1, h=1, mapping=None, coordination_scopes=None, props=None, uid=None):
         """
         Add a view to the config.
 

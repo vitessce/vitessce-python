@@ -117,10 +117,29 @@ export default { createPlugins };
 
 
 class SpatialQueryPlugin(VitesscePlugin):
+    """
+    Spatial-Query plugin view renders controls to change parameters passed to the Spatial-Query methods.
+    """
     plugin_esm = PLUGIN_ESM
     commands = {}
 
-    def __init__(self, adata, spatial_key="X_spatial", label_key="predicted.ASCT.celltype"):
+    def __init__(self, adata, spatial_key="X_spatial", label_key="cell_type"):
+        """
+        Construct a new Vitessce widget.
+
+        :param adata: AnnData.
+        :type adata: anndata.AnnData
+        :param str spatial_key: The key in adata.obsm that contains the (x, y) coordinates of each cell. By default, "X_spatial".
+        :param str label_key: The column in adata.obs that contains the cell type labels. By default, "cell_type".
+
+        .. code-block:: python
+
+            from vitessce.widget_plugins import SpatialQueryPlugin
+
+            plugin = SpatialQueryPlugin(adata, spatial_key="X_spatial", label_key="cell_type")
+            # ...
+            vc.widget(plugins=[plugin])
+        """
         from SpatialQuery.spatial_query import spatial_query
         import matplotlib.pyplot as plt  # Add as dependency / optional dependency?
 

@@ -138,7 +138,7 @@ class SpatialQueryPlugin(VitesscePlugin):
 
             plugin = SpatialQueryPlugin(adata, spatial_key="X_spatial", label_key="cell_type")
             # ...
-            vc.widget(plugins=[plugin])
+            vc.widget(plugins=[plugin], remount_on_uid_change=False)
         """
         from SpatialQuery.spatial_query import spatial_query
         import matplotlib.pyplot as plt  # Add as dependency / optional dependency?

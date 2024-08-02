@@ -288,18 +288,20 @@ async function render(view) {
     }
 
     let PageComponent;
-    try {
-        const pageEsmUrl = URL.createObjectURL(new Blob([pageEsm], { type: "text/javascript" }));
-        const pageModule = (await import(pageEsmUrl)).default;
-        URL.revokeObjectURL(pageEsmUrl);
+    if(pageMode && pageEsm.length > 0) {
+        try {
+            const pageEsmUrl = URL.createObjectURL(new Blob([pageEsm], { type: "text/javascript" }));
+            const pageModule = (await import(pageEsmUrl)).default;
+            URL.revokeObjectURL(pageEsmUrl);
 
-        const pageDeps = {
-            usePageModeView,
-        };
-        PageComponent = await pageModule.createPage(pageDeps);
-    } catch(e) {
-        console.error("Error loading page ESM or executing createPage function.")
-        console.error(e);
+            const pageDeps = {
+                usePageModeView,
+            };
+            PageComponent = await pageModule.createPage(pageDeps);
+        } catch(e) {
+            console.error("Error loading page ESM or executing createPage function.")
+            console.error(e);
+        }
     }
 
     function VitessceWidget(props) {
@@ -608,7 +610,7 @@ class VitessceWidget(anywidget.AnyWidget):
         return command_func(command_params, buffers)
 
 # Launch Vitessce using plain HTML representation (no ipywidgets)
-def ipython_display(config, height=600, theme='auto', base_url=None, host_name=None, uid=None, port=None, proxy=False, js_package_version='3.3.12', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True):
+def ipython_display(config, height=600, theme='auto', base_url=None, host_name=None, uid=None, port=None, proxy=False, js_package_version='3.3.12', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, page_mode=False, page_esm=None):
     from IPython.display import display, HTML
     uid_str = "vitessce" + get_uid_str(uid)
 
@@ -627,6 +629,8 @@ def ipython_display(config, height=600, theme='auto', base_url=None, host_name=N
         "js_dev_mode": js_dev_mode,
         "custom_js_url": custom_js_url,
         "plugin_esm": plugin_esm,
+        "page_mode": page_mode,
+        "page_esm": ('' if page_esm is None else page_esm),
         "remount_on_uid_change": remount_on_uid_change,
         "proxy": proxy,
         "has_host_name": host_name is not None,

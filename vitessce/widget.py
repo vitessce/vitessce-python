@@ -393,14 +393,23 @@ function createPlugins(utilsForPlugins) {
 export default { createPlugins };
 """
 
-# Abstract class for widget plugins to subclass
-
 
 class VitesscePlugin:
+    """
+    A class that represents a Vitessce widget plugin. Custom plugins can be created by subclassing this class.
+    """
     plugin_esm = DEFAULT_PLUGIN_ESM
     commands = {}
 
     def on_config_change(self, new_config):
+        """
+        Config change handler.
+
+        :param dict new_config: The new config object.
+
+        :returns: config (likely with new "uid" property) or None
+        :rtype: dict or None
+        """
         raise NotImplementedError("on_config_change may optionally be implemented by subclasses.")
 
 
@@ -444,7 +453,7 @@ class VitessceWidget(anywidget.AnyWidget):
         :param str js_package_version: The version of the NPM package ('vitessce' if not js_dev_mode else '@vitessce/dev').
         :param bool js_dev_mode: Should @vitessce/dev be used (typically for debugging purposes)? By default, False.
         :param str custom_js_url: A URL to a JavaScript file to use (instead of 'vitessce' or '@vitessce/dev' NPM package).
-        :param list[WidgetPlugin] plugins: A list of subclasses of WidgetPlugin, defining plugin_esm (string) and/or on_config_change (function). Optional.
+        :param list[WidgetPlugin] plugins: A list of subclasses of VitesscePlugin. Optional.
         :param bool remount_on_uid_change: Passed to the remountOnUidChange prop of the <Vitessce/> React component. By default, True.
 
         .. code-block:: python

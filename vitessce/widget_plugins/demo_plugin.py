@@ -48,22 +48,18 @@ def handle_demo_command(message, buffers):
     return message.upper(), []
 
 
-"""
-Example of a minimal plugin view that gets the obsType coordination value from the coordination space and renders a button.
-This plugin view is not meant to be useful for end-users, but rather to demonstrate how to develop a plugin view that uses coordination (and uses eslint_py for JSX transformation).
-
-:meta hide-value:
-
-.. code-block:: python
-
-    from vitessce.widget_plugins import demo_plugin_esm
-
-    # ...
-    vc.widget(plugin_esm=demo_plugin_esm)
-"""
-
-
 class DemoPlugin(VitesscePlugin):
+    """
+    Example of a minimal plugin view that gets the obsType coordination value from the coordination space and renders a button.
+    This plugin view is not meant to be useful for end-users, but rather to demonstrate how to develop a plugin view that uses coordination (and uses eslint_py for JSX transformation).
+
+    .. code-block:: python
+
+        from vitessce.widget_plugins import DemoPlugin
+
+        # ...
+        vc.widget(plugins=[DemoPlugin()])
+    """
     plugin_esm = PLUGIN_ESM
     commands = {
         "demo_command": handle_demo_command,

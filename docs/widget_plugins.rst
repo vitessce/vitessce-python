@@ -47,24 +47,21 @@ If defined, these plugin arrays are passed to the Vitessce component as `props <
 Passing plugin ESM to the widget
 --------------------------------
 
-The plugin string can be passed to the widget using the ``plugin_esm`` parameter:
+The plugin string can be passed to the widget using the ``plugins`` parameter and passing a subclass of ``VitesscePlugin``:
 
 
 .. code-block:: python
 
-    from vitessce import VitessceConfig
+    from vitessce import VitessceConfig, VitesscePlugin
 
-    vc = VitessceConfig(
-        description="A Vitessce widget with a custom plugin",
-        widget=[
-            {
-                "plugin": PLUGIN_ESM,
-            },
-        ],
-    )
+    class MyPlugin(VitesscePlugin):
+        plugin_esm = PLUGIN_ESM
+
+    vc = VitessceConfig(description="A Vitessce widget with a custom plugin")
     # Some more configuration here...
 
-    vc.widget(plugin_esm=PLUGIN_ESM)
+    plugin = MyPlugin()
+    vc.widget(plugins=[plugin])
 
 
 -------------------------------
@@ -149,4 +146,7 @@ vitessce.widget_plugins
 ***********************
 
 .. automodule:: vitessce.widget_plugins.demo_plugin
+ :members:
+
+.. automodule:: vitessce.widget_plugins.spatial_query
  :members:

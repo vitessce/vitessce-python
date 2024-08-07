@@ -61,6 +61,7 @@ def test_config_add_dataset():
         "initStrategy": "auto"
     }
 
+
 def test_config_add_anndata_url():
     vc = VitessceConfig(schema_version="1.0.15")
     vc.add_dataset(name='My Dataset').add_object(
@@ -71,7 +72,6 @@ def test_config_add_anndata_url():
     )
 
     vc_dict = vc.to_dict()
-    print(vc_dict)
 
     assert vc_dict == {
         "version": "1.0.15",
@@ -105,7 +105,6 @@ def test_config_add_anndata_url():
         "layout": [],
         "initStrategy": "auto"
     }
-
 
 
 def test_config_add_dataset_add_files():

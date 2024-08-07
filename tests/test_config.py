@@ -12,6 +12,7 @@ from vitessce import (  # noqa: F401
     AbstractWrapper,
     make_repr,
     CoordinationLevel as CL,
+    AnnDataWrapper,
 
     # Neither of these is in the source code, but they do appear in code which is eval'd.
     VitessceChainableConfig,
@@ -49,6 +50,51 @@ def test_config_add_dataset():
                 'uid': 'A',
                 'name': 'My Dataset',
                 'files': []
+            }
+        ],
+        'coordinationSpace': {
+            'dataset': {
+                'A': 'A'
+            },
+        },
+        "layout": [],
+        "initStrategy": "auto"
+    }
+
+
+def test_config_add_anndata_url():
+    vc = VitessceConfig(schema_version="1.0.15")
+    vc.add_dataset(name='My Dataset').add_object(
+        AnnDataWrapper(
+            adata_url="http://example.com/adata.h5ad.zarr",
+            obs_set_paths=["obs/louvain"],
+        )
+    )
+
+    vc_dict = vc.to_dict()
+
+    assert vc_dict == {
+        "version": "1.0.15",
+        "name": "",
+        "description": "",
+        "datasets": [
+            {
+                'uid': 'A',
+                'name': 'My Dataset',
+                'files': [
+                    {
+                        "fileType": "anndata.zarr",
+                        "url": "http://example.com/adata.h5ad.zarr",
+                        "options": {
+                            "obsSets": [
+                                {
+                                    "name": "louvain",
+                                    "path": "obs/louvain",
+                                }
+                            ]
+                        }
+                    }
+                ]
             }
         ],
         'coordinationSpace': {

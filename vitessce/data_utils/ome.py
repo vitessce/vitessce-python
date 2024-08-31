@@ -38,7 +38,13 @@ def multiplex_img_to_ome_tiff(img_arr, channel_names, output_path, axes="CYX"):
     :param str output_path: The path to save the Zarr store.
     :param str axes: The array axis ordering. By default, "CYX"
     """
-    tiff_writer = TiffWriter(output_path, ome=True)
+    num_pixels = 1
+    for n in img_arr.shape:
+        num_pixels *= n
+    
+    bigtiff = (num_pixels > 2**32)
+
+    tiff_writer = TiffWriter(output_path, ome=True, bigtiff=bigtiff)
     tiff_writer.write(
         img_arr,
         metadata={

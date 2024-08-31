@@ -1,3 +1,4 @@
+import json
 import numpy as np
 from anndata import AnnData
 import scipy.cluster
@@ -5,6 +6,16 @@ from scipy.sparse import issparse
 
 VAR_CHUNK_SIZE = 10
 
+
+def generate_h5ad_ref_spec(h5_url, omit_url=True):
+    from kerchunk.hdf import SingleHdf5ToZarr
+    h5chunks = SingleHdf5ToZarr(h5_url, inline_threshold=300)
+    h5dict = h5chunks.translate()
+    if omit_url:
+        for key, val in h5dict['refs'].items():
+            if isinstance(val, list):
+                h5dict['refs'][key] = [None, *val[1:]] 
+    return h5dict
 
 def cast_arr(arr):
     """

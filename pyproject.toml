@@ -80,6 +80,8 @@ all = [
   'ujson>=4.0.1',
   'starlette==0.14.0',
   'generate-tiff-offsets>=0.1.7',
+  'kerchunk>=0.2.6',
+  'fsspec>=2023.12.2',
 
   # aiofiles is not explicitly referenced in our code,
   # but it is an implicit dependency of starlette==0.14.0.

@@ -13,8 +13,9 @@ def generate_h5ad_ref_spec(h5_url, omit_url=True):
     if omit_url:
         for key, val in h5dict['refs'].items():
             if isinstance(val, list):
-                h5dict['refs'][key] = [None, *val[1:]] 
+                h5dict['refs'][key] = [None, *val[1:]]
     return h5dict
+
 
 def cast_arr(arr):
     """

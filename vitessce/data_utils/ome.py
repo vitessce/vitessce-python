@@ -19,6 +19,7 @@ def needs_bigtiff(img_arr_shape):
         num_pixels *= n
     return (num_pixels > 2**32)
 
+
 def rgb_img_to_ome_tiff(img_arr, output_path, img_name="Image", axes="CYX"):
     """
     Convert an RGB image to OME-TIFF.

@@ -262,9 +262,9 @@ class SpatialQueryPlugin(VitesscePlugin):
         params_dict = dict(
             max_dist=max_dist,
             min_size=min_size,
-            #min_count=min_count,
+            # min_count=min_count,
             min_support=min_support,
-            #dis_duplicates=dis_duplicates,
+            # dis_duplicates=dis_duplicates,
             if_display=True,
             fig_size=(9, 6),
             return_cellID=True,
@@ -282,9 +282,9 @@ class SpatialQueryPlugin(VitesscePlugin):
         elif query_type == "ct-center":
             fp_tree = self.tt.motif_enrichment_knn(
                 ct=cell_type_of_interest,
-                k=20, # TODO: make this a parameter in the UI.
+                k=20,  # TODO: make this a parameter in the UI.
                 min_support=min_support,
-                #dis_duplicates=dis_duplicates,
+                # dis_duplicates=dis_duplicates,
                 return_cellID=True,
             )
             print(fp_tree)
@@ -307,10 +307,10 @@ class SpatialQueryPlugin(VitesscePlugin):
         motif_to_select = new_additional_obs_sets["tree"][0]["children"][0]["name"]
         new_obs_set_selection = [[new_additional_obs_sets["tree"][0]["name"], motif_to_select, node["name"]] for node in new_additional_obs_sets["tree"][0]["children"][0]["children"]]
         prev_config["coordinationSpace"]["obsSetSelection"]["A"] = new_obs_set_selection
-        
+
         # TODO: need to fix bug that prevents this from working
         # Reference: https://github.com/vitessce/vitessce/blob/774328ab5c4436576dd2e8e4fff0758d6c6cce89/packages/view-types/obs-sets-manager/src/ObsSetsManagerSubscriber.js#L104
-        prev_config["coordinationSpace"]["obsSetExpansion"]["A"] = [ path[:-1] for path in new_obs_set_selection ]
+        prev_config["coordinationSpace"]["obsSetExpansion"]["A"] = [path[:-1] for path in new_obs_set_selection]
 
         return {**prev_config, "uid": f"with_query_{query_uuid}"}
 

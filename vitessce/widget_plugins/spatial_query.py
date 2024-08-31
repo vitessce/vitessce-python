@@ -251,9 +251,9 @@ class SpatialQueryPlugin(VitesscePlugin):
 
         max_dist = query_params.get("maxDist", 150)
         min_size = query_params.get("minSize", 4)
-        min_count = query_params.get("minCount", 10)
+        # min_count = query_params.get("minCount", 10)
         min_support = query_params.get("minSupport", 0.5)
-        dis_duplicates = query_params.get("disDuplicates", False)  # if distinguish duplicates of cell types in neighborhood
+        # dis_duplicates = query_params.get("disDuplicates", False)  # if distinguish duplicates of cell types in neighborhood
         query_type = query_params.get("queryType", "grid")
         cell_type_of_interest = query_params.get("cellTypeOfInterest", None)
 

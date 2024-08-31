@@ -213,7 +213,10 @@ class SpatialQueryPlugin(VitesscePlugin):
         obs_set_color = []
 
         for row_i, row in fp_tree.iterrows():
-            motif = row["itemsets"]
+            try:
+                motif = row["itemsets"]
+            except KeyError:
+                motif = row["motifs"]
             cell_i = row["cell_id"]
 
             motif_name = str(list(motif))
@@ -248,24 +251,27 @@ class SpatialQueryPlugin(VitesscePlugin):
 
         max_dist = query_params.get("maxDist", 150)
         min_size = query_params.get("minSize", 4)
-        min_count = query_params.get("minCount", 10)
+        # min_count = query_params.get("minCount", 10)
         min_support = query_params.get("minSupport", 0.5)
-        dis_duplicates = query_params.get("disDuplicates", False)  # if distinguish duplicates of cell types in neighborhood
+        # dis_duplicates = query_params.get("disDuplicates", False)  # if distinguish duplicates of cell types in neighborhood
         query_type = query_params.get("queryType", "grid")
+        cell_type_of_interest = query_params.get("cellTypeOfInterest", None)
 
         query_uuid = query_params["uuid"]
 
         params_dict = dict(
             max_dist=max_dist,
             min_size=min_size,
-            min_count=min_count,
+            # min_count=min_count,
             min_support=min_support,
-            dis_duplicates=dis_duplicates,
+            # dis_duplicates=dis_duplicates,
             if_display=True,
             fig_size=(9, 6),
             return_cellID=True,
         )
         print(params_dict)
+
+        # TODO: add unit tests for this functionality
 
         if query_type == "rand":
             # TODO: implement param similar to return_grid for find_patterns_rand (to return the random points used)
@@ -273,7 +279,17 @@ class SpatialQueryPlugin(VitesscePlugin):
         elif query_type == "grid":
             params_dict["return_grid"] = True
             fp_tree, grid_pos = self.tt.find_patterns_grid(**params_dict)
-        # TODO: support query_type == "ct-center"
+        elif query_type == "ct-center":
+            fp_tree = self.tt.motif_enrichment_knn(
+                ct=cell_type_of_interest,
+                k=20,  # TODO: make this a parameter in the UI.
+                min_support=min_support,
+                # dis_duplicates=dis_duplicates,
+                return_cellID=True,
+            )
+            print(fp_tree)
+
+        # TODO: implement query types that are dependent on motif selection.
 
         # Previous values
         additional_obs_sets = prev_config["coordinationSpace"]["additionalObsSets"]["A"]
@@ -292,7 +308,9 @@ class SpatialQueryPlugin(VitesscePlugin):
         new_obs_set_selection = [[new_additional_obs_sets["tree"][0]["name"], motif_to_select, node["name"]] for node in new_additional_obs_sets["tree"][0]["children"][0]["children"]]
         prev_config["coordinationSpace"]["obsSetSelection"]["A"] = new_obs_set_selection
 
-        # TODO: set obsSetExpansion
+        # TODO: need to fix bug that prevents this from working
+        # Reference: https://github.com/vitessce/vitessce/blob/774328ab5c4436576dd2e8e4fff0758d6c6cce89/packages/view-types/obs-sets-manager/src/ObsSetsManagerSubscriber.js#L104
+        prev_config["coordinationSpace"]["obsSetExpansion"]["A"] = [path[:-1] for path in new_obs_set_selection]
 
         return {**prev_config, "uid": f"with_query_{query_uuid}"}
 

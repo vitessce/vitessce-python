@@ -5,6 +5,21 @@ from tifffile import TiffWriter
 from .anndata import cast_arr
 
 
+def needs_bigtiff(img_arr_shape):
+    """
+    Helper function to determine if an image array is too large for standard TIFF format.
+
+    :param img_arr_shape: The shape of the image array.
+    :type img_arr_shape: tuple[int]
+    :return: True if the image array is too large for standard TIFF format, False otherwise.
+    :rtype: bool
+    """
+    num_pixels = 1
+    for n in img_arr_shape.shape:
+        num_pixels *= n
+    return (num_pixels > 2**32)
+
+
 def rgb_img_to_ome_tiff(img_arr, output_path, img_name="Image", axes="CYX"):
     """
     Convert an RGB image to OME-TIFF.
@@ -16,8 +31,9 @@ def rgb_img_to_ome_tiff(img_arr, output_path, img_name="Image", axes="CYX"):
     :param str axes: The array axis ordering. By default, "CYX"
     """
     img_arr = img_arr.astype(np.dtype('uint8'))
+    bigtiff = needs_bigtiff(img_arr.shape)
 
-    tiff_writer = TiffWriter(output_path, ome=True)
+    tiff_writer = TiffWriter(output_path, ome=True, bigtiff=bigtiff)
     tiff_writer.write(
         img_arr,
         metadata={
@@ -38,11 +54,7 @@ def multiplex_img_to_ome_tiff(img_arr, channel_names, output_path, axes="CYX"):
     :param str output_path: The path to save the Zarr store.
     :param str axes: The array axis ordering. By default, "CYX"
     """
-    num_pixels = 1
-    for n in img_arr.shape:
-        num_pixels *= n
-    
-    bigtiff = (num_pixels > 2**32)
+    bigtiff = needs_bigtiff(img_arr.shape)
 
     tiff_writer = TiffWriter(output_path, ome=True, bigtiff=bigtiff)
     tiff_writer.write(

@@ -190,7 +190,7 @@ class AbstractWrapper:
             else:
                 route_path = file_path_to_url_path(local_file_path)
                 local_file_path = join(self.base_dir, local_file_path)
-                
+
             return [
                 FileRoute(route_path, lambda req: range_repsonse(req, local_file_path), local_file_path),
             ]
@@ -999,7 +999,7 @@ class AnnDataWrapper(AbstractWrapper):
             self.is_h5ad = True
         else:
             self.is_h5ad = False
-        
+
         if adata_store is not None and (ref_path is not None or ref_url is not None):
             raise ValueError(
                 "Did not expect ref_path or ref_url to be provided with adata_store")
@@ -1011,7 +1011,6 @@ class AnnDataWrapper(AbstractWrapper):
         if num_inputs == 0:
             raise ValueError(
                 "Expected one of adata_path, adata_url, or adata_store to be provided")
-
 
         if adata_path is not None:
             self.is_remote = False
@@ -1086,13 +1085,13 @@ class AnnDataWrapper(AbstractWrapper):
             return self._adata_url
         else:
             return self.get_local_dir_url(base_url, dataset_uid, obj_i, self._adata_path, self.local_dir_uid)
-    
+
     def get_h5ad_url(self, base_url="", dataset_uid="", obj_i=""):
         if self.is_remote:
             return self._adata_url
         else:
             return self.get_local_file_url(base_url, dataset_uid, obj_i, self._adata_path, self.local_file_uid)
-        
+
     def get_ref_url(self, base_url="", dataset_uid="", obj_i=""):
         if self.is_remote:
             return self._ref_url
@@ -1174,7 +1173,7 @@ class AnnDataWrapper(AbstractWrapper):
                 for path, name in zip(self._obs_labels_paths, names):
                     obs_labels.append({"path": path, "obsLabelsType": name})
                 options["obsLabels"] = obs_labels
-            
+
             if len(options.keys()) > 0:
                 if self.is_h5ad:
                     options["refSpecUrl"] = self.get_ref_url(base_url, dataset_uid, obj_i)

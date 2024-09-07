@@ -238,7 +238,7 @@ class TestWrappers(unittest.TestCase):
                                         'obsEmbedding': [{'path': 'obsm/X_umap', 'embeddingType': 'UMAP', 'dims': [0, 1]}],
                                         'obsSets': [{'path': 'obs/CellType', 'name': 'Cell Type'}]
                                     }})
-    
+
     def test_anndata_with_h5ad_and_ref_json_with_base_dir(self):
         adata_path = 'test.h5ad'
         ref_json_path = 'test.h5ad.ref.json'
@@ -259,7 +259,7 @@ class TestWrappers(unittest.TestCase):
                                         'obsSets': [{'path': 'obs/CellType', 'name': 'Cell Type'}],
                                         'obsLabels': [{'path': 'obs/CellLabel', 'obsLabelsType': 'Cell Label'}]
                                     }})
-    
+
     def test_anndata_with_base_dir(self):
         adata_path = 'test.h5ad.zarr'
         w = AnnDataWrapper(adata_path, obs_set_paths=['obs/CellType'], obs_set_names=['Cell Type'], obs_embedding_paths=[

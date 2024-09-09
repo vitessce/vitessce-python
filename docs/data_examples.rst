@@ -8,3 +8,4 @@ Data preparation examples
    notebooks/data_export_s3
    notebooks/data_export_files
    notebooks/widget_brain_with_base_dir
+   notebooks/widget_brain_h5ad

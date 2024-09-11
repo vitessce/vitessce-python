@@ -202,6 +202,7 @@ async function render(view) {
     const pluginEsmArr = view.model.get('plugin_esm');
     const remountOnUidChange = view.model.get('remount_on_uid_change');
     const storeUrls = view.model.get('store_urls');
+    const invokeTimeout = view.model.get('invoke_timeout');
 
     const pkgName = (jsDevMode ? "@vitessce/dev" : "vitessce");
 
@@ -230,7 +231,9 @@ async function render(view) {
             storeUrl,
             {
                 async get(key) {
-                    const [data, buffers] = await view.experimental.invoke("_zarr_get", [storeUrl, key]);
+                    const [data, buffers] = await view.experimental.invoke("_zarr_get", [storeUrl, key], {
+                        signal: AbortSignal.timeout(invokeTimeout),
+                    });
                     if (!data.success) return undefined;
                     return buffers[0].buffer;
                 },
@@ -239,7 +242,9 @@ async function render(view) {
     );
 
     function invokePluginCommand(commandName, commandParams, commandBuffers) {
-        return view.experimental.invoke("_plugin_command", [commandName, commandParams], commandBuffers);
+        return view.experimental.invoke("_plugin_command", [commandName, commandParams], commandBuffers, {
+            signal: AbortSignal.timeout(invokeTimeout),
+        });
     }
 
     for (const pluginEsm of pluginEsmArr) {
@@ -437,10 +442,11 @@ class VitessceWidget(anywidget.AnyWidget):
     custom_js_url = Unicode('').tag(sync=True)
     plugin_esm = List(trait=Unicode(''), default_value=[]).tag(sync=True)
     remount_on_uid_change = Bool(True).tag(sync=True)
+    invoke_timeout = Int(30000).tag(sync=True)
 
     store_urls = List(trait=Unicode(''), default_value=[]).tag(sync=True)
 
-    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='3.4.10', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True):
+    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='3.4.10', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, invoke_timeout=30000):
         """
         Construct a new Vitessce widget.
 
@@ -455,6 +461,7 @@ class VitessceWidget(anywidget.AnyWidget):
         :param str custom_js_url: A URL to a JavaScript file to use (instead of 'vitessce' or '@vitessce/dev' NPM package).
         :param list[WidgetPlugin] plugins: A list of subclasses of VitesscePlugin. Optional.
         :param bool remount_on_uid_change: Passed to the remountOnUidChange prop of the <Vitessce/> React component. By default, True.
+        :param int invoke_timeout: The timeout in milliseconds for invoking Python functions from JavaScript. By default, 30000.
 
         .. code-block:: python
             :emphasize-lines: 4
@@ -486,7 +493,7 @@ class VitessceWidget(anywidget.AnyWidget):
         super(VitessceWidget, self).__init__(
             config=config_dict, height=height, theme=theme, proxy=proxy,
             js_package_version=js_package_version, js_dev_mode=js_dev_mode, custom_js_url=custom_js_url,
-            plugin_esm=plugin_esm, remount_on_uid_change=remount_on_uid_change,
+            plugin_esm=plugin_esm, remount_on_uid_change=remount_on_uid_change, invoke_timeout=invoke_timeout,
             uid=uid_str, store_urls=list(self._stores.keys())
         )
 
@@ -569,6 +576,7 @@ def ipython_display(config, height=600, theme='auto', base_url=None, host_name=N
         "custom_js_url": custom_js_url,
         "plugin_esm": plugin_esm,
         "remount_on_uid_change": remount_on_uid_change,
+        "invoke_timeout": 30000,
         "proxy": proxy,
         "has_host_name": host_name is not None,
         "height": height,

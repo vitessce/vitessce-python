@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vitessce"
-version = "3.3.3"
+version = "3.3.4"
 authors = [
   { name="Mark Keller", email="mark_keller@hms.harvard.edu" },
 ]
@@ -26,19 +26,19 @@ classifiers = [
   'Programming Language :: Python :: 3.12',
 ]
 dependencies = [
-  'zarr>=2.5.0',
-  'numcodecs>=0.5.7',
-  'scipy>=1.2.1',
+  'zarr>=2.18.0',
+  'numcodecs>=0.12.1',
+  'scipy>=1.13.1',
   'negspy>=0.2.24',
-  'pandas>=1.1.2',
-  'black>=21.11b1',
-  'numpy>=1.21.2,<2.0',
-  'anndata>=0.7.8,<0.11',
-  'scanpy>=1.9.3',
+  'pandas>=2.2.2',
+  'black>=24.8.0',
+  'numpy>=2.0.2',
+  'anndata>=0.10.9',
+  'scanpy>=1.10.1',
   'ome-zarr==0.8.3',
   'tifffile>=2020.10.1',
-  'jsonschema>=3.2',
-  'tqdm>=4.1.0'
+  'jsonschema>=4.23.0',
+  'tqdm>=4.66.5'
 ]
 
 [project.optional-dependencies]
@@ -81,7 +81,7 @@ all = [
   'starlette==0.14.0',
   'generate-tiff-offsets>=0.1.7',
   'kerchunk>=0.2.6',
-  'fsspec>=2023.12.2',
+  'fsspec>=2024.9.0',
 
   # aiofiles is not explicitly referenced in our code,
   # but it is an implicit dependency of starlette==0.14.0.

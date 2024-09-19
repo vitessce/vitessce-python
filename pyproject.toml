@@ -47,7 +47,7 @@ dev = [
   'pytest>=6.2.4',
   'loompy>=3.0.6',
   'coverage>=6.3.2',
-  'flake8>=3.8.4',
+  'flake8==3.8.4',
 ]
 docs = [
   'sphinx>=4.2.0',

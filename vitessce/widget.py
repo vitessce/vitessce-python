@@ -242,8 +242,9 @@ async function render(view) {
     );
 
     function invokePluginCommand(commandName, commandParams, commandBuffers) {
-        return view.experimental.invoke("_plugin_command", [commandName, commandParams], commandBuffers, {
+        return view.experimental.invoke("_plugin_command", [commandName, commandParams], {
             signal: AbortSignal.timeout(invokeTimeout),
+            ...(commandBuffers ? { buffers: commandBuffers } : {}),
         });
     }
 

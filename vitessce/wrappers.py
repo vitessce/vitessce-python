@@ -1167,9 +1167,12 @@ class SpatialDataWrapper(AnnDataWrapper):
         else:
             self.is_remote = True
             self.zarr_folder = None
+        self.obs_type_label = None
+        if "obsType" in self._coordination_values:
+            self.obs_type_label = self._coordination_values["obsType"]
 
     @classmethod
-    def from_object(cls: Type[SpatialDataWrapperType], spatialdata: SpatialData, table_keys_to_image_elems: dict[str, Union[str, None]] = defaultdict(type(None)), table_keys_to_regions: dict[str, Union[str, None]] = defaultdict(type(None))) -> list[SpatialDataWrapperType]:
+    def from_object(cls: Type[SpatialDataWrapperType], spatialdata: SpatialData, table_keys_to_image_elems: dict[str, Union[str, None]] = defaultdict(type(None)), table_keys_to_regions: dict[str, Union[str, None]] = defaultdict(type(None)), obs_type_label: str = "spot") -> list[SpatialDataWrapperType]:
         """Instantiate a wrapper for SpatialData stores, one per table, directly from the SpatialData object.
         By default, we "show everything" that can reasonable be inferred given the information.  If you wish to have more control,
         consider instantiating the object directly.  This function will error if something cannot be inferred i.e., the user does not present
@@ -1196,6 +1199,7 @@ class SpatialDataWrapper(AnnDataWrapper):
         ValueError
         """
         wrappers = []
+        parent_table_key = "table" if (spatialdata.path / "table").exists() else "tables"
         for table_key, table in spatialdata.tables.items():
             shapes_elem = None
             image_elem = table_keys_to_image_elems[table_key]
@@ -1214,17 +1218,17 @@ class SpatialDataWrapper(AnnDataWrapper):
                 shapes_elem = f"shapes/{region}"
             if region in spatialdata.labels:
                 labels_elem = f"labels/{region}"
-            obs_feature_matrix_elem = f"table/{table_key}/X"
+            obs_feature_matrix_elem = f"{parent_table_key}/{table_key}/X"
             if 'highly_variable' in table.var:
                 # TODO: fix first key needing to be "table" in vitessce-js
                 initial_feature_filter_elem = 'highly_variable'
             else:
                 initial_feature_filter_elem = None
-            obs_set_elems = [f"table/{table_key}/obs/{elem}" for elem in table.obs if table.obs[elem].dtype == 'category']
+            obs_set_elems = [f"{parent_table_key}/{table_key}/obs/{elem}" for elem in table.obs if table.obs[elem].dtype == 'category']
             wrappers += [
                 cls(
                     spatialdata_path=str(spatialdata.path),
-                    image_path=str(image_elem) if image_elem is not None else None,
+                    image_elem=str(image_elem) if image_elem is not None else None,
                     labels_path=str(labels_elem) if labels_elem is not None else None,
                     obs_feature_matrix_path=str(obs_feature_matrix_elem),
                     shapes_path=str(shapes_elem) if shapes_elem is not None else None,

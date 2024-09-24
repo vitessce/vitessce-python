@@ -1231,7 +1231,7 @@ class SpatialDataWrapper(AnnDataWrapper):
                     image_elem=str(image_elem) if image_elem is not None else None,
                     labels_path=str(labels_elem) if labels_elem is not None else None,
                     obs_feature_matrix_path=str(obs_feature_matrix_elem),
-                    shapes_path=str(shapes_elem) if shapes_elem is not None else None,
+                    shapes_elem=str(shapes_elem) if shapes_elem is not None else None,
                     initial_feature_filter_path=initial_feature_filter_elem,
                     obs_set_paths=obs_set_elems,
                     coordination_values={"obsType": "spot"}  # TODO: should we remove?

@@ -76,7 +76,7 @@ def gen_obs_sets_schema(options: dict, paths: Optional[list[str]] = None, names:
         if names is not None:
             names = names
         else:
-            names = [obs.split('/')[-1] for obs in paths]
+            names = [obs.split('/')[-1].capitalize() for obs in paths]
         for obs, name in zip(paths, names):
             options["obsSets"].append({
                 "name": name,
@@ -138,11 +138,11 @@ def gen_image_schema(options, path: str, affine_transformation: Optional[np.ndar
     return options
 
 
-def gen_obs_spots_from_shapes_schema(options: dict, shapes_path: Optional[str] = None) -> dict:
+def gen_obs_spots_from_shapes_schema(options: dict, shapes_path: Optional[str] = None, table_path: str = "tables/table") -> dict:
     if shapes_path is not None:
         options['obsSpots'] = {
             "path": shapes_path,
-            "tablePath": "table/table",
+            "tablePath": table_path,
             "region": "region"
         }
     return options

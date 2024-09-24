@@ -1495,6 +1495,65 @@ class VitessceConfig:
             "layout": [c.to_dict() for c in self.config["layout"]]
         }
 
+    def get_views(self):
+        """
+        Provides all the views in the config.layout object list
+
+        :returns: A list of VitessceConfigView objects.
+
+        """
+        return self.config["layout"]
+
+    def get_view_by(self, view_by):
+        """
+        Get a view from the layout by either index or view type (component) specified by the 'view_by' parameter..
+
+        :param view_by: Either an index (int) or a component view_by (str).
+        :type view_by: int or str
+
+        :returns: The view corresponding to the provided index or component view_by.
+        :rtype: VitessceConfigView or None if not found
+        """
+        if isinstance(view_by, int):
+            if 0 <= view_by < len(self.config["layout"]):
+                return self.config["layout"][view_by]
+            else:
+                raise IndexError("Index out of range")
+        elif isinstance(view_by, str):
+            for view in self.config["layout"]:
+                # TODO: returns the first match, do we need to return all matches in case of component type (scatterplots)
+                if view.view["component"].lower() == view_by.lower():
+                    return view
+            raise ValueError(f"No view found with component view_by: {view_by}")
+        else:
+            raise TypeError("view_by must be an integer index or a string representing the view type")
+
+    def remove_view_by(self, view_by):
+        """
+        Removes a view from the layout by either index or view type (component) specified by the 'view_by' parameter.
+
+        :param view_by: Either an index (int) or a component view_by (str).
+        :type view_by: int or str
+
+        :returns: The layout component of the config
+        :rtype: VitessceConfigView or None if not found
+
+        """
+
+        if isinstance(view_by, int):
+            if 0 <= view_by < len(self.config["layout"]):
+                return self.config["layout"].pop(view_by)
+            else:
+                raise IndexError("Index out of range")
+        elif isinstance(view_by, str):
+            for i, view in enumerate(self.config["layout"]):
+                if view.view["component"].lower() == view_by.lower():
+                    # TODO: should we delete all views of same viewtype (Scatterplot)
+                    return self.config["layout"].pop(i)
+            raise ValueError(f"No view found with component type: {view_by}")
+        else:
+            raise TypeError("view_by must be an integer index or a string component type")
+
     def get_routes(self):
         """
         Convert the routes for this view config from the datasets.

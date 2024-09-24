@@ -1113,7 +1113,7 @@ SpatialDataWrapperType = TypeVar('SpatialDataWrapperType', bound='SpatialDataWra
 
 class SpatialDataWrapper(AnnDataWrapper):
 
-    def __init__(self, spatialdata_path: Optional[str] = None, spatialdata_url: Optional[str] = None, spatialdata_store: Optional[str] = None, image_elem: Optional[str] = None, affine_transformation: Optional[np.ndarray] = None, shapes_elem: Optional[str] = None, labels_elem: Optional[str] = None, **kwargs):
+    def __init__(self, spatialdata_path: Optional[str] = None, spatialdata_url: Optional[str] = None, spatialdata_store: Optional[str] = None, image_elem: Optional[str] = None, affine_transformation: Optional[np.ndarray] = None, shapes_elem: Optional[str] = None, labels_elem: Optional[str] = None, table_path: str = "tables/table", **kwargs):
         """_summary_
 
         Parameters
@@ -1170,6 +1170,7 @@ class SpatialDataWrapper(AnnDataWrapper):
         self.obs_type_label = None
         if "obsType" in self._coordination_values:
             self.obs_type_label = self._coordination_values["obsType"]
+        self._table_path = table_path
 
     @classmethod
     def from_object(cls: Type[SpatialDataWrapperType], spatialdata: SpatialData, table_keys_to_image_elems: dict[str, Union[str, None]] = defaultdict(type(None)), table_keys_to_regions: dict[str, Union[str, None]] = defaultdict(type(None)), obs_type_label: str = "spot") -> list[SpatialDataWrapperType]:
@@ -1246,7 +1247,7 @@ class SpatialDataWrapper(AnnDataWrapper):
             options = gen_obs_feature_matrix_schema(options, self._expression_matrix, self._gene_var_filter, self._matrix_gene_var_filter)
             options = gen_obs_sets_schema(options, self._obs_set_elems, self._obs_set_names)
             options['obsSets'] = {'obsSets': options['obsSets']}  # see https://github.com/vitessce/vitessce/blob/cd7e81956786a8130658d6745ff03986e2e6f806/packages/schemas/src/file-def-options.ts#L138-L146 for nested structure
-            options = gen_obs_spots_from_shapes_schema(options, self._shapes_elem)
+            options = gen_obs_spots_from_shapes_schema(options, self._shapes_elem, self._table_path)
             options = gen_image_schema(options, self._image_elem, self._affine_transformation)
             options = gen_feature_labels_schema(self._feature_labels, options)
             if len(options.keys()) > 0:

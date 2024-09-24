@@ -1168,7 +1168,7 @@ class SpatialDataWrapper(AnnDataWrapper):
             self.is_remote = True
             self.zarr_folder = None
         self.obs_type_label = None
-        if "obsType" in self._coordination_values:
+        if self._coordination_values is not None and "obsType" in self._coordination_values:
             self.obs_type_label = self._coordination_values["obsType"]
         self._table_path = table_path
 

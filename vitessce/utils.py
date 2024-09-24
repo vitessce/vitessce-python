@@ -76,7 +76,11 @@ def gen_obs_sets_schema(options: dict, paths: Optional[list[str]] = None, names:
         if names is not None:
             names = names
         else:
-            names = [obs.split('/')[-1].capitalize() for obs in paths]
+            names = []
+            for obs in paths:
+                obs_end_path = obs.split('/')[-1]
+                first_letter_capitalized = obs_end_path.capitalize()
+                names = [first_letter_capitalized + obs_end_path[1:]]
         for obs, name in zip(paths, names):
             options["obsSets"].append({
                 "name": name,

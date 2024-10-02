@@ -219,6 +219,15 @@ async function render(view) {
         PluginJointFileType,
         z,
         useCoordination,
+        useGridItemSize,
+        // TODO: names and function signatures are subject to change for the following functions
+        // Reference: https://github.com/keller-mark/use-coordination/issues/37#issuecomment-1946226827
+        useComplexCoordination,
+        useMultiCoordinationScopesNonNull,
+        useMultiCoordinationScopesSecondaryNonNull,
+        useComplexCoordinationSecondary,
+        useCoordinationScopes,
+        useCoordinationScopesBy,
     } = await importWithMap("vitessce", importMap);
 
     let pluginViewTypes = [];
@@ -261,8 +270,15 @@ async function render(view) {
                 PluginCoordinationType,
                 PluginJointFileType,
                 z,
-                useCoordination,
                 invokeCommand: invokePluginCommand,
+                useCoordination,
+                useGridItemSize,
+                useComplexCoordination,
+                useMultiCoordinationScopesNonNull,
+                useMultiCoordinationScopesSecondaryNonNull,
+                useComplexCoordinationSecondary,
+                useCoordinationScopes,
+                useCoordinationScopesBy,
             });
             if(Array.isArray(pluginsObj.pluginViewTypes)) {
                 pluginViewTypes = [...pluginViewTypes, ...pluginsObj.pluginViewTypes];
@@ -438,7 +454,7 @@ class VitessceWidget(anywidget.AnyWidget):
 
     next_port = DEFAULT_PORT
 
-    js_package_version = Unicode('3.4.10').tag(sync=True)
+    js_package_version = Unicode('3.4.12').tag(sync=True)
     js_dev_mode = Bool(False).tag(sync=True)
     custom_js_url = Unicode('').tag(sync=True)
     plugin_esm = List(trait=Unicode(''), default_value=[]).tag(sync=True)
@@ -447,7 +463,7 @@ class VitessceWidget(anywidget.AnyWidget):
 
     store_urls = List(trait=Unicode(''), default_value=[]).tag(sync=True)
 
-    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='3.4.10', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, invoke_timeout=30000):
+    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='3.4.12', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, invoke_timeout=30000):
         """
         Construct a new Vitessce widget.
 
@@ -560,7 +576,7 @@ class VitessceWidget(anywidget.AnyWidget):
 # Launch Vitessce using plain HTML representation (no ipywidgets)
 
 
-def ipython_display(config, height=600, theme='auto', base_url=None, host_name=None, uid=None, port=None, proxy=False, js_package_version='3.4.10', js_dev_mode=False, custom_js_url='', plugin_esm=DEFAULT_PLUGIN_ESM, remount_on_uid_change=True):
+def ipython_display(config, height=600, theme='auto', base_url=None, host_name=None, uid=None, port=None, proxy=False, js_package_version='3.4.12', js_dev_mode=False, custom_js_url='', plugin_esm=DEFAULT_PLUGIN_ESM, remount_on_uid_change=True):
     from IPython.display import display, HTML
     uid_str = "vitessce" + get_uid_str(uid)
 

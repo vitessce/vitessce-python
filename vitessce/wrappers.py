@@ -461,7 +461,7 @@ class ImageOmeTiffWrapper(AbstractWrapper):
         self._offsets_artifact = offsets_artifact
         self._coordinate_transformations = coordinate_transformations
         self._coordination_values = coordination_values
-        self.is_remote = img_url is not None
+        self.is_remote = img_url is not None or img_artifact is not None
         self.local_img_uid = make_unique_filename(".ome.tif")
         self.local_offsets_uid = make_unique_filename(".offsets.json")
 
@@ -594,7 +594,7 @@ class ObsSegmentationsOmeTiffWrapper(AbstractWrapper):
         self._coordinate_transformations = coordinate_transformations
         self._obs_types_from_channel_names = obs_types_from_channel_names
         self._coordination_values = coordination_values
-        self.is_remote = img_url is not None
+        self.is_remote = img_url is not None or img_artifact is not None
         self.local_img_uid = make_unique_filename(".ome.tif")
         self.local_offsets_uid = make_unique_filename(".offsets.json")
 

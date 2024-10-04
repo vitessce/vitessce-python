@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from collections import defaultdict
 import os
 from os.path import join
@@ -13,7 +15,23 @@ import zarr
 import numpy as np
 from spatialdata import SpatialData
 
-from vitessce.utils import gen_obs_locations_schema, gen_obs_segmentations_schema, gen_obs_spots_from_shapes_schema, gen_obs_spots_schema, gen_obs_points_schema, gen_obs_embedding_schema, gen_feature_labels_schema, gen_image_schema, gen_obs_feature_matrix_schema, gen_obs_labels_schema, gen_obs_sets_schema
+if TYPE_CHECKING:
+    import lamindb as ln
+
+from vitessce.file_def_utils import (
+    gen_obs_locations_schema,
+    gen_obs_segmentations_schema,
+    gen_sdata_obs_spots_schema,
+    gen_obs_spots_schema,
+    gen_obs_points_schema,
+    gen_obs_embedding_schema,
+    gen_feature_labels_schema,
+    gen_sdata_image_schema,
+    gen_sdata_labels_schema,
+    gen_obs_feature_matrix_schema,
+    gen_obs_labels_schema,
+    gen_obs_sets_schema
+)
 
 from .constants import (
     norm_enum,
@@ -1037,18 +1055,33 @@ class ObsSegmentationsOmeZarrWrapper(AbstractWrapper):
         return image_file_def_creator
 
 
-def raise_error_if_more_than_one_none(inputs):
+def raise_error_if_zero_or_more_than_one(inputs):
     num_inputs = sum([1 for x in inputs if x is not None])
     if num_inputs > 1:
         raise ValueError(
-            "Expected only one of adata_path, adata_url, or adata_store to be provided"
+            "Expected only one type of data input parameter to be provided (_url, _path, _store, etc.), but received more than one."
         )
     if num_inputs == 0:
         raise ValueError(
-            "Expected one of adata_path, adata_url, or adata_store to be provided"
+            "Expected one type of data input parameter to be provided (_url, _path, _store, etc.), but received none."
         )
     return True
 
+def raise_error_if_any(inputs):
+    num_inputs = sum([1 for x in inputs if x is not None])
+    if num_inputs > 0:
+        raise ValueError(
+            "Did not expect any of these parameters to be provided, but received one or more: " + str(inputs)
+        )
+    return True
+
+def raise_error_if_more_than_one(inputs):
+    num_inputs = sum([1 for x in inputs if x is not None])
+    if num_inputs > 1:
+        raise ValueError(
+            "Expected only one of these parameters to be provided, but received more than one: " + str(inputs)
+        )
+    return True
 
 class AnnDataWrapper(AbstractWrapper):
     def __init__(self, adata_path=None, adata_url=None, adata_store=None, adata_artifact=None, ref_path=None, ref_url=None, ref_artifact=None, obs_feature_matrix_path=None, feature_filter_path=None, initial_feature_filter_path=None, obs_set_paths=None, obs_set_names=None, obs_locations_path=None, obs_segmentations_path=None, obs_embedding_paths=None, obs_embedding_names=None, obs_embedding_dims=None, obs_spots_path=None, obs_points_path=None, feature_labels_path=None, obs_labels_path=None, convert_to_dense=True, coordination_values=None, obs_labels_paths=None, obs_labels_names=None, **kwargs):
@@ -1103,10 +1136,7 @@ class AnnDataWrapper(AbstractWrapper):
             raise ValueError(
                 "Did not expect reference JSON to be provided with adata_store")
 
-        num_inputs = sum([1 for x in [adata_path, adata_url, adata_store, adata_artifact] if x is not None])
-        if num_inputs != 1:
-            raise ValueError(
-                "Expected one of adata_path, adata_url, adata_artifact, or adata_store to be provided")
+        raise_error_if_zero_or_more_than_one([adata_path, adata_url, adata_store, adata_artifact])
 
         if adata_path is not None:
             self.is_remote = False
@@ -1173,7 +1203,7 @@ class AnnDataWrapper(AbstractWrapper):
         if self.is_remote:
             return []
         elif self.is_store:
-            self.register_zarr_store(dataset_uid, obj_i, self._store, self.local_dir_uid)
+            self.register_zarr_store(dataset_uid, obj_i, self._adata_store, self.local_dir_uid)
             return []
         else:
             if self.is_h5ad:
@@ -1186,9 +1216,9 @@ class AnnDataWrapper(AbstractWrapper):
 
     def get_zarr_url(self, base_url="", dataset_uid="", obj_i=""):
         if self.is_remote:
-            return self._url
+            return self._adata_url
         else:
-            return self.get_local_dir_url(base_url, dataset_uid, obj_i, self._path, self.local_dir_uid)
+            return self.get_local_dir_url(base_url, dataset_uid, obj_i, self._adata_path, self.local_dir_uid)
 
     def get_h5ad_url(self, base_url="", dataset_uid="", obj_i=""):
         if self.is_remote:
@@ -1255,67 +1285,59 @@ SpatialDataWrapperType = TypeVar('SpatialDataWrapperType', bound='SpatialDataWra
 
 class SpatialDataWrapper(AnnDataWrapper):
 
-    def __init__(self, spatialdata_path: Optional[str] = None, spatialdata_url: Optional[str] = None, spatialdata_store: Optional[str] = None, image_elem: Optional[str] = None, affine_transformation: Optional[np.ndarray] = None, shapes_elem: Optional[str] = None, labels_elem: Optional[str] = None, table_path: str = "tables/table", **kwargs):
-        """_summary_
-
-        Parameters
-        ----------
-        spatialdata_path : Optional[str], optional
-            SpatialData path, exclusive with other `{spatialdata,adata}_xxxx` arguments, by default None
-        spatialdata_url : Optional[str], optional
-            SpatialData url, exclusive with other `{spatialdata,adata}_xxxx` arguments, by default None
-        spatialdata_store : Optional[str], optional
-            SpatialData store, exclusive with other `{spatialdata,adata}_xxxx` arguments, by default None
-        image_elem : Optional[str], optional
-            location of the image, by default None
-        affine_transformation : Optional[np.ndarray], optional
-            transformation to be applied to the image, by default None
-        shapes_elem : Optional[str], optional
-            location of the shapes, by default None
-        labels_elem : Optional[str], optional
-            location of the labels, by default None
-
-        Raises
-        ------
-        ValueError
-            If more than one of `{spatialdata,adata}_xxxx` is not `None` or all are.
+    def __init__(self, sdata_path: Optional[str] = None, sdata_url: Optional[str] = None, sdata_store: Optional[Union[str, zarr.storage.StoreLike]] = None, sdata_artifact: Optional[ln.Artifact] = None, image_path: Optional[str] = None, region: Optional[str] = None, coordinate_system: Optional[str] = None, affine_transformation: Optional[np.ndarray] = None, spot_shapes_path: Optional[str] = None, labels_path: Optional[str] = None, table_path: str = "tables/table", **kwargs):
         """
-        raise_error_if_more_than_one_none(
-            [
-                spatialdata_path,
+        Wrap a SpatialData object.
+
+        :param sdata_path: SpatialData path, exclusive with other `{sdata,adata}_xxxx` arguments, by default None
+        :type sdata_path: Optional[str]
+        :param sdata_url: SpatialData url, exclusive with other `{sdata,adata}_xxxx` arguments, by default None
+        :type sdata_url: Optional[str]
+        :param sdata_store: SpatialData store, exclusive with other `{spatialdata,adata}_xxxx` arguments, by default None
+        :type sdata_store: Optional[Union[str, zarr.storage.StoreLike]]
+        :param sdata_artifact: Artifact that corresponds to a SpatialData object.
+        :type sdata_artifact: Optional[ln.Artifact]
+        :param image_elem: Name of the image element of interest. By default, None.
+        :type image_elem: Optional[str]
+        :param coordinate_system: Name of a target coordinate system.
+        :type coordinate_system: Optional[str]
+        :param affine_transformation: Transformation to be applied to the image. By default, None. Prefer coordinate_system.
+        :type affine_transformation: Optional[np.ndarray] 
+        :param shapes_elem: location of the shapes, by default None
+        :type shapes_elem: Optional[str]
+        :param labels_elem: location of the labels, by default None
+        :type labels_elem: Optional[str]
+        """
+        raise_error_if_zero_or_more_than_one([
+                sdata_path,
+                sdata_url,
+                sdata_store,
+                sdata_artifact,
+        ])
+        raise_error_if_any([
                 kwargs.get('adata_path', None),
-                spatialdata_url,
                 kwargs.get('adata_url', None),
-                spatialdata_store,
-                kwargs.get('adata_store', None)
-            ]
-        )
-        super().__init__(adata_path=spatialdata_path, adata_url=spatialdata_url, adata_store=spatialdata_store, **kwargs)
-        self.local_dir_uid = make_unique_filename(".spatialdata.zarr")  # correct?
-        self._image_elem = image_elem
+                kwargs.get('adata_store', None),
+                kwargs.get('adata_artifact', None)
+        ])
+        super().__init__(adata_path=sdata_path, adata_url=sdata_url, adata_store=sdata_store, adata_artifact=sdata_artifact, **kwargs)
+        self.local_dir_uid = make_unique_filename(".sdata.zarr")
+        self._image_path = image_path
+        self._region = region
+        self._coordinate_system = coordinate_system
         self._affine_transformation = affine_transformation
         self._kwargs = kwargs
-        self._shapes_elem = shapes_elem
-        self._labels_elem = labels_elem
-        if self._path is not None and (self._url is not None):
-            raise ValueError(
-                "Did not expect path to be provided with url")
-        if self._url is None and (self._path is None):
-            raise ValueError(
-                "Expected either url or path to be provided")
-        if self._url is None:
-            self.is_remote = False
+        self._spot_shapes_path = spot_shapes_path
+        self._labels_path = labels_path
+        if self._adata_path is not None:
             self.zarr_folder = 'spatialdata.zarr'
-        else:
-            self.is_remote = True
-            self.zarr_folder = None
         self.obs_type_label = None
         if self._coordination_values is not None and "obsType" in self._coordination_values:
             self.obs_type_label = self._coordination_values["obsType"]
         self._table_path = table_path
 
     @classmethod
-    def from_object(cls: Type[SpatialDataWrapperType], spatialdata: SpatialData, table_keys_to_image_elems: dict[str, Union[str, None]] = defaultdict(type(None)), table_keys_to_regions: dict[str, Union[str, None]] = defaultdict(type(None)), obs_type_label: str = "spot") -> list[SpatialDataWrapperType]:
+    def from_object(cls: Type[SpatialDataWrapperType], sdata: SpatialData, table_keys_to_image_elems: dict[str, Union[str, None]] = defaultdict(type(None)), table_keys_to_regions: dict[str, Union[str, None]] = defaultdict(type(None)), obs_type_label: str = "spot") -> list[SpatialDataWrapperType]:
         """Instantiate a wrapper for SpatialData stores, one per table, directly from the SpatialData object.
         By default, we "show everything" that can reasonable be inferred given the information.  If you wish to have more control,
         consider instantiating the object directly.  This function will error if something cannot be inferred i.e., the user does not present
@@ -1342,9 +1364,9 @@ class SpatialDataWrapper(AnnDataWrapper):
         ValueError
         """
         wrappers = []
-        parent_table_key = "table" if (spatialdata.path / "table").exists() else "tables"
-        for table_key, table in spatialdata.tables.items():
-            shapes_elem = None
+        parent_table_key = "table" if (sdata.path / "table").exists() else "tables"
+        for table_key, table in sdata.tables.items():
+            spot_shapes_elem = None
             image_elem = table_keys_to_image_elems[table_key]
             labels_elem = None
             spatialdata_attr = table.uns['spatialdata_attrs']
@@ -1357,9 +1379,11 @@ class SpatialDataWrapper(AnnDataWrapper):
                 if len(region) > 1:
                     raise ValueError("Vitessce cannot subset AnnData objects on the fly.  Please provide an explicit region")
                 region = region[0]
-            if region in spatialdata.shapes:
-                shapes_elem = f"shapes/{region}"
-            if region in spatialdata.labels:
+            if region in sdata.shapes:
+                spot_shapes_elem = f"shapes/{region}"
+                # Currently, only circle shapes are supported.
+                # TODO: add if statement to check that this region contains spot shapes rather than other types of shapes
+            if region in sdata.labels:
                 labels_elem = f"labels/{region}"
             obs_feature_matrix_elem = f"{parent_table_key}/{table_key}/X"
             if 'highly_variable' in table.var:
@@ -1370,14 +1394,14 @@ class SpatialDataWrapper(AnnDataWrapper):
             obs_set_elems = [f"{parent_table_key}/{table_key}/obs/{elem}" for elem in table.obs if table.obs[elem].dtype == 'category']
             wrappers += [
                 cls(
-                    spatialdata_path=str(spatialdata.path),
-                    image_elem=str(image_elem) if image_elem is not None else None,
+                    sdata_path=str(sdata.path),
+                    image_path=str(image_elem) if image_elem is not None else None,
                     labels_path=str(labels_elem) if labels_elem is not None else None,
                     obs_feature_matrix_path=str(obs_feature_matrix_elem),
-                    shapes_elem=str(shapes_elem) if shapes_elem is not None else None,
+                    spot_shapes_path=str(spot_shapes_elem) if spot_shapes_elem is not None else None,
                     initial_feature_filter_path=initial_feature_filter_elem,
                     obs_set_paths=obs_set_elems,
-                    coordination_values={"obsType": "spot"}  # TODO: should we remove?
+                    coordination_values={"obsType": "spot"} # TODO: should we remove?
                 )
             ]
         return wrappers
@@ -1388,10 +1412,9 @@ class SpatialDataWrapper(AnnDataWrapper):
             options = gen_obs_labels_schema(options, self._obs_labels_elems, self._obs_labels_names)
             options = gen_obs_feature_matrix_schema(options, self._expression_matrix, self._gene_var_filter, self._matrix_gene_var_filter)
             options = gen_obs_sets_schema(options, self._obs_set_elems, self._obs_set_names)
-            if 'obsSets' in options:
-                options['obsSets'] = {'obsSets': options['obsSets']}  # see https://github.com/vitessce/vitessce/blob/cd7e81956786a8130658d6745ff03986e2e6f806/packages/schemas/src/file-def-options.ts#L138-L146 for nested structure
-            options = gen_obs_spots_from_shapes_schema(options, self._shapes_elem, self._table_path)
-            options = gen_image_schema(options, self._image_elem, self._affine_transformation)
+            options = gen_sdata_obs_spots_schema(options, self._spot_shapes_path, self._table_path, self._region, self._coordinate_system)
+            options = gen_sdata_image_schema(options, self._image_path, self._coordinate_system, self._affine_transformation)
+            options = gen_sdata_labels_schema(options, self._labels_path, self._table_path, self._coordinate_system, self._affine_transformation)
             options = gen_feature_labels_schema(self._feature_labels, options)
             if len(options.keys()) > 0:
                 obj_file_def = {

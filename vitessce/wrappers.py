@@ -76,11 +76,26 @@ class AbstractWrapper:
         return self.routes
     
     def register_artifact(self, artifact):
+        """
+        Register an artifact.
+
+        :param artifact: The artifact object to register.
+        :type artifact: lamindb.Artifact
+        :returns: The artifact URL.
+        :rtype: str
+        """
         artifact_url = artifact.path.to_url()
         self.artifacts[artifact_url] = artifact
         return artifact_url
 
+    
     def get_artifacts(self):
+        """
+        Obtain the dictionary that maps artifact URLs to artifact objects.
+
+        :returns: A dictionary that maps artifact URLs to Artifact objects.
+        :rtype: dict[str, lamindb.Artifact]
+        """
         return self.artifacts
 
     def get_stores(self, base_url):
@@ -546,9 +561,13 @@ class ObsSegmentationsOmeTiffWrapper(AbstractWrapper):
     Wrap an OME-TIFF File by creating an instance of the ``ObsSegmentationsOmeTiffWrapper`` class. Intended to be used with the spatialBeta and layerControllerBeta views.
 
     :param str img_path: A local filepath to an OME-TIFF file.
-    :param str offsets_path: A local filepath to an offsets.json file.
     :param str img_url: A remote URL of an OME-TIFF file.
+    :param img_artifact: A lamindb Artifact corresponding to the image.
+    :type img_artifact: lamindb.Artifact
+    :param str offsets_path: A local filepath to an offsets.json file.
     :param str offsets_url: A remote URL of an offsets.json file.
+    :param offsets_artifact: A lamindb Artifact corresponding to the offsets JSON.
+    :type offsets_artifact: lamindb.Artifact
     :param list coordinate_transformations: A column-major ordered matrix for transforming this image (see http://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices/#homogeneous-coordinates for more information).
     :param bool obs_types_from_channel_names: Whether to use the channel names to determine the obs types. Optional.
     :param dict coordination_values: Optional coordinationValues to be passed in the file definition.
@@ -849,6 +868,8 @@ class ImageOmeZarrWrapper(AbstractWrapper):
 
     :param str img_path: A local filepath to an OME-NGFF Zarr store.
     :param str img_url: A remote URL of an OME-NGFF Zarr store.
+    :param img_artifact: A lamindb Artifact corresponding to the image.
+    :type img_artifact: lamindb.Artifact
     :param list coordinate_transformations: A column-major ordered matrix for transforming this image (see http://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices/#homogeneous-coordinates for more information).
     :param dict coordination_values: Optional coordinationValues to be passed in the file definition.
     :param \\*\\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
@@ -929,6 +950,8 @@ class ObsSegmentationsOmeZarrWrapper(AbstractWrapper):
 
     :param str img_path: A local filepath to an OME-NGFF Zarr store.
     :param str img_url: A remote URL of an OME-NGFF Zarr store.
+    :param img_artifact: A lamindb Artifact corresponding to the image.
+    :type img_artifact: lamindb.Artifact
     :param list coordinate_transformations: A column-major ordered matrix for transforming this image (see http://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices/#homogeneous-coordinates for more information).
     :param dict coordination_values: Optional coordinationValues to be passed in the file definition.
     :param bool obs_types_from_channel_names: Whether to use the channel names to determine the obs types. Optional.
@@ -1076,7 +1099,8 @@ class AnnDataWrapper(AbstractWrapper):
             self.is_remote = True
             self.is_store = False
             self.zarr_folder = None
-            # Store artifacts on the AbstractWrapper.artifacts array for downstream access, e.g. in lamindb.save_vitessce_config
+            # Store artifacts on AbstractWrapper.artifacts for downstream access,
+            # e.g. in lamindb.save_vitessce_config
             self._adata_url = self.register_artifact(adata_artifact)
             if ref_artifact is not None:
                 self._ref_url = self.register_artifact(ref_artifact)

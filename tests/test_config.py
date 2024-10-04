@@ -164,7 +164,7 @@ def test_config_add_anndata_artifact():
     }
 
     vc_artifacts = vc.get_artifacts()
-    assert vc_artifacts.keys() == ["http://example.com/adata.h5ad.zarr"]
+    assert list(vc_artifacts.keys()) == ["http://example.com/adata.h5ad.zarr"]
     assert vc_artifacts["http://example.com/adata.h5ad.zarr"].name == "My anndata artifact"
 
 def test_config_add_dataset_add_files():

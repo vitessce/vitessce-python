@@ -1091,17 +1091,15 @@ class AnnDataWrapper(AbstractWrapper):
             self.is_remote = False
             self.is_store = False
             self.zarr_folder = 'anndata.zarr'
-        elif adata_url is not None:
+        elif adata_url is not None or adata_artifact is not None:
             self.is_remote = True
             self.is_store = False
             self.zarr_folder = None
-        elif adata_artifact is not None:
-            self.is_remote = True
-            self.is_store = False
-            self.zarr_folder = None
+            
             # Store artifacts on AbstractWrapper.artifacts for downstream access,
             # e.g. in lamindb.save_vitessce_config
-            self._adata_url = self.register_artifact(adata_artifact)
+            if adata_artifact is not None:
+                self._adata_url = self.register_artifact(adata_artifact)
             if ref_artifact is not None:
                 self._ref_url = self.register_artifact(ref_artifact)
         else:

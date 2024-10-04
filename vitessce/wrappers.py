@@ -1078,7 +1078,7 @@ class AnnDataWrapper(AbstractWrapper):
 
         if adata_store is not None and (ref_path is not None or ref_url is not None or ref_artifact is not None):
             raise ValueError(
-                "Did not expect ref_path or ref_url to be provided with adata_store")
+                "Did not expect reference JSON to be provided with adata_store")
 
         num_inputs = sum([1 for x in [adata_path, adata_url, adata_store, adata_artifact] if x is not None])
         if num_inputs != 1:

@@ -234,7 +234,7 @@ class VitessceConfigDataset:
             routes += obj.get_routes()
 
         return routes
-    
+
     def get_artifacts(self):
         artifacts = {}
         for obj in self.objs:
@@ -1596,7 +1596,7 @@ class VitessceConfig:
         for d in self.config["datasets"]:
             routes += d.get_routes()
         return routes
-    
+
     def get_artifacts(self):
         """
         Get all artifacts for this view config from the datasets.

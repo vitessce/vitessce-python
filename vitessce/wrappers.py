@@ -74,7 +74,7 @@ class AbstractWrapper:
         :rtype: list[starlette.routing.Route]
         """
         return self.routes
-    
+
     def register_artifact(self, artifact):
         """
         Register an artifact.
@@ -88,7 +88,6 @@ class AbstractWrapper:
         self.artifacts[artifact_url] = artifact
         return artifact_url
 
-    
     def get_artifacts(self):
         """
         Obtain the dictionary that maps artifact URLs to artifact objects.
@@ -448,7 +447,7 @@ class ImageOmeTiffWrapper(AbstractWrapper):
         if num_inputs != 1:
             raise ValueError(
                 "Expected one of img_path, img_url, or img_artifact to be provided")
-        
+
         num_inputs = sum([1 for x in [offsets_path, offsets_url, offsets_artifact] if x is not None])
         if num_inputs > 1:
             raise ValueError(
@@ -465,13 +464,12 @@ class ImageOmeTiffWrapper(AbstractWrapper):
         self.is_remote = img_url is not None
         self.local_img_uid = make_unique_filename(".ome.tif")
         self.local_offsets_uid = make_unique_filename(".offsets.json")
-        
+
         if img_artifact is not None:
             self._img_url = self.register_artifact(img_artifact)
 
         if offsets_artifact is not None:
             self._offsets_url = self.register_artifact(offsets_artifact)
-
 
     def convert_and_save(self, dataset_uid, obj_i, base_dir=None):
         # Only create out-directory if needed
@@ -581,7 +579,7 @@ class ObsSegmentationsOmeTiffWrapper(AbstractWrapper):
         if num_inputs != 1:
             raise ValueError(
                 "Expected one of img_path, img_url, or img_artifact to be provided")
-        
+
         num_inputs = sum([1 for x in [offsets_path, offsets_url, offsets_artifact] if x is not None])
         if num_inputs > 1:
             raise ValueError(
@@ -599,7 +597,7 @@ class ObsSegmentationsOmeTiffWrapper(AbstractWrapper):
         self.is_remote = img_url is not None
         self.local_img_uid = make_unique_filename(".ome.tif")
         self.local_offsets_uid = make_unique_filename(".offsets.json")
-        
+
         if img_artifact is not None:
             self._img_url = self.register_artifact(img_artifact)
 
@@ -883,7 +881,7 @@ class ImageOmeZarrWrapper(AbstractWrapper):
         if num_inputs != 1:
             raise ValueError(
                 "Expected one of img_path, img_url, or img_artifact to be provided")
-        
+
         self._img_path = img_path
         self._img_url = img_url
         self._img_artifact = img_artifact
@@ -893,11 +891,11 @@ class ImageOmeZarrWrapper(AbstractWrapper):
             self.is_remote = False
         else:
             self.is_remote = True
-        
+
         if self._img_artifact is not None:
             # To serve as a placeholder in the config JSON URL field
             self._img_url = self.register_artifact(img_artifact)
-            
+
         self.local_dir_uid = make_unique_filename(".ome.zarr")
 
     def convert_and_save(self, dataset_uid, obj_i, base_dir=None):
@@ -976,7 +974,7 @@ class ObsSegmentationsOmeZarrWrapper(AbstractWrapper):
             self.is_remote = False
         else:
             self.is_remote = True
-        
+
         if self._img_artifact is not None:
             # To serve as a placeholder in the config JSON URL field
             self._img_url = self.register_artifact(img_artifact)
@@ -1095,7 +1093,7 @@ class AnnDataWrapper(AbstractWrapper):
             self.is_remote = True
             self.is_store = False
             self.zarr_folder = None
-            
+
             # Store artifacts on AbstractWrapper.artifacts for downstream access,
             # e.g. in lamindb.save_vitessce_config
             if adata_artifact is not None:

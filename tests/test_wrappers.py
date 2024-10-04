@@ -256,6 +256,47 @@ class TestWrappers(unittest.TestCase):
                                         'obsSets': [{'name': 'CellType', 'path': 'obs/CellType'}]
                                     }})
 
+    def test_anndata_with_h5ad_and_ref_json(self):
+        adata_path = data_path / 'test.h5ad'
+        ref_json_path = data_path / 'test.h5ad.ref.json'
+        w = AnnDataWrapper(adata_path, ref_path=ref_json_path,
+                           obs_set_paths=['obs/CellType'], obs_set_names=['Cell Type'],
+                           obs_labels_names=['Cell Label'], obs_labels_paths=['obs/CellLabel'],
+                           obs_embedding_paths=['obsm/X_umap'], obs_embedding_names=['UMAP'])
+        w.local_file_uid = 'anndata.h5ad'
+        w.local_ref_uid = 'anndata.reference.json'
+
+        file_def_creator = w.make_file_def_creator('A', 0)
+        file_def = file_def_creator('http://localhost:8000')
+        self.assertEqual(file_def, {'fileType': 'anndata.h5ad', 'url': 'http://localhost:8000/A/0/anndata.h5ad',
+                                    'options': {
+                                        'refSpecUrl': 'http://localhost:8000/A/0/anndata.reference.json',
+                                        'obsEmbedding': [{'path': 'obsm/X_umap', 'embeddingType': 'UMAP', 'dims': [0, 1]}],
+                                        'obsSets': [{'path': 'obs/CellType', 'name': 'Cell Type'}],
+                                        'obsLabels': [{'path': 'obs/CellLabel', 'obsLabelsType': 'Cell Label'}]
+                                    }})
+
+    def test_anndata_with_h5ad_and_ref_json_with_base_dir(self):
+        adata_path = 'test.h5ad'
+        ref_json_path = 'test.h5ad.ref.json'
+        w = AnnDataWrapper(adata_path, ref_path=ref_json_path,
+                           obs_set_paths=['obs/CellType'], obs_set_names=['Cell Type'],
+                           obs_labels_names=['Cell Label'], obs_labels_paths=['obs/CellLabel'],
+                           obs_embedding_paths=['obsm/X_umap'], obs_embedding_names=['UMAP'])
+        w.base_dir = data_path
+        w.local_file_uid = 'anndata.h5ad'
+        w.local_ref_uid = 'anndata.reference.json'
+
+        file_def_creator = w.make_file_def_creator('A', 0)
+        file_def = file_def_creator('http://localhost:8000')
+        self.assertEqual(file_def, {'fileType': 'anndata.h5ad', 'url': 'http://localhost:8000/test.h5ad',
+                                    'options': {
+                                        'refSpecUrl': 'http://localhost:8000/test.h5ad.ref.json',
+                                        'obsEmbedding': [{'path': 'obsm/X_umap', 'embeddingType': 'UMAP', 'dims': [0, 1]}],
+                                        'obsSets': [{'path': 'obs/CellType', 'name': 'Cell Type'}],
+                                        'obsLabels': [{'path': 'obs/CellLabel', 'obsLabelsType': 'Cell Label'}]
+                                    }})
+
     def test_csv(self):
         w = CsvWrapper(
             csv_path=data_path / 'test.umap.csv',

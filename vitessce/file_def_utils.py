@@ -50,6 +50,27 @@ def gen_obs_sets_schema(options: dict, paths: Optional[list[str]] = None, names:
             })
     return options
 
+def gen_sdata_obs_sets_schema(options: dict, paths: Optional[list[str]] = None, names: Optional[list[str]] = None, table_path: Optional[str] = None, region: Optional[str] = None):
+    if paths is not None:
+        options["obsSets"] = { "obsSets": [] }
+        if names is not None:
+            names = names
+        else:
+            names = []
+            for obs in paths:
+                obs_end_path = obs.split('/')[-1]
+                names += [obs_end_path]
+        for obs, name in zip(paths, names):
+            options["obsSets"]["obsSets"].append({
+                "name": name,
+                "path": obs
+            })
+        if table_path is not None:
+            options["obsSets"]["tablePath"] = table_path
+        if region is not None:
+            options["obsSets"]["region"] = region
+    return options
+
 
 def gen_obs_feature_matrix_schema(options: dict, matrix_path: Optional[str] = None, var_filter_path: Optional[str] = None, init_var_filter_path: Optional[str] = None):
     if matrix_path is not None:

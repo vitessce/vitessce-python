@@ -21,16 +21,17 @@ if TYPE_CHECKING:
 from vitessce.file_def_utils import (
     gen_obs_locations_schema,
     gen_obs_segmentations_schema,
-    gen_sdata_obs_spots_schema,
     gen_obs_spots_schema,
     gen_obs_points_schema,
     gen_obs_embedding_schema,
     gen_feature_labels_schema,
-    gen_sdata_image_schema,
-    gen_sdata_labels_schema,
     gen_obs_feature_matrix_schema,
     gen_obs_labels_schema,
-    gen_obs_sets_schema
+    gen_obs_sets_schema,
+    gen_sdata_image_schema,
+    gen_sdata_labels_schema,
+    gen_sdata_obs_spots_schema,
+    gen_sdata_obs_sets_schema
 )
 
 from .constants import (
@@ -1240,7 +1241,7 @@ class AnnDataWrapper(AbstractWrapper):
             options = gen_obs_spots_schema(self._spatial_spots_obsm, options)
             options = gen_obs_points_schema(self._spatial_points_obsm, options)
             options = gen_obs_embedding_schema(options, self._mappings_obsm, self._mappings_obsm_names, self._mappings_obsm_dims)
-            options = gen_obs_sets_schema(options, self._obs_set_elems, self._obs_set_names)
+            options = gen_obs_sets_schema(options, self._obs_set_elems, self._obs_set_names,)
             options = gen_obs_feature_matrix_schema(options, self._expression_matrix, self._gene_var_filter, self._matrix_gene_var_filter)
             options = gen_feature_labels_schema(self._feature_labels, options)
             options = gen_obs_labels_schema(options, self._obs_labels_elems, self._obs_labels_names)
@@ -1411,7 +1412,7 @@ class SpatialDataWrapper(AnnDataWrapper):
             options = {}
             options = gen_obs_labels_schema(options, self._obs_labels_elems, self._obs_labels_names)
             options = gen_obs_feature_matrix_schema(options, self._expression_matrix, self._gene_var_filter, self._matrix_gene_var_filter)
-            options = gen_obs_sets_schema(options, self._obs_set_elems, self._obs_set_names)
+            options = gen_sdata_obs_sets_schema(options, self._obs_set_elems, self._obs_set_names, self._table_path, self._region)
             options = gen_sdata_obs_spots_schema(options, self._spot_shapes_path, self._table_path, self._region, self._coordinate_system)
             options = gen_sdata_image_schema(options, self._image_path, self._coordinate_system, self._affine_transformation)
             options = gen_sdata_labels_schema(options, self._labels_path, self._table_path, self._coordinate_system, self._affine_transformation)

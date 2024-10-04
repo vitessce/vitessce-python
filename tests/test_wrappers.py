@@ -401,5 +401,6 @@ class TestWrappers(unittest.TestCase):
 
         file_def_creator = w.make_file_def_creator('A', 0)
         file_def = file_def_creator('http://localhost:8000')
+        print(file_def)
         self.assertEqual(file_def,
-                         {'fileType': 'spatialdata.zarr', 'url': 'http://localhost:8000/test.spatialdata.zarr', 'options': {'obsSets': [{'name': 'Cell Type', 'path': 'obs/CellType'}], 'image': {'path': 'images/picture'}}})
+                         {'fileType': 'spatialdata.zarr', 'url': 'http://localhost:8000/test.spatialdata.zarr', 'options': {'obsSets': {'obsSets': [{'name': 'Cell Type', 'path': 'obs/CellType'}], 'tablePath': 'tables/table'}, 'image': {'path': 'images/picture'}}})

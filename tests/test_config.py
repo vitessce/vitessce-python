@@ -20,6 +20,18 @@ from vitessce import (  # noqa: F401
 )
 
 
+class MockArtifactPath:
+    def __init__(self, url):
+        self.url = url
+    def to_url(self):
+        return self.url
+
+class MockArtifact:
+    def __init__(self, name, url):
+        self.name = name
+        self.path = MockArtifactPath(url)
+
+
 def test_config_creation():
     vc = VitessceConfig(schema_version="1.0.15")
     vc_dict = vc.to_dict()
@@ -106,6 +118,54 @@ def test_config_add_anndata_url():
         "initStrategy": "auto"
     }
 
+
+def test_config_add_anndata_artifact():
+    vc = VitessceConfig(schema_version="1.0.15")
+    vc.add_dataset(name='My Dataset').add_object(
+        AnnDataWrapper(
+            adata_artifact=MockArtifact("My anndata artifact", "http://example.com/adata.h5ad.zarr"),
+            obs_set_paths=["obs/louvain"],
+        )
+    )
+
+    vc_dict = vc.to_dict()
+
+    assert vc_dict == {
+        "version": "1.0.15",
+        "name": "",
+        "description": "",
+        "datasets": [
+            {
+                'uid': 'A',
+                'name': 'My Dataset',
+                'files': [
+                    {
+                        "fileType": "anndata.zarr",
+                        "url": "http://example.com/adata.h5ad.zarr",
+                        "options": {
+                            "obsSets": [
+                                {
+                                    "name": "louvain",
+                                    "path": "obs/louvain",
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        ],
+        'coordinationSpace': {
+            'dataset': {
+                'A': 'A'
+            },
+        },
+        "layout": [],
+        "initStrategy": "auto"
+    }
+
+    vc_artifacts = vc.get_artifacts()
+    assert vc_artifacts.keys() == ["http://example.com/adata.h5ad.zarr"]
+    assert vc_artifacts["http://example.com/adata.h5ad.zarr"].name == "My anndata artifact"
 
 def test_config_add_dataset_add_files():
     vc = VitessceConfig(schema_version="1.0.15")

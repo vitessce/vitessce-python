@@ -234,6 +234,13 @@ class VitessceConfigDataset:
             routes += obj.get_routes()
 
         return routes
+    
+    def get_artifacts(self):
+        artifacts = {}
+        for obj in self.objs:
+            artifacts.update(obj.get_artifacts())
+
+        return artifacts
 
     def get_stores(self, base_url=None):
         stores = {}
@@ -1589,6 +1596,18 @@ class VitessceConfig:
         for d in self.config["datasets"]:
             routes += d.get_routes()
         return routes
+    
+    def get_artifacts(self):
+        """
+        Get all artifacts for this view config from the datasets.
+
+        :returns: A dict mapping artifact URLs to corresponding artifact objects.
+        :rtype: dict[str, lamindb.Artifact]
+        """
+        artifacts = {}
+        for d in self.config["datasets"]:
+            artifacts.update(d.get_artifacts())
+        return artifacts
 
     def get_stores(self, base_url=None):
         """

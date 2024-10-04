@@ -162,6 +162,7 @@ class FileType(DocEnum):
     An enum type representing the file format or schema to which a file conforms.
     """
     ANNDATA_ZARR = "anndata.zarr", "Joint file type for AnnData objects"
+    ANNDATA_H5AD = "anndata.h5ad", "Joint file type for AnnData objects"
     SPATIALDATA_ZARR = "spatialdata.zarr", "Joint file type for SpatialData objects"
     OBS_EMBEDDING_CSV = 'obsEmbedding.csv', "File type for obsEmbedding values stored in a CSV file"
     OBS_LOCATIONS_CSV = 'obsLocations.csv', "File type for obsLocations values stored in a CSV file"

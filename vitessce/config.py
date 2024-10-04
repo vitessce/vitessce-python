@@ -50,7 +50,7 @@ class VitessceConfigDatasetFile:
     A class to represent a file (described by a URL, data type, and file type) in a Vitessce view config dataset.
     """
 
-    def __init__(self, file_type, url=None, coordination_values=None, options=None, data_type=None):
+    def __init__(self, file_type, url=None, coordination_values=None, options=None, data_type=None, request_init=None):
         """
         Not meant to be instantiated directly, but instead created and returned by the ``VitessceConfigDataset.add_file()`` method.
 
@@ -62,6 +62,8 @@ class VitessceConfigDatasetFile:
         :param options: Extra options to pass to the file loader class.
         :type options: dict or list or None
         :param data_type: Deprecated / not used. Only included for backwards compatibility with the old API.
+        :param request_init: Optional request init object to pass to the fetch API.
+        :type request_init: dict or None
         """
         self.file = {
             "fileType": file_type
@@ -72,6 +74,8 @@ class VitessceConfigDatasetFile:
             self.file["options"] = options
         if coordination_values:
             self.file["coordinationValues"] = coordination_values
+        if request_init:
+            self.file["requestInit"] = request_init
 
     def __repr__(self):
         repr_dict = {
@@ -83,6 +87,8 @@ class VitessceConfigDatasetFile:
             repr_dict["coordination_values"] = self.file["coordinationValues"]
         if "options" in self.file:
             repr_dict["options"] = self.file["options"]
+        if "requestInit" in self.file:
+            repr_dict["request_init"] = self.file["requestInit"]
 
         return make_repr(repr_dict, class_def=self.__class__)
 
@@ -135,7 +141,7 @@ class VitessceConfigDataset:
         """
         return self.dataset["uid"]
 
-    def add_file(self, file_type, url=None, coordination_values=None, options=None, data_type=None):
+    def add_file(self, file_type, url=None, coordination_values=None, options=None, data_type=None, request_init=None):
         """
         Add a new file definition to this dataset instance.
 
@@ -148,6 +154,8 @@ class VitessceConfigDataset:
         :param options: Extra options to pass to the file loader class. Optional.
         :type options: dict or list or None
         :param data_type: Deprecated / not used. Only included for backwards compatibility with the old API.
+        :param request_init: Optional request init object to pass to the fetch API.
+        :type request_init: dict or None
 
         :returns: Self, to allow function chaining.
         :rtype: VitessceConfigDataset
@@ -171,7 +179,7 @@ class VitessceConfigDataset:
         file_type_str = norm_enum(file_type, ft)
 
         self._add_file(VitessceConfigDatasetFile(
-            url=url, file_type=file_type_str, coordination_values=coordination_values, options=options))
+            url=url, file_type=file_type_str, coordination_values=coordination_values, options=options, request_init=request_init))
         return self
 
     def _add_file(self, obj):
@@ -226,6 +234,13 @@ class VitessceConfigDataset:
             routes += obj.get_routes()
 
         return routes
+
+    def get_artifacts(self):
+        artifacts = {}
+        for obj in self.objs:
+            artifacts.update(obj.get_artifacts())
+
+        return artifacts
 
     def get_stores(self, base_url=None):
         stores = {}
@@ -1487,6 +1502,89 @@ class VitessceConfig:
             "layout": [c.to_dict() for c in self.config["layout"]]
         }
 
+    def get_views(self):
+        """
+        Provides all the views in the config.layout object list
+
+        :returns: A list of VitessceConfigView objects.
+
+        """
+        return self.config["layout"]
+
+    def get_view_by_index(self, index):
+        """
+        Get a view from the layout by the index specified by the 'index' parameter.
+
+        :param index: Index (int) of the view in the Layout array.
+        :type index: int
+
+        :returns: The view corresponding to the provided index
+        :rtype: VitessceConfigView or None if not found
+        """
+        if isinstance(index, int):
+            if 0 <= index < len(self.config["layout"]):
+                return self.config["layout"][index]
+            else:
+                raise IndexError("index out of range")
+        else:
+            raise TypeError("index must be an integer")
+
+    def get_first_view_by_type(self, view_type):
+        """
+        Get a view from the layout by view type (component) specified by the 'view_type' parameter.
+
+        :param view_type: The view type (str) of the view in the Layout array.
+        :type view_type:  str
+
+        :returns: The view corresponding to the provided view_type.
+        :rtype: VitessceConfigView or None if not found
+        """
+        if isinstance(view_type, str):
+            for view in self.config["layout"]:
+                if view.view["component"].lower() == view_type.lower():
+                    return view
+            raise ValueError(f"No view found with component view_type: {view_type}")
+        else:
+            raise TypeError("view_type must be a string representing the view type")
+
+    def remove_view_by_index(self, index):
+        """
+        Removes a view from the layout by the index specified by the 'index' parameter.
+
+        :param index: the index (int) of the view
+        :type index: int
+
+        :returns: The layout component of the config corresponding to the specified index
+        :rtype: VitessceConfigView or None if not found
+
+        """
+        if isinstance(index, int):
+            if 0 <= index < len(self.config["layout"]):
+                return self.config["layout"].pop(index)
+            else:
+                raise IndexError("Index out of range")
+        else:
+            raise TypeError("index must be an integer")
+
+    def remove_first_view_by_type(self, view_type):
+        """
+        Removes a view from the layout by the view type (component) specified by the 'view_type' parameter.
+
+        :param view_by: A component view_type (str).
+        :type view_by: str
+
+        :returns: The layout component  of the config corresponding to the specified view_type
+        :rtype: VitessceConfigView or None if not found
+
+        """
+        if isinstance(view_type, str):
+            for i, view in enumerate(self.config["layout"]):
+                if view.view["component"].lower() == view_type.lower():
+                    return self.config["layout"].pop(i)
+            raise ValueError(f"No view found with component type: {view_type}")
+        else:
+            raise TypeError("view_by must a string representing component type")
+
     def get_routes(self):
         """
         Convert the routes for this view config from the datasets.
@@ -1498,6 +1596,18 @@ class VitessceConfig:
         for d in self.config["datasets"]:
             routes += d.get_routes()
         return routes
+
+    def get_artifacts(self):
+        """
+        Get all artifacts for this view config from the datasets.
+
+        :returns: A dict mapping artifact URLs to corresponding artifact objects.
+        :rtype: dict[str, lamindb.Artifact]
+        """
+        artifacts = {}
+        for d in self.config["datasets"]:
+            artifacts.update(d.get_artifacts())
+        return artifacts
 
     def get_stores(self, base_url=None):
         """
@@ -1606,7 +1716,8 @@ class VitessceConfig:
                     file_type=f["fileType"],
                     url=f.get("url"),
                     coordination_values=f.get("coordinationValues"),
-                    options=f.get("options")
+                    options=f.get("options"),
+                    request_init=f.get("requestInit")
                 )
         if 'coordinationSpace' in config:
             for c_type in config['coordinationSpace'].keys():

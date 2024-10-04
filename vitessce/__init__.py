@@ -37,7 +37,7 @@ from .wrappers import AbstractWrapper
 # We allow installation without all of the dependencies that the widget requires.
 # The imports below will fail in that case, and corresponding globals will be undefined.
 try:
-    from .widget import VitessceWidget, data_server
+    from .widget import VitessceWidget, VitesscePlugin, data_server
 except ModuleNotFoundError as e:  # pragma: no cover
     warn(f'Extra installs are necessary to use widgets: {e}')
 

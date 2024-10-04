@@ -1068,6 +1068,7 @@ def raise_error_if_zero_or_more_than_one(inputs):
         )
     return True
 
+
 def raise_error_if_any(inputs):
     num_inputs = sum([1 for x in inputs if x is not None])
     if num_inputs > 0:
@@ -1076,6 +1077,7 @@ def raise_error_if_any(inputs):
         )
     return True
 
+
 def raise_error_if_more_than_one(inputs):
     num_inputs = sum([1 for x in inputs if x is not None])
     if num_inputs > 1:
@@ -1083,6 +1085,7 @@ def raise_error_if_more_than_one(inputs):
             "Expected only one of these parameters to be provided, but received more than one: " + str(inputs)
         )
     return True
+
 
 class AnnDataWrapper(AbstractWrapper):
     def __init__(self, adata_path=None, adata_url=None, adata_store=None, adata_artifact=None, ref_path=None, ref_url=None, ref_artifact=None, obs_feature_matrix_path=None, feature_filter_path=None, initial_feature_filter_path=None, obs_set_paths=None, obs_set_names=None, obs_locations_path=None, obs_segmentations_path=None, obs_embedding_paths=None, obs_embedding_names=None, obs_embedding_dims=None, obs_spots_path=None, obs_points_path=None, feature_labels_path=None, obs_labels_path=None, convert_to_dense=True, coordination_values=None, obs_labels_paths=None, obs_labels_names=None, **kwargs):
@@ -1303,23 +1306,23 @@ class SpatialDataWrapper(AnnDataWrapper):
         :param coordinate_system: Name of a target coordinate system.
         :type coordinate_system: Optional[str]
         :param affine_transformation: Transformation to be applied to the image. By default, None. Prefer coordinate_system.
-        :type affine_transformation: Optional[np.ndarray] 
+        :type affine_transformation: Optional[np.ndarray]
         :param shapes_elem: location of the shapes, by default None
         :type shapes_elem: Optional[str]
         :param labels_elem: location of the labels, by default None
         :type labels_elem: Optional[str]
         """
         raise_error_if_zero_or_more_than_one([
-                sdata_path,
-                sdata_url,
-                sdata_store,
-                sdata_artifact,
+            sdata_path,
+            sdata_url,
+            sdata_store,
+            sdata_artifact,
         ])
         raise_error_if_any([
-                kwargs.get('adata_path', None),
-                kwargs.get('adata_url', None),
-                kwargs.get('adata_store', None),
-                kwargs.get('adata_artifact', None)
+            kwargs.get('adata_path', None),
+            kwargs.get('adata_url', None),
+            kwargs.get('adata_store', None),
+            kwargs.get('adata_artifact', None)
         ])
         super().__init__(adata_path=sdata_path, adata_url=sdata_url, adata_store=sdata_store, adata_artifact=sdata_artifact, **kwargs)
         self.local_dir_uid = make_unique_filename(".sdata.zarr")
@@ -1402,7 +1405,7 @@ class SpatialDataWrapper(AnnDataWrapper):
                     spot_shapes_path=str(spot_shapes_elem) if spot_shapes_elem is not None else None,
                     initial_feature_filter_path=initial_feature_filter_elem,
                     obs_set_paths=obs_set_elems,
-                    coordination_values={"obsType": "spot"} # TODO: should we remove?
+                    coordination_values={"obsType": "spot"}  # TODO: should we remove?
                 )
             ]
         return wrappers

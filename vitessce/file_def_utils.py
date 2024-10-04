@@ -50,9 +50,10 @@ def gen_obs_sets_schema(options: dict, paths: Optional[list[str]] = None, names:
             })
     return options
 
+
 def gen_sdata_obs_sets_schema(options: dict, paths: Optional[list[str]] = None, names: Optional[list[str]] = None, table_path: Optional[str] = None, region: Optional[str] = None):
     if paths is not None:
-        options["obsSets"] = { "obsSets": [] }
+        options["obsSets"] = {"obsSets": []}
         if names is not None:
             names = names
         else:
@@ -114,6 +115,7 @@ gen_obs_spots_schema = partial(gen_path_schema, "obsSpots")
 gen_obs_points_schema = partial(gen_path_schema, "obsPoints")
 gen_feature_labels_schema = partial(gen_path_schema, "featureLabels")
 
+
 def gen_sdata_image_schema(options, path: str, coordinate_system: Optional[str] = None, affine_transformation: Optional[np.ndarray] = None) -> dict:
     if path is not None:
         options["image"] = {
@@ -124,6 +126,7 @@ def gen_sdata_image_schema(options, path: str, coordinate_system: Optional[str] 
         if coordinate_system is not None:
             options["image"]['coordinateSystem'] = coordinate_system
     return options
+
 
 def gen_sdata_labels_schema(options, path: str, table_path: str = "tables/table", coordinate_system: Optional[str] = None, affine_transformation: Optional[np.ndarray] = None) -> dict:
     if path is not None:

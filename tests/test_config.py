@@ -13,6 +13,7 @@ from vitessce import (  # noqa: F401
     make_repr,
     CoordinationLevel as CL,
     AnnDataWrapper,
+    ImageOmeTiffWrapper,
 
     # Neither of these is in the source code, but they do appear in code which is eval'd.
     VitessceChainableConfig,
@@ -120,6 +121,11 @@ def test_config_add_anndata_url():
         "initStrategy": "auto"
     }
 
+def test_config_artifact_is_remote_image_ome_tiff():
+    iw = ImageOmeTiffWrapper(
+        img_artifact=MockArtifact("My anndata artifact", "http://example.com/adata.h5ad.zarr"),
+    )
+    assert iw.is_remote == True
 
 def test_config_add_anndata_artifact():
     vc = VitessceConfig(schema_version="1.0.15")

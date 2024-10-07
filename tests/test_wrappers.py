@@ -233,7 +233,6 @@ class TestWrappers(unittest.TestCase):
 
         file_def_creator = w.make_file_def_creator('A', 0)
         file_def = file_def_creator('http://localhost:8000')
-        print(file_def)
         self.assertEqual(file_def, {'fileType': 'anndata.zarr', 'url': 'http://localhost:8000/test.h5ad.zarr',
                                     'options': {
                                         'obsEmbedding': [{'path': 'obsm/X_umap', 'dims': [0, 1], 'embeddingType': 'UMAP'}],
@@ -249,7 +248,6 @@ class TestWrappers(unittest.TestCase):
 
         file_def_creator = w.make_file_def_creator('A', 0)
         file_def = file_def_creator('http://localhost:8000')
-        print(file_def)
         self.assertEqual(file_def, {'fileType': 'anndata.zarr', 'url': 'http://localhost:8000/test.h5ad.zarr',
                                     'options': {
                                         'obsEmbedding': [{'path': 'obsm/X_umap', 'dims': [0, 1], 'embeddingType': 'X_umap'}],
@@ -396,7 +394,7 @@ class TestWrappers(unittest.TestCase):
     def test_spatial_data_with_base_dir(self):
 
         spatial_data_path = 'test.spatialdata.zarr'
-        w = SpatialDataWrapper(spatialdata_path=spatial_data_path, image_elem="picture", obs_set_paths=['obs/CellType'], obs_set_names=['Cell Type'], obs_embedding_paths=[
+        w = SpatialDataWrapper(sdata_path=spatial_data_path, image_path="images/picture", obs_set_paths=['obs/CellType'], obs_set_names=['Cell Type'], obs_embedding_paths=[
             'obsm/X_umap'], obs_embedding_names=['UMAP'])
         w.base_dir = data_path
         w.local_dir_uid = 'spatialdata.zarr'
@@ -405,4 +403,4 @@ class TestWrappers(unittest.TestCase):
         file_def = file_def_creator('http://localhost:8000')
         print(file_def)
         self.assertEqual(file_def,
-                         {'fileType': 'spatialdata.zarr', 'url': 'http://localhost:8000/test.spatialdata.zarr', 'options': {'obsSets': {'obsSets': [{'name': 'Cell Type', 'path': 'obs/CellType'}]}, 'image': {'path': 'picture'}}})
+                         {'fileType': 'spatialdata.zarr', 'url': 'http://localhost:8000/test.spatialdata.zarr', 'options': {'obsSets': {'obsSets': [{'name': 'Cell Type', 'path': 'obs/CellType'}], 'tablePath': 'tables/table'}, 'image': {'path': 'images/picture'}}})

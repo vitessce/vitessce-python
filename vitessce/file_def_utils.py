@@ -142,13 +142,28 @@ def gen_sdata_labels_schema(options, path: str, table_path: str = "tables/table"
     return options
 
 
-def gen_sdata_obs_spots_schema(options: dict, shapes_path: Optional[str] = None, table_path: str = "tables/table", region: Optional[str] = None, coordinate_system: Optional[str] = None) -> dict:
+def gen_sdata_obs_spots_schema(options: dict, shapes_path: str, table_path: str = "tables/table", region: Optional[str] = None, coordinate_system: Optional[str] = None) -> dict:
     if shapes_path is not None:
         options['obsSpots'] = {
             "path": shapes_path,
-            "tablePath": table_path,
-            "region": region
+            "tablePath": table_path
         }
+        if region is not None:
+            options['obsSpots']['region'] = region
         if coordinate_system is not None:
             options['obsSpots']['coordinateSystem'] = coordinate_system
+    return options
+
+
+def gen_sdata_obs_feature_matrix_schema(options: dict, matrix_path: Optional[str] = None, var_filter_path: Optional[str] = None, init_var_filter_path: Optional[str] = None, region: Optional[str] = None):
+    if matrix_path is not None:
+        options["obsFeatureMatrix"] = {
+            "path": matrix_path
+        }
+        if region is not None:
+            options['obsFeatureMatrix']['region'] = region
+        if var_filter_path is not None:
+            options["obsFeatureMatrix"]["featureFilterPath"] = var_filter_path
+        if init_var_filter_path is not None:
+            options["obsFeatureMatrix"]["initialFeatureFilterPath"] = init_var_filter_path
     return options

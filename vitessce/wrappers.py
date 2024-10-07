@@ -31,7 +31,8 @@ from vitessce.file_def_utils import (
     gen_sdata_image_schema,
     gen_sdata_labels_schema,
     gen_sdata_obs_spots_schema,
-    gen_sdata_obs_sets_schema
+    gen_sdata_obs_sets_schema,
+    gen_sdata_obs_feature_matrix_schema,
 )
 
 from .constants import (
@@ -1289,7 +1290,7 @@ SpatialDataWrapperType = TypeVar('SpatialDataWrapperType', bound='SpatialDataWra
 
 class SpatialDataWrapper(AnnDataWrapper):
 
-    def __init__(self, sdata_path: Optional[str] = None, sdata_url: Optional[str] = None, sdata_store: Optional[Union[str, zarr.storage.StoreLike]] = None, sdata_artifact: Optional[ln.Artifact] = None, image_path: Optional[str] = None, region: Optional[str] = None, coordinate_system: Optional[str] = None, affine_transformation: Optional[np.ndarray] = None, spot_shapes_path: Optional[str] = None, labels_path: Optional[str] = None, table_path: str = "tables/table", **kwargs):
+    def __init__(self, sdata_path: Optional[str] = None, sdata_url: Optional[str] = None, sdata_store: Optional[Union[str, zarr.storage.StoreLike]] = None, sdata_artifact: Optional[ln.Artifact] = None, image_path: Optional[str] = None, region: Optional[str] = None, coordinate_system: Optional[str] = None, affine_transformation: Optional[np.ndarray] = None, obs_spots_path: Optional[str] = None, labels_path: Optional[str] = None, table_path: str = "tables/table", **kwargs):
         """
         Wrap a SpatialData object.
 
@@ -1301,16 +1302,16 @@ class SpatialDataWrapper(AnnDataWrapper):
         :type sdata_store: Optional[Union[str, zarr.storage.StoreLike]]
         :param sdata_artifact: Artifact that corresponds to a SpatialData object.
         :type sdata_artifact: Optional[ln.Artifact]
-        :param image_elem: Name of the image element of interest. By default, None.
-        :type image_elem: Optional[str]
+        :param image_path: Path to the image element of interest. By default, None.
+        :type image_path: Optional[str]
         :param coordinate_system: Name of a target coordinate system.
         :type coordinate_system: Optional[str]
         :param affine_transformation: Transformation to be applied to the image. By default, None. Prefer coordinate_system.
         :type affine_transformation: Optional[np.ndarray]
-        :param shapes_elem: location of the shapes, by default None
-        :type shapes_elem: Optional[str]
-        :param labels_elem: location of the labels, by default None
-        :type labels_elem: Optional[str]
+        :param obs_spots_path: Location of shapes that should be interpreted as spot observations, by default None
+        :type obs_spots_path: Optional[str]
+        :param labels_path: Location of the labels (segmentation bitmask image), by default None
+        :type labels_path: Optional[str]
         """
         raise_error_if_zero_or_more_than_one([
             sdata_path,
@@ -1331,7 +1332,7 @@ class SpatialDataWrapper(AnnDataWrapper):
         self._coordinate_system = coordinate_system
         self._affine_transformation = affine_transformation
         self._kwargs = kwargs
-        self._spot_shapes_path = spot_shapes_path
+        self._obs_spots_path = obs_spots_path
         self._labels_path = labels_path
         if self._adata_path is not None:
             self.zarr_folder = 'spatialdata.zarr'
@@ -1402,7 +1403,7 @@ class SpatialDataWrapper(AnnDataWrapper):
                     image_path=str(image_elem) if image_elem is not None else None,
                     labels_path=str(labels_elem) if labels_elem is not None else None,
                     obs_feature_matrix_path=str(obs_feature_matrix_elem),
-                    spot_shapes_path=str(spot_shapes_elem) if spot_shapes_elem is not None else None,
+                    obs_spots_path=str(spot_shapes_elem) if spot_shapes_elem is not None else None,
                     initial_feature_filter_path=initial_feature_filter_elem,
                     obs_set_paths=obs_set_elems,
                     coordination_values={"obsType": "spot"}  # TODO: should we remove?
@@ -1414,9 +1415,9 @@ class SpatialDataWrapper(AnnDataWrapper):
         def generator(base_url):
             options = {}
             options = gen_obs_labels_schema(options, self._obs_labels_elems, self._obs_labels_names)
-            options = gen_obs_feature_matrix_schema(options, self._expression_matrix, self._gene_var_filter, self._matrix_gene_var_filter)
+            options = gen_sdata_obs_feature_matrix_schema(options, self._expression_matrix, self._gene_var_filter, self._matrix_gene_var_filter, self._region)
             options = gen_sdata_obs_sets_schema(options, self._obs_set_elems, self._obs_set_names, self._table_path, self._region)
-            options = gen_sdata_obs_spots_schema(options, self._spot_shapes_path, self._table_path, self._region, self._coordinate_system)
+            options = gen_sdata_obs_spots_schema(options, self._obs_spots_path, self._table_path, self._region, self._coordinate_system)
             options = gen_sdata_image_schema(options, self._image_path, self._coordinate_system, self._affine_transformation)
             options = gen_sdata_labels_schema(options, self._labels_path, self._table_path, self._coordinate_system, self._affine_transformation)
             options = gen_feature_labels_schema(self._feature_labels, options)

@@ -394,13 +394,69 @@ class TestWrappers(unittest.TestCase):
     def test_spatial_data_with_base_dir(self):
 
         spatial_data_path = 'test.spatialdata.zarr'
-        w = SpatialDataWrapper(sdata_path=spatial_data_path, image_path="images/picture", obs_set_paths=['obs/CellType'], obs_set_names=['Cell Type'], obs_embedding_paths=[
-            'obsm/X_umap'], obs_embedding_names=['UMAP'])
+        w = SpatialDataWrapper(
+            sdata_path=spatial_data_path,
+            image_path="images/picture",
+            obs_set_paths=['obs/CellType'],
+            obs_set_names=['Cell Type'],
+            obs_embedding_paths=['obsm/X_umap'],
+            obs_embedding_names=['UMAP']
+        )
         w.base_dir = data_path
         w.local_dir_uid = 'spatialdata.zarr'
 
         file_def_creator = w.make_file_def_creator('A', 0)
         file_def = file_def_creator('http://localhost:8000')
-        print(file_def)
-        self.assertEqual(file_def,
-                         {'fileType': 'spatialdata.zarr', 'url': 'http://localhost:8000/test.spatialdata.zarr', 'options': {'obsSets': {'obsSets': [{'name': 'Cell Type', 'path': 'obs/CellType'}], 'tablePath': 'tables/table'}, 'image': {'path': 'images/picture'}}})
+        self.assertEqual(file_def, {
+            'fileType': 'spatialdata.zarr',
+            'url': 'http://localhost:8000/test.spatialdata.zarr',
+            'options': {
+                'obsSets': {
+                    'obsSets': [{'name': 'Cell Type', 'path': 'obs/CellType'}],
+                    'tablePath': 'tables/table'
+                },
+                'image': {'path': 'images/picture'}
+            }})
+
+    def test_spatial_data_with_base_dir_2(self):
+        spatial_data_path = 'test.spatialdata.zarr'
+        w = SpatialDataWrapper(
+            sdata_path=spatial_data_path,
+            image_path='images/CytAssist_FFPE_Human_Breast_Cancer_full_image',
+            coordinate_system='aligned',
+            region='CytAssist_FFPE_Human_Breast_Cancer',
+            obs_feature_matrix_path='tables/table/X',
+            obs_spots_path='shapes/CytAssist_FFPE_Human_Breast_Cancer',
+            table_path='tables/table',
+            coordination_values={
+                "obsType": "spot"
+            }
+        )
+        w.base_dir = data_path
+        w.local_dir_uid = 'spatialdata.zarr'
+
+        file_def_creator = w.make_file_def_creator('A', 0)
+        file_def = file_def_creator('http://localhost:8000')
+        self.assertDictEqual(file_def, {
+            'fileType': 'spatialdata.zarr',
+            'url': 'http://localhost:8000/test.spatialdata.zarr',
+            'options': {
+                'image': {
+                    'path': 'images/CytAssist_FFPE_Human_Breast_Cancer_full_image',
+                    'coordinateSystem': 'aligned',
+                },
+                'obsFeatureMatrix': {
+                    'path': 'tables/table/X',
+                    'region': 'CytAssist_FFPE_Human_Breast_Cancer'
+                },
+                'obsSpots': {
+                    'path': 'shapes/CytAssist_FFPE_Human_Breast_Cancer',
+                    'tablePath': 'tables/table',
+                    'region': 'CytAssist_FFPE_Human_Breast_Cancer',
+                    'coordinateSystem': 'aligned',
+                }
+            },
+            'coordinationValues': {
+                "obsType": "spot"
+            }
+        })

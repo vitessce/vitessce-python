@@ -407,7 +407,6 @@ class TestWrappers(unittest.TestCase):
 
         file_def_creator = w.make_file_def_creator('A', 0)
         file_def = file_def_creator('http://localhost:8000')
-        print(file_def)
         self.assertEqual(file_def, {
             'fileType': 'spatialdata.zarr',
             'url': 'http://localhost:8000/test.spatialdata.zarr',
@@ -420,7 +419,6 @@ class TestWrappers(unittest.TestCase):
             }})
 
     def test_spatial_data_with_base_dir_2(self):
-
         spatial_data_path = 'test.spatialdata.zarr'
         w = SpatialDataWrapper(
             sdata_path=spatial_data_path,

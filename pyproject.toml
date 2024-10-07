@@ -4,14 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vitessce"
-version = "3.4.0"
+version = "3.4.1"
 authors = [
   { name="Mark Keller", email="mark_keller@hms.harvard.edu" },
 ]
 description = "Jupyter widget facilitating interactive visualization of spatial single-cell data with Vitessce"
 readme = "README.md"
 license = {file = "LICENSE"}
-requires-python = ">=3.7"
+requires-python = ">=3.9"
 keywords = ["ipython", "jupyter", "widgets"]
 classifiers = [
   'Development Status :: 4 - Beta',
@@ -19,7 +19,6 @@ classifiers = [
   'Intended Audience :: Developers',
   'Intended Audience :: Science/Research',
   'Topic :: Multimedia :: Graphics',
-  'Programming Language :: Python :: 3.8',
   'Programming Language :: Python :: 3.9',
   'Programming Language :: Python :: 3.10',
   'Programming Language :: Python :: 3.11',
@@ -34,8 +33,9 @@ dependencies = [
   'black>=21.11b1',
   'numpy>=1.21.2,<2.0',
   'anndata>=0.7.8,<0.11',
+  'spatialdata>=0.2.2',
   'scanpy>=1.9.3',
-  'ome-zarr==0.8.3',
+  'ome-zarr>=0.8.3',
   'tifffile>=2020.10.1',
   'jsonschema>=3.2',
   'tqdm>=4.1.0'
@@ -81,7 +81,7 @@ all = [
   'starlette==0.14.0',
   'generate-tiff-offsets>=0.1.7',
   'kerchunk>=0.2.6',
-  'fsspec>=2023.12.2',
+  'fsspec',
 
   # aiofiles is not explicitly referenced in our code,
   # but it is an implicit dependency of starlette==0.14.0.

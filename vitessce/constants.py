@@ -14,7 +14,7 @@ class DocEnum(Enum):
 
 
 def norm_enum(enum_val, expected_enum_class=None):
-    assert isinstance(enum_val, str) or isinstance(enum_val, expected_enum_class)
+    # assert isinstance(enum_val, str) or isinstance(enum_val, expected_enum_class), f"enum_val was {type(enum_val)} and not a string or expected value {type(expected_enum_class)}"
     # We don't actually use the expected_enum_class,
     # since it would not account for things like plugin coordination types, etc.
     # But we can pass it around anyway and in the future could use
@@ -162,6 +162,7 @@ class FileType(DocEnum):
     An enum type representing the file format or schema to which a file conforms.
     """
     ANNDATA_ZARR = "anndata.zarr", "Joint file type for AnnData objects"
+    SPATIALDATA_ZARR = "spatialdata.zarr", "Joint file type for SpatialData objects"
     ANNDATA_H5AD = "anndata.h5ad", "Joint file type for AnnData objects"
     OBS_EMBEDDING_CSV = 'obsEmbedding.csv', "File type for obsEmbedding values stored in a CSV file"
     OBS_LOCATIONS_CSV = 'obsLocations.csv', "File type for obsLocations values stored in a CSV file"

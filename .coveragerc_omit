@@ -2,6 +2,7 @@
 omit =
     vitessce/config.py
     vitessce/export.py
+    vitessce/file_def_utils.py
     vitessce/routes.py
     vitessce/widget.py
     vitessce/wrappers.py

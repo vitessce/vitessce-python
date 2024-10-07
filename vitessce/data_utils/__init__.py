@@ -6,6 +6,7 @@ from .anndata import (
     sort_var_axis,
     to_diamond,
     VAR_CHUNK_SIZE,
+    generate_h5ad_ref_spec,
 )
 from .ome import (
     rgb_img_to_ome_zarr,

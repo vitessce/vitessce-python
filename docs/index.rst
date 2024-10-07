@@ -48,6 +48,7 @@ The Vitessce widget is compatible with the following interactive Python platform
    api_config
    api_data
    data_options
+   widget_plugins
    screenshots
 
 

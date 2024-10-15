@@ -2,6 +2,7 @@
 omit =
     vitessce/config.py
     vitessce/export.py
+    vitessce/file_def_utils.py
     vitessce/routes.py
     vitessce/widget.py
     vitessce/wrappers.py
@@ -11,3 +12,5 @@ omit =
     vitessce/data_utils/ome.py
     vitessce/data_utils/entities.py
     vitessce/data_utils/multivec.py
+    vitessce/widget_plugins/demo_plugin.py
+    vitessce/widget_plugins/spatial_query.py

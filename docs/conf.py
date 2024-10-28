@@ -28,8 +28,8 @@ import nbclean
 # -- Project information -----------------------------------------------------
 
 project = 'vitessce'
-copyright = '2020, Gehlenborg Lab'
-author = 'Gehlenborg Lab'
+copyright = '2020, HIDIVE Lab'
+author = 'HIDIVE Lab'
 
 
 # -- General configuration ---------------------------------------------------

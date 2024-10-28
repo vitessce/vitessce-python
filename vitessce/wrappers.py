@@ -13,10 +13,10 @@ import warnings
 import zarr
 
 import numpy as np
-from spatialdata import SpatialData
 
 if TYPE_CHECKING:
     import lamindb as ln
+    from spatialdata import SpatialData
 
 from vitessce.file_def_utils import (
     gen_obs_locations_schema,

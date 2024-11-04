@@ -47,6 +47,7 @@ try:
         OmeZarrWrapper,
         MultiImageWrapper,
         CsvWrapper,
+        JsonWrapper,
         AnnDataWrapper,
         MultivecZarrWrapper,
         ImageOmeTiffWrapper,

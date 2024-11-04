@@ -808,6 +808,95 @@ class CsvWrapper(AbstractWrapper):
                              obj_i, self.local_csv_uid)
 
 
+class JsonWrapper(AbstractWrapper):
+
+    """
+    Wrap a JSON file by creating an instance of the ``JsonWrapper`` class.
+
+    :param str data_type: The data type of the information contained in the file.
+    :param str json_path: A local filepath JSON a JSON file.
+    :param str json_url: A remote URL of a CSV file.
+    :param dict options: The file options.
+    :param dict coordination_values: The coordination values.
+    :param \\*\\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
+    """
+
+    def __init__(self, json_path=None, json_url=None, data_type=None, options=None, coordination_values=None,
+                 **kwargs):
+        super().__init__(**kwargs)
+        self._repr = make_repr(locals())
+        self._json_path = json_path
+        self._json_url = json_url
+        self._data_type = norm_enum(data_type, dt)
+        self._options = options
+        self._coordination_values = coordination_values
+        self.is_remote = json_url is not None
+        self.local_json_uid = make_unique_filename(".json")
+        if data_type is None:
+            raise ValueError("Expected data_type to be provided")
+        if json_url is not None and json_path is not None:
+            raise ValueError(
+                "Did not expect json_url to be provided with json_path")
+        if json_url is None and json_path is None:
+            raise ValueError(
+                "Expected json_url or json_path to be provided")
+
+    def convert_and_save(self, dataset_uid, obj_i, base_dir=None):
+        # Only create out-directory if needed
+        if not self.is_remote:
+            super().convert_and_save(dataset_uid, obj_i, base_dir=base_dir)
+
+        file_def_creator = self.make_json_file_def_creator(
+            dataset_uid, obj_i)
+        routes = self.make_json_routes(dataset_uid, obj_i)
+
+        self.file_def_creators.append(file_def_creator)
+        self.routes += routes
+
+    def make_json_routes(self, dataset_uid, obj_i):
+        if self.is_remote:
+            return []
+        else:
+            # TODO: Move imports back to top when this is factored out.
+            from .routes import FileRoute
+            from starlette.responses import FileResponse
+
+            if self.base_dir is not None:
+                local_json_path = join(self.base_dir, self._json_path)
+                local_json_route_path = file_path_to_url_path(self._json_path)
+            else:
+                local_json_path = self._json_path
+                local_json_route_path = self._get_route_str(dataset_uid, obj_i, self.local_json_uid)
+
+            async def response_func(req):
+                return FileResponse(local_json_path, filename=os.path.basename(self._json_path))
+            routes = [
+                FileRoute(local_json_route_path, response_func, local_json_path),
+            ]
+            return routes
+
+    def make_json_file_def_creator(self, dataset_uid, obj_i):
+        def json_file_def_creator(base_url):
+            file_def = {
+                "fileType": f"{self._data_type}.json",
+                "url": self.get_json_url(base_url, dataset_uid, obj_i),
+            }
+            if self._options is not None:
+                file_def["options"] = self._options
+            if self._coordination_values is not None:
+                file_def["coordinationValues"] = self._coordination_values
+            return file_def
+        return json_file_def_creator
+
+    def get_json_url(self, base_url="", dataset_uid="", obj_i=""):
+        if self.is_remote:
+            return self._json_url
+        if self.base_dir is not None:
+            return self._get_url_simple(base_url, file_path_to_url_path(self._json_path, prepend_slash=False))
+        return self._get_url(base_url, dataset_uid,
+                             obj_i, self.local_json_uid)
+
+
 class OmeZarrWrapper(AbstractWrapper):
 
     """

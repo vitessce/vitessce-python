@@ -15,6 +15,7 @@ from vitessce import (
     OmeZarrWrapper,
     AnnDataWrapper,
     CsvWrapper,
+    JsonWrapper,
     MultivecZarrWrapper,
     ImageOmeTiffWrapper,
     ObsSegmentationsOmeTiffWrapper,
@@ -355,6 +356,53 @@ class TestWrappers(unittest.TestCase):
             },
             'coordinationValues': {
                 "embeddingType": "UMAP"
+            }
+        })
+
+    def test_json(self):
+        w = JsonWrapper(
+            json_path=data_path / 'test.segmentations.json',
+            data_type="obsSegmentations",
+            coordination_values={
+                "obsType": "nucleus"
+            }
+        )
+        w.local_json_uid = 'test_uid'
+
+        file_def_creator = w.make_json_file_def_creator(
+            "A",
+            "0"
+        )
+        file_def = file_def_creator('http://localhost:8000')
+        self.assertEqual(file_def, {
+            'fileType': 'obsSegmentations.json',
+            'url': 'http://localhost:8000/A/0/test_uid',
+            'coordinationValues': {
+                "obsType": "nucleus"
+            }
+        })
+
+    def test_json_with_base_dir(self):
+        w = JsonWrapper(
+            json_path='test.segmentations.json',
+            data_type="obsSegmentations",
+            coordination_values={
+                "obsType": "nucleus"
+            }
+        )
+        w.base_dir = data_path
+        w.local_json_uid = 'test_uid'
+
+        file_def_creator = w.make_json_file_def_creator(
+            "A",
+            "0"
+        )
+        file_def = file_def_creator('http://localhost:8000')
+        self.assertEqual(file_def, {
+            'fileType': 'obsSegmentations.json',
+            'url': 'http://localhost:8000/test.segmentations.json',
+            'coordinationValues': {
+                "obsType": "nucleus"
             }
         })
 

@@ -7,15 +7,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: astral-sh/setup-uv@v3
         with:
-          python-version: '3.9'
-      - run: |
-          pip install "pulp==2.7.0"
-          pip install snakemake
-          pip install pyyaml
+          version: "latest"
       - name: Install vitessce
-        run: pip install -e .[dev,all]
+        run: uv sync --extra dev --extra all --extra demos
       - name: Run tests
         working-directory: ./demos
-        run: snakemake -j 1 --dry-run
+        run: uv run snakemake -j 1 --dry-run

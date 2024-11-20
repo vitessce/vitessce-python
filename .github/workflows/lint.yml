@@ -11,4 +11,4 @@ jobs:
         with:
           version: "latest"
       - run: uv sync --extra dev
-      - run: flake8
+      - run: uv run flake8

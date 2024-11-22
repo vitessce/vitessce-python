@@ -47,12 +47,14 @@ try:
         OmeZarrWrapper,
         MultiImageWrapper,
         CsvWrapper,
+        JsonWrapper,
         AnnDataWrapper,
         MultivecZarrWrapper,
         ImageOmeTiffWrapper,
         ObsSegmentationsOmeTiffWrapper,
         ImageOmeZarrWrapper,
         ObsSegmentationsOmeZarrWrapper,
+        SpatialDataWrapper,
     )
 except ModuleNotFoundError as e:  # pragma: no cover
     warn(f'Extra installs are necessary to use wrappers: {e}')

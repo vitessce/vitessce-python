@@ -1,9 +1,39 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+from collections import defaultdict
 import os
 from os.path import join
 import tempfile
+from typing import Callable, Optional, Type, TypeVar, Union
 from uuid import uuid4
 from pathlib import PurePath, PurePosixPath
+import warnings
 import zarr
+
+import numpy as np
+
+if TYPE_CHECKING:
+    import lamindb as ln
+    from spatialdata import SpatialData
+
+from vitessce.file_def_utils import (
+    gen_obs_locations_schema,
+    gen_obs_segmentations_schema,
+    gen_obs_spots_schema,
+    gen_obs_points_schema,
+    gen_obs_embedding_schema,
+    gen_feature_labels_schema,
+    gen_obs_feature_matrix_schema,
+    gen_obs_labels_schema,
+    gen_obs_sets_schema,
+    gen_sdata_image_schema,
+    gen_sdata_labels_schema,
+    gen_sdata_obs_spots_schema,
+    gen_sdata_obs_sets_schema,
+    gen_sdata_obs_feature_matrix_schema,
+)
 
 from .constants import (
     norm_enum,
@@ -47,6 +77,7 @@ class AbstractWrapper:
         self.file_def_creators = []
         self.base_dir = None
         self.stores = {}
+        self.artifacts = {}
         self._request_init = kwargs['request_init'] if 'request_init' in kwargs else None
 
     def __repr__(self):
@@ -73,6 +104,28 @@ class AbstractWrapper:
         :rtype: list[starlette.routing.Route]
         """
         return self.routes
+
+    def register_artifact(self, artifact):
+        """
+        Register an artifact.
+
+        :param artifact: The artifact object to register.
+        :type artifact: lamindb.Artifact
+        :returns: The artifact URL.
+        :rtype: str
+        """
+        artifact_url = artifact.path.to_url()
+        self.artifacts[artifact_url] = artifact
+        return artifact_url
+
+    def get_artifacts(self):
+        """
+        Obtain the dictionary that maps artifact URLs to artifact objects.
+
+        :returns: A dictionary that maps artifact URLs to Artifact objects.
+        :rtype: dict[str, lamindb.Artifact]
+        """
+        return self.artifacts
 
     def get_stores(self, base_url):
         """
@@ -123,10 +176,14 @@ class AbstractWrapper:
                           app=StaticFiles(directory=out_dir, html=False))]
         return []
 
-    def get_local_dir_url(self, base_url, dataset_uid, obj_i, local_dir_path, local_dir_uid):
+    def get_local_file_url(self, base_url, dataset_uid, obj_i, local_file_path, local_file_uid):
         if not self.is_remote and self.base_dir is not None:
-            return self._get_url_simple(base_url, file_path_to_url_path(local_dir_path, prepend_slash=False))
-        return self._get_url(base_url, dataset_uid, obj_i, local_dir_uid)
+            return self._get_url_simple(base_url, file_path_to_url_path(local_file_path, prepend_slash=False))
+        return self._get_url(base_url, dataset_uid, obj_i, local_file_uid)
+
+    def get_local_dir_url(self, base_url, dataset_uid, obj_i, local_dir_path, local_dir_uid):
+        # Logic for files and directories is the same for this function.
+        return self.get_local_file_url(base_url, dataset_uid, obj_i, local_dir_path, local_dir_uid)
 
     def register_zarr_store(self, dataset_uid, obj_i, store_or_local_dir_path, local_dir_uid):
         if not self.is_remote and self.is_store:
@@ -175,6 +232,21 @@ class AbstractWrapper:
             from starlette.routing import Mount
             return [Mount(route_path,
                           app=StaticFiles(directory=local_dir_path, html=False))]
+        return []
+
+    def get_local_file_route(self, dataset_uid, obj_i, local_file_path, local_file_uid):
+        if not self.is_remote:
+            from .routes import range_repsonse, FileRoute
+
+            if self.base_dir is None:
+                route_path = self._get_route_str(dataset_uid, obj_i, local_file_uid)
+            else:
+                route_path = file_path_to_url_path(local_file_path)
+                local_file_path = join(self.base_dir, local_file_path)
+
+            return [
+                FileRoute(route_path, lambda req: range_repsonse(req, local_file_path), local_file_path),
+            ]
         return []
 
     def _get_url(self, base_url, dataset_uid, obj_i, *args):
@@ -398,21 +470,36 @@ class ImageOmeTiffWrapper(AbstractWrapper):
     :param \\*\\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
     """
 
-    def __init__(self, img_path=None, offsets_path=None, img_url=None, offsets_url=None, coordinate_transformations=None, coordination_values=None, **kwargs):
+    def __init__(self, img_path=None, img_url=None, img_artifact=None, offsets_path=None, offsets_url=None, offsets_artifact=None, coordinate_transformations=None, coordination_values=None, **kwargs):
         super().__init__(**kwargs)
         self._repr = make_repr(locals())
+        num_inputs = sum([1 for x in [img_path, img_url, img_artifact] if x is not None])
+        if num_inputs != 1:
+            raise ValueError(
+                "Expected one of img_path, img_url, or img_artifact to be provided")
+
+        num_inputs = sum([1 for x in [offsets_path, offsets_url, offsets_artifact] if x is not None])
+        if num_inputs > 1:
+            raise ValueError(
+                "Expected zero or one of offsets_path, offsets_url, or offsets_artifact to be provided")
+
         self._img_path = img_path
         self._img_url = img_url
+        self._img_artifact = img_artifact
         self._offsets_path = offsets_path
         self._offsets_url = offsets_url
+        self._offsets_artifact = offsets_artifact
         self._coordinate_transformations = coordinate_transformations
         self._coordination_values = coordination_values
-        self.is_remote = img_url is not None
+        self.is_remote = img_url is not None or img_artifact is not None
         self.local_img_uid = make_unique_filename(".ome.tif")
         self.local_offsets_uid = make_unique_filename(".offsets.json")
-        if img_url is not None and (img_path is not None or offsets_path is not None):
-            raise ValueError(
-                "Did not expect img_path or offsets_path to be provided with img_url")
+
+        if img_artifact is not None:
+            self._img_url = self.register_artifact(img_artifact)
+
+        if offsets_artifact is not None:
+            self._offsets_url = self.register_artifact(offsets_artifact)
 
     def convert_and_save(self, dataset_uid, obj_i, base_dir=None):
         # Only create out-directory if needed
@@ -502,31 +589,50 @@ class ObsSegmentationsOmeTiffWrapper(AbstractWrapper):
     Wrap an OME-TIFF File by creating an instance of the ``ObsSegmentationsOmeTiffWrapper`` class. Intended to be used with the spatialBeta and layerControllerBeta views.
 
     :param str img_path: A local filepath to an OME-TIFF file.
-    :param str offsets_path: A local filepath to an offsets.json file.
     :param str img_url: A remote URL of an OME-TIFF file.
+    :param img_artifact: A lamindb Artifact corresponding to the image.
+    :type img_artifact: lamindb.Artifact
+    :param str offsets_path: A local filepath to an offsets.json file.
     :param str offsets_url: A remote URL of an offsets.json file.
+    :param offsets_artifact: A lamindb Artifact corresponding to the offsets JSON.
+    :type offsets_artifact: lamindb.Artifact
     :param list coordinate_transformations: A column-major ordered matrix for transforming this image (see http://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices/#homogeneous-coordinates for more information).
     :param bool obs_types_from_channel_names: Whether to use the channel names to determine the obs types. Optional.
     :param dict coordination_values: Optional coordinationValues to be passed in the file definition.
     :param \\*\\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
     """
 
-    def __init__(self, img_path=None, offsets_path=None, img_url=None, offsets_url=None, coordinate_transformations=None, obs_types_from_channel_names=None, coordination_values=None, **kwargs):
+    def __init__(self, img_path=None, img_url=None, img_artifact=None, offsets_path=None, offsets_url=None, offsets_artifact=None, coordinate_transformations=None, obs_types_from_channel_names=None, coordination_values=None, **kwargs):
         super().__init__(**kwargs)
         self._repr = make_repr(locals())
+        num_inputs = sum([1 for x in [img_path, img_url, img_artifact] if x is not None])
+        if num_inputs != 1:
+            raise ValueError(
+                "Expected one of img_path, img_url, or img_artifact to be provided")
+
+        num_inputs = sum([1 for x in [offsets_path, offsets_url, offsets_artifact] if x is not None])
+        if num_inputs > 1:
+            raise ValueError(
+                "Expected zero or one of offsets_path, offsets_url, or offsets_artifact to be provided")
+
         self._img_path = img_path
         self._img_url = img_url
+        self._img_artifact = img_artifact
         self._offsets_path = offsets_path
         self._offsets_url = offsets_url
+        self._offsets_artifact = offsets_artifact
         self._coordinate_transformations = coordinate_transformations
         self._obs_types_from_channel_names = obs_types_from_channel_names
         self._coordination_values = coordination_values
-        self.is_remote = img_url is not None
+        self.is_remote = img_url is not None or img_artifact is not None
         self.local_img_uid = make_unique_filename(".ome.tif")
         self.local_offsets_uid = make_unique_filename(".offsets.json")
-        if img_url is not None and (img_path is not None or offsets_path is not None):
-            raise ValueError(
-                "Did not expect img_path or offsets_path to be provided with img_url")
+
+        if img_artifact is not None:
+            self._img_url = self.register_artifact(img_artifact)
+
+        if offsets_artifact is not None:
+            self._offsets_url = self.register_artifact(offsets_artifact)
 
     def convert_and_save(self, dataset_uid, obj_i, base_dir=None):
         # Only create out-directory if needed
@@ -702,6 +808,95 @@ class CsvWrapper(AbstractWrapper):
                              obj_i, self.local_csv_uid)
 
 
+class JsonWrapper(AbstractWrapper):
+
+    """
+    Wrap a JSON file by creating an instance of the ``JsonWrapper`` class.
+
+    :param str data_type: The data type of the information contained in the file.
+    :param str json_path: A local filepath JSON a JSON file.
+    :param str json_url: A remote URL of a CSV file.
+    :param dict options: The file options.
+    :param dict coordination_values: The coordination values.
+    :param \\*\\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
+    """
+
+    def __init__(self, json_path=None, json_url=None, data_type=None, options=None, coordination_values=None,
+                 **kwargs):
+        super().__init__(**kwargs)
+        self._repr = make_repr(locals())
+        self._json_path = json_path
+        self._json_url = json_url
+        self._data_type = norm_enum(data_type, dt)
+        self._options = options
+        self._coordination_values = coordination_values
+        self.is_remote = json_url is not None
+        self.local_json_uid = make_unique_filename(".json")
+        if data_type is None:
+            raise ValueError("Expected data_type to be provided")
+        if json_url is not None and json_path is not None:
+            raise ValueError(
+                "Did not expect json_url to be provided with json_path")
+        if json_url is None and json_path is None:
+            raise ValueError(
+                "Expected json_url or json_path to be provided")
+
+    def convert_and_save(self, dataset_uid, obj_i, base_dir=None):
+        # Only create out-directory if needed
+        if not self.is_remote:
+            super().convert_and_save(dataset_uid, obj_i, base_dir=base_dir)
+
+        file_def_creator = self.make_json_file_def_creator(
+            dataset_uid, obj_i)
+        routes = self.make_json_routes(dataset_uid, obj_i)
+
+        self.file_def_creators.append(file_def_creator)
+        self.routes += routes
+
+    def make_json_routes(self, dataset_uid, obj_i):
+        if self.is_remote:
+            return []
+        else:
+            # TODO: Move imports back to top when this is factored out.
+            from .routes import FileRoute
+            from starlette.responses import FileResponse
+
+            if self.base_dir is not None:
+                local_json_path = join(self.base_dir, self._json_path)
+                local_json_route_path = file_path_to_url_path(self._json_path)
+            else:
+                local_json_path = self._json_path
+                local_json_route_path = self._get_route_str(dataset_uid, obj_i, self.local_json_uid)
+
+            async def response_func(req):
+                return FileResponse(local_json_path, filename=os.path.basename(self._json_path))
+            routes = [
+                FileRoute(local_json_route_path, response_func, local_json_path),
+            ]
+            return routes
+
+    def make_json_file_def_creator(self, dataset_uid, obj_i):
+        def json_file_def_creator(base_url):
+            file_def = {
+                "fileType": f"{self._data_type}.json",
+                "url": self.get_json_url(base_url, dataset_uid, obj_i),
+            }
+            if self._options is not None:
+                file_def["options"] = self._options
+            if self._coordination_values is not None:
+                file_def["coordinationValues"] = self._coordination_values
+            return file_def
+        return json_file_def_creator
+
+    def get_json_url(self, base_url="", dataset_uid="", obj_i=""):
+        if self.is_remote:
+            return self._json_url
+        if self.base_dir is not None:
+            return self._get_url_simple(base_url, file_path_to_url_path(self._json_path, prepend_slash=False))
+        return self._get_url(base_url, dataset_uid,
+                             obj_i, self.local_json_uid)
+
+
 class OmeZarrWrapper(AbstractWrapper):
 
     """
@@ -790,28 +985,36 @@ class ImageOmeZarrWrapper(AbstractWrapper):
 
     :param str img_path: A local filepath to an OME-NGFF Zarr store.
     :param str img_url: A remote URL of an OME-NGFF Zarr store.
+    :param img_artifact: A lamindb Artifact corresponding to the image.
+    :type img_artifact: lamindb.Artifact
     :param list coordinate_transformations: A column-major ordered matrix for transforming this image (see http://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices/#homogeneous-coordinates for more information).
     :param dict coordination_values: Optional coordinationValues to be passed in the file definition.
     :param \\*\\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
     """
 
-    def __init__(self, img_path=None, img_url=None, coordinate_transformations=None, coordination_values=None, **kwargs):
+    def __init__(self, img_path=None, img_url=None, img_artifact=None, coordinate_transformations=None, coordination_values=None, **kwargs):
         super().__init__(**kwargs)
         self._repr = make_repr(locals())
-        if img_url is not None and img_path is not None:
+
+        num_inputs = sum([1 for x in [img_path, img_url, img_artifact] if x is not None])
+        if num_inputs != 1:
             raise ValueError(
-                "Did not expect img_path to be provided with img_url")
-        if img_url is None and img_path is None:
-            raise ValueError(
-                "Expected either img_url or img_path to be provided")
+                "Expected one of img_path, img_url, or img_artifact to be provided")
+
         self._img_path = img_path
         self._img_url = img_url
+        self._img_artifact = img_artifact
         self._coordinate_transformations = coordinate_transformations
         self._coordination_values = coordination_values
         if self._img_path is not None:
             self.is_remote = False
         else:
             self.is_remote = True
+
+        if self._img_artifact is not None:
+            # To serve as a placeholder in the config JSON URL field
+            self._img_url = self.register_artifact(img_artifact)
+
         self.local_dir_uid = make_unique_filename(".ome.zarr")
 
     def convert_and_save(self, dataset_uid, obj_i, base_dir=None):
@@ -864,23 +1067,25 @@ class ObsSegmentationsOmeZarrWrapper(AbstractWrapper):
 
     :param str img_path: A local filepath to an OME-NGFF Zarr store.
     :param str img_url: A remote URL of an OME-NGFF Zarr store.
+    :param img_artifact: A lamindb Artifact corresponding to the image.
+    :type img_artifact: lamindb.Artifact
     :param list coordinate_transformations: A column-major ordered matrix for transforming this image (see http://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices/#homogeneous-coordinates for more information).
     :param dict coordination_values: Optional coordinationValues to be passed in the file definition.
     :param bool obs_types_from_channel_names: Whether to use the channel names to determine the obs types. Optional.
     :param \\*\\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
     """
 
-    def __init__(self, img_path=None, img_url=None, coordinate_transformations=None, coordination_values=None, obs_types_from_channel_names=None, **kwargs):
+    def __init__(self, img_path=None, img_url=None, img_artifact=None, coordinate_transformations=None, coordination_values=None, obs_types_from_channel_names=None, **kwargs):
         super().__init__(**kwargs)
         self._repr = make_repr(locals())
-        if img_url is not None and img_path is not None:
+
+        num_inputs = sum([1 for x in [img_path, img_url, img_artifact] if x is not None])
+        if num_inputs != 1:
             raise ValueError(
-                "Did not expect img_path to be provided with img_url")
-        if img_url is None and img_path is None:
-            raise ValueError(
-                "Expected either img_url or img_path to be provided")
+                "Expected one of img_path, img_url, or img_artifact to be provided")
         self._img_path = img_path
         self._img_url = img_url
+        self._img_artifact = img_artifact
         self._coordinate_transformations = coordinate_transformations
         self._obs_types_from_channel_names = obs_types_from_channel_names
         self._coordination_values = coordination_values
@@ -888,6 +1093,11 @@ class ObsSegmentationsOmeZarrWrapper(AbstractWrapper):
             self.is_remote = False
         else:
             self.is_remote = True
+
+        if self._img_artifact is not None:
+            # To serve as a placeholder in the config JSON URL field
+            self._img_url = self.register_artifact(img_artifact)
+
         self.local_dir_uid = make_unique_filename(".ome.zarr")
 
     def convert_and_save(self, dataset_uid, obj_i, base_dir=None):
@@ -936,8 +1146,39 @@ class ObsSegmentationsOmeZarrWrapper(AbstractWrapper):
         return image_file_def_creator
 
 
+def raise_error_if_zero_or_more_than_one(inputs):
+    num_inputs = sum([1 for x in inputs if x is not None])
+    if num_inputs > 1:
+        raise ValueError(
+            "Expected only one type of data input parameter to be provided (_url, _path, _store, etc.), but received more than one."
+        )
+    if num_inputs == 0:
+        raise ValueError(
+            "Expected one type of data input parameter to be provided (_url, _path, _store, etc.), but received none."
+        )
+    return True
+
+
+def raise_error_if_any(inputs):
+    num_inputs = sum([1 for x in inputs if x is not None])
+    if num_inputs > 0:
+        raise ValueError(
+            "Did not expect any of these parameters to be provided, but received one or more: " + str(inputs)
+        )
+    return True
+
+
+def raise_error_if_more_than_one(inputs):
+    num_inputs = sum([1 for x in inputs if x is not None])
+    if num_inputs > 1:
+        raise ValueError(
+            "Expected only one of these parameters to be provided, but received more than one: " + str(inputs)
+        )
+    return True
+
+
 class AnnDataWrapper(AbstractWrapper):
-    def __init__(self, adata_path=None, adata_url=None, adata_store=None, obs_feature_matrix_path=None, feature_filter_path=None, initial_feature_filter_path=None, obs_set_paths=None, obs_set_names=None, obs_locations_path=None, obs_segmentations_path=None, obs_embedding_paths=None, obs_embedding_names=None, obs_embedding_dims=None, obs_spots_path=None, obs_points_path=None, feature_labels_path=None, obs_labels_path=None, convert_to_dense=True, coordination_values=None, obs_labels_paths=None, obs_labels_names=None, **kwargs):
+    def __init__(self, adata_path=None, adata_url=None, adata_store=None, adata_artifact=None, ref_path=None, ref_url=None, ref_artifact=None, obs_feature_matrix_path=None, feature_filter_path=None, initial_feature_filter_path=None, obs_set_paths=None, obs_set_names=None, obs_locations_path=None, obs_segmentations_path=None, obs_embedding_paths=None, obs_embedding_names=None, obs_embedding_dims=None, obs_spots_path=None, obs_points_path=None, feature_labels_path=None, obs_labels_path=None, convert_to_dense=True, coordination_values=None, obs_labels_paths=None, obs_labels_names=None, **kwargs):
         """
         Wrap an AnnData object by creating an instance of the ``AnnDataWrapper`` class.
 
@@ -945,6 +1186,8 @@ class AnnDataWrapper(AbstractWrapper):
         :param str adata_url: A remote url pointing to a zarr-backed AnnData store.
         :param adata_store: A path to pass to zarr.DirectoryStore, or an existing store instance.
         :type adata_store: str or zarr.Storage
+        :param adata_artifact: A lamindb Artifact corresponding to the AnnData object.
+        :type adata_artifact: lamindb.Artifact
         :param str obs_feature_matrix_path: Location of the expression (cell x gene) matrix, like `X` or `obsm/highly_variable_genes_subset`
         :param str feature_filter_path: A string like `var/highly_variable` used in conjunction with `obs_feature_matrix_path` if obs_feature_matrix_path points to a subset of `X` of the full `var` list.
         :param str initial_feature_filter_path: A string like `var/highly_variable` used in conjunction with `obs_feature_matrix_path` if obs_feature_matrix_path points to a subset of `X` of the full `var` list.
@@ -971,23 +1214,39 @@ class AnnDataWrapper(AbstractWrapper):
         self._adata_path = adata_path
         self._adata_url = adata_url
         self._adata_store = adata_store
+        self._adata_artifact = adata_artifact
 
-        num_inputs = sum([1 for x in [adata_path, adata_url, adata_store] if x is not None])
-        if num_inputs > 1:
+        # For reference spec JSON with .h5ad files
+        self._ref_path = ref_path
+        self._ref_url = ref_url
+        self._ref_artifact = ref_artifact
+
+        if ref_path is not None or ref_url is not None or ref_artifact is not None:
+            self.is_h5ad = True
+        else:
+            self.is_h5ad = False
+
+        if adata_store is not None and (ref_path is not None or ref_url is not None or ref_artifact is not None):
             raise ValueError(
-                "Expected only one of adata_path, adata_url, or adata_store to be provided")
-        if num_inputs == 0:
-            raise ValueError(
-                "Expected one of adata_path, adata_url, or adata_store to be provided")
+                "Did not expect reference JSON to be provided with adata_store")
+
+        raise_error_if_zero_or_more_than_one([adata_path, adata_url, adata_store, adata_artifact])
 
         if adata_path is not None:
             self.is_remote = False
             self.is_store = False
             self.zarr_folder = 'anndata.zarr'
-        elif adata_url is not None:
+        elif adata_url is not None or adata_artifact is not None:
             self.is_remote = True
             self.is_store = False
             self.zarr_folder = None
+
+            # Store artifacts on AbstractWrapper.artifacts for downstream access,
+            # e.g. in lamindb.save_vitessce_config
+            if adata_artifact is not None:
+                self._adata_url = self.register_artifact(adata_artifact)
+            if ref_artifact is not None:
+                self._ref_url = self.register_artifact(ref_artifact)
         else:
             # Store case
             self.is_remote = False
@@ -995,25 +1254,29 @@ class AnnDataWrapper(AbstractWrapper):
             self.zarr_folder = None
 
         self.local_dir_uid = make_unique_filename(".adata.zarr")
+        self.local_file_uid = make_unique_filename(".h5ad")
+        self.local_ref_uid = make_unique_filename(".ref.json")
+
         self._expression_matrix = obs_feature_matrix_path
-        self._cell_set_obs_names = obs_set_names
+        self._obs_set_names = obs_set_names
         self._mappings_obsm_names = obs_embedding_names
         self._gene_var_filter = feature_filter_path
         self._matrix_gene_var_filter = initial_feature_filter_path
-        self._cell_set_obs = obs_set_paths
+        self._obs_set_elems = obs_set_paths
         self._spatial_centroid_obsm = obs_locations_path
         self._spatial_polygon_obsm = obs_segmentations_path
         self._mappings_obsm = obs_embedding_paths
         self._mappings_obsm_dims = obs_embedding_dims
         self._spatial_spots_obsm = obs_spots_path
         self._spatial_points_obsm = obs_points_path
-        self._gene_alias = feature_labels_path
+        self._feature_labels = feature_labels_path
         # Support legacy provision of single obs labels path
         if (obs_labels_path is not None):
-            self._obs_labels_paths = [obs_labels_path]
+            warnings.warn("`obs_labels_path` will be deprecated in a future release.", DeprecationWarning)
+            self._obs_labels_elems = [obs_labels_path]
             self._obs_labels_names = [obs_labels_path.split('/')[-1]]
         else:
-            self._obs_labels_paths = obs_labels_paths
+            self._obs_labels_elems = obs_labels_paths
             self._obs_labels_names = obs_labels_names
         self._convert_to_dense = convert_to_dense
         self._coordination_values = coordination_values
@@ -1025,19 +1288,25 @@ class AnnDataWrapper(AbstractWrapper):
 
         file_def_creator = self.make_file_def_creator(
             dataset_uid, obj_i)
-        routes = self.make_anndata_routes(dataset_uid, obj_i)
+        routes = self.make_routes(dataset_uid, obj_i)
 
         self.file_def_creators.append(file_def_creator)
         self.routes += routes
 
-    def make_anndata_routes(self, dataset_uid, obj_i):
+    def make_routes(self, dataset_uid, obj_i):
         if self.is_remote:
             return []
         elif self.is_store:
             self.register_zarr_store(dataset_uid, obj_i, self._adata_store, self.local_dir_uid)
             return []
         else:
-            return self.get_local_dir_route(dataset_uid, obj_i, self._adata_path, self.local_dir_uid)
+            if self.is_h5ad:
+                return [
+                    *self.get_local_file_route(dataset_uid, obj_i, self._adata_path, self.local_file_uid),
+                    *self.get_local_file_route(dataset_uid, obj_i, self._ref_path, self.local_ref_uid)
+                ]
+            else:
+                return self.get_local_dir_route(dataset_uid, obj_i, self._adata_path, self.local_dir_uid)
 
     def get_zarr_url(self, base_url="", dataset_uid="", obj_i=""):
         if self.is_remote:
@@ -1045,85 +1314,38 @@ class AnnDataWrapper(AbstractWrapper):
         else:
             return self.get_local_dir_url(base_url, dataset_uid, obj_i, self._adata_path, self.local_dir_uid)
 
+    def get_h5ad_url(self, base_url="", dataset_uid="", obj_i=""):
+        if self.is_remote:
+            return self._adata_url
+        else:
+            return self.get_local_file_url(base_url, dataset_uid, obj_i, self._adata_path, self.local_file_uid)
+
+    def get_ref_url(self, base_url="", dataset_uid="", obj_i=""):
+        if self.is_remote:
+            return self._ref_url
+        else:
+            return self.get_local_file_url(base_url, dataset_uid, obj_i, self._ref_path, self.local_ref_uid)
+
     def make_file_def_creator(self, dataset_uid, obj_i):
         def get_anndata_zarr(base_url):
             options = {}
-            if self._spatial_centroid_obsm is not None:
-                options["obsLocations"] = {
-                    "path": self._spatial_centroid_obsm
-                }
-            if self._spatial_polygon_obsm is not None:
-                options["obsSegmentations"] = {
-                    "path": self._spatial_polygon_obsm
-                }
-            if self._spatial_spots_obsm is not None:
-                options["obsSpots"] = {
-                    "path": self._spatial_spots_obsm
-                }
-            if self._spatial_points_obsm is not None:
-                options["obsPoints"] = {
-                    "path": self._spatial_points_obsm
-                }
-            if self._mappings_obsm is not None:
-                options["obsEmbedding"] = []
-                if self._mappings_obsm_names is not None:
-                    for key, mapping in zip(self._mappings_obsm_names, self._mappings_obsm):
-                        options["obsEmbedding"].append({
-                            "path": mapping,
-                            "dims": [0, 1],
-                            "embeddingType": key
-                        })
-                else:
-                    for mapping in self._mappings_obsm:
-                        mapping_key = mapping.split('/')[-1]
-                        self._mappings_obsm_names = mapping_key
-                        options["obsEmbedding"].append({
-                            "path": mapping,
-                            "dims": [0, 1],
-                            "embeddingType": mapping_key
-                        })
-                if self._mappings_obsm_dims is not None:
-                    for dim_i, dim in enumerate(self._mappings_obsm_dims):
-                        options["obsEmbedding"][dim_i]['dims'] = dim
-            if self._cell_set_obs is not None:
-                options["obsSets"] = []
-                if self._cell_set_obs_names is not None:
-                    names = self._cell_set_obs_names
-                else:
-                    names = [obs.split('/')[-1] for obs in self._cell_set_obs]
-                for obs, name in zip(self._cell_set_obs, names):
-                    options["obsSets"].append({
-                        "name": name,
-                        "path": obs
-                    })
-            if self._expression_matrix is not None:
-                options["obsFeatureMatrix"] = {
-                    "path": self._expression_matrix
-                }
-                if self._gene_var_filter is not None:
-                    options["obsFeatureMatrix"]["featureFilterPath"] = self._gene_var_filter
-                if self._matrix_gene_var_filter is not None:
-                    options["obsFeatureMatrix"]["initialFeatureFilterPath"] = self._matrix_gene_var_filter
-            if self._gene_alias is not None:
-                options["featureLabels"] = {
-                    "path": self._gene_alias
-                }
-            if self._obs_labels_paths is not None:
-                if self._obs_labels_names is not None and len(self._obs_labels_paths) == len(self._obs_labels_names):
-                    # A name was provided for each path element, so use those values.
-                    names = self._obs_labels_names
-                else:
-                    # Names were not provided for each path element,
-                    # so fall back to using the final part of each path for the names.
-                    names = [labels_path.split('/')[-1] for labels_path in self._obs_labels_paths]
-                obs_labels = []
-                for path, name in zip(self._obs_labels_paths, names):
-                    obs_labels.append({"path": path, "obsLabelsType": name})
-                options["obsLabels"] = obs_labels
+            options = gen_obs_locations_schema(self._spatial_centroid_obsm, options)
+            options = gen_obs_segmentations_schema(self._spatial_polygon_obsm, options)
+            options = gen_obs_spots_schema(self._spatial_spots_obsm, options)
+            options = gen_obs_points_schema(self._spatial_points_obsm, options)
+            options = gen_obs_embedding_schema(options, self._mappings_obsm, self._mappings_obsm_names, self._mappings_obsm_dims)
+            options = gen_obs_sets_schema(options, self._obs_set_elems, self._obs_set_names,)
+            options = gen_obs_feature_matrix_schema(options, self._expression_matrix, self._gene_var_filter, self._matrix_gene_var_filter)
+            options = gen_feature_labels_schema(self._feature_labels, options)
+            options = gen_obs_labels_schema(options, self._obs_labels_elems, self._obs_labels_names)
+
             if len(options.keys()) > 0:
+                if self.is_h5ad:
+                    options["refSpecUrl"] = self.get_ref_url(base_url, dataset_uid, obj_i)
+
                 obj_file_def = {
-                    "fileType": ft.ANNDATA_ZARR.value,
-                    "url": self.get_zarr_url(base_url, dataset_uid, obj_i),
+                    "fileType": ft.ANNDATA_ZARR.value if not self.is_h5ad else ft.ANNDATA_H5AD.value,
+                    "url": self.get_zarr_url(base_url, dataset_uid, obj_i) if not self.is_h5ad else self.get_h5ad_url(base_url, dataset_uid, obj_i),
                     "options": options
                 }
                 if self._request_init is not None:
@@ -1150,6 +1372,158 @@ class AnnDataWrapper(AbstractWrapper):
         else:
             vc.layout((scatterplot | (cell_sets / genes))
                       / heatmap)
+
+
+SpatialDataWrapperType = TypeVar('SpatialDataWrapperType', bound='SpatialDataWrapper')
+
+
+class SpatialDataWrapper(AnnDataWrapper):
+
+    def __init__(self, sdata_path: Optional[str] = None, sdata_url: Optional[str] = None, sdata_store: Optional[Union[str, zarr.storage.StoreLike]] = None, sdata_artifact: Optional[ln.Artifact] = None, image_path: Optional[str] = None, region: Optional[str] = None, coordinate_system: Optional[str] = None, affine_transformation: Optional[np.ndarray] = None, obs_spots_path: Optional[str] = None, labels_path: Optional[str] = None, table_path: str = "tables/table", **kwargs):
+        """
+        Wrap a SpatialData object.
+
+        :param sdata_path: SpatialData path, exclusive with other `{sdata,adata}_xxxx` arguments, by default None
+        :type sdata_path: Optional[str]
+        :param sdata_url: SpatialData url, exclusive with other `{sdata,adata}_xxxx` arguments, by default None
+        :type sdata_url: Optional[str]
+        :param sdata_store: SpatialData store, exclusive with other `{spatialdata,adata}_xxxx` arguments, by default None
+        :type sdata_store: Optional[Union[str, zarr.storage.StoreLike]]
+        :param sdata_artifact: Artifact that corresponds to a SpatialData object.
+        :type sdata_artifact: Optional[ln.Artifact]
+        :param image_path: Path to the image element of interest. By default, None.
+        :type image_path: Optional[str]
+        :param coordinate_system: Name of a target coordinate system.
+        :type coordinate_system: Optional[str]
+        :param affine_transformation: Transformation to be applied to the image. By default, None. Prefer coordinate_system.
+        :type affine_transformation: Optional[np.ndarray]
+        :param obs_spots_path: Location of shapes that should be interpreted as spot observations, by default None
+        :type obs_spots_path: Optional[str]
+        :param labels_path: Location of the labels (segmentation bitmask image), by default None
+        :type labels_path: Optional[str]
+        """
+        raise_error_if_zero_or_more_than_one([
+            sdata_path,
+            sdata_url,
+            sdata_store,
+            sdata_artifact,
+        ])
+        raise_error_if_any([
+            kwargs.get('adata_path', None),
+            kwargs.get('adata_url', None),
+            kwargs.get('adata_store', None),
+            kwargs.get('adata_artifact', None)
+        ])
+        super().__init__(adata_path=sdata_path, adata_url=sdata_url, adata_store=sdata_store, adata_artifact=sdata_artifact, **kwargs)
+        self.local_dir_uid = make_unique_filename(".sdata.zarr")
+        self._image_path = image_path
+        self._region = region
+        self._coordinate_system = coordinate_system
+        self._affine_transformation = affine_transformation
+        self._kwargs = kwargs
+        self._obs_spots_path = obs_spots_path
+        self._labels_path = labels_path
+        if self._adata_path is not None:
+            self.zarr_folder = 'spatialdata.zarr'
+        self.obs_type_label = None
+        if self._coordination_values is not None and "obsType" in self._coordination_values:
+            self.obs_type_label = self._coordination_values["obsType"]
+        self._table_path = table_path
+
+    @classmethod
+    def from_object(cls: Type[SpatialDataWrapperType], sdata: SpatialData, table_keys_to_image_elems: dict[str, Union[str, None]] = defaultdict(type(None)), table_keys_to_regions: dict[str, Union[str, None]] = defaultdict(type(None)), obs_type_label: str = "spot") -> list[SpatialDataWrapperType]:
+        """Instantiate a wrapper for SpatialData stores, one per table, directly from the SpatialData object.
+        By default, we "show everything" that can reasonable be inferred given the information.  If you wish to have more control,
+        consider instantiating the object directly.  This function will error if something cannot be inferred i.e., the user does not present
+        regions explicitly but there is more than one for a given table.
+
+
+        Parameters
+        ----------
+        cls : Type[SpatialDataWrapperType]
+            _description_
+        spatialdata : SpatialData
+            _description_
+        table_keys_to_image_elems : dict[str, str], optional
+            which image paths to use for a given table for the visualization, by default None for each table key.
+        table_keys_to_regions : dict[str, str], optional
+            which regions to use for a given table for the visualization, by default None for each table key.
+
+        Returns
+        -------
+        list[SpatialDataWrapperType]
+
+        Raises
+        ------
+        ValueError
+        """
+        wrappers = []
+        parent_table_key = "table" if (sdata.path / "table").exists() else "tables"
+        for table_key, table in sdata.tables.items():
+            spot_shapes_elem = None
+            image_elem = table_keys_to_image_elems[table_key]
+            labels_elem = None
+            spatialdata_attr = table.uns['spatialdata_attrs']
+            region = table_keys_to_regions[table_key]
+            if region is not None:
+                assert region in spatialdata_attr['region']
+            else:
+                region = spatialdata_attr['region']
+            if isinstance(region, list):
+                if len(region) > 1:
+                    raise ValueError("Vitessce cannot subset AnnData objects on the fly.  Please provide an explicit region")
+                region = region[0]
+            if region in sdata.shapes:
+                spot_shapes_elem = f"shapes/{region}"
+                # Currently, only circle shapes are supported.
+                # TODO: add if statement to check that this region contains spot shapes rather than other types of shapes
+            if region in sdata.labels:
+                labels_elem = f"labels/{region}"
+            obs_feature_matrix_elem = f"{parent_table_key}/{table_key}/X"
+            if 'highly_variable' in table.var:
+                # TODO: fix first key needing to be "table" in vitessce-js
+                initial_feature_filter_elem = 'highly_variable'
+            else:
+                initial_feature_filter_elem = None
+            obs_set_elems = [f"{parent_table_key}/{table_key}/obs/{elem}" for elem in table.obs if table.obs[elem].dtype == 'category']
+            wrappers += [
+                cls(
+                    sdata_path=str(sdata.path),
+                    image_path=str(image_elem) if image_elem is not None else None,
+                    labels_path=str(labels_elem) if labels_elem is not None else None,
+                    obs_feature_matrix_path=str(obs_feature_matrix_elem),
+                    obs_spots_path=str(spot_shapes_elem) if spot_shapes_elem is not None else None,
+                    initial_feature_filter_path=initial_feature_filter_elem,
+                    obs_set_paths=obs_set_elems,
+                    coordination_values={"obsType": "spot"}  # TODO: should we remove?
+                )
+            ]
+        return wrappers
+
+    def make_file_def_creator(self, dataset_uid: str, obj_i: str) -> Optional[Callable]:
+        def generator(base_url):
+            options = {}
+            options = gen_obs_labels_schema(options, self._obs_labels_elems, self._obs_labels_names)
+            options = gen_sdata_obs_feature_matrix_schema(options, self._expression_matrix, self._gene_var_filter, self._matrix_gene_var_filter, self._region)
+            options = gen_sdata_obs_sets_schema(options, self._obs_set_elems, self._obs_set_names, self._table_path, self._region)
+            options = gen_sdata_obs_spots_schema(options, self._obs_spots_path, self._table_path, self._region, self._coordinate_system)
+            options = gen_sdata_image_schema(options, self._image_path, self._coordinate_system, self._affine_transformation)
+            options = gen_sdata_labels_schema(options, self._labels_path, self._table_path, self._coordinate_system, self._affine_transformation)
+            options = gen_feature_labels_schema(self._feature_labels, options)
+            if len(options.keys()) > 0:
+                obj_file_def = {
+                    "fileType": ft.SPATIALDATA_ZARR.value,
+                    "url": self.get_zarr_url(base_url, dataset_uid, obj_i),
+                    "options": options
+                }
+                if self._request_init is not None:
+                    obj_file_def['requestInit'] = self._request_init
+                if self._coordination_values is not None:
+                    obj_file_def['coordinationValues'] = self._coordination_values
+                return obj_file_def
+            return None
+
+        return generator
 
 
 class MultivecZarrWrapper(AbstractWrapper):

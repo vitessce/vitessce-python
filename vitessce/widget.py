@@ -202,6 +202,7 @@ async function render(view) {
     const pluginEsmArr = view.model.get('plugin_esm');
     const remountOnUidChange = view.model.get('remount_on_uid_change');
     const storeUrls = view.model.get('store_urls');
+    const invokeTimeout = view.model.get('invoke_timeout');
 
     const pageMode = view.model.get('page_mode');
     const pageEsm = view.model.get('page_esm');
@@ -223,6 +224,15 @@ async function render(view) {
         z,
         useCoordination,
         usePageModeView,
+        useGridItemSize,
+        // TODO: names and function signatures are subject to change for the following functions
+        // Reference: https://github.com/keller-mark/use-coordination/issues/37#issuecomment-1946226827
+        useComplexCoordination,
+        useMultiCoordinationScopesNonNull,
+        useMultiCoordinationScopesSecondaryNonNull,
+        useComplexCoordinationSecondary,
+        useCoordinationScopes,
+        useCoordinationScopesBy,
     } = await importWithMap("vitessce", importMap);
 
     let pluginViewTypes = [];
@@ -236,7 +246,9 @@ async function render(view) {
             storeUrl,
             {
                 async get(key) {
-                    const [data, buffers] = await view.experimental.invoke("_zarr_get", [storeUrl, key]);
+                    const [data, buffers] = await view.experimental.invoke("_zarr_get", [storeUrl, key], {
+                        signal: AbortSignal.timeout(invokeTimeout),
+                    });
                     if (!data.success) return undefined;
                     return buffers[0].buffer;
                 },
@@ -245,7 +257,10 @@ async function render(view) {
     );
 
     function invokePluginCommand(commandName, commandParams, commandBuffers) {
-        return view.experimental.invoke("_plugin_command", [commandName, commandParams], commandBuffers);
+        return view.experimental.invoke("_plugin_command", [commandName, commandParams], {
+            signal: AbortSignal.timeout(invokeTimeout),
+            ...(commandBuffers ? { buffers: commandBuffers } : {}),
+        });
     }
 
     for (const pluginEsm of pluginEsmArr) {
@@ -262,8 +277,15 @@ async function render(view) {
                 PluginJointFileType,
                 PluginAsyncFunction,
                 z,
-                useCoordination,
                 invokeCommand: invokePluginCommand,
+                useCoordination,
+                useGridItemSize,
+                useComplexCoordination,
+                useMultiCoordinationScopesNonNull,
+                useMultiCoordinationScopesSecondaryNonNull,
+                useComplexCoordinationSecondary,
+                useCoordinationScopes,
+                useCoordinationScopesBy,
             };
             const pluginsObj = await pluginModule.createPlugins(pluginDeps);
             if(Array.isArray(pluginsObj.pluginViewTypes)) {
@@ -486,7 +508,7 @@ class VitessceWidget(anywidget.AnyWidget):
 
     next_port = DEFAULT_PORT
 
-    js_package_version = Unicode('3.3.12').tag(sync=True)
+    js_package_version = Unicode('3.4.14').tag(sync=True)
     js_dev_mode = Bool(False).tag(sync=True)
     custom_js_url = Unicode('').tag(sync=True)
     plugin_esm = List(trait=Unicode(''), default_value=[]).tag(sync=True)
@@ -495,8 +517,9 @@ class VitessceWidget(anywidget.AnyWidget):
     page_esm = Unicode('').tag(sync=True)
 
     store_urls = List(trait=Unicode(''), default_value=[]).tag(sync=True)
+    invoke_timeout = Int(30000).tag(sync=True)
 
-    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='3.3.12', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, page_mode=False, page_esm=None):
+    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='3.4.14', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, invoke_timeout=30000, page_mode=False, page_esm=None):
         """
         Construct a new Vitessce widget.
 
@@ -511,6 +534,7 @@ class VitessceWidget(anywidget.AnyWidget):
         :param str custom_js_url: A URL to a JavaScript file to use (instead of 'vitessce' or '@vitessce/dev' NPM package).
         :param list[VitesscePlugin] plugins: A list of subclasses of VitesscePlugin. Optional.
         :param bool remount_on_uid_change: Passed to the remountOnUidChange prop of the <Vitessce/> React component. By default, True.
+        :param int invoke_timeout: The timeout in milliseconds for invoking Python functions from JavaScript. By default, 30000.
         :param bool page_mode: Whether to render the <Vitessce/> component in grid-mode or page-mode. By default, False.
         :param str page_esm: The ES module string for the page component creation function. Optional.
 
@@ -546,6 +570,7 @@ class VitessceWidget(anywidget.AnyWidget):
             js_package_version=js_package_version, js_dev_mode=js_dev_mode, custom_js_url=custom_js_url,
             plugin_esm=plugin_esm, remount_on_uid_change=remount_on_uid_change,
             page_mode=page_mode, page_esm=('' if page_esm is None else page_esm),
+            invoke_timeout=invoke_timeout,
             uid=uid_str, store_urls=list(self._stores.keys())
         )
 
@@ -611,7 +636,7 @@ class VitessceWidget(anywidget.AnyWidget):
 # Launch Vitessce using plain HTML representation (no ipywidgets)
 
 
-def ipython_display(config, height=600, theme='auto', base_url=None, host_name=None, uid=None, port=None, proxy=False, js_package_version='3.3.12', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, page_mode=False, page_esm=None):
+def ipython_display(config, height=600, theme='auto', base_url=None, host_name=None, uid=None, port=None, proxy=False, js_package_version='3.4.14', js_dev_mode=False, custom_js_url='', plugin_esm=DEFAULT_PLUGIN_ESM, remount_on_uid_change=True, page_mode=False, page_esm=None):
     from IPython.display import display, HTML
     uid_str = "vitessce" + get_uid_str(uid)
 
@@ -633,6 +658,7 @@ def ipython_display(config, height=600, theme='auto', base_url=None, host_name=N
         "page_mode": page_mode,
         "page_esm": ('' if page_esm is None else page_esm),
         "remount_on_uid_change": remount_on_uid_change,
+        "invoke_timeout": 30000,
         "proxy": proxy,
         "has_host_name": host_name is not None,
         "height": height,

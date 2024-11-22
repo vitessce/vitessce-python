@@ -15,6 +15,7 @@ from vitessce import (
     OmeZarrWrapper,
     AnnDataWrapper,
     CsvWrapper,
+    JsonWrapper,
     MultivecZarrWrapper,
     ImageOmeTiffWrapper,
     ObsSegmentationsOmeTiffWrapper,
@@ -22,7 +23,7 @@ from vitessce import (
     ObsSegmentationsOmeZarrWrapper,
 )
 
-from vitessce.wrappers import file_path_to_url_path
+from vitessce.wrappers import SpatialDataWrapper, file_path_to_url_path
 
 
 data_path = Path('tests/data')
@@ -235,8 +236,64 @@ class TestWrappers(unittest.TestCase):
         file_def = file_def_creator('http://localhost:8000')
         self.assertEqual(file_def, {'fileType': 'anndata.zarr', 'url': 'http://localhost:8000/test.h5ad.zarr',
                                     'options': {
+                                        'obsEmbedding': [{'path': 'obsm/X_umap', 'dims': [0, 1], 'embeddingType': 'UMAP'}],
+                                        'obsSets': [{'name': 'Cell Type', 'path': 'obs/CellType'}]
+                                    }})
+
+    def test_anndata_with_base_dir_no_names(self):
+        adata_path = 'test.h5ad.zarr'
+        w = AnnDataWrapper(adata_path, obs_set_paths=['obs/CellType'], obs_embedding_paths=[
+                           'obsm/X_umap'])
+        w.base_dir = data_path
+        w.local_dir_uid = 'anndata.zarr'
+
+        file_def_creator = w.make_file_def_creator('A', 0)
+        file_def = file_def_creator('http://localhost:8000')
+        self.assertEqual(file_def, {'fileType': 'anndata.zarr', 'url': 'http://localhost:8000/test.h5ad.zarr',
+                                    'options': {
+                                        'obsEmbedding': [{'path': 'obsm/X_umap', 'dims': [0, 1], 'embeddingType': 'X_umap'}],
+                                        'obsSets': [{'name': 'CellType', 'path': 'obs/CellType'}]
+                                    }})
+
+    def test_anndata_with_h5ad_and_ref_json(self):
+        adata_path = data_path / 'test.h5ad'
+        ref_json_path = data_path / 'test.h5ad.ref.json'
+        w = AnnDataWrapper(adata_path, ref_path=ref_json_path,
+                           obs_set_paths=['obs/CellType'], obs_set_names=['Cell Type'],
+                           obs_labels_names=['Cell Label'], obs_labels_paths=['obs/CellLabel'],
+                           obs_embedding_paths=['obsm/X_umap'], obs_embedding_names=['UMAP'])
+        w.local_file_uid = 'anndata.h5ad'
+        w.local_ref_uid = 'anndata.reference.json'
+
+        file_def_creator = w.make_file_def_creator('A', 0)
+        file_def = file_def_creator('http://localhost:8000')
+        self.assertEqual(file_def, {'fileType': 'anndata.h5ad', 'url': 'http://localhost:8000/A/0/anndata.h5ad',
+                                    'options': {
+                                        'refSpecUrl': 'http://localhost:8000/A/0/anndata.reference.json',
                                         'obsEmbedding': [{'path': 'obsm/X_umap', 'embeddingType': 'UMAP', 'dims': [0, 1]}],
-                                        'obsSets': [{'path': 'obs/CellType', 'name': 'Cell Type'}]
+                                        'obsSets': [{'path': 'obs/CellType', 'name': 'Cell Type'}],
+                                        'obsLabels': [{'path': 'obs/CellLabel', 'obsLabelsType': 'Cell Label'}]
+                                    }})
+
+    def test_anndata_with_h5ad_and_ref_json_with_base_dir(self):
+        adata_path = 'test.h5ad'
+        ref_json_path = 'test.h5ad.ref.json'
+        w = AnnDataWrapper(adata_path, ref_path=ref_json_path,
+                           obs_set_paths=['obs/CellType'], obs_set_names=['Cell Type'],
+                           obs_labels_names=['Cell Label'], obs_labels_paths=['obs/CellLabel'],
+                           obs_embedding_paths=['obsm/X_umap'], obs_embedding_names=['UMAP'])
+        w.base_dir = data_path
+        w.local_file_uid = 'anndata.h5ad'
+        w.local_ref_uid = 'anndata.reference.json'
+
+        file_def_creator = w.make_file_def_creator('A', 0)
+        file_def = file_def_creator('http://localhost:8000')
+        self.assertEqual(file_def, {'fileType': 'anndata.h5ad', 'url': 'http://localhost:8000/test.h5ad',
+                                    'options': {
+                                        'refSpecUrl': 'http://localhost:8000/test.h5ad.ref.json',
+                                        'obsEmbedding': [{'path': 'obsm/X_umap', 'embeddingType': 'UMAP', 'dims': [0, 1]}],
+                                        'obsSets': [{'path': 'obs/CellType', 'name': 'Cell Type'}],
+                                        'obsLabels': [{'path': 'obs/CellLabel', 'obsLabelsType': 'Cell Label'}]
                                     }})
 
     def test_csv(self):
@@ -302,6 +359,53 @@ class TestWrappers(unittest.TestCase):
             }
         })
 
+    def test_json(self):
+        w = JsonWrapper(
+            json_path=data_path / 'test.segmentations.json',
+            data_type="obsSegmentations",
+            coordination_values={
+                "obsType": "nucleus"
+            }
+        )
+        w.local_json_uid = 'test_uid'
+
+        file_def_creator = w.make_json_file_def_creator(
+            "A",
+            "0"
+        )
+        file_def = file_def_creator('http://localhost:8000')
+        self.assertEqual(file_def, {
+            'fileType': 'obsSegmentations.json',
+            'url': 'http://localhost:8000/A/0/test_uid',
+            'coordinationValues': {
+                "obsType": "nucleus"
+            }
+        })
+
+    def test_json_with_base_dir(self):
+        w = JsonWrapper(
+            json_path='test.segmentations.json',
+            data_type="obsSegmentations",
+            coordination_values={
+                "obsType": "nucleus"
+            }
+        )
+        w.base_dir = data_path
+        w.local_json_uid = 'test_uid'
+
+        file_def_creator = w.make_json_file_def_creator(
+            "A",
+            "0"
+        )
+        file_def = file_def_creator('http://localhost:8000')
+        self.assertEqual(file_def, {
+            'fileType': 'obsSegmentations.json',
+            'url': 'http://localhost:8000/test.segmentations.json',
+            'coordinationValues': {
+                "obsType": "nucleus"
+            }
+        })
+
     def test_multivec_zarr(self):
         zarr_filepath = data_path / 'test_out.snap.multivec.zarr'
 
@@ -333,4 +437,74 @@ class TestWrappers(unittest.TestCase):
         self.assertEqual(file_def, {
             'fileType': 'genomic-profiles.zarr',
             'url': 'http://localhost:8000/test_out.snap.multivec.zarr',
+        })
+
+    def test_spatial_data_with_base_dir(self):
+
+        spatial_data_path = 'test.spatialdata.zarr'
+        w = SpatialDataWrapper(
+            sdata_path=spatial_data_path,
+            image_path="images/picture",
+            obs_set_paths=['obs/CellType'],
+            obs_set_names=['Cell Type'],
+            obs_embedding_paths=['obsm/X_umap'],
+            obs_embedding_names=['UMAP']
+        )
+        w.base_dir = data_path
+        w.local_dir_uid = 'spatialdata.zarr'
+
+        file_def_creator = w.make_file_def_creator('A', 0)
+        file_def = file_def_creator('http://localhost:8000')
+        self.assertEqual(file_def, {
+            'fileType': 'spatialdata.zarr',
+            'url': 'http://localhost:8000/test.spatialdata.zarr',
+            'options': {
+                'obsSets': {
+                    'obsSets': [{'name': 'Cell Type', 'path': 'obs/CellType'}],
+                    'tablePath': 'tables/table'
+                },
+                'image': {'path': 'images/picture'}
+            }})
+
+    def test_spatial_data_with_base_dir_2(self):
+        spatial_data_path = 'test.spatialdata.zarr'
+        w = SpatialDataWrapper(
+            sdata_path=spatial_data_path,
+            image_path='images/CytAssist_FFPE_Human_Breast_Cancer_full_image',
+            coordinate_system='aligned',
+            region='CytAssist_FFPE_Human_Breast_Cancer',
+            obs_feature_matrix_path='tables/table/X',
+            obs_spots_path='shapes/CytAssist_FFPE_Human_Breast_Cancer',
+            table_path='tables/table',
+            coordination_values={
+                "obsType": "spot"
+            }
+        )
+        w.base_dir = data_path
+        w.local_dir_uid = 'spatialdata.zarr'
+
+        file_def_creator = w.make_file_def_creator('A', 0)
+        file_def = file_def_creator('http://localhost:8000')
+        self.assertDictEqual(file_def, {
+            'fileType': 'spatialdata.zarr',
+            'url': 'http://localhost:8000/test.spatialdata.zarr',
+            'options': {
+                'image': {
+                    'path': 'images/CytAssist_FFPE_Human_Breast_Cancer_full_image',
+                    'coordinateSystem': 'aligned',
+                },
+                'obsFeatureMatrix': {
+                    'path': 'tables/table/X',
+                    'region': 'CytAssist_FFPE_Human_Breast_Cancer'
+                },
+                'obsSpots': {
+                    'path': 'shapes/CytAssist_FFPE_Human_Breast_Cancer',
+                    'tablePath': 'tables/table',
+                    'region': 'CytAssist_FFPE_Human_Breast_Cancer',
+                    'coordinateSystem': 'aligned',
+                }
+            },
+            'coordinationValues': {
+                "obsType": "spot"
+            }
         })

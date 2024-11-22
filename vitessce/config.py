@@ -235,6 +235,13 @@ class VitessceConfigDataset:
 
         return routes
 
+    def get_artifacts(self):
+        artifacts = {}
+        for obj in self.objs:
+            artifacts.update(obj.get_artifacts())
+
+        return artifacts
+
     def get_stores(self, base_url=None):
         stores = {}
         for obj in self.objs:
@@ -1045,7 +1052,7 @@ class VitessceConfig:
             dataset_uid, str)
         assert dataset is None or dataset_uid is None
         component = view_type
-        assert type(component) in [str, cm]
+        # assert type(component) in [str, cm]
 
         if dataset is None:
             dataset = self.get_dataset_by_uid(dataset_uid)
@@ -1499,6 +1506,89 @@ class VitessceConfig:
             "layout": [c.to_dict() for c in self.config["layout"]]
         }
 
+    def get_views(self):
+        """
+        Provides all the views in the config.layout object list
+
+        :returns: A list of VitessceConfigView objects.
+
+        """
+        return self.config["layout"]
+
+    def get_view_by_index(self, index):
+        """
+        Get a view from the layout by the index specified by the 'index' parameter.
+
+        :param index: Index (int) of the view in the Layout array.
+        :type index: int
+
+        :returns: The view corresponding to the provided index
+        :rtype: VitessceConfigView or None if not found
+        """
+        if isinstance(index, int):
+            if 0 <= index < len(self.config["layout"]):
+                return self.config["layout"][index]
+            else:
+                raise IndexError("index out of range")
+        else:
+            raise TypeError("index must be an integer")
+
+    def get_first_view_by_type(self, view_type):
+        """
+        Get a view from the layout by view type (component) specified by the 'view_type' parameter.
+
+        :param view_type: The view type (str) of the view in the Layout array.
+        :type view_type:  str
+
+        :returns: The view corresponding to the provided view_type.
+        :rtype: VitessceConfigView or None if not found
+        """
+        if isinstance(view_type, str):
+            for view in self.config["layout"]:
+                if view.view["component"].lower() == view_type.lower():
+                    return view
+            raise ValueError(f"No view found with component view_type: {view_type}")
+        else:
+            raise TypeError("view_type must be a string representing the view type")
+
+    def remove_view_by_index(self, index):
+        """
+        Removes a view from the layout by the index specified by the 'index' parameter.
+
+        :param index: the index (int) of the view
+        :type index: int
+
+        :returns: The layout component of the config corresponding to the specified index
+        :rtype: VitessceConfigView or None if not found
+
+        """
+        if isinstance(index, int):
+            if 0 <= index < len(self.config["layout"]):
+                return self.config["layout"].pop(index)
+            else:
+                raise IndexError("Index out of range")
+        else:
+            raise TypeError("index must be an integer")
+
+    def remove_first_view_by_type(self, view_type):
+        """
+        Removes a view from the layout by the view type (component) specified by the 'view_type' parameter.
+
+        :param view_by: A component view_type (str).
+        :type view_by: str
+
+        :returns: The layout component  of the config corresponding to the specified view_type
+        :rtype: VitessceConfigView or None if not found
+
+        """
+        if isinstance(view_type, str):
+            for i, view in enumerate(self.config["layout"]):
+                if view.view["component"].lower() == view_type.lower():
+                    return self.config["layout"].pop(i)
+            raise ValueError(f"No view found with component type: {view_type}")
+        else:
+            raise TypeError("view_by must a string representing component type")
+
     def get_routes(self):
         """
         Convert the routes for this view config from the datasets.
@@ -1510,6 +1600,18 @@ class VitessceConfig:
         for d in self.config["datasets"]:
             routes += d.get_routes()
         return routes
+
+    def get_artifacts(self):
+        """
+        Get all artifacts for this view config from the datasets.
+
+        :returns: A dict mapping artifact URLs to corresponding artifact objects.
+        :rtype: dict[str, lamindb.Artifact]
+        """
+        artifacts = {}
+        for d in self.config["datasets"]:
+            artifacts.update(d.get_artifacts())
+        return artifacts
 
     def get_stores(self, base_url=None):
         """

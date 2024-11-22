@@ -33,6 +33,7 @@ from vitessce.file_def_utils import (
     gen_sdata_obs_spots_schema,
     gen_sdata_obs_sets_schema,
     gen_sdata_obs_feature_matrix_schema,
+    gen_sample_edges_schema,
 )
 
 from .constants import (
@@ -1178,7 +1179,7 @@ def raise_error_if_more_than_one(inputs):
 
 
 class AnnDataWrapper(AbstractWrapper):
-    def __init__(self, adata_path=None, adata_url=None, adata_store=None, adata_artifact=None, ref_path=None, ref_url=None, ref_artifact=None, obs_feature_matrix_path=None, feature_filter_path=None, initial_feature_filter_path=None, obs_set_paths=None, obs_set_names=None, obs_locations_path=None, obs_segmentations_path=None, obs_embedding_paths=None, obs_embedding_names=None, obs_embedding_dims=None, obs_spots_path=None, obs_points_path=None, feature_labels_path=None, obs_labels_path=None, convert_to_dense=True, coordination_values=None, obs_labels_paths=None, obs_labels_names=None, **kwargs):
+    def __init__(self, adata_path=None, adata_url=None, adata_store=None, adata_artifact=None, ref_path=None, ref_url=None, ref_artifact=None, obs_feature_matrix_path=None, feature_filter_path=None, initial_feature_filter_path=None, obs_set_paths=None, obs_set_names=None, obs_locations_path=None, obs_segmentations_path=None, obs_embedding_paths=None, obs_embedding_names=None, obs_embedding_dims=None, obs_spots_path=None, obs_points_path=None, feature_labels_path=None, obs_labels_path=None, sample_edges_path=None, convert_to_dense=True, coordination_values=None, obs_labels_paths=None, obs_labels_names=None, **kwargs):
         """
         Wrap an AnnData object by creating an instance of the ``AnnDataWrapper`` class.
 
@@ -1204,6 +1205,7 @@ class AnnDataWrapper(AbstractWrapper):
         :param str obs_labels_path: (DEPRECATED) The name of a column containing observation labels (e.g., alternate cell IDs), instead of the default index in `obs` of the AnnData store. Use `obs_labels_paths` and `obs_labels_names` instead. This arg will be removed in a future release.
         :param list[str] obs_labels_paths: The names of columns containing observation labels (e.g., alternate cell IDs), instead of the default index in `obs` of the AnnData store.
         :param list[str] obs_labels_names: The optional display names of columns containing observation labels (e.g., alternate cell IDs), instead of the default index in `obs` of the AnnData store.
+        :param str sample_edges_path: The path to a column that maps cells to sample IDs.
         :param bool convert_to_dense: Whether or not to convert `X` to dense the zarr store (dense is faster but takes more disk space).
         :param coordination_values: Coordination values for the file definition.
         :type coordination_values: dict or None
@@ -1270,6 +1272,7 @@ class AnnDataWrapper(AbstractWrapper):
         self._spatial_spots_obsm = obs_spots_path
         self._spatial_points_obsm = obs_points_path
         self._feature_labels = feature_labels_path
+        self._sample_edges_path = sample_edges_path
         # Support legacy provision of single obs labels path
         if (obs_labels_path is not None):
             warnings.warn("`obs_labels_path` will be deprecated in a future release.", DeprecationWarning)
@@ -1330,6 +1333,7 @@ class AnnDataWrapper(AbstractWrapper):
         def get_anndata_zarr(base_url):
             options = {}
             options = gen_obs_locations_schema(self._spatial_centroid_obsm, options)
+            options = gen_sample_edges_schema(self._sample_edges_path, options)
             options = gen_obs_segmentations_schema(self._spatial_polygon_obsm, options)
             options = gen_obs_spots_schema(self._spatial_spots_obsm, options)
             options = gen_obs_points_schema(self._spatial_points_obsm, options)

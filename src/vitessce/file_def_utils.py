@@ -114,6 +114,7 @@ gen_obs_segmentations_schema = partial(gen_path_schema, "obsSegmentations")
 gen_obs_spots_schema = partial(gen_path_schema, "obsSpots")
 gen_obs_points_schema = partial(gen_path_schema, "obsPoints")
 gen_feature_labels_schema = partial(gen_path_schema, "featureLabels")
+gen_sample_edges_schema = partial(gen_path_schema, "sampleEdges")
 
 
 def gen_sdata_image_schema(options, path: str, coordinate_system: Optional[str] = None, affine_transformation: Optional[np.ndarray] = None) -> dict:

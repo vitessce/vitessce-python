@@ -338,7 +338,7 @@ async function render(view) {
         const divRef = React.useRef();
 
         React.useEffect(() => {
-            if(!divRef.current) {
+            if(!divRef.current || pageMode) {
                 return () => {};
             }
 
@@ -364,7 +364,7 @@ async function render(view) {
                     divRef.current.removeEventListener("mouseleave", handleMouseLeave);
                 }
             };
-        }, [divRef]);
+        }, [divRef, pageMode]);
 
         // Config changed on JS side (from within <Vitessce/>),
         // send updated config to Python side.

@@ -258,11 +258,12 @@ class VitessceConfigViewHConcat:
     A class to represent a horizontal concatenation of view instances.
     """
 
-    def __init__(self, views):
+    def __init__(self, views, split=None):
         """
         Not meant to be instantiated directly, but instead created and returned by the ``hconcat`` helper function.
         """
         self.views = views
+        self.split = split
 
     def __or__(self, other):
         return hconcat(self, other)
@@ -271,12 +272,14 @@ class VitessceConfigViewHConcat:
         return vconcat(self, other)
 
 
-def hconcat(*views):
+def hconcat(*views, split=None):
     """
     A helper function to create a ``VitessceConfigViewHConcat`` instance.
 
     :param \\*views: A variable number of views to concatenate horizontally.
     :type \\*views: VitessceConfigView or VitessceConfigViewVConcat or VitessceConfigViewHConcat
+    :param split: Optional list of relative width fractions for each view.
+    :type split: list of int
 
     :returns: The concatenated view instance.
     :rtype: VitessceConfigViewHConcat
@@ -291,9 +294,11 @@ def hconcat(*views):
         v1 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
         v2 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
         v3 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
-        vc.layout(hconcat(v1, vconcat(v2, v3)))
+        vc.layout(hconcat(v1, vconcat(v2, v3), split = [1,2]))
+        split = [1,2] would give v1 (1/3) width, and vconcat(v2, v3) 2/3 width
     """
-    return VitessceConfigViewHConcat(views)
+
+    return VitessceConfigViewHConcat(views, split=split)
 
 
 class VitessceConfigViewVConcat:
@@ -301,11 +306,12 @@ class VitessceConfigViewVConcat:
     A class to represent a vertical concatenation of view instances.
     """
 
-    def __init__(self, views):
+    def __init__(self, views, split=None):
         """
         Not meant to be instantiated directly, but instead created and returned by the ``vconcat`` helper function.
         """
         self.views = views
+        self.split = split
 
     def __or__(self, other):
         return hconcat(self, other)
@@ -314,12 +320,14 @@ class VitessceConfigViewVConcat:
         return vconcat(self, other)
 
 
-def vconcat(*views):
+def vconcat(*views, split=None):
     """
     A helper function to create a ``VitessceConfigViewVConcat`` instance.
 
     :param \\*views: A variable number of views to concatenate vertically.
     :type \\*views: VitessceConfigView or VitessceConfigViewVConcat or VitessceConfigViewHConcat
+    :param split: Optional list of relative height fractions for each view.
+    :type split: list of int
 
     :returns: The concatenated view instance.
     :rtype: VitessceConfigViewVConcat
@@ -334,9 +342,10 @@ def vconcat(*views):
         v1 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
         v2 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
         v3 = vc.add_view(vt.SPATIAL, dataset=my_dataset)
-        vc.layout(hconcat(v1, vconcat(v2, v3)))
+        vc.layout(hconcat(v1, vconcat(v2, v3, [1,2])))
+        split = [1,2] would give v2 (1/3) height, and v3, 2/3 height
     """
-    return VitessceConfigViewVConcat(views)
+    return VitessceConfigViewVConcat(views, split=split)
 
 
 def _use_coordination_by_dict_helper(scopes, coordination_scopes, coordination_scopes_by):
@@ -1450,28 +1459,25 @@ class VitessceConfig:
             h = y_max - y_min
             if isinstance(obj, VitessceConfigView):
                 obj.set_xywh(x_min, y_min, w, h)
-            elif isinstance(obj, VitessceConfigViewHConcat):
+            else:
                 views = obj.views
-                num_views = len(views)
-                for i in range(num_views):
-                    _layout(
-                        views[i],
-                        x_min + (w / num_views) * i,
-                        x_min + (w / num_views) * (i + 1),
-                        y_min,
-                        y_max
-                    )
-            elif isinstance(obj, VitessceConfigViewVConcat):
-                views = obj.views
-                num_views = len(views)
-                for i in range(num_views):
-                    _layout(
-                        views[i],
-                        x_min,
-                        x_max,
-                        y_min + (h / num_views) * i,
-                        y_min + (h / num_views) * (i + 1),
-                    )
+                # If the split parameter is provided, it must have the same length as the views.
+                assert obj.split is None or len(obj.split) == len(views)
+                split = obj.split or [1] * len(views)  # Default to equal split if not provided
+                total = sum(split)
+
+                if isinstance(obj, VitessceConfigViewHConcat):
+                    widths = [int(s / total * w) for s in split]
+                    x_pos = x_min
+                    for view, width in zip(views, widths):
+                        _layout(view, x_pos, x_pos + width, y_min, y_max)
+                        x_pos += width
+                if isinstance(obj, VitessceConfigViewVConcat):
+                    heights = [int(s / total * h) for s in split]
+                    y_pos = y_min
+                    for view, height in zip(views, heights):
+                        _layout(view, x_min, x_max, y_pos, y_pos + height)
+                        y_pos += height
 
         # Recursively set the values (x,y,w,h) for each view.
         _layout(view_concat, 0, 12, 0, 12)

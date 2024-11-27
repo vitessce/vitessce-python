@@ -7,19 +7,21 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        version: ['3.9', '3.12']
+        version: ['3.10', '3.12']
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: astral-sh/setup-uv@v3
         with:
-          python-version: ${{ matrix.version }}
+          version: "latest"
+        env:
+          UV_PYTHON: ${{ matrix.version }}
       - name: Install vitessce
-        run: pip install -e .[dev,all]
+        run: uv sync --extra dev --extra all
       - name: Run tests and report coverage with omits
         run: |
-          coverage run --rcfile .coveragerc_omit --module pytest && \
-          coverage report --show-missing --fail-under 100
+          uv run coverage run --rcfile .coveragerc_omit --module pytest && \
+          uv run coverage report --show-missing --fail-under 100
       - name: Run tests and report coverage without omits
         run: |
-          coverage run --rcfile .coveragerc_real --module pytest && \
-          coverage report --show-missing
+          uv run coverage run --rcfile .coveragerc_real --module pytest && \
+          uv run coverage report --show-missing

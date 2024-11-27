@@ -28,9 +28,7 @@ For a development installation (requires NodeJS and NPM),
 
     $ git clone https://github.com/vitessce/vitessce-python.git
     $ cd vitessce-python
-    $ conda env create -f environment.yml
-    $ conda activate vitessce-python-dev
-    $ pip install -e ".[dev,docs,all]"
+    $ uv sync --extra dev --extra docs --extra all
 
 ### Conda environments
 
@@ -43,8 +41,8 @@ In this repository, there are multiple conda environments for different purposes
 ## Linting and testing
 
 ```sh
-flake8
-pytest
+uv run flake8
+uv run pytest
 ```
 
 ### Formatting
@@ -52,20 +50,20 @@ pytest
 One file:
 
 ```sh
-autopep8 --in-place --aggressive ./path/to/file.py
+uv run autopep8 --in-place --aggressive ./path/to/file.py
 ```
 
 All `.py` files:
 
 ```sh
-find . -name '*.py' -exec autopep8 --in-place --aggressive '{}' \;
+find . -name '*.py' -exec uv run autopep8 --in-place --aggressive '{}' \;
 ```
 
 
 ## Documentation
 
 ```sh
-make html
+uv run make html
 ```
 
 

@@ -1,7 +1,0 @@
-name: vitessce-python-dev
-channels:
- - defaults
- - conda-forge
-dependencies:
- - python==3.9
- - pip

@@ -16,28 +16,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
       - name: Install system dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y pandoc
-      - uses: actions/setup-python@v2
-        with:
-          python-version: '3.9'
       - name: Install vitessce
-        run: pip install -e .[dev,docs,all]
+        run: uv sync --extra dev --extra docs --extra all
       - name: Run tests
-        run: pytest
+        run: uv run pytest
       - name: Build a binary wheel and a source tarball
-        run: >-
-          python -m
-          build
-          --sdist
-          --wheel
-          --outdir dist/
-          .
+        run: uv build --sdist --wheel
       - name: Build docs
         run: |
-          make html
+          uv run make html
           touch docs-dist/html/.nojekyll
       - uses: actions/upload-pages-artifact@v1
         with:

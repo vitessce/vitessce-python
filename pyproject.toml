@@ -100,13 +100,14 @@ dev = [
   'pytest>=6.2.4',
   'loompy>=3.0.6',
   'coverage>=6.3.2',
-  'flake8==3.8.4',
+  'flake8>=3.8.4',
   #'spatialdata>=0.2.2',
   'jupyterlab',
   'numba>=0.53.0',
   'jupyterlab>=3',
   'boto3>=1.16.30',
   'scikit-misc>=0.1.3',
+  'autopep8>=2.0.2',
 ]
 
 [tool.uv]

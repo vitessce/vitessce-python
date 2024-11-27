@@ -555,6 +555,7 @@ def test_config_set_layout_multi_view():
         "initStrategy": "auto"
     }
 
+
 def test_config_set_layout_multi_view_custom_split():
     vc = VitessceConfig(schema_version="1.0.15")
     my_dataset = vc.add_dataset(name='My Dataset')

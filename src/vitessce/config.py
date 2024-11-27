@@ -1461,6 +1461,8 @@ class VitessceConfig:
                 obj.set_xywh(x_min, y_min, w, h)
             else:
                 views = obj.views
+                # If the split parameter is provided, it must have the same length as the views.
+                assert obj.split is None or len(obj.split) == len(views)
                 split = obj.split or [1] * len(views)  # Default to equal split if not provided
                 total = sum(split)
 

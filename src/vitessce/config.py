@@ -1467,13 +1467,13 @@ class VitessceConfig:
                 total = sum(split)
 
                 if isinstance(obj, VitessceConfigViewHConcat):
-                    widths = [s / total * w for s in split]
+                    widths = [int(s / total * w) for s in split]
                     x_pos = x_min
                     for view, width in zip(views, widths):
                         _layout(view, x_pos, x_pos + width, y_min, y_max)
                         x_pos += width
                 if isinstance(obj, VitessceConfigViewVConcat):
-                    heights = [s / total * h for s in split]
+                    heights = [int(s / total * h) for s in split]
                     y_pos = y_min
                     for view, height in zip(views, heights):
                         _layout(view, x_min, x_max, y_pos, y_pos + height)

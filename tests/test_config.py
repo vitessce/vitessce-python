@@ -555,6 +555,68 @@ def test_config_set_layout_multi_view():
         "initStrategy": "auto"
     }
 
+def test_config_set_layout_multi_view_custom_split():
+    vc = VitessceConfig(schema_version="1.0.15")
+    my_dataset = vc.add_dataset(name='My Dataset')
+    v1 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
+    v2 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
+    v3 = vc.add_view(cm.SPATIAL, dataset=my_dataset)
+
+    vc.layout(hconcat(v1, vconcat(v2, v3, split=[1, 2]), split=[3, 1]))
+
+    vc_dict = vc.to_dict()
+
+    assert vc_dict == {
+        "version": "1.0.15",
+        "name": "",
+        "description": "",
+        "datasets": [
+            {
+                'uid': 'A',
+                'name': 'My Dataset',
+                'files': []
+            }
+        ],
+        'coordinationSpace': {
+            'dataset': {
+                'A': 'A'
+            },
+        },
+        "layout": [
+            {
+                'component': 'spatial',
+                'coordinationScopes': {
+                    'dataset': 'A',
+                },
+                'x': 0,
+                'y': 0,
+                'h': 12,
+                'w': 9,
+            },
+            {
+                'component': 'spatial',
+                'coordinationScopes': {
+                    'dataset': 'A',
+                },
+                'x': 9,
+                'y': 0,
+                'h': 4,
+                'w': 3,
+            },
+            {
+                'component': 'spatial',
+                'coordinationScopes': {
+                    'dataset': 'A',
+                },
+                'x': 9,
+                'y': 4,
+                'h': 8,
+                'w': 3,
+            }
+        ],
+        "initStrategy": "auto"
+    }
+
 
 def test_config_set_layout_multi_view_magic():
     vc = VitessceConfig(schema_version="1.0.15")

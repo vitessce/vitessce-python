@@ -244,7 +244,7 @@ async function render(view) {
                         signal: AbortSignal.timeout(invokeTimeout),
                     });
                     if (!data.success) return undefined;
-                    
+
                     if (key.includes("spatialdata_attrs") && key.endsWith("0") && !ArrayBuffer.isView(buffers[0].buffer)) {
                         // For some reason, the Zarrita.js UnicodeStringArray does not seem to work with
                         // ArrayBuffers (throws a TypeError), so here we convert to Uint8Array if needed.

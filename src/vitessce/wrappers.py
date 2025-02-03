@@ -131,7 +131,7 @@ class AbstractWrapper:
         artifact_stores = dict()
         for artifact_url, artifact in self.artifacts.items():
             local_path = artifact._local_filepath
-            if os.path.isdir(local_path):
+            if local_path is not None and os.path.isdir(local_path):
                 store = zarr.DirectoryStore(local_path)
                 artifact_stores[artifact_url] = store
         return artifact_stores

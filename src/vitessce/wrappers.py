@@ -126,7 +126,7 @@ class AbstractWrapper:
         :rtype: dict[str, lamindb.Artifact]
         """
         return self.artifacts
-    
+
     def try_getting_artifact_stores(self):
         artifact_stores = dict()
         for artifact_url, artifact in self.artifacts.items():

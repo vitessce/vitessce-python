@@ -15,7 +15,7 @@ jobs:
   pre_deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v3
         with:
           version: "latest"
@@ -33,7 +33,7 @@ jobs:
         run: |
           uv run make html
           touch docs-dist/html/.nojekyll
-      - uses: actions/upload-pages-artifact@v1
+      - uses: actions/upload-pages-artifact@v3
         with:
           path: ./docs-dist/html
       - name: Deploy package to PyPI
@@ -51,4 +51,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v1
+        uses: actions/deploy-pages@v4

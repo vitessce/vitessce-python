@@ -622,7 +622,7 @@ class VitessceWidget(anywidget.AnyWidget):
         except KeyError:
             buffers = []
         return {"success": len(buffers) == 1}, buffers
-    
+
     @anywidget.experimental.command
     def _zarr_get_multi(self, params_arr, buffers):
         # This variant of _zarr_get supports batching.
@@ -633,10 +633,10 @@ class VitessceWidget(anywidget.AnyWidget):
             store = self._stores[store_url]
             try:
                 result_buffers.append(store[key.lstrip("/")])
-                result_dicts.append({ "success": True })
+                result_dicts.append({"success": True})
             except KeyError:
                 result_buffers.append(b'')
-                result_dicts.append({ "success": False })
+                result_dicts.append({"success": False})
         return result_dicts, result_buffers
 
     @anywidget.experimental.command

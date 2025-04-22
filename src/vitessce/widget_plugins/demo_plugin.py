@@ -1,4 +1,4 @@
-from esbuild_py import transform
+from oxc_py import transform
 from ..widget import VitesscePlugin
 
 

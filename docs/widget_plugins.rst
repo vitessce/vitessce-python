@@ -74,11 +74,11 @@ However, JSX is not valid JavaScript and therefore must be transformed to valid 
 Vitessce plugin developers then have two options for defining React components for plugin view types:
 
 * Use ``React.createElement`` directly (without JSX).
-* Use the ``transform`` function from `esbuild_py <https://github.com/keller-mark/esbuild-py>`_ to perform JSX to JS transformation.
+* Use the ``transform`` function from `oxc_py <https://github.com/keller-mark/oxc-py>`_ to perform JSX to JS transformation.
 
 .. code-block:: python
 
-    from esbuild_py import transform
+    from oxc_py import transform
 
     PLUGIN_ESM = transform("""
     function createPlugins(utilsForPlugins) {

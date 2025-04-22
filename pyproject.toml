@@ -25,21 +25,21 @@ classifiers = [
   'Programming Language :: Python :: 3.12',
 ]
 dependencies = [
-  'zarr>=2.5.0',
-  'numcodecs>=0.5.7',
   'scipy>=1.2.1',
   'negspy>=0.2.24',
   'pandas>=1.1.2',
   'black>=21.11b1',
   'numpy>=1.21.2',
+  'zarr>=2.5.0,<3',
+  'numcodecs>=0.5.7',
   'anndata>=0.7.8',
-  # scanpy < 1.10.3 does not support numpy >= 2.0.0 and does not 
+  # scanpy < 1.10.3 does not support numpy >= 2.0.0 and does not
   # Reference: https://github.com/scverse/scanpy/pull/3115/files
   'scanpy>=1.10.2',
-  'ome-zarr>=0.8.3',
+  'ome-zarr<9',
   'tifffile>=2020.10.1',
   'jsonschema>=3.2',
-  'tqdm>=4.1.0'
+  'tqdm>=4.1.0',
 ]
 
 [project.optional-dependencies]
@@ -74,7 +74,7 @@ all = [
   'uvicorn>=0.17.0',
   'ujson>=4.0.1',
   'starlette==0.14.0',
-  'generate-tiff-offsets>=0.1.8',
+  'generate-tiff-offsets>=0.1.9',
   'kerchunk>=0.2.6',
   'fsspec',
 

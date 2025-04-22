@@ -534,7 +534,7 @@ name = "click"
 version = "8.1.7"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "colorama", marker = "platform_system == 'Windows'" },
+    { name = "colorama", marker = "sys_platform == 'win32'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/96/d3/f04c7bfcf5c1862a2a5b845c6b2b360488cf47af55dfa79c98f6a6bf98b5/click-8.1.7.tar.gz", hash = "sha256:ca9853ad459e787e2192211578cc907e7594e294c7ccc834310722b41b9ca6de", size = 336121 }
 wheels = [
@@ -1064,14 +1064,14 @@ wheels = [
 
 [[package]]
 name = "generate-tiff-offsets"
-version = "0.1.8"
+version = "0.1.9"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "tifffile" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/fe/cc/3d92ee239a3819ccfb852670a30be210639f710f303e447e3bd50f42e76f/generate_tiff_offsets-0.1.8.tar.gz", hash = "sha256:3c767102c38e1ad99550ead6e8de40ccb7e99f33812b0bbba2697eba0d6b51aa", size = 13454 }
+sdist = { url = "https://files.pythonhosted.org/packages/84/1f/a0877178ae7796c11b7c64c5442776612f280725fe8c333c68c63b4b8180/generate_tiff_offsets-0.1.9.tar.gz", hash = "sha256:330b6d998dd7f2cfb0b25b9dd00cc49a48e7f0d1d38bba80e4de29d6f2eb534a", size = 13439 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/62/34/b75f8a94b6cbdff8e457ebb5eee5439ea38d755763d7b892008905f69ff4/generate_tiff_offsets-0.1.8-py3-none-any.whl", hash = "sha256:60d2e249ce95722625b84beb2ecd64d3154757ae29f41e09e1fdf55ec76a164f", size = 3062 },
+    { url = "https://files.pythonhosted.org/packages/eb/f4/55cbd4dd3965c7006d8cadc8201d73dc88b7a55d39ba98cb391d9343146e/generate_tiff_offsets-0.1.9-py3-none-any.whl", hash = "sha256:a157d87ce54ea3967c1fa9d98ff646899b36b2f6243ec705fc9f011c8bc9e4a0", size = 4825 },
 ]
 
 [[package]]
@@ -1207,7 +1207,7 @@ name = "ipykernel"
 version = "6.29.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "appnope", marker = "platform_system == 'Darwin'" },
+    { name = "appnope", marker = "sys_platform == 'darwin'" },
     { name = "comm" },
     { name = "debugpy" },
     { name = "ipython" },
@@ -3156,10 +3156,15 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/69/fe/413049c52d04236bb23c6d852d10e7033f6957caf6252922490d10afe33d/scikit_misc-0.5.1-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:496a65c0ed0903deca80aa641102f3d8dca1acd2ed5fafc98d2101e7bbbfde90", size = 161857 },
     { url = "https://files.pythonhosted.org/packages/14/6b/93b07eb8e355467243a1518d9501fb60f1b65add98a5a0c327c7ab9b7e31/scikit_misc-0.5.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:bd9a12ab92725b69eccacff033179597d46b4c45378eb127d8db400236ee6aae", size = 188964 },
     { url = "https://files.pythonhosted.org/packages/98/7a/0ef8646dac8bcac7151c5dd3e604a33c497d6d093f4db538e25656144394/scikit_misc-0.5.1-cp311-cp311-win_amd64.whl", hash = "sha256:cf4a26d901157fa820a2da5b15ddc8aef18d6c17395f18b5cf5cc9663b81aac3", size = 157243 },
+    { url = "https://files.pythonhosted.org/packages/a5/bd/25d2295e052b939e131352d2572875c7d8cc4873c90d74e3cb6fcfed5c3b/scikit_misc-0.5.1-cp312-cp312-macosx_10_13_x86_64.whl", hash = "sha256:266ff5f0eb4889eb9ec5d9c94e1900d93b8b96500c3b120134bff04cd986e8ad", size = 170069 },
     { url = "https://files.pythonhosted.org/packages/81/f0/047b2b1742c679327d49a16e7c7cf4acfc8e66126ff45a1ced72514961df/scikit_misc-0.5.1-cp312-cp312-macosx_10_9_x86_64.whl", hash = "sha256:e036e0f57cb7317ef7499497d2c0506274eb1b18513d54fe188c9e5619e3cef3", size = 170091 },
     { url = "https://files.pythonhosted.org/packages/49/01/e2886b471a8a3dbf8292cbb1ef133e3fc727850b88caaefde3529fdd9b42/scikit_misc-0.5.1-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:34aa6f468234be81f70374bc22b1ec159991c72148ea664308c2b194d7255a95", size = 161862 },
     { url = "https://files.pythonhosted.org/packages/6d/7c/014980a1b5fe2ee990c222ae5c9b1602fe7b64359643319123d8e1df5009/scikit_misc-0.5.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:8237509cbb1c4420d99d2d3cccfde8a2ca45ca6ea86fbd17516e5d6a0867d8b4", size = 183556 },
     { url = "https://files.pythonhosted.org/packages/63/2e/1da9f27515bdb92364bc5a8796b8e7d10e7b1f667b722681c5ceae168854/scikit_misc-0.5.1-cp312-cp312-win_amd64.whl", hash = "sha256:fd350ade48b79b930d8d7bdc8bd659349193afc319cb34f2ddbedada6f2464e0", size = 157041 },
+    { url = "https://files.pythonhosted.org/packages/15/55/72c6f3c9862d95e51d96477fd1fe4c88f9a73149f1f500b3110da49e5341/scikit_misc-0.5.1-cp313-cp313-macosx_10_13_x86_64.whl", hash = "sha256:1132a5b1fe249791afea00a6454e0ef921883f1c40af4a3bd7648aa78e6d1b27", size = 168736 },
+    { url = "https://files.pythonhosted.org/packages/98/4a/e51722b0f18301451472b0857fc6e043f4c8826aee709ed82589e62318d6/scikit_misc-0.5.1-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:718873b355ab4b78e167c7a27a3f413e00f54a2399ec1a68050016273d03f0f5", size = 160743 },
+    { url = "https://files.pythonhosted.org/packages/43/12/f899915eca292018e1174767e6d8aa2a260ce9f211a4708b775829008f3a/scikit_misc-0.5.1-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:fdccf8bf3588f95c0dc38098456740e5939614b697ce041951f4a20df56034f0", size = 182952 },
+    { url = "https://files.pythonhosted.org/packages/4f/ff/a02130345fed22b9bd8fb1769fc39b35d54ef17c5193d6d879878cc2357d/scikit_misc-0.5.1-cp313-cp313-win_amd64.whl", hash = "sha256:5d7b7dceb88bebd09faa57bf2162d98da806d384d6b904529e695f291fba8691", size = 156451 },
 ]
 
 [[package]]
@@ -3651,7 +3656,7 @@ name = "tqdm"
 version = "4.67.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "colorama", marker = "platform_system == 'Windows'" },
+    { name = "colorama", marker = "sys_platform == 'win32'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/e8/4f/0153c21dc5779a49a0598c445b1978126b1344bab9ee71e53e44877e14e0/tqdm-4.67.0.tar.gz", hash = "sha256:fe5a6f95e6fe0b9755e9469b77b9c3cf850048224ecaa8293d7d2d31f97d869a", size = 169739 }
 wheels = [
@@ -3781,7 +3786,7 @@ wheels = [
 
 [[package]]
 name = "vitessce"
-version = "3.4.3"
+version = "3.5.1"
 source = { editable = "." }
 dependencies = [
     { name = "anndata" },
@@ -3855,7 +3860,7 @@ requires-dist = [
     { name = "black", specifier = ">=21.11b1" },
     { name = "esbuild-py", marker = "extra == 'all'", specifier = ">=0.1.3" },
     { name = "fsspec", marker = "extra == 'all'" },
-    { name = "generate-tiff-offsets", marker = "extra == 'all'", specifier = ">=0.1.8" },
+    { name = "generate-tiff-offsets", marker = "extra == 'all'", specifier = ">=0.1.9" },
     { name = "jinja2", marker = "extra == 'docs'", specifier = "==3.0.3" },
     { name = "jsonschema", specifier = ">=3.2" },
     { name = "jupyter-server-proxy", marker = "extra == 'all'", specifier = ">=1.5.2" },
@@ -3866,7 +3871,7 @@ requires-dist = [
     { name = "negspy", specifier = ">=0.2.24" },
     { name = "numcodecs", specifier = ">=0.5.7" },
     { name = "numpy", specifier = ">=1.21.2" },
-    { name = "ome-zarr", specifier = ">=0.8.3" },
+    { name = "ome-zarr", specifier = "<9" },
     { name = "pandas", specifier = ">=1.1.2" },
     { name = "pulp", marker = "extra == 'demos'", specifier = "==2.7.0" },
     { name = "pyyaml", marker = "extra == 'demos'" },
@@ -3887,7 +3892,7 @@ requires-dist = [
     { name = "tqdm", specifier = ">=4.1.0" },
     { name = "ujson", marker = "extra == 'all'", specifier = ">=4.0.1" },
     { name = "uvicorn", marker = "extra == 'all'", specifier = ">=0.17.0" },
-    { name = "zarr", specifier = ">=2.5.0" },
+    { name = "zarr", specifier = ">=2.5.0,<3" },
 ]
 
 [package.metadata.requires-dev]

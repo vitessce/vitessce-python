@@ -463,16 +463,16 @@ class VitessceWidget(anywidget.AnyWidget):
 
     next_port = DEFAULT_PORT
 
-    js_package_version = Unicode('3.5.4').tag(sync=True)
+    js_package_version = Unicode('3.5.11').tag(sync=True)
     js_dev_mode = Bool(False).tag(sync=True)
     custom_js_url = Unicode('').tag(sync=True)
     plugin_esm = List(trait=Unicode(''), default_value=[]).tag(sync=True)
     remount_on_uid_change = Bool(True).tag(sync=True)
-    invoke_timeout = Int(30000).tag(sync=True)
+    invoke_timeout = Int(300000).tag(sync=True)
 
     store_urls = List(trait=Unicode(''), default_value=[]).tag(sync=True)
 
-    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='3.5.4', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, invoke_timeout=30000):
+    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='3.5.11', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, prefer_local=True, invoke_timeout=300000):
         """
         Construct a new Vitessce widget.
 
@@ -487,6 +487,7 @@ class VitessceWidget(anywidget.AnyWidget):
         :param str custom_js_url: A URL to a JavaScript file to use (instead of 'vitessce' or '@vitessce/dev' NPM package).
         :param list[WidgetPlugin] plugins: A list of subclasses of VitesscePlugin. Optional.
         :param bool remount_on_uid_change: Passed to the remountOnUidChange prop of the <Vitessce/> React component. By default, True.
+        :param bool prefer_local: Should local data be preferred (only applies to `*_artifact` data objects)? By default, True.
         :param int invoke_timeout: The timeout in milliseconds for invoking Python functions from JavaScript. By default, 30000.
 
         .. code-block:: python
@@ -506,7 +507,7 @@ class VitessceWidget(anywidget.AnyWidget):
         config_dict = config.to_dict(base_url=base_url)
         routes = config.get_routes()
 
-        self._stores = config.get_stores(base_url=base_url)
+        self._stores = config.get_stores(base_url=base_url, prefer_local=prefer_local)
         self._plugins = plugins or []
 
         plugin_esm = [p.plugin_esm for p in self._plugins]
@@ -585,7 +586,7 @@ class VitessceWidget(anywidget.AnyWidget):
 # Launch Vitessce using plain HTML representation (no ipywidgets)
 
 
-def ipython_display(config, height=600, theme='auto', base_url=None, host_name=None, uid=None, port=None, proxy=False, js_package_version='3.5.4', js_dev_mode=False, custom_js_url='', plugin_esm=DEFAULT_PLUGIN_ESM, remount_on_uid_change=True):
+def ipython_display(config, height=600, theme='auto', base_url=None, host_name=None, uid=None, port=None, proxy=False, js_package_version='3.5.11', js_dev_mode=False, custom_js_url='', plugin_esm=DEFAULT_PLUGIN_ESM, remount_on_uid_change=True):
     from IPython.display import display, HTML
     uid_str = "vitessce" + get_uid_str(uid)
 

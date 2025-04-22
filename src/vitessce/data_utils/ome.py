@@ -15,7 +15,7 @@ def needs_bigtiff(img_arr_shape):
     :rtype: bool
     """
     num_pixels = 1
-    for n in img_arr_shape.shape:
+    for n in img_arr_shape:
         num_pixels *= n
     return (num_pixels > 2**32)
 

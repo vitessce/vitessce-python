@@ -235,11 +235,56 @@ async function render(view) {
     let pluginFileTypes = [];
     let pluginJointFileTypes = [];
 
+    let pending = [];
+    let batchId = 0;
+
+    async function processBatch(prevPendingArr) {
+        const [dataArr, buffersArr] = await view.experimental.invoke("_zarr_get_multi", prevPendingArr.map(d => d.params), {
+            signal: AbortSignal.timeout(invokeTimeout),
+        });
+        prevPendingArr.forEach((prevPendingItem, i) => {
+            const data = dataArr[i];
+            const bufferData = buffersArr[i];
+            const { params, resolve, reject } = prevPendingItem;
+            const [storeUrl, key] = params;
+
+            if (!data.success) {
+                resolve(undefined);
+            }
+
+            if (key.includes("spatialdata_attrs") && key.endsWith("0") && !ArrayBuffer.isView(bufferData.buffer)) {
+                // For some reason, the Zarrita.js UnicodeStringArray does not seem to work with
+                // ArrayBuffers (throws a TypeError), so here we convert to Uint8Array if needed.
+                // This error is occurring specifically for the arr.getChunk call within the AnnDataSource._loadString function.
+                // TODO: figure out a more long-term solution.
+                resolve(new Uint8Array(bufferData.buffer));
+            }
+
+            resolve(bufferData.buffer);
+        });
+    }
+
+    function run() {
+        processBatch(pending);
+        pending = [];
+        batchId = 0;
+    }
+
+    function enqueue(params) {
+        batchId = batchId || requestAnimationFrame(() => run());
+        let { promise, resolve, reject } = Promise.withResolvers();
+        pending.push({ params, resolve, reject });
+        return promise;
+    }
+
+
     const stores = Object.fromEntries(
         storeUrls.map(storeUrl => ([
             storeUrl,
             {
                 async get(key) {
+                    return enqueue([storeUrl, key]);
+                    /*
                     const [data, buffers] = await view.experimental.invoke("_zarr_get", [storeUrl, key], {
                         signal: AbortSignal.timeout(invokeTimeout),
                     });
@@ -254,6 +299,7 @@ async function render(view) {
                     }
 
                     return buffers[0].buffer;
+                    */
                 },
             }
         ])),
@@ -576,6 +622,22 @@ class VitessceWidget(anywidget.AnyWidget):
         except KeyError:
             buffers = []
         return {"success": len(buffers) == 1}, buffers
+
+    @anywidget.experimental.command
+    def _zarr_get_multi(self, params_arr, buffers):
+        # This variant of _zarr_get supports batching.
+        result_dicts = []
+        result_buffers = []
+        for params in params_arr:
+            [store_url, key] = params
+            store = self._stores[store_url]
+            try:
+                result_buffers.append(store[key.lstrip("/")])
+                result_dicts.append({"success": True})
+            except KeyError:
+                result_buffers.append(b'')
+                result_dicts.append({"success": False})
+        return result_dicts, result_buffers
 
     @anywidget.experimental.command
     def _plugin_command(self, params, buffers):

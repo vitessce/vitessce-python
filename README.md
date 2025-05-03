@@ -112,6 +112,8 @@ or
 vc.display(proxy=True, host_name="http://localhost:8888")
 ```
 
+For more information see the [data location options documentation](https://python-docs.vitessce.io/data_options.html).
+
 ### Ensure that Vitessce and Jupyter are installed in the same environment
 
 With the environment activated, run `pip list` on the command line:

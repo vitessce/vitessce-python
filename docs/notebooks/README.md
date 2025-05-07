@@ -8,15 +8,13 @@ Some of the example notebooks rely on external single-cell data analysis package
 
 ```sh
 cd docs/notebooks
-conda env create -f environment.yml
-conda activate vitessce-python-notebooks
-pip install -e "../..[dev]"
+uv sync --extra dev --extra docs --extra all
 ```
 
 ## Run
 
 ```sh
-jupyter lab
+uv run jupyter lab
 ```
 
 ## Troubleshooting

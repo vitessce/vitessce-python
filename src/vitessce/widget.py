@@ -241,16 +241,71 @@ async function render(view) {
     let pluginJointFileTypes = [];
     let pluginAsyncFunctions = [];
 
+    let pending = [];
+    let batchId = 0;
+
+    async function processBatch(prevPendingArr) {
+        const [dataArr, buffersArr] = await view.experimental.invoke("_zarr_get_multi", prevPendingArr.map(d => d.params), {
+            signal: AbortSignal.timeout(invokeTimeout),
+        });
+        prevPendingArr.forEach((prevPendingItem, i) => {
+            const data = dataArr[i];
+            const bufferData = buffersArr[i];
+            const { params, resolve, reject } = prevPendingItem;
+            const [storeUrl, key] = params;
+
+            if (!data.success) {
+                resolve(undefined);
+            }
+
+            if (key.includes("spatialdata_attrs") && key.endsWith("0") && !ArrayBuffer.isView(bufferData.buffer)) {
+                // For some reason, the Zarrita.js UnicodeStringArray does not seem to work with
+                // ArrayBuffers (throws a TypeError), so here we convert to Uint8Array if needed.
+                // This error is occurring specifically for the arr.getChunk call within the AnnDataSource._loadString function.
+                // TODO: figure out a more long-term solution.
+                resolve(new Uint8Array(bufferData.buffer));
+            }
+
+            resolve(bufferData.buffer);
+        });
+    }
+
+    function run() {
+        processBatch(pending);
+        pending = [];
+        batchId = 0;
+    }
+
+    function enqueue(params) {
+        batchId = batchId || requestAnimationFrame(() => run());
+        let { promise, resolve, reject } = Promise.withResolvers();
+        pending.push({ params, resolve, reject });
+        return promise;
+    }
+
+
     const stores = Object.fromEntries(
         storeUrls.map(storeUrl => ([
             storeUrl,
             {
                 async get(key) {
+                    return enqueue([storeUrl, key]);
+                    /*
                     const [data, buffers] = await view.experimental.invoke("_zarr_get", [storeUrl, key], {
                         signal: AbortSignal.timeout(invokeTimeout),
                     });
                     if (!data.success) return undefined;
+
+                    if (key.includes("spatialdata_attrs") && key.endsWith("0") && !ArrayBuffer.isView(buffers[0].buffer)) {
+                        // For some reason, the Zarrita.js UnicodeStringArray does not seem to work with
+                        // ArrayBuffers (throws a TypeError), so here we convert to Uint8Array if needed.
+                        // This error is occurring specifically for the arr.getChunk call within the AnnDataSource._loadString function.
+                        // TODO: figure out a more long-term solution.
+                        return new Uint8Array(buffers[0].buffer);
+                    }
+
                     return buffers[0].buffer;
+                    */
                 },
             }
         ])),
@@ -508,18 +563,18 @@ class VitessceWidget(anywidget.AnyWidget):
 
     next_port = DEFAULT_PORT
 
-    js_package_version = Unicode('3.5.0').tag(sync=True)
+    js_package_version = Unicode('3.5.11').tag(sync=True)
     js_dev_mode = Bool(False).tag(sync=True)
     custom_js_url = Unicode('').tag(sync=True)
     plugin_esm = List(trait=Unicode(''), default_value=[]).tag(sync=True)
     remount_on_uid_change = Bool(True).tag(sync=True)
     page_mode = Bool(False).tag(sync=True)
     page_esm = Unicode('').tag(sync=True)
+    invoke_timeout = Int(300000).tag(sync=True)
 
     store_urls = List(trait=Unicode(''), default_value=[]).tag(sync=True)
-    invoke_timeout = Int(30000).tag(sync=True)
 
-    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='3.5.0', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, invoke_timeout=30000, page_mode=False, page_esm=None):
+    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='3.5.11', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, prefer_local=True, invoke_timeout=300000, page_mode=False, page_esm=None):
         """
         Construct a new Vitessce widget.
 
@@ -534,7 +589,8 @@ class VitessceWidget(anywidget.AnyWidget):
         :param str custom_js_url: A URL to a JavaScript file to use (instead of 'vitessce' or '@vitessce/dev' NPM package).
         :param list[VitesscePlugin] plugins: A list of subclasses of VitesscePlugin. Optional.
         :param bool remount_on_uid_change: Passed to the remountOnUidChange prop of the <Vitessce/> React component. By default, True.
-        :param int invoke_timeout: The timeout in milliseconds for invoking Python functions from JavaScript. By default, 30000.
+        :param bool prefer_local: Should local data be preferred (only applies to `*_artifact` data objects)? By default, True.
+        :param int invoke_timeout: The timeout in milliseconds for invoking Python functions from JavaScript. By default, 300000.
         :param bool page_mode: Whether to render the <Vitessce/> component in grid-mode or page-mode. By default, False.
         :param str page_esm: The ES module string for the page component creation function. Optional.
 
@@ -555,7 +611,7 @@ class VitessceWidget(anywidget.AnyWidget):
         config_dict = config.to_dict(base_url=base_url)
         routes = config.get_routes()
 
-        self._stores = config.get_stores(base_url=base_url)
+        self._stores = config.get_stores(base_url=base_url, prefer_local=prefer_local)
         self._plugins = plugins or []
 
         plugin_esm = [p.plugin_esm for p in self._plugins]
@@ -628,6 +684,22 @@ class VitessceWidget(anywidget.AnyWidget):
         return {"success": len(buffers) == 1}, buffers
 
     @anywidget.experimental.command
+    def _zarr_get_multi(self, params_arr, buffers):
+        # This variant of _zarr_get supports batching.
+        result_dicts = []
+        result_buffers = []
+        for params in params_arr:
+            [store_url, key] = params
+            store = self._stores[store_url]
+            try:
+                result_buffers.append(store[key.lstrip("/")])
+                result_dicts.append({"success": True})
+            except KeyError:
+                result_buffers.append(b'')
+                result_dicts.append({"success": False})
+        return result_dicts, result_buffers
+
+    @anywidget.experimental.command
     def _plugin_command(self, params, buffers):
         [command_name, command_params] = params
         command_func = self._plugin_commands[command_name]
@@ -636,7 +708,7 @@ class VitessceWidget(anywidget.AnyWidget):
 # Launch Vitessce using plain HTML representation (no ipywidgets)
 
 
-def ipython_display(config, height=600, theme='auto', base_url=None, host_name=None, uid=None, port=None, proxy=False, js_package_version='3.5.0', js_dev_mode=False, custom_js_url='', plugin_esm=DEFAULT_PLUGIN_ESM, remount_on_uid_change=True, page_mode=False, page_esm=None):
+def ipython_display(config, height=600, theme='auto', base_url=None, host_name=None, uid=None, port=None, proxy=False, js_package_version='3.5.11', js_dev_mode=False, custom_js_url='', plugin_esm=DEFAULT_PLUGIN_ESM, remount_on_uid_change=True, page_mode=False, page_esm=None):
     from IPython.display import display, HTML
     uid_str = "vitessce" + get_uid_str(uid)
 

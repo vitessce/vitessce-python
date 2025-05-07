@@ -372,6 +372,7 @@ async function render(view) {
             URL.revokeObjectURL(pageEsmUrl);
 
             const pageDeps = {
+                React,
                 usePageModeView,
             };
             PageComponent = await pageModule.createPage(pageDeps);

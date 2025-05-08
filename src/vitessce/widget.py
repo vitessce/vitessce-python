@@ -172,15 +172,26 @@ function prependBaseUrl(config, proxy, hasHostName) {
     return config;
   }
   const { origin } = new URL(window.location.href);
+  const pathSegments = window.location.pathname.split('/');
   let baseUrl;
-  const jupyterLabConfigEl = document.getElementById('jupyter-config-data');
-
-  if (jupyterLabConfigEl) {
-    // This is jupyter lab
-    baseUrl = JSON.parse(jupyterLabConfigEl.textContent || '').baseUrl;
+  const passthroughIndex = pathSegments.indexOf('passthrough');
+  if (passthroughIndex !== -1) {
+    baseUrl = pathSegments.slice(0, passthroughIndex + 3).join('/');
   } else {
-    // This is jupyter notebook
-    baseUrl = document.getElementsByTagName('body')[0].getAttribute('data-base-url');
+    const jupyterLabConfigEl = document.getElementById('jupyter-config-data');
+
+    if (jupyterLabConfigEl) {
+        // This is jupyter lab
+        baseUrl = JSON.parse(jupyterLabConfigEl.textContent || '').baseUrl;
+    } else {
+        // This is jupyter notebook
+        baseUrl = document.getElementsByTagName('body')[0].getAttribute('data-base-url');
+    }
+  }
+
+  // Ensure baseUrl starts with a slash
+  if (!baseUrl.startsWith('/')) {
+    baseUrl = '/' + baseUrl;
   }
   return {
     ...config,

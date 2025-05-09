@@ -161,48 +161,61 @@ const React = await importWithMap("react", importMap);
 const { createRoot } = await importWithMap("react-dom/client", importMap);
 
 const e = React.createElement;
-
+const WORKSPACES_URL_KEYWORD = 'https://workspaces-pt'
 const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-
 // The jupyter server may be running through a proxy,
 // which means that the client needs to prepend the part of the URL before /proxy/8000 such as
 // https://hub.gke2.mybinder.org/user/vitessce-vitessce-python-swi31vcv/proxy/8000/A/0/cells
+// For workspaces: https://workspaces-pt.hubmapconsortium.org/passthrough/HOSTNAME/PORT/ADDITIONAL_PATH_INFO?QUERY_PARAMS=HELLO_WORLD
 function prependBaseUrl(config, proxy, hasHostName) {
-  if(!proxy || hasHostName) {
+   if (!proxy || hasHostName) {
     return config;
-  }
-  const { origin } = new URL(window.location.href);
-  const pathSegments = window.location.pathname.split('/');
-  let baseUrl;
-  const passthroughIndex = pathSegments.indexOf('passthrough');
-  if (passthroughIndex !== -1) {
-    baseUrl = pathSegments.slice(0, passthroughIndex + 3).join('/');
-  } else {
+   }
+    let proxyPath;
+    const { origin } = new URL(window.location.href);
+    const isInWorkspaces = origin.includes(WORKSPACES_URL_KEYWORD)
+    if (isInWorkspaces) {
+        const pathSegments = window.location.pathname.split('/');
+        const passthroughIndex = pathSegments.indexOf('passthrough');
+        if (passthroughIndex !== -1) {
+            proxyPath = pathSegments.slice(0, passthroughIndex + 3).join('/');
+        } 
+    }
     const jupyterLabConfigEl = document.getElementById('jupyter-config-data');
-
+    let baseUrl;
     if (jupyterLabConfigEl) {
         // This is jupyter lab
         baseUrl = JSON.parse(jupyterLabConfigEl.textContent || '').baseUrl;
     } else {
         // This is jupyter notebook
         baseUrl = document.getElementsByTagName('body')[0].getAttribute('data-base-url');
-    }
-  }
-
-  // Ensure baseUrl starts with a slash
-  if (!baseUrl.startsWith('/')) {
-    baseUrl = '/' + baseUrl;
-  }
-  return {
-    ...config,
-    datasets: config.datasets.map(d => ({
-      ...d,
-      files: d.files.map(f => ({
-        ...f,
-        url: `${origin}${baseUrl}${f.url}`,
-      })),
-    })),
-  };
+    }    
+    return {
+        ...config,
+        datasets: config.datasets.map(d => ({
+            ...d,
+            files: d.files.map(f => {
+                // Checks to handle different scenarios of urls presented in workspaces and otherwise, i.e., local vs. remote
+                // For regular urls
+                let constructedUrl = f.url
+                // if in workspaces, only local data is accessed 
+                if (isInWorkspaces && f.url.startsWith(WORKSPACES_URL_KEYWORD)){
+                    constructedUrl = `${proxyPath}${baseUrl}${f.url}` 
+                }
+                else if (isInWorkspaces && !f.url.startsWith(WORKSPACES_URL_KEYWORD)){
+                    constructedUrl = f.url
+                }
+                // if local data is accessed in the notebook
+                else if (f.url.startsWith('proxy')) {
+                  constructedUrl = `${origin}${baseUrl}${f.url}`
+                }
+                return {
+                    ...f,
+                    url: constructedUrl,
+                }
+            }),
+        })),
+    };
 }
 
 async function render(view) {

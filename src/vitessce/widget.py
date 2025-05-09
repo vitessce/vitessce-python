@@ -179,7 +179,7 @@ function prependBaseUrl(config, proxy, hasHostName) {
         const passthroughIndex = pathSegments.indexOf('passthrough');
         if (passthroughIndex !== -1) {
             proxyPath = pathSegments.slice(0, passthroughIndex + 3).join('/');
-        } 
+        }
     }
     const jupyterLabConfigEl = document.getElementById('jupyter-config-data');
     let baseUrl;
@@ -189,7 +189,7 @@ function prependBaseUrl(config, proxy, hasHostName) {
     } else {
         // This is jupyter notebook
         baseUrl = document.getElementsByTagName('body')[0].getAttribute('data-base-url');
-    }    
+    }
     return {
         ...config,
         datasets: config.datasets.map(d => ({
@@ -197,17 +197,17 @@ function prependBaseUrl(config, proxy, hasHostName) {
             files: d.files.map(f => {
                 // Checks to handle different scenarios of urls presented in workspaces and otherwise, i.e., local vs. remote
                 // For regular urls
-                let constructedUrl = f.url
-                // if in workspaces, only local data is accessed 
+                let constructedUrl = f.url;
+                // if in workspaces, only local data is accessed
                 if (isInWorkspaces && f.url.startsWith(WORKSPACES_URL_KEYWORD)){
-                    constructedUrl = `${proxyPath}${baseUrl}${f.url}` 
+                    constructedUrl = `${proxyPath}${baseUrl}${f.url}`;
                 }
                 else if (isInWorkspaces && !f.url.startsWith(WORKSPACES_URL_KEYWORD)){
-                    constructedUrl = f.url
+                    constructedUrl = f.url;
                 }
                 // if local data is accessed in the notebook
                 else if (f.url.startsWith('proxy')) {
-                  constructedUrl = `${origin}${baseUrl}${f.url}`
+                  constructedUrl = `${origin}${baseUrl}${f.url}`;
                 }
                 return {
                     ...f,

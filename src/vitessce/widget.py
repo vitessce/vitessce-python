@@ -1,6 +1,7 @@
 import importlib.util
 from urllib.parse import quote_plus
 import json
+import sys
 
 # Widget dependencies
 import anywidget
@@ -104,7 +105,8 @@ def get_base_url_and_port(port, next_port, proxy=False, base_url=None, host_name
 
     if base_url is None:
         if proxy:
-            if importlib.util.find_spec('jupyter_server_proxy') is None:
+            is_in_workspaces = sys.executable.startswith('/hive')
+            if importlib.util.find_spec('jupyter_server_proxy') is None and not is_in_workspaces:
                 raise ValueError(
                     "To use the widget through a proxy, jupyter-server-proxy must be installed.")
             if host_name is None:
@@ -167,23 +169,24 @@ const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-schem
 // which means that the client needs to prepend the part of the URL before /proxy/8000 such as
 // https://hub.gke2.mybinder.org/user/vitessce-vitessce-python-swi31vcv/proxy/8000/A/0/cells
 // For workspaces: https://workspaces-pt.hubmapconsortium.org/passthrough/HOSTNAME/PORT/ADDITIONAL_PATH_INFO?QUERY_PARAMS=HELLO_WORLD
-function prependBaseUrl(config, proxy, hasHostName) {
-   if (!proxy || hasHostName) {
-    return config;
-   }
-    let proxyPath;
-    const { origin } = new URL(window.location.href);
-    const isInWorkspaces = origin.includes(WORKSPACES_URL_KEYWORD)
+function prependBaseUrl(config, proxy, hasHostName, currentPort) {
+    if (!proxy || hasHostName) {
+        return config;
+    }
+    const { origin, pathname } = new URL(window.location.href);
+    const isInWorkspaces = origin.startsWith(WORKSPACES_URL_KEYWORD);
+
+    const localhostBaseUrl = `http://localhost:${currentPort}`;
+    const jupyterLabConfigEl = document.getElementById('jupyter-config-data');
+    
+    let baseUrl;
     if (isInWorkspaces) {
-        const pathSegments = window.location.pathname.split('/');
+        const pathSegments = pathname.split('/');
         const passthroughIndex = pathSegments.indexOf('passthrough');
         if (passthroughIndex !== -1) {
-            proxyPath = pathSegments.slice(0, passthroughIndex + 3).join('/');
+            baseUrl = pathSegments.slice(0, passthroughIndex + 2).join('/');
         }
-    }
-    const jupyterLabConfigEl = document.getElementById('jupyter-config-data');
-    let baseUrl;
-    if (jupyterLabConfigEl) {
+    } else if (jupyterLabConfigEl) {
         // This is jupyter lab
         baseUrl = JSON.parse(jupyterLabConfigEl.textContent || '').baseUrl;
     } else {
@@ -195,24 +198,15 @@ function prependBaseUrl(config, proxy, hasHostName) {
         datasets: config.datasets.map(d => ({
             ...d,
             files: d.files.map(f => {
-                // Checks to handle different scenarios of urls presented in workspaces and otherwise, i.e., local vs. remote
-                // For regular urls
-                let constructedUrl = f.url;
-                // if in workspaces, only local data is accessed
-                if (isInWorkspaces && f.url.startsWith(WORKSPACES_URL_KEYWORD)){
-                    constructedUrl = `${proxyPath}${baseUrl}${f.url}`;
-                }
-                else if (isInWorkspaces && !f.url.startsWith(WORKSPACES_URL_KEYWORD)){
-                    constructedUrl = f.url;
-                }
-                // if local data is accessed in the notebook
-                else if (f.url.startsWith('proxy')) {
-                  constructedUrl = `${origin}${baseUrl}${f.url}`;
+                if (isInWorkspaces && f.url.startsWith('proxy')) {
+                    // When the user is in workspaces, we do not use jupyter_server_proxy.
+                    // Instead, the workspaces infrastructure has its own "passthrough" functionality.
+                    f.url = f.url.replace('proxy', '');
                 }
                 return {
                     ...f,
-                    url: constructedUrl,
-                }
+                    url: `${origin}${baseUrl}${f.url}`,
+                };
             }),
         })),
     };
@@ -409,7 +403,7 @@ async function render(view) {
     function VitessceWidget(props) {
         const { model } = props;
 
-        const [config, setConfig] = React.useState(prependBaseUrl(model.get('config'), model.get('proxy'), model.get('has_host_name')));
+        const [config, setConfig] = React.useState(prependBaseUrl(model.get('config'), model.get('proxy'), model.get('has_host_name'), model.get('current_port')));
         const [validateConfig, setValidateConfig] = React.useState(true);
         const height = model.get('height');
         const theme = model.get('theme') === 'auto' ? (prefersDark ? 'dark' : 'light') : model.get('theme');
@@ -597,6 +591,7 @@ class VitessceWidget(anywidget.AnyWidget):
     page_mode = Bool(False).tag(sync=True)
     page_esm = Unicode('').tag(sync=True)
     invoke_timeout = Int(300000).tag(sync=True)
+    current_port = Int(0).tag(sync=True)
 
     store_urls = List(trait=Unicode(''), default_value=[]).tag(sync=True)
 
@@ -653,7 +648,8 @@ class VitessceWidget(anywidget.AnyWidget):
             plugin_esm=plugin_esm, remount_on_uid_change=remount_on_uid_change,
             page_mode=page_mode, page_esm=('' if page_esm is None else page_esm),
             invoke_timeout=invoke_timeout,
-            uid=uid_str, store_urls=list(self._stores.keys())
+            uid=uid_str, store_urls=list(self._stores.keys()),
+            current_port=use_port
         )
 
         # Register chained plugin on_config_change functions with a change observer.
@@ -759,6 +755,7 @@ def ipython_display(config, height=600, theme='auto', base_url=None, host_name=N
         "invoke_timeout": 30000,
         "proxy": proxy,
         "has_host_name": host_name is not None,
+        "current_port": use_port,
         "height": height,
         "theme": theme,
         "config": config_dict,

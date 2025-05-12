@@ -163,7 +163,7 @@ const React = await importWithMap("react", importMap);
 const { createRoot } = await importWithMap("react-dom/client", importMap);
 
 const e = React.createElement;
-const WORKSPACES_URL_KEYWORD = 'https://workspaces-pt'
+const WORKSPACES_URL_KEYWORD = 'https://workspaces-pt';
 const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
 // The jupyter server may be running through a proxy,
 // which means that the client needs to prepend the part of the URL before /proxy/8000 such as
@@ -198,7 +198,10 @@ function prependBaseUrl(config, proxy, hasHostName) {
             ...d,
             files: d.files.map(f => ({
                 ...f,
-                url: `${origin}${baseUrl}${f.url}`,
+                url: (!(f.url.startsWith('http://') || f.url.startsWith('https://'))
+                    ? `${origin}${baseUrl}${f.url}`
+                    : f.url
+                ),
             })),
         })),
     };

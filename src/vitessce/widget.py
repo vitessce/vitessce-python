@@ -1,6 +1,7 @@
 import importlib.util
 from urllib.parse import quote_plus
 import json
+import sys
 
 # Widget dependencies
 import anywidget
@@ -104,7 +105,8 @@ def get_base_url_and_port(port, next_port, proxy=False, base_url=None, host_name
 
     if base_url is None:
         if proxy:
-            if importlib.util.find_spec('jupyter_server_proxy') is None:
+            is_in_workspaces = sys.executable.startswith('/hive')
+            if importlib.util.find_spec('jupyter_server_proxy') is None and not is_in_workspaces:
                 raise ValueError(
                     "To use the widget through a proxy, jupyter-server-proxy must be installed.")
             if host_name is None:
@@ -161,37 +163,52 @@ const React = await importWithMap("react", importMap);
 const { createRoot } = await importWithMap("react-dom/client", importMap);
 
 const e = React.createElement;
-
+const WORKSPACES_URL_KEYWORD = 'https://workspaces-pt'
 const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-
 // The jupyter server may be running through a proxy,
 // which means that the client needs to prepend the part of the URL before /proxy/8000 such as
 // https://hub.gke2.mybinder.org/user/vitessce-vitessce-python-swi31vcv/proxy/8000/A/0/cells
+// For workspaces: https://workspaces-pt.hubmapconsortium.org/passthrough/HOSTNAME/PORT/ADDITIONAL_PATH_INFO?QUERY_PARAMS=HELLO_WORLD
 function prependBaseUrl(config, proxy, hasHostName) {
-  if(!proxy || hasHostName) {
-    return config;
-  }
-  const { origin } = new URL(window.location.href);
-  let baseUrl;
-  const jupyterLabConfigEl = document.getElementById('jupyter-config-data');
+    if (!proxy || hasHostName) {
+        return config;
+    }
+    const { origin, pathname } = new URL(window.location.href);
+    const isInWorkspaces = origin.startsWith(WORKSPACES_URL_KEYWORD);
 
-  if (jupyterLabConfigEl) {
-    // This is jupyter lab
-    baseUrl = JSON.parse(jupyterLabConfigEl.textContent || '').baseUrl;
-  } else {
-    // This is jupyter notebook
-    baseUrl = document.getElementsByTagName('body')[0].getAttribute('data-base-url');
-  }
-  return {
-    ...config,
-    datasets: config.datasets.map(d => ({
-      ...d,
-      files: d.files.map(f => ({
-        ...f,
-        url: `${origin}${baseUrl}${f.url}`,
-      })),
-    })),
-  };
+    const jupyterLabConfigEl = document.getElementById('jupyter-config-data');
+
+    let baseUrl;
+    if (isInWorkspaces) {
+        const pathSegments = pathname.split('/');
+        const passthroughIndex = pathSegments.indexOf('passthrough');
+        if (passthroughIndex !== -1) {
+            baseUrl = pathSegments.slice(0, passthroughIndex + 2).join('/');
+        }
+    } else if (jupyterLabConfigEl) {
+        // This is jupyter lab
+        baseUrl = JSON.parse(jupyterLabConfigEl.textContent || '').baseUrl;
+    } else {
+        // This is jupyter notebook
+        baseUrl = document.getElementsByTagName('body')[0].getAttribute('data-base-url');
+    }
+    return {
+        ...config,
+        datasets: config.datasets.map(d => ({
+            ...d,
+            files: d.files.map(f => {
+                if (isInWorkspaces && f.url.startsWith('proxy')) {
+                    // When the user is in workspaces, we do not use jupyter_server_proxy.
+                    // Instead, the workspaces infrastructure has its own "passthrough" functionality.
+                    f.url = f.url.replace('proxy', '');
+                }
+                return {
+                    ...f,
+                    url: `${origin}${baseUrl}${f.url}`,
+                };
+            }),
+        })),
+    };
 }
 
 async function render(view) {

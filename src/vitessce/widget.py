@@ -175,7 +175,6 @@ function prependBaseUrl(config, proxy, hasHostName) {
     }
     const { origin, pathname } = new URL(window.location.href);
     const isInWorkspaces = origin.startsWith(WORKSPACES_URL_KEYWORD);
-
     const jupyterLabConfigEl = document.getElementById('jupyter-config-data');
 
     let baseUrl;
@@ -183,7 +182,8 @@ function prependBaseUrl(config, proxy, hasHostName) {
         const pathSegments = pathname.split('/');
         const passthroughIndex = pathSegments.indexOf('passthrough');
         if (passthroughIndex !== -1) {
-            baseUrl = pathSegments.slice(0, passthroughIndex + 2).join('/');
+            baseUrl = pathSegments.slice(0, passthroughIndex + 3).join('/');
+            baseUrl += '/';
         }
     } else if (jupyterLabConfigEl) {
         // This is jupyter lab
@@ -196,17 +196,10 @@ function prependBaseUrl(config, proxy, hasHostName) {
         ...config,
         datasets: config.datasets.map(d => ({
             ...d,
-            files: d.files.map(f => {
-                if (isInWorkspaces && f.url.startsWith('proxy')) {
-                    // When the user is in workspaces, we do not use jupyter_server_proxy.
-                    // Instead, the workspaces infrastructure has its own "passthrough" functionality.
-                    f.url = f.url.replace('proxy', '');
-                }
-                return {
-                    ...f,
-                    url: `${origin}${baseUrl}${f.url}`,
-                };
-            }),
+            files: d.files.map(f => ({
+                ...f,
+                url: `${origin}${baseUrl}${f.url}`,
+            })),
         })),
     };
 }

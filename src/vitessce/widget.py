@@ -173,7 +173,7 @@ function prependBaseUrl(config, proxy, hasHostName) {
     if (!proxy || hasHostName) {
         return config;
     }
-    let { origin, pathname } = new URL(window.location.href);
+    const { origin, pathname } = new URL(window.location.href);
     const isInWorkspaces = origin.startsWith(WORKSPACES_URL_KEYWORD);
     const jupyterLabConfigEl = document.getElementById('jupyter-config-data');
 

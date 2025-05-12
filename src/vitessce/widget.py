@@ -169,14 +169,13 @@ const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-schem
 // which means that the client needs to prepend the part of the URL before /proxy/8000 such as
 // https://hub.gke2.mybinder.org/user/vitessce-vitessce-python-swi31vcv/proxy/8000/A/0/cells
 // For workspaces: https://workspaces-pt.hubmapconsortium.org/passthrough/HOSTNAME/PORT/ADDITIONAL_PATH_INFO?QUERY_PARAMS=HELLO_WORLD
-function prependBaseUrl(config, proxy, hasHostName, currentPort) {
+function prependBaseUrl(config, proxy, hasHostName) {
     if (!proxy || hasHostName) {
         return config;
     }
     const { origin, pathname } = new URL(window.location.href);
     const isInWorkspaces = origin.startsWith(WORKSPACES_URL_KEYWORD);
 
-    const localhostBaseUrl = `http://localhost:${currentPort}`;
     const jupyterLabConfigEl = document.getElementById('jupyter-config-data');
     
     let baseUrl;
@@ -403,7 +402,7 @@ async function render(view) {
     function VitessceWidget(props) {
         const { model } = props;
 
-        const [config, setConfig] = React.useState(prependBaseUrl(model.get('config'), model.get('proxy'), model.get('has_host_name'), model.get('current_port')));
+        const [config, setConfig] = React.useState(prependBaseUrl(model.get('config'), model.get('proxy'), model.get('has_host_name')));
         const [validateConfig, setValidateConfig] = React.useState(true);
         const height = model.get('height');
         const theme = model.get('theme') === 'auto' ? (prefersDark ? 'dark' : 'light') : model.get('theme');
@@ -591,7 +590,6 @@ class VitessceWidget(anywidget.AnyWidget):
     page_mode = Bool(False).tag(sync=True)
     page_esm = Unicode('').tag(sync=True)
     invoke_timeout = Int(300000).tag(sync=True)
-    current_port = Int(0).tag(sync=True)
 
     store_urls = List(trait=Unicode(''), default_value=[]).tag(sync=True)
 
@@ -648,8 +646,7 @@ class VitessceWidget(anywidget.AnyWidget):
             plugin_esm=plugin_esm, remount_on_uid_change=remount_on_uid_change,
             page_mode=page_mode, page_esm=('' if page_esm is None else page_esm),
             invoke_timeout=invoke_timeout,
-            uid=uid_str, store_urls=list(self._stores.keys()),
-            current_port=use_port
+            uid=uid_str, store_urls=list(self._stores.keys())
         )
 
         # Register chained plugin on_config_change functions with a change observer.
@@ -755,7 +752,6 @@ def ipython_display(config, height=600, theme='auto', base_url=None, host_name=N
         "invoke_timeout": 30000,
         "proxy": proxy,
         "has_host_name": host_name is not None,
-        "current_port": use_port,
         "height": height,
         "theme": theme,
         "config": config_dict,

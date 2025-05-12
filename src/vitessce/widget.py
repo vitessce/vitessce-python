@@ -177,7 +177,7 @@ function prependBaseUrl(config, proxy, hasHostName) {
     const isInWorkspaces = origin.startsWith(WORKSPACES_URL_KEYWORD);
 
     const jupyterLabConfigEl = document.getElementById('jupyter-config-data');
-    
+
     let baseUrl;
     if (isInWorkspaces) {
         const pathSegments = pathname.split('/');

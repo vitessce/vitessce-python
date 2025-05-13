@@ -163,7 +163,12 @@ const React = await importWithMap("react", importMap);
 const { createRoot } = await importWithMap("react-dom/client", importMap);
 
 const e = React.createElement;
+
+function isAbsoluteUrl(s) {
+    return s.startsWith('http://') || s.startsWith('https://');
+}
 const WORKSPACES_URL_KEYWORD = 'https://workspaces-pt';
+const OPTIONS_URL_KEYS = ['offsetsUrl', 'refSpecUrl'];
 const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
 // The jupyter server may be running through a proxy,
 // which means that the client needs to prepend the part of the URL before /proxy/8000 such as
@@ -197,24 +202,25 @@ function prependBaseUrl(config, proxy, hasHostName) {
         datasets: config.datasets.map(d => ({
             ...d,
             files: d.files.map(f => {
-                // Update the main file URL
-                const updatedUrl = f.url.startsWith('http://') || f.url.startsWith('https://')
-                    ? f.url
-                    : `${origin}${baseUrl}${f.url}`;
-                // Update any urls within the options object
-                const updatedOptions = { ...f.options };
-                ['offsetsUrl', 'refSpecUrl'].forEach(key => {
-                    if (updatedOptions.hasOwnProperty(key)) {
-                        if (!updatedOptions[key].startsWith('http://') && !updatedOptions[key].startsWith('https://')) {
-                            updatedOptions[key] = `${origin}${baseUrl}${updatedOptions[key]}`;
+                const updatedFileDef = { ...f };
+                if (!isAbsoluteUrl(f.url)) {
+                    // Update the main file URL if necessary.
+                    updatedFileDef.url = `${origin}${baseUrl}${f.url}`;
+                }
+                if (f.options) {
+                    // Update any urls within the options object
+                    const updatedOptions = { ...f.options };
+                    OPTIONS_URL_KEYS.forEach(key => {
+                        const optionValue = updatedOptions[key];
+                        if (optionValue) {
+                            if (!isAbsoluteUrl(optionValue)) {
+                                updatedOptions[key] = `${origin}${baseUrl}${optionValue}`;
+                            }
                         }
-                    }
-                });
-                return {
-                    ...f,
-                    url: updatedUrl,
-                    options: updatedOptions,
-                };
+                    });
+                    updatedFileDef.options = updatedOptions;
+                }
+                return updatedFileDef;
             }),
         })),
     };

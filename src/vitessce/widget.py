@@ -212,10 +212,8 @@ function prependBaseUrl(config, proxy, hasHostName) {
                     const updatedOptions = { ...f.options };
                     OPTIONS_URL_KEYS.forEach(key => {
                         const optionValue = updatedOptions[key];
-                        if (optionValue) {
-                            if (!isAbsoluteUrl(optionValue)) {
-                                updatedOptions[key] = `${origin}${baseUrl}${optionValue}`;
-                            }
+                        if (optionValue && !isAbsoluteUrl(optionValue)) {
+                            updatedOptions[key] = `${origin}${baseUrl}${optionValue}`;
                         }
                     });
                     updatedFileDef.options = updatedOptions;

@@ -196,13 +196,26 @@ function prependBaseUrl(config, proxy, hasHostName) {
         ...config,
         datasets: config.datasets.map(d => ({
             ...d,
-            files: d.files.map(f => ({
-                ...f,
-                url: (!(f.url.startsWith('http://') || f.url.startsWith('https://'))
-                    ? `${origin}${baseUrl}${f.url}`
-                    : f.url
-                ),
-            })),
+            files: d.files.map(f => {
+                // Update the main file URL
+                const updatedUrl = f.url.startsWith('http://') || f.url.startsWith('https://')
+                    ? f.url
+                    : `${origin}${baseUrl}${f.url}`;
+                // Update any urls within the options object
+                const updatedOptions = { ...f.options };
+                ['offsetsUrl', 'refSpecUrl'].forEach(key => {
+                    if (updatedOptions.hasOwnProperty(key)) {
+                        if (!updatedOptions[key].startsWith('http://') && !updatedOptions[key].startsWith('https://')) {
+                            updatedOptions[key] = `${origin}${baseUrl}${updatedOptions[key]}`;
+                        }
+                    }
+                });
+                return {
+                    ...f,
+                    url: updatedUrl,
+                    options: updatedOptions,
+                };
+            }),
         })),
     };
 }

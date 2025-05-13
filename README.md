@@ -14,7 +14,7 @@ Python API and Jupyter widget facilitating interactive visualization of spatial 
 
 To install with pip:
 
-    $ pip install vitessce[all]
+    $ pip install 'vitessce[all]'
 
 ## Getting started
 

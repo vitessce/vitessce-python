@@ -1,5 +1,6 @@
 {
   "name": "tests-widget",
+  "packageManager": "pnpm@9.5.0",
   "private": true,
   "version": "1.0.0",
   "description": "",

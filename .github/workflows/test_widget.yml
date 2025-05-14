@@ -22,7 +22,7 @@ jobs:
         with:
           run_install: |
             - cwd: tests-widget
-          version: 9
+          package_json_file: tests-widget/package.json
       - name: Install Playwright Browsers
         run: pnpm exec playwright install --with-deps
         working-directory: ./tests-widget

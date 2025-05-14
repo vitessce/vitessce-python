@@ -19,16 +19,17 @@ jobs:
         with:
           node-version: 22
       - uses: pnpm/action-setup@v4
-        working-directory: ./tests-widget
         with:
           run_install: |
             - cwd: tests-widget
           package_json_file: tests-widget/package.json
       - name: Install Playwright Browsers
         run: pnpm exec playwright install --with-deps
+        working-directory: ./tests-widget
       - name: Install vitessce
         run: uv sync --extra dev --extra all
       - name: Export notebook to HTML
         run: uv run jupyter nbconvert --to=html --execute docs/notebooks/widget_from_dict.ipynb
       - name: Check that widget renders in HTML output using Playwright
         run: pnpm exec playwright test
+        working-directory: ./tests-widget

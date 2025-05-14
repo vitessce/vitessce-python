@@ -33,3 +33,13 @@ vitessce/yarn.lock
 .DS_Store
 .nova/
 .vscode/
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+tests-widget/test-results/
+tests-widget/playwright-report/
+tests-widget/blob-report/
+tests-widget/playwright/.cache/

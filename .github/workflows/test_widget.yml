@@ -19,8 +19,7 @@ jobs:
         with:
           node-version: 22
       - uses: pnpm/action-setup@v4
-        run:
-          working-directory: tests-widget
+        working-directory: ./tests-widget
         with:
           run_install: |
             - cwd: tests-widget

@@ -2,7 +2,7 @@ Widget examples
 ###############
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    notebooks/widget_brain
    notebooks/widget_brain_h5ad

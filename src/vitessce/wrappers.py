@@ -1253,7 +1253,7 @@ class AnnDataWrapper(AbstractWrapper):
             self.zarr_folder = 'anndata.zarr'
             if '.zip' in str(adata_path):
                 self.is_zip = True
-                self.zarr_folder = 'anndata.zarr.zip'
+                # self.zarr_folder = 'anndata.zarr.zip'
         elif adata_url is not None or adata_artifact is not None:
             self.is_remote = True
             self.is_store = False
@@ -1274,6 +1274,7 @@ class AnnDataWrapper(AbstractWrapper):
 
         self.local_dir_uid = make_unique_filename(".adata.zarr")
         self.local_file_uid = make_unique_filename(".h5ad")
+        self.local_file_uid_zarr = make_unique_filename('.zarr.zip')
         self.local_ref_uid = make_unique_filename(".ref.json")
 
         self._expression_matrix = obs_feature_matrix_path
@@ -1361,7 +1362,7 @@ class AnnDataWrapper(AbstractWrapper):
             if len(options.keys()) > 0:
                 if self.is_h5ad:
                     options["refSpecUrl"] = self.get_ref_url(base_url, dataset_uid, obj_i)
-
+                print(ft.ANNDATA_ZIPPED_ZARR.value)
                 obj_file_def = {
                     "fileType": ft.ANNDATA_ZIPPED_ZARR.value if self.is_zip else ft.ANNDATA_H5AD.value if self.is_h5ad else ft.ANNDATA_ZARR.value,
                     "url": self.get_zarr_url(base_url, dataset_uid, obj_i) if not self.is_h5ad else self.get_h5ad_url(base_url, dataset_uid, obj_i),

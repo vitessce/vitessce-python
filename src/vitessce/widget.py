@@ -233,6 +233,7 @@ async function render(view) {
     const remountOnUidChange = view.model.get('remount_on_uid_change');
     const storeUrls = view.model.get('store_urls');
     const invokeTimeout = view.model.get('invoke_timeout');
+    const invokeBatched = view.model.get('invoke_batched');
 
     const pageMode = view.model.get('page_mode');
     const pageEsm = view.model.get('page_esm');
@@ -319,23 +320,25 @@ async function render(view) {
             storeUrl,
             {
                 async get(key) {
-                    return enqueue([storeUrl, key]);
-                    /*
-                    const [data, buffers] = await view.experimental.invoke("_zarr_get", [storeUrl, key], {
-                        signal: AbortSignal.timeout(invokeTimeout),
-                    });
-                    if (!data.success) return undefined;
+                    if (invokeBatched) {
+                        return enqueue([storeUrl, key]);
+                    } else {
+                        // Do not submit zarr gets in batches. Instead, submit individually.
+                        const [data, buffers] = await view.experimental.invoke("_zarr_get", [storeUrl, key], {
+                            signal: AbortSignal.timeout(invokeTimeout),
+                        });
+                        if (!data.success) return undefined;
 
-                    if (key.includes("spatialdata_attrs") && key.endsWith("0") && !ArrayBuffer.isView(buffers[0].buffer)) {
-                        // For some reason, the Zarrita.js UnicodeStringArray does not seem to work with
-                        // ArrayBuffers (throws a TypeError), so here we convert to Uint8Array if needed.
-                        // This error is occurring specifically for the arr.getChunk call within the AnnDataSource._loadString function.
-                        // TODO: figure out a more long-term solution.
-                        return new Uint8Array(buffers[0].buffer);
+                        if (key.includes("spatialdata_attrs") && key.endsWith("0") && !ArrayBuffer.isView(buffers[0].buffer)) {
+                            // For some reason, the Zarrita.js UnicodeStringArray does not seem to work with
+                            // ArrayBuffers (throws a TypeError), so here we convert to Uint8Array if needed.
+                            // This error is occurring specifically for the arr.getChunk call within the AnnDataSource._loadString function.
+                            // TODO: figure out a more long-term solution.
+                            return new Uint8Array(buffers[0].buffer);
+                        }
+
+                        return buffers[0].buffer;
                     }
-
-                    return buffers[0].buffer;
-                    */
                 },
             }
         ])),
@@ -413,7 +416,7 @@ async function render(view) {
     }
 
     function VitessceWidget(props) {
-        const { model } = props;
+        const { model, styleContainer } = props;
 
         const [config, setConfig] = React.useState(prependBaseUrl(model.get('config'), model.get('proxy'), model.get('has_host_name')));
         const [validateConfig, setValidateConfig] = React.useState(true);
@@ -477,7 +480,7 @@ async function render(view) {
             height, theme, config, onConfigChange, validateConfig,
             pluginViewTypes, pluginCoordinationTypes,
             pluginFileTypes,pluginJointFileTypes, pluginAsyncFunctions,
-            remountOnUidChange, stores, pageMode,
+            remountOnUidChange, stores, pageMode, styleContainer,
         };
 
         return e('div', { ref: divRef, style: { height: height + 'px' } },
@@ -492,7 +495,10 @@ async function render(view) {
     }
 
     const root = createRoot(view.el);
-    root.render(e(VitessceWidget, { model: view.model }));
+    // Marimo puts AnyWidgets in a Shadow Root, so we need to tell Emotion to
+    // insert styles within the Shadow DOM.
+    const styleContainer = view.el.getRootNode();
+    root.render(e(VitessceWidget, { model: view.model, styleContainer }));
 
     return () => {
         // Re-enable scrolling.
@@ -603,10 +609,11 @@ class VitessceWidget(anywidget.AnyWidget):
     page_mode = Bool(False).tag(sync=True)
     page_esm = Unicode('').tag(sync=True)
     invoke_timeout = Int(300000).tag(sync=True)
+    invoke_batched = Bool(True).tag(sync=True)
 
     store_urls = List(trait=Unicode(''), default_value=[]).tag(sync=True)
 
-    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='3.5.12', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, prefer_local=True, invoke_timeout=300000, page_mode=False, page_esm=None):
+    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='3.5.12', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, prefer_local=True, invoke_timeout=300000, invoke_batched=True, page_mode=False, page_esm=None):
         """
         Construct a new Vitessce widget.
 
@@ -623,6 +630,7 @@ class VitessceWidget(anywidget.AnyWidget):
         :param bool remount_on_uid_change: Passed to the remountOnUidChange prop of the <Vitessce/> React component. By default, True.
         :param bool prefer_local: Should local data be preferred (only applies to `*_artifact` data objects)? By default, True.
         :param int invoke_timeout: The timeout in milliseconds for invoking Python functions from JavaScript. By default, 300000.
+        :param bool invoke_batched: Should invocations (Zarr gets) be submitted in batch, or individually? By default, True.
         :param bool page_mode: Whether to render the <Vitessce/> component in grid-mode or page-mode. By default, False.
         :param str page_esm: The ES module string for the page component creation function. Optional.
 
@@ -658,7 +666,7 @@ class VitessceWidget(anywidget.AnyWidget):
             js_package_version=js_package_version, js_dev_mode=js_dev_mode, custom_js_url=custom_js_url,
             plugin_esm=plugin_esm, remount_on_uid_change=remount_on_uid_change,
             page_mode=page_mode, page_esm=('' if page_esm is None else page_esm),
-            invoke_timeout=invoke_timeout,
+            invoke_timeout=invoke_timeout, invoke_batched=invoke_batched,
             uid=uid_str, store_urls=list(self._stores.keys())
         )
 
@@ -763,6 +771,7 @@ def ipython_display(config, height=600, theme='auto', base_url=None, host_name=N
         "page_esm": ('' if page_esm is None else page_esm),
         "remount_on_uid_change": remount_on_uid_change,
         "invoke_timeout": 30000,
+        "invoke_batched": False,
         "proxy": proxy,
         "has_host_name": host_name is not None,
         "height": height,

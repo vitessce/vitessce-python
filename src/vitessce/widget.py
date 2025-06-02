@@ -416,7 +416,7 @@ async function render(view) {
     }
 
     function VitessceWidget(props) {
-        const { model } = props;
+        const { model, styleContainer } = props;
 
         const [config, setConfig] = React.useState(prependBaseUrl(model.get('config'), model.get('proxy'), model.get('has_host_name')));
         const [validateConfig, setValidateConfig] = React.useState(true);
@@ -480,7 +480,7 @@ async function render(view) {
             height, theme, config, onConfigChange, validateConfig,
             pluginViewTypes, pluginCoordinationTypes,
             pluginFileTypes,pluginJointFileTypes, pluginAsyncFunctions,
-            remountOnUidChange, stores, pageMode,
+            remountOnUidChange, stores, pageMode, styleContainer,
         };
 
         return e('div', { ref: divRef, style: { height: height + 'px' } },
@@ -495,7 +495,10 @@ async function render(view) {
     }
 
     const root = createRoot(view.el);
-    root.render(e(VitessceWidget, { model: view.model }));
+    // Marimo puts AnyWidgets in a Shadow Root, so we need to tell Emotion to
+    // insert styles within the Shadow DOM.
+    const styleContainer = view.el.getRootNode();
+    root.render(e(VitessceWidget, { model: view.model, styleContainer }));
 
     return () => {
         // Re-enable scrolling.

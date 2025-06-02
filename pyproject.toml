@@ -90,6 +90,8 @@ linting = []
 notebook = [
   'spatialdata>=0.3.0',
   'dask[dataframe]==2024.11.1',
+  'marimo',
+  'starlette>=0.42.0',
 ]
 demos = [
   "pulp==2.7.0",
@@ -115,9 +117,7 @@ dev = [
 
 [tool.uv]
 default-groups = ["dev"]
-override-dependencies = [
-  'starlette==0.14.0'
-]
+override-dependencies = []
 
 [tool.hatch.build]
 exclude = [".github", "docs", "demos", "binder"]

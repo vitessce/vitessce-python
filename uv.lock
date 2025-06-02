@@ -3830,7 +3830,7 @@ wheels = [
 
 [[package]]
 name = "vitessce"
-version = "3.5.9"
+version = "3.6.0"
 source = { editable = "." }
 dependencies = [
     { name = "anndata" },

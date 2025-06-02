@@ -208,6 +208,23 @@ class TestWrappers(unittest.TestCase):
             'url': 'http://localhost:8000/A/0/test.ome.zarr'
         })
 
+    def test_anndata_with_zip(self):
+        adata_path = data_path / 'test.h5ad.zarr.zip'
+        w = AnnDataWrapper(adata_path,
+                           obs_set_paths=['obs/CellType'], obs_set_names=['Cell Type'],
+                           obs_labels_names=['Cell Label'], obs_labels_paths=['obs/CellLabel'],
+                           obs_embedding_paths=['obsm/X_umap'], obs_embedding_names=['UMAP'])
+        w.local_dir_uid = 'anndata.zarr.zip'
+
+        file_def_creator = w.make_file_def_creator('A', 0)
+        file_def = file_def_creator('http://localhost:8000')
+        self.assertEqual(file_def, {'fileType': 'anndata.zarr.zip', 'url': 'http://localhost:8000/A/0/anndata.zarr.zip',
+                                    'options': {
+                                        'obsEmbedding': [{'path': 'obsm/X_umap', 'embeddingType': 'UMAP', 'dims': [0, 1]}],
+                                        'obsSets': [{'path': 'obs/CellType', 'name': 'Cell Type'}],
+                                        'obsLabels': [{'path': 'obs/CellLabel', 'obsLabelsType': 'Cell Label'}]
+                                    }})
+
     def test_anndata(self):
         adata_path = data_path / 'test.h5ad.zarr'
         w = AnnDataWrapper(adata_path,

@@ -1229,6 +1229,7 @@ class AnnDataWrapper(AbstractWrapper):
         self._adata_url = adata_url
         self._adata_store = adata_store
         self._adata_artifact = adata_artifact
+        self.is_zip = False
 
         # For reference spec JSON with .h5ad files
         self._ref_path = ref_path
@@ -1250,11 +1251,15 @@ class AnnDataWrapper(AbstractWrapper):
             self.is_remote = False
             self.is_store = False
             self.zarr_folder = 'anndata.zarr'
+            if '.zip' in str(adata_path):
+                self.is_zip = True
+                self.zarr_folder = 'anndata.zarr.zip'
         elif adata_url is not None or adata_artifact is not None:
             self.is_remote = True
             self.is_store = False
             self.zarr_folder = None
-
+            if '.zip' in str(adata_url):
+                self.is_zip = True
             # Store artifacts on AbstractWrapper.artifacts for downstream access,
             # e.g. in lamindb.save_vitessce_config
             if adata_artifact is not None:
@@ -1358,7 +1363,7 @@ class AnnDataWrapper(AbstractWrapper):
                     options["refSpecUrl"] = self.get_ref_url(base_url, dataset_uid, obj_i)
 
                 obj_file_def = {
-                    "fileType": ft.ANNDATA_ZARR.value if not self.is_h5ad else ft.ANNDATA_H5AD.value,
+                    "fileType": ft.ANNDATA_ZIPPED_ZARR.value if self.is_zip else ft.ANNDATA_H5AD.value if self.is_h5ad else ft.ANNDATA_ZARR.value,
                     "url": self.get_zarr_url(base_url, dataset_uid, obj_i) if not self.is_h5ad else self.get_h5ad_url(base_url, dataset_uid, obj_i),
                     "options": options
                 }

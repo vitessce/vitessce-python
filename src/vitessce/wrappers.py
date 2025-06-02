@@ -390,8 +390,8 @@ class OmeTiffWrapper(AbstractWrapper):
         else:
             # TODO: Move imports back to top when this is factored out.
             from .routes import range_repsonse, JsonRoute, FileRoute
+            from .responses import UJSONResponse
             from generate_tiff_offsets import get_offsets
-            from starlette.responses import UJSONResponse
 
             offsets = get_offsets(self._img_path)
 
@@ -533,8 +533,8 @@ class ImageOmeTiffWrapper(AbstractWrapper):
         else:
             # TODO: Move imports back to top when this is factored out.
             from .routes import range_repsonse, JsonRoute, FileRoute
+            from .responses import UJSONResponse
             from generate_tiff_offsets import get_offsets
-            from starlette.responses import UJSONResponse
 
             offsets = get_offsets(self._img_path)
 
@@ -666,8 +666,8 @@ class ObsSegmentationsOmeTiffWrapper(AbstractWrapper):
         else:
             # TODO: Move imports back to top when this is factored out.
             from .routes import range_repsonse, JsonRoute, FileRoute
+            from .responses import UJSONResponse
             from generate_tiff_offsets import get_offsets
-            from starlette.responses import UJSONResponse
 
             offsets = get_offsets(self._img_path)
 

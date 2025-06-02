@@ -75,11 +75,12 @@ def test_config_add_dataset():
         "initStrategy": "auto"
     }
 
+
 def test_config_add_anndata_zip_url():
     vc = VitessceConfig(schema_version="1.0.15")
     vc.add_dataset(name='My Dataset').add_object(
         AnnDataWrapper(
-            adata_url="http://example.com/adata.h5ad.zarr.zip",
+            adata_url="http://example.com/adata.zarr.zip",
             obs_set_paths=["obs/louvain"],
         )
     )
@@ -97,7 +98,7 @@ def test_config_add_anndata_zip_url():
                 'files': [
                     {
                         "fileType": "anndata.zarr.zip",
-                        "url": "http://example.com/adata.h5ad.zarr.zip",
+                        "url": "http://example.com/adata.zarr.zip",
                         "options": {
                             "obsSets": [
                                 {

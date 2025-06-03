@@ -82,6 +82,7 @@ def test_config_add_anndata_zip_url():
         AnnDataWrapper(
             adata_url="http://example.com/adata.zarr.zip",
             obs_set_paths=["obs/louvain"],
+            is_zip=True
         )
     )
 

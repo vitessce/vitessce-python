@@ -211,6 +211,7 @@ class TestWrappers(unittest.TestCase):
     def test_anndata_with_zip(self):
         adata_path = data_path / 'test.zarr.zip'
         w = AnnDataWrapper(adata_path,
+                           is_zip=True,
                            obs_set_paths=['obs/CellType'], obs_set_names=['Cell Type'],
                            obs_labels_names=['Cell Label'], obs_labels_paths=['obs/CellLabel'],
                            obs_embedding_paths=['obsm/X_umap'], obs_embedding_names=['UMAP'])

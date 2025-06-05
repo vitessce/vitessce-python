@@ -76,6 +76,52 @@ def test_config_add_dataset():
     }
 
 
+def test_config_add_anndata_zip_url():
+    vc = VitessceConfig(schema_version="1.0.15")
+    vc.add_dataset(name='My Dataset').add_object(
+        AnnDataWrapper(
+            adata_url="http://example.com/adata.zarr.zip",
+            obs_set_paths=["obs/louvain"],
+            is_zip=True
+        )
+    )
+
+    vc_dict = vc.to_dict()
+
+    assert vc_dict == {
+        "version": "1.0.15",
+        "name": "",
+        "description": "",
+        "datasets": [
+            {
+                'uid': 'A',
+                'name': 'My Dataset',
+                'files': [
+                    {
+                        "fileType": "anndata.zarr.zip",
+                        "url": "http://example.com/adata.zarr.zip",
+                        "options": {
+                            "obsSets": [
+                                {
+                                    "name": "louvain",
+                                    "path": "obs/louvain",
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        ],
+        'coordinationSpace': {
+            'dataset': {
+                'A': 'A'
+            },
+        },
+        "layout": [],
+        "initStrategy": "auto"
+    }
+
+
 def test_config_add_anndata_url():
     vc = VitessceConfig(schema_version="1.0.15")
     vc.add_dataset(name='My Dataset').add_object(

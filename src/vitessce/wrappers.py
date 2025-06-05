@@ -1252,13 +1252,13 @@ class AnnDataWrapper(AbstractWrapper):
             self.is_remote = False
             self.is_store = False
             self.zarr_folder = 'anndata.zarr'
-            if is_zip and '.zip' in str(adata_path):
+            if is_zip is None and '.zip' in str(adata_path):
                 self.is_zip = True
         elif adata_url is not None or adata_artifact is not None:
             self.is_remote = True
             self.is_store = False
             self.zarr_folder = None
-            if is_zip and '.zip' in str(adata_url):
+            if is_zip is None and '.zip' in str(adata_url):
                 self.is_zip = True
             # Store artifacts on AbstractWrapper.artifacts for downstream access,
             # e.g. in lamindb.save_vitessce_config

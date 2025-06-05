@@ -27,9 +27,11 @@ jobs:
         run: pnpm exec playwright install --with-deps
         working-directory: ./tests-widget
       - name: Install vitessce
-        run: uv sync --extra dev --extra all
-      - name: Export notebook to HTML
+        run: uv sync --extra dev --extra all --extra notebook
+      - name: Export Jupyter notebook to HTML
         run: uv run jupyter nbconvert --to=html --execute docs/notebooks/widget_from_dict.ipynb
+      - name: Export Marimo notebook to HTML
+        run: uv run marimo export html docs/notebooks/marimo.py -o docs/notebooks/marimo.html
       - name: Check that widget renders in HTML output using Playwright
         run: pnpm exec playwright test
         working-directory: ./tests-widget

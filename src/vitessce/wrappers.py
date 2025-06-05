@@ -1192,7 +1192,7 @@ def raise_error_if_more_than_one(inputs):
 
 
 class AnnDataWrapper(AbstractWrapper):
-    def __init__(self, adata_path=None, adata_url=None, adata_store=None, adata_artifact=None, ref_path=None, ref_url=None, ref_artifact=None, obs_feature_matrix_path=None, feature_filter_path=None, initial_feature_filter_path=None, obs_set_paths=None, obs_set_names=None, obs_locations_path=None, obs_segmentations_path=None, obs_embedding_paths=None, obs_embedding_names=None, obs_embedding_dims=None, obs_spots_path=None, obs_points_path=None, feature_labels_path=None, obs_labels_path=None, convert_to_dense=True, coordination_values=None, obs_labels_paths=None, obs_labels_names=None, **kwargs):
+    def __init__(self, adata_path=None, adata_url=None, adata_store=None, adata_artifact=None, ref_path=None, ref_url=None, ref_artifact=None, obs_feature_matrix_path=None, feature_filter_path=None, initial_feature_filter_path=None, obs_set_paths=None, obs_set_names=None, obs_locations_path=None, obs_segmentations_path=None, obs_embedding_paths=None, obs_embedding_names=None, obs_embedding_dims=None, obs_spots_path=None, obs_points_path=None, feature_labels_path=None, obs_labels_path=None, convert_to_dense=True, coordination_values=None, obs_labels_paths=None, obs_labels_names=None, is_zip=None, **kwargs):
         """
         Wrap an AnnData object by creating an instance of the ``AnnDataWrapper`` class.
 
@@ -1220,6 +1220,7 @@ class AnnDataWrapper(AbstractWrapper):
         :param list[str] obs_labels_names: The optional display names of columns containing observation labels (e.g., alternate cell IDs), instead of the default index in `obs` of the AnnData store.
         :param bool convert_to_dense: Whether or not to convert `X` to dense the zarr store (dense is faster but takes more disk space).
         :param coordination_values: Coordination values for the file definition.
+        :param is_zip: Boolean indicating whether the Zarr store is in a zipped format.
         :type coordination_values: dict or None
         :param \\*\\*kwargs: Keyword arguments inherited from :class:`~vitessce.wrappers.AbstractWrapper`
         """
@@ -1229,6 +1230,7 @@ class AnnDataWrapper(AbstractWrapper):
         self._adata_url = adata_url
         self._adata_store = adata_store
         self._adata_artifact = adata_artifact
+        self.is_zip = is_zip
 
         # For reference spec JSON with .h5ad files
         self._ref_path = ref_path
@@ -1250,11 +1252,14 @@ class AnnDataWrapper(AbstractWrapper):
             self.is_remote = False
             self.is_store = False
             self.zarr_folder = 'anndata.zarr'
+            if is_zip is None and '.zip' in str(adata_path):
+                self.is_zip = True
         elif adata_url is not None or adata_artifact is not None:
             self.is_remote = True
             self.is_store = False
             self.zarr_folder = None
-
+            if is_zip is None and '.zip' in str(adata_url):
+                self.is_zip = True
             # Store artifacts on AbstractWrapper.artifacts for downstream access,
             # e.g. in lamindb.save_vitessce_config
             if adata_artifact is not None:
@@ -1356,9 +1361,8 @@ class AnnDataWrapper(AbstractWrapper):
             if len(options.keys()) > 0:
                 if self.is_h5ad:
                     options["refSpecUrl"] = self.get_ref_url(base_url, dataset_uid, obj_i)
-
                 obj_file_def = {
-                    "fileType": ft.ANNDATA_ZARR.value if not self.is_h5ad else ft.ANNDATA_H5AD.value,
+                    "fileType": ft.ANNDATA_ZARR_ZIP.value if self.is_zip else ft.ANNDATA_H5AD.value if self.is_h5ad else ft.ANNDATA_ZARR.value,
                     "url": self.get_zarr_url(base_url, dataset_uid, obj_i) if not self.is_h5ad else self.get_h5ad_url(base_url, dataset_uid, obj_i),
                     "options": options
                 }

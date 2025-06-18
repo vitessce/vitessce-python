@@ -18,7 +18,7 @@ from os.path import join
 
 
 import spatialdata
-from spatialdata import SpatialData
+from spatialdata import SpatialData, to_polygons
 from spatialdata.models import Image2DModel, Labels2DModel, TableModel
 from spatialdata.transformations import (
     Affine,
@@ -91,6 +91,10 @@ seg_z = zarr.open(seg_store)
 def clean_adata(adata):
     colnames = adata.obs.columns.tolist()
     adata.obs = adata.obs.rename(columns=dict([ (c, c.replace(" ", "_")) for c in colnames ]))
+    # Many of the anndata objects contain un-helpful obs indices with entirely zero values like [0, 0, 0, 0]
+    # TODO: determine whether using 1...N+1 in these cases is correct.
+    if adata.obs.index.unique().shape[0] == 1:
+        adata.obs.index = range(1, adata.obs.shape[0]+1)
     return adata
 
 
@@ -116,6 +120,10 @@ for i, obs_type in enumerate(adata_paths.keys()):
 
 
 # In[ ]:
+
+for labels_key in sdata.labels.keys():
+    shapes_key = "shapes" + labels_key[labels_key.index("_"):]
+    sdata.shapes[shapes_key] = to_polygons(sdata.labels[labels_key])
 
 
 sdata.write(join(base_dir, "sdata.zarr"), overwrite=True)

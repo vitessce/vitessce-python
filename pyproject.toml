@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "vitessce"
-version = "3.6.1"
+version = "3.6.2"
 authors = [
   { name="Mark Keller", email="mark_keller@hms.harvard.edu" },
 ]
@@ -26,20 +26,11 @@ classifiers = [
 ]
 dependencies = [
   'scipy>=1.2.1',
-  'negspy>=0.2.24',
   'pandas>=1.1.2',
   'black>=21.11b1',
   'numpy>=1.21.2',
   'zarr>=2.5.0,<3',
   'numcodecs>=0.5.7,<0.16.0',
-  'anndata>=0.7.8',
-  # scanpy < 1.10.3 does not support numpy >= 2.0.0 and does not
-  # Reference: https://github.com/scverse/scanpy/pull/3115/files
-  'scanpy>=1.10.2',
-  'ome-zarr<0.10.3',
-  'tifffile>=2020.10.1',
-  'jsonschema>=3.2',
-  'tqdm>=4.1.0',
 ]
 
 [project.optional-dependencies]
@@ -68,6 +59,15 @@ docs = [
   'jinja2',
 ]
 all = [
+  # For data_utils
+  'negspy>=0.2.24',
+  'anndata>=0.7.8',
+  # scanpy < 1.10.3 does not support numpy >= 2.0.0 and does not
+  # Reference: https://github.com/scverse/scanpy/pull/3115/files
+  'scanpy>=1.10.2',
+  'ome-zarr<0.10.3',
+  'tifffile>=2020.10.1',
+
   'jupyter-server-proxy>=1.5.2',
   'oxc-py>=0.1.1',
   'anywidget>=0.9.10',
@@ -92,6 +92,7 @@ notebook = [
   'dask[dataframe]==2024.11.1',
   'marimo',
   'starlette>=0.42.0',
+  'tqdm>=4.1.0',
 ]
 demos = [
   "pulp==2.7.0",

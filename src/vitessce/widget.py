@@ -2,29 +2,22 @@ import importlib.util
 from urllib.parse import quote_plus
 import json
 import sys
-
-# Widget dependencies
-import anywidget
-from traitlets import Unicode, Dict, List, Int, Bool
 import time
 import uuid
+import anywidget
+from traitlets import Unicode, Dict, List, Int, Bool
 
-# Server dependencies
-from uvicorn import Config, Server
-
-from starlette.applications import Starlette
-from starlette.middleware import Middleware
-from starlette.middleware.cors import CORSMiddleware
-from threading import Thread
-import socket
 
 MAX_PORT_TRIES = 1000
 DEFAULT_PORT = 8000
 
-
 class BackgroundServer:
     # Reference: https://github.com/gosling-lang/gos/blob/main/gosling/data/_background_server.py#L10
     def __init__(self, routes):
+        from starlette.applications import Starlette
+        from starlette.middleware import Middleware
+        from starlette.middleware.cors import CORSMiddleware
+
         middleware = [
             Middleware(CORSMiddleware, allow_origins=[
                        '*'], allow_methods=["OPTIONS", "GET"], allow_headers=['Range'])
@@ -47,6 +40,9 @@ class BackgroundServer:
         return self
 
     def start(self, port=None, timeout=1, daemon=True, log_level="warning"):
+        from uvicorn import Config, Server
+        from threading import Thread
+
         if self.thread is not None:
             return self
 
@@ -87,6 +83,7 @@ data_server = VitessceDataServer()
 
 
 def is_port_in_use(port):
+    import socket
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         return s.connect_ex(('localhost', port)) == 0
 

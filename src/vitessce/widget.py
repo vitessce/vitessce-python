@@ -11,6 +11,7 @@ from traitlets import Unicode, Dict, List, Int, Bool
 MAX_PORT_TRIES = 1000
 DEFAULT_PORT = 8000
 
+
 class BackgroundServer:
     # Reference: https://github.com/gosling-lang/gos/blob/main/gosling/data/_background_server.py#L10
     def __init__(self, routes):

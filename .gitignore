@@ -11,6 +11,7 @@ tests/data/*
 !tests/data/test.ome.tif
 ./notebooks/
 docs/notebooks/data/
+docs/notebooks/*.html
 __pycache__/
 .snakemake/
 .coverage

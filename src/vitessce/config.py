@@ -602,7 +602,7 @@ class VitessceConfigView:
             })
             spatial_view.use_coordination_by_dict(scopes)
         """
-        if "coordinationScopes" not in self.view["coordinationScopes"] or self.view["coordinationScopes"] is None:
+        if "coordinationScopes" not in self.view or self.view["coordinationScopes"] is None:
             self.view["coordinationScopes"] = {}
 
         if "coordinationScopesBy" not in self.view or self.view["coordinationScopesBy"] is None:

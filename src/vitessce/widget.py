@@ -2,21 +2,11 @@ import importlib.util
 from urllib.parse import quote_plus
 import json
 import sys
-
-# Widget dependencies
-import anywidget
-from traitlets import Unicode, Dict, List, Int, Bool
 import time
 import uuid
+import anywidget
+from traitlets import Unicode, Dict, List, Int, Bool
 
-# Server dependencies
-from uvicorn import Config, Server
-
-from starlette.applications import Starlette
-from starlette.middleware import Middleware
-from starlette.middleware.cors import CORSMiddleware
-from threading import Thread
-import socket
 
 MAX_PORT_TRIES = 1000
 DEFAULT_PORT = 8000
@@ -25,6 +15,10 @@ DEFAULT_PORT = 8000
 class BackgroundServer:
     # Reference: https://github.com/gosling-lang/gos/blob/main/gosling/data/_background_server.py#L10
     def __init__(self, routes):
+        from starlette.applications import Starlette
+        from starlette.middleware import Middleware
+        from starlette.middleware.cors import CORSMiddleware
+
         middleware = [
             Middleware(CORSMiddleware, allow_origins=[
                        '*'], allow_methods=["OPTIONS", "GET"], allow_headers=['Range'])
@@ -47,6 +41,9 @@ class BackgroundServer:
         return self
 
     def start(self, port=None, timeout=1, daemon=True, log_level="warning"):
+        from uvicorn import Config, Server
+        from threading import Thread
+
         if self.thread is not None:
             return self
 
@@ -87,6 +84,7 @@ data_server = VitessceDataServer()
 
 
 def is_port_in_use(port):
+    import socket
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         return s.connect_ex(('localhost', port)) == 0
 
@@ -602,7 +600,7 @@ class VitessceWidget(anywidget.AnyWidget):
 
     next_port = DEFAULT_PORT
 
-    js_package_version = Unicode('3.6.2').tag(sync=True)
+    js_package_version = Unicode('3.6.3').tag(sync=True)
     js_dev_mode = Bool(False).tag(sync=True)
     custom_js_url = Unicode('').tag(sync=True)
     plugin_esm = List(trait=Unicode(''), default_value=[]).tag(sync=True)
@@ -614,7 +612,7 @@ class VitessceWidget(anywidget.AnyWidget):
 
     store_urls = List(trait=Unicode(''), default_value=[]).tag(sync=True)
 
-    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='3.6.2', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, prefer_local=True, invoke_timeout=300000, invoke_batched=True, page_mode=False, page_esm=None):
+    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='3.6.3', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, prefer_local=True, invoke_timeout=300000, invoke_batched=True, page_mode=False, page_esm=None):
         """
         Construct a new Vitessce widget.
 
@@ -749,7 +747,7 @@ class VitessceWidget(anywidget.AnyWidget):
 # Launch Vitessce using plain HTML representation (no ipywidgets)
 
 
-def ipython_display(config, height=600, theme='auto', base_url=None, host_name=None, uid=None, port=None, proxy=False, js_package_version='3.6.2', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, page_mode=False, page_esm=None):
+def ipython_display(config, height=600, theme='auto', base_url=None, host_name=None, uid=None, port=None, proxy=False, js_package_version='3.6.3', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, page_mode=False, page_esm=None):
     from IPython.display import display, HTML
     uid_str = "vitessce" + get_uid_str(uid)
 

@@ -1397,7 +1397,7 @@ SpatialDataWrapperType = TypeVar('SpatialDataWrapperType', bound='SpatialDataWra
 
 class SpatialDataWrapper(AnnDataWrapper):
 
-    def __init__(self, sdata_path: Optional[str] = None, sdata_url: Optional[str] = None, sdata_store: Optional[Union[str, zarr.storage.StoreLike]] = None, sdata_artifact: Optional[ln.Artifact] = None, image_path: Optional[str] = None, region: Optional[str] = None, coordinate_system: Optional[str] = None, affine_transformation: Optional[np.ndarray] = None, obs_spots_path: Optional[str] = None, labels_path: Optional[str] = None, table_path: str = "tables/table", **kwargs):
+    def __init__(self, sdata_path: Optional[str] = None, sdata_url: Optional[str] = None, sdata_store: Optional[Union[str, zarr.storage.StoreLike]] = None, sdata_artifact: Optional[ln.Artifact] = None, image_path: Optional[str] = None, region: Optional[str] = None, coordinate_system: Optional[str] = None, affine_transformation: Optional[np.ndarray] = None, obs_spots_path: Optional[str] = None, labels_path: Optional[str] = None, table_path: str = "tables/table", coordination_values=None, **kwargs):
         """
         Wrap a SpatialData object.
 
@@ -1444,6 +1444,7 @@ class SpatialDataWrapper(AnnDataWrapper):
         if self._adata_path is not None:
             self.zarr_folder = 'spatialdata.zarr'
         self.obs_type_label = None
+        self._coordination_values = coordination_values
         if self._coordination_values is not None and "obsType" in self._coordination_values:
             self.obs_type_label = self._coordination_values["obsType"]
         self._table_path = table_path

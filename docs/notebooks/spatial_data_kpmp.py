@@ -1,56 +1,15 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# # Vitessce Widget Tutorial
-
-# ## Import dependencies
-# 
-
-# https://github.com/vitessce/vitessce/blob/main/examples/configs/src/view-configs/spatial-beta/kpmp.js
-
-# In[2]:
-
-
 from os.path import join
-
-
-# In[1]:
-
-
-import spatialdata
 from spatialdata import SpatialData, to_polygons
 from spatialdata.models import Image2DModel, Labels2DModel, TableModel
 from spatialdata.transformations import (
-    Affine,
-    MapAxis,
     Scale,
-    Sequence,
-    Translation,
-    get_transformation,
     set_transformation,
 )
-from anndata import read_zarr, AnnData
-import tifffile
-from tifffile import imread, TiffFile
-import xml.etree.ElementTree
-import io
+from anndata import read_zarr
+from tifffile import imread
 import zarr
 
-
-
-# In[2]:
-
-
-
-
-# In[3]:
-
-
-base_dir = join("..", "..", "..", "kpmp-f2f-march-2023", "S-1905-017737")
-
-
-# In[ ]:
-
+base_dir = join("S-1905-017737")
 
 img_path = join(base_dir, "S-1905-017737_PAS_2of2_bf.ome.tif")
 seg_path = join(base_dir, "S-1905-017737_PAS_2of2.ome.tif")
@@ -65,28 +24,10 @@ adata_paths = {
     "peritubular_capillaries": join(base_dir, "Peritubular Capillaries renamed.adata.zarr"),
 }
 
-
-# In[ ]:
-
-
 # The shape of the data should be c(z)yx for 2D (3D) images
-
-
-# In[ ]:
-
-
 img_arr = imread(img_path)
-
-
-# In[ ]:
-
-
 seg_store = imread(seg_path, aszarr=True)
 seg_z = zarr.open(seg_store)
-
-
-# In[ ]:
-
 
 def clean_adata(adata):
     colnames = adata.obs.columns.tolist()
@@ -96,10 +37,6 @@ def clean_adata(adata):
     if adata.obs.index.unique().shape[0] == 1:
         adata.obs.index = range(1, adata.obs.shape[0]+1)
     return adata
-
-
-# In[ ]:
-
 
 sdata = SpatialData(
     images={
@@ -118,26 +55,10 @@ for i, obs_type in enumerate(adata_paths.keys()):
     scale = Scale([2.0, 2.0], axes=("y","x"))
     set_transformation(sdata[f"labels_{obs_type}"], scale, to_coordinate_system="global")
 
-
-# In[ ]:
-
 for labels_key in sdata.labels.keys():
     shapes_key = "shapes" + labels_key[labels_key.index("_"):]
     sdata.shapes[shapes_key] = to_polygons(sdata.labels[labels_key])
 
-
 sdata.write(join(base_dir, "sdata.zarr"), overwrite=True)
-print(join(base_dir, "sdata.zarr"))
+print(join(base_dir, "S-1905-017737.sdata.zarr"))
 print("Done")
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-

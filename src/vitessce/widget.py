@@ -232,6 +232,7 @@ async function render(view) {
     const storeUrls = view.model.get('store_urls');
     const invokeTimeout = view.model.get('invoke_timeout');
     const invokeBatched = view.model.get('invoke_batched');
+    const preventScroll = view.model.get('prevent_scroll');
 
     const pageMode = view.model.get('page_mode');
     const pageEsm = view.model.get('page_esm');
@@ -424,7 +425,7 @@ async function render(view) {
         const divRef = React.useRef();
 
         React.useEffect(() => {
-            if(!divRef.current || pageMode) {
+            if(!divRef.current || !preventScroll) {
                 return () => {};
             }
 
@@ -450,7 +451,7 @@ async function render(view) {
                     divRef.current.removeEventListener("mouseleave", handleMouseLeave);
                 }
             };
-        }, [divRef, pageMode]);
+        }, [divRef, preventScroll]);
 
         // Config changed on JS side (from within <Vitessce/>),
         // send updated config to Python side.
@@ -609,10 +610,11 @@ class VitessceWidget(anywidget.AnyWidget):
     page_esm = Unicode('').tag(sync=True)
     invoke_timeout = Int(300000).tag(sync=True)
     invoke_batched = Bool(True).tag(sync=True)
+    prevent_scroll = Bool(True).tag(sync=True)
 
     store_urls = List(trait=Unicode(''), default_value=[]).tag(sync=True)
 
-    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='3.6.3', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, prefer_local=True, invoke_timeout=300000, invoke_batched=True, page_mode=False, page_esm=None):
+    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='3.6.3', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, prefer_local=True, invoke_timeout=300000, invoke_batched=True, page_mode=False, page_esm=None, prevent_scroll=True):
         """
         Construct a new Vitessce widget.
 
@@ -632,6 +634,7 @@ class VitessceWidget(anywidget.AnyWidget):
         :param bool invoke_batched: Should invocations (Zarr gets) be submitted in batch, or individually? By default, True.
         :param bool page_mode: Whether to render the <Vitessce/> component in grid-mode or page-mode. By default, False.
         :param str page_esm: The ES module string for the page component creation function. Optional.
+        :param bool prevent_scroll: Should mouseover in the Vitessce widget prevent disable the scrolling of the notebook? By default, True.
 
         .. code-block:: python
             :emphasize-lines: 4
@@ -665,7 +668,7 @@ class VitessceWidget(anywidget.AnyWidget):
             js_package_version=js_package_version, js_dev_mode=js_dev_mode, custom_js_url=custom_js_url,
             plugin_esm=plugin_esm, remount_on_uid_change=remount_on_uid_change,
             page_mode=page_mode, page_esm=('' if page_esm is None else page_esm),
-            invoke_timeout=invoke_timeout, invoke_batched=invoke_batched,
+            invoke_timeout=invoke_timeout, invoke_batched=invoke_batched, prevent_scroll=prevent_scroll,
             uid=uid_str, store_urls=list(self._stores.keys())
         )
 

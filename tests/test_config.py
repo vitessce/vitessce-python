@@ -1151,6 +1151,7 @@ def test_config_add_and_use_coordination_by_dict():
             {
                 "component": "spatial",
                 "coordinationScopes": {
+                    "dataset": "A",
                     "spatialImageLayer": ["A"],
                     "spatialSegmentationLayer": ["A"]
                 },

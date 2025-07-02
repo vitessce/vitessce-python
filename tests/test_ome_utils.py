@@ -90,7 +90,9 @@ class TestOmeUtils(unittest.TestCase):
                      }
                 ],
                 'name': 'Test',
-                'rdefs': {},
+                'rdefs': {
+                    "model": "color",
+                },
                 'version': '0.3'
             }
         }

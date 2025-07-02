@@ -99,7 +99,9 @@ def rgb_img_to_ome_zarr(img_arr, output_path, img_name="Image", chunks=(1, 256, 
     z_root.attrs["omero"] = {
         "name": img_name,
         "version": "0.3",
-        "rdefs": {},
+        "rdefs": {
+            "model": "color",
+        },
         "channels": [
             {
                 "label": "R",
@@ -156,7 +158,9 @@ def multiplex_img_to_ome_zarr(img_arr, channel_names, output_path, img_name="Ima
     z_root.attrs["omero"] = {
         "name": img_name,
         "version": "0.3",
-        "rdefs": {},
+        "rdefs": {
+            "model": "greyscale",
+        },
         "channels": [
             {
                 "label": channel_name,

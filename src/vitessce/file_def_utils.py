@@ -100,6 +100,16 @@ def gen_obs_labels_schema(options: dict, paths: Optional[list[str]] = None, name
         options["obsLabels"] = obs_labels
     return options
 
+def gen_obs_feature_columns_schema(options: dict, obs_feature_column_paths: Optional[list[str]] = None):
+    if obs_feature_column_paths is not None:
+        options["obsFeatureColumns"] = [
+            {
+                "path": col_path
+            }
+            for col_path in obs_feature_column_paths
+        ]
+    return options
+
 
 def gen_path_schema(key: str, path: Optional[str], options: dict):
     if path is not None:

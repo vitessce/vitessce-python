@@ -163,7 +163,7 @@ const { createRoot } = await importWithMap("react-dom/client", importMap);
 const e = React.createElement;
 
 function isAbsoluteUrl(s) {
-    return s.startsWith('http://') || s.startsWith('https://');
+    return s?.startsWith('http://') || s?.startsWith('https://');
 }
 const WORKSPACES_URL_KEYWORD = 'https://workspaces-pt';
 const OPTIONS_URL_KEYS = ['offsetsUrl', 'refSpecUrl'];
@@ -201,7 +201,7 @@ function prependBaseUrl(config, proxy, hasHostName) {
             ...d,
             files: d.files.map(f => {
                 const updatedFileDef = { ...f };
-                if (!isAbsoluteUrl(f.url)) {
+                if (f.url && !isAbsoluteUrl(f.url) ) {
                     // Update the main file URL if necessary.
                     updatedFileDef.url = `${origin}${baseUrl}${f.url}`;
                 }
@@ -214,6 +214,28 @@ function prependBaseUrl(config, proxy, hasHostName) {
                             updatedOptions[key] = `${origin}${baseUrl}${optionValue}`;
                         }
                     });
+
+                    // Update image URLs if they exist
+                    if ('images' in f.options && Array.isArray(f.options.images)) {
+                        const updatedImages = f.options.images.map(image => {
+                            const updatedImage = { ...image };
+
+                            if (image.url && !isAbsoluteUrl(image.url)) {
+                                updatedImage.url = `${origin}${baseUrl}${image.url}`;
+                            }
+
+                            const metadata = { ...image.metadata };
+                            if (metadata?.omeTiffOffsetsUrl && !isAbsoluteUrl(metadata.omeTiffOffsetsUrl)) {
+                                metadata.omeTiffOffsetsUrl = `${origin}${baseUrl}${metadata.omeTiffOffsetsUrl}`;
+                            }
+
+                            updatedImage.metadata = metadata;
+
+                            return updatedImage;
+                        });
+
+                        updatedOptions.images = updatedImages;
+                    }
                     updatedFileDef.options = updatedOptions;
                 }
                 return updatedFileDef;

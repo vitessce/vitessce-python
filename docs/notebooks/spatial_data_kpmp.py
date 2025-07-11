@@ -59,6 +59,37 @@ for labels_key in sdata.labels.keys():
     shapes_key = "shapes" + labels_key[labels_key.index("_"):]
     sdata.shapes[shapes_key] = to_polygons(sdata.labels[labels_key])
 
+# Convert boolean columns to set names
+ptc_obs = sdata.tables['table_peritubular_capillaries'].obs
+ptc_obs['PTC_in_Cortex'] = sdata.tables['table_peritubular_capillaries'].X[:,2]
+ptc_obs['PTC_in_IFTA'] = sdata.tables['table_peritubular_capillaries'].X[:,3]
+
+def row_to_cortex_name(row):
+    if row['PTC_in_Cortex'] == 1.0:
+        return "Inside Cortex"
+    if row['PTC_in_Cortex'] == 0.0:
+        return "Outside Cortex"
+
+def row_to_ifta_name(row):
+    if row['PTC_in_IFTA'] == 1.0:
+        return "IFTA"
+    if row['PTC_in_IFTA'] == 0.0:
+        return "non-IFTA"
+
+def row_to_cortical_ifta_name(row):
+    if row['PTC_in_Cortex'] == 1.0 and row['PTC_in_IFTA'] == 1.0:
+        return "Cortical IFTA"
+    if row['PTC_in_Cortex'] == 1.0 and row['PTC_in_IFTA'] == 0.0:
+        return "Cortical non-IFTA"
+    if row['PTC_in_Cortex'] == 0.0:
+        return "Outside Cortex"
+
+ptc_obs['cortex_set'] = ptc_obs.apply(row_to_cortex_name, axis='columns')
+ptc_obs['ifta_set'] = ptc_obs.apply(row_to_ifta_name, axis='columns')
+ptc_obs['cortex_ifta_set'] = ptc_obs.apply(row_to_cortical_ifta_name, axis='columns')
+
+sdata.tables['table_peritubular_capillaries'].obs = ptc_obs
+
 sdata.write(join(base_dir, "sdata.zarr"), overwrite=True)
 print(join(base_dir, "S-1905-017737.sdata.zarr"))
 print("Done")

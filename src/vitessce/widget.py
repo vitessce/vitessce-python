@@ -146,7 +146,7 @@ def get_uid_str(uid):
         uid_str = uid
     return uid_str
 
-
+# lang: js
 ESM = """
 import { importWithMap } from 'https://unpkg.com/dynamic-importmap@0.1.0';
 const importMap = {
@@ -539,6 +539,7 @@ async function render(view) {
 export default { render };
 """
 
+# lang: js
 DEFAULT_PLUGIN_ESM = """
 function createPlugins(utilsForPlugins) {
     const {
@@ -563,6 +564,7 @@ function createPlugins(utilsForPlugins) {
 export default { createPlugins };
 """
 
+# lang: js
 DEFAULT_PAGE_ESM = """
 function createPage(utilsForPage) {
     const {
@@ -623,7 +625,7 @@ class VitessceWidget(anywidget.AnyWidget):
 
     next_port = DEFAULT_PORT
 
-    js_package_version = Unicode('3.6.6').tag(sync=True)
+    js_package_version = Unicode('3.6.7').tag(sync=True)
     js_dev_mode = Bool(False).tag(sync=True)
     custom_js_url = Unicode('').tag(sync=True)
     plugin_esm = List(trait=Unicode(''), default_value=[]).tag(sync=True)
@@ -636,7 +638,7 @@ class VitessceWidget(anywidget.AnyWidget):
 
     store_urls = List(trait=Unicode(''), default_value=[]).tag(sync=True)
 
-    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='3.6.6', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, prefer_local=True, invoke_timeout=300000, invoke_batched=True, page_mode=False, page_esm=None, prevent_scroll=True):
+    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='3.6.7', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, prefer_local=True, invoke_timeout=300000, invoke_batched=True, page_mode=False, page_esm=None, prevent_scroll=True):
         """
         Construct a new Vitessce widget.
 
@@ -772,7 +774,7 @@ class VitessceWidget(anywidget.AnyWidget):
 # Launch Vitessce using plain HTML representation (no ipywidgets)
 
 
-def ipython_display(config, height=600, theme='auto', base_url=None, host_name=None, uid=None, port=None, proxy=False, js_package_version='3.6.6', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, page_mode=False, page_esm=None):
+def ipython_display(config, height=600, theme='auto', base_url=None, host_name=None, uid=None, port=None, proxy=False, js_package_version='3.6.7', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, page_mode=False, page_esm=None):
     from IPython.display import display, HTML
     uid_str = "vitessce" + get_uid_str(uid)
 

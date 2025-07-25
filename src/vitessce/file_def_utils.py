@@ -3,8 +3,6 @@ from __future__ import annotations
 from functools import partial
 from typing import Optional
 
-import numpy as np
-
 
 def gen_obs_embedding_schema(options: dict, paths: Optional[list[str]] = None, names: Optional[list[str]] = None, dims: Optional[list[list[int]]] = None):
     if paths is not None:
@@ -127,29 +125,25 @@ gen_obs_points_schema = partial(gen_path_schema, "obsPoints")
 gen_feature_labels_schema = partial(gen_path_schema, "featureLabels")
 
 
-def gen_sdata_image_schema(options, path: str, coordinate_system: Optional[str] = None, affine_transformation: Optional[np.ndarray] = None) -> dict:
+def gen_sdata_image_schema(options, path: str, coordinate_system: Optional[str] = None) -> dict:
     if path is not None:
         options["image"] = {
             "path": path
         }
-        if affine_transformation is not None:
-            options["image"]['coordinateTransformations'] = affine_transformation
         if coordinate_system is not None:
             options["image"]['coordinateSystem'] = coordinate_system
     return options
 
 
-def gen_sdata_labels_schema(options, path: str, table_path: str = "tables/table", coordinate_system: Optional[str] = None, affine_transformation: Optional[np.ndarray] = None) -> dict:
+def gen_sdata_obs_segmentations_schema(options, path: str, table_path: str = "tables/table", coordinate_system: Optional[str] = None) -> dict:
     if path is not None:
-        options["labels"] = {
+        options["obsSegmentations"] = {
             "path": path
         }
         if table_path is not None:
-            options["labels"]['tablePath'] = table_path
-        if affine_transformation is not None:
-            options["labels"]['coordinateTransformations'] = affine_transformation
+            options["obsSegmentations"]['tablePath'] = table_path
         if coordinate_system is not None:
-            options["labels"]['coordinateSystem'] = coordinate_system
+            options["obsSegmentations"]['coordinateSystem'] = coordinate_system
     return options
 
 

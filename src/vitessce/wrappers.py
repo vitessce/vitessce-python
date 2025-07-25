@@ -29,7 +29,7 @@ from vitessce.file_def_utils import (
     gen_obs_labels_schema,
     gen_obs_sets_schema,
     gen_sdata_image_schema,
-    gen_sdata_labels_schema,
+    gen_sdata_obs_segmentations_schema,
     gen_sdata_obs_spots_schema,
     gen_sdata_obs_sets_schema,
     gen_sdata_obs_feature_matrix_schema,
@@ -1401,7 +1401,7 @@ SpatialDataWrapperType = TypeVar('SpatialDataWrapperType', bound='SpatialDataWra
 
 class SpatialDataWrapper(AnnDataWrapper):
 
-    def __init__(self, sdata_path: Optional[str] = None, sdata_url: Optional[str] = None, sdata_store: Optional[Union[str, zarr.storage.StoreLike]] = None, sdata_artifact: Optional[ln.Artifact] = None, image_path: Optional[str] = None, region: Optional[str] = None, coordinate_system: Optional[str] = None, affine_transformation: Optional[np.ndarray] = None, obs_spots_path: Optional[str] = None, labels_path: Optional[str] = None, table_path: str = "tables/table", coordination_values=None, **kwargs):
+    def __init__(self, sdata_path: Optional[str] = None, sdata_url: Optional[str] = None, sdata_store: Optional[Union[str, zarr.storage.StoreLike]] = None, sdata_artifact: Optional[ln.Artifact] = None, image_path: Optional[str] = None, region: Optional[str] = None, coordinate_system: Optional[str] = None, obs_spots_path: Optional[str] = None, obs_segmentations_path: Optional[str] = None, table_path: str = "tables/table", coordination_values=None, **kwargs):
         """
         Wrap a SpatialData object.
 
@@ -1421,8 +1421,8 @@ class SpatialDataWrapper(AnnDataWrapper):
         :type affine_transformation: Optional[np.ndarray]
         :param obs_spots_path: Location of shapes that should be interpreted as spot observations, by default None
         :type obs_spots_path: Optional[str]
-        :param labels_path: Location of the labels (segmentation bitmask image), by default None
-        :type labels_path: Optional[str]
+        :param obs_segmentations_path: Path to a labels or shapes element (segmentation bitmask label image or segmentation polygon shapes), by default None
+        :type obs_segmentations_path: Optional[str]
         """
         raise_error_if_zero_or_more_than_one([
             sdata_path,
@@ -1437,14 +1437,21 @@ class SpatialDataWrapper(AnnDataWrapper):
             kwargs.get('adata_artifact', None)
         ])
         super().__init__(adata_path=sdata_path, adata_url=sdata_url, adata_store=sdata_store, adata_artifact=sdata_artifact, **kwargs)
+        if "labels_path" in kwargs:
+            warnings.warn("`labels_path` is deprecated. Use `obs_segmentations_path` instead.", DeprecationWarning)
+            self._obs_segmentations_path = kwargs["labels_path"]
+        if "shapes_path" in kwargs:
+            warnings.warn("`shapes_path` is deprecated. Use `obs_segmentations_path` instead.", DeprecationWarning)
+        if "affine_transformation" in kwargs:
+            warnings.warn("`affine_transformation` is deprecated. Store transformations in the SpatialData object, then specify `coordinate_system`.", DeprecationWarning)
+
         self.local_dir_uid = make_unique_filename(".sdata.zarr")
         self._image_path = image_path
         self._region = region
         self._coordinate_system = coordinate_system
-        self._affine_transformation = affine_transformation
         self._kwargs = kwargs
         self._obs_spots_path = obs_spots_path
-        self._labels_path = labels_path
+        self._obs_segmentations_path = obs_segmentations_path
         if self._adata_path is not None:
             self.zarr_folder = 'spatialdata.zarr'
         self.obs_type_label = None
@@ -1530,8 +1537,8 @@ class SpatialDataWrapper(AnnDataWrapper):
             options = gen_sdata_obs_feature_matrix_schema(options, self._expression_matrix, self._gene_var_filter, self._matrix_gene_var_filter, self._region)
             options = gen_sdata_obs_sets_schema(options, self._obs_set_elems, self._obs_set_names, self._table_path, self._region)
             options = gen_sdata_obs_spots_schema(options, self._obs_spots_path, self._table_path, self._region, self._coordinate_system)
-            options = gen_sdata_image_schema(options, self._image_path, self._coordinate_system, self._affine_transformation)
-            options = gen_sdata_labels_schema(options, self._labels_path, self._table_path, self._coordinate_system, self._affine_transformation)
+            options = gen_sdata_image_schema(options, self._image_path, self._coordinate_system)
+            options = gen_sdata_obs_segmentations_schema(options, self._obs_segmentations_path, self._table_path, self._coordinate_system)
             options = gen_feature_labels_schema(self._feature_labels, options)
             if len(options.keys()) > 0:
                 obj_file_def = {

@@ -12,8 +12,6 @@ from pathlib import PurePath, PurePosixPath
 import warnings
 import zarr
 
-import numpy as np
-
 if TYPE_CHECKING:
     import lamindb as ln
     from spatialdata import SpatialData

@@ -3,8 +3,6 @@ from __future__ import annotations
 from functools import partial
 from typing import Optional
 
-import numpy as np
-
 
 def gen_obs_embedding_schema(options: dict, paths: Optional[list[str]] = None, names: Optional[list[str]] = None, dims: Optional[list[list[int]]] = None):
     if paths is not None:

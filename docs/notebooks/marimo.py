@@ -33,13 +33,13 @@ def _(mo):
 
 @app.cell
 def _(vw):
-    vw.config
+    vw._config
     return
 
 
 @app.cell
 def _(vw):
-    vw.config["coordinationSpace"]["embeddingZoom"]
+    vw._config["coordinationSpace"]["embeddingZoom"]
     return
 
 

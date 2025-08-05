@@ -445,7 +445,7 @@ async function render(view) {
     function VitessceWidget(props) {
         const { model, styleContainer } = props;
 
-        const [config, setConfig] = React.useState(prependBaseUrl(model.get('config'), model.get('proxy'), model.get('has_host_name')));
+        const [config, setConfig] = React.useState(prependBaseUrl(model.get('_config'), model.get('proxy'), model.get('has_host_name')));
         const [validateConfig, setValidateConfig] = React.useState(true);
         const height = model.get('height');
         const theme = model.get('theme') === 'auto' ? (prefersDark ? 'dark' : 'light') : model.get('theme');
@@ -484,7 +484,7 @@ async function render(view) {
         // Config changed on JS side (from within <Vitessce/>),
         // send updated config to Python side.
         const onConfigChange = React.useCallback((config) => {
-            model.set('config', config);
+            model.set('_config', config);
             setValidateConfig(false);
             model.save_changes();
         }, [model]);
@@ -492,8 +492,8 @@ async function render(view) {
         // Config changed on Python side,
         // pass to <Vitessce/> component to it is updated on JS side.
         React.useEffect(() => {
-            model.on('change:config', () => {
-                const newConfig = prependBaseUrl(model.get('config'), model.get('proxy'), model.get('has_host_name'));
+            model.on('change:_config', () => {
+                const newConfig = prependBaseUrl(model.get('_config'), model.get('proxy'), model.get('has_host_name'));
 
                 // Force a re-render and re-validation by setting a new config.uid value.
                 // TODO: make this conditional on a parameter from Python.
@@ -597,8 +597,12 @@ class VitesscePlugin:
     """
     A class that represents a Vitessce widget plugin. Custom plugins can be created by subclassing this class.
     """
-    plugin_esm = DEFAULT_PLUGIN_ESM
-    commands = {}
+
+    #: The ES module string for the plugin.
+    plugin_esm = DEFAULT_PLUGIN_ESM  # type: str
+
+    #: A dictionary mapping command name strings to functions. Functions should take two arguments (message, buffers) and return a tuple (response, buffers).
+    commands = {}  # type: dict
 
     def on_config_change(self, new_config):
         """
@@ -614,7 +618,16 @@ class VitesscePlugin:
 
 class VitessceWidget(anywidget.AnyWidget):
     """
-    A class to represent a Jupyter widget for Vitessce.
+    A class to represent a Jupyter widget for Vitessce. Not intended to be instantiated directly; instead, use ``VitessceConfig.widget``.
+
+    .. code-block:: python
+        :emphasize-lines: 4
+
+        from vitessce import VitessceConfig
+
+        vc = VitessceConfig.from_object(my_scanpy_object)
+        vw = vc.widget()
+        vw
     """
     _esm = ESM
 
@@ -622,7 +635,13 @@ class VitessceWidget(anywidget.AnyWidget):
     # Widget properties are defined as traitlets. Any property tagged with `sync=True`
     # is automatically synced to the frontend *any* time it changes in Python.
     # It is synced back to Python from the frontend *any* time the model is touched.
-    config = Dict({}).tag(sync=True)
+
+    #: Dictionary representation of the Vitessce JSON configuration. Synced via traitlets upon interactions.
+    _config = Dict({}).tag(sync=True)  # type: dict
+
+    #: The VitessceConfig instance used to create this widget. Not synced upon interactions.
+    config = None  # type: vitessce.config.VitessceConfig
+
     height = Int(600).tag(sync=True)
     theme = Unicode('auto').tag(sync=True)
     proxy = Bool(False).tag(sync=True)
@@ -631,7 +650,7 @@ class VitessceWidget(anywidget.AnyWidget):
 
     next_port = DEFAULT_PORT
 
-    js_package_version = Unicode('3.6.11').tag(sync=True)
+    js_package_version = Unicode('3.6.12').tag(sync=True)
     js_dev_mode = Bool(False).tag(sync=True)
     custom_js_url = Unicode('').tag(sync=True)
     plugin_esm = List(trait=Unicode(''), default_value=[]).tag(sync=True)
@@ -644,9 +663,10 @@ class VitessceWidget(anywidget.AnyWidget):
 
     store_urls = List(trait=Unicode(''), default_value=[]).tag(sync=True)
 
-    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='3.6.11', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, prefer_local=True, invoke_timeout=300000, invoke_batched=True, page_mode=False, page_esm=None, prevent_scroll=True):
+    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='3.6.12', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, prefer_local=True, invoke_timeout=300000, invoke_batched=True, page_mode=False, page_esm=None, prevent_scroll=True):
+        """ """
         """
-        Construct a new Vitessce widget.
+        Construct a new Vitessce widget. Not intended to be instantiated directly; instead, use ``VitessceConfig.widget``.
 
         :param config: A view config instance.
         :type config: VitessceConfig
@@ -666,19 +686,16 @@ class VitessceWidget(anywidget.AnyWidget):
         :param str page_esm: The ES module string for the page component creation function. Optional.
         :param bool prevent_scroll: Should mouseover in the Vitessce widget prevent disable the scrolling of the notebook? By default, True.
 
-        .. code-block:: python
-            :emphasize-lines: 4
-
-            from vitessce import VitessceConfig, VitessceWidget
-
-            vc = VitessceConfig.from_object(my_scanpy_object)
-            vw = vc.widget()
-            vw
+        Note: these parameter docstrings need to be manually kept in sync with the VitessceConfig.widget docstring.
         """
 
         base_url, use_port, VitessceWidget.next_port = get_base_url_and_port(
             port, VitessceWidget.next_port, proxy=proxy)
-        self.config_obj = config
+        # Note:
+        # - self.config is the VitessceConfig instance.
+        # - self._config is the JSON configuration, synced via traitlets
+
+        self.config = config
         self.port = use_port
         config_dict = config.to_dict(base_url=base_url)
         routes = config.get_routes()
@@ -694,7 +711,7 @@ class VitessceWidget(anywidget.AnyWidget):
         uid_str = get_uid_str(uid)
 
         super(VitessceWidget, self).__init__(
-            config=config_dict, height=height, theme=theme, proxy=proxy,
+            _config=config_dict, height=height, theme=theme, proxy=proxy,
             js_package_version=js_package_version, js_dev_mode=js_dev_mode, custom_js_url=custom_js_url,
             plugin_esm=plugin_esm, remount_on_uid_change=remount_on_uid_change,
             page_mode=page_mode, page_esm=('' if page_esm is None else page_esm),
@@ -712,14 +729,14 @@ class VitessceWidget(anywidget.AnyWidget):
                     # It is optional for plugins to implement on_config_change.
                     pass
             if new_config is not None:
-                self.config = new_config
+                self._config = new_config
 
-        self.observe(handle_config_change, names=['config'])
+        self.observe(handle_config_change, names=['_config'])
 
         serve_routes(config, routes, use_port)
 
     def _get_coordination_value(self, coordination_type, coordination_scope):
-        obj = self.config['coordinationSpace'][coordination_type]
+        obj = self._config['coordinationSpace'][coordination_type]
         obj_scopes = list(obj.keys())
         if coordination_scope is not None:
             if coordination_scope in obj_scopes:
@@ -742,7 +759,7 @@ class VitessceWidget(anywidget.AnyWidget):
         return self._get_coordination_value('cellSelection', scope)
 
     def close(self):
-        self.config_obj.stop_server(self.port)
+        self.config.stop_server(self.port)
         super().close()
 
     @anywidget.experimental.command
@@ -780,7 +797,7 @@ class VitessceWidget(anywidget.AnyWidget):
 # Launch Vitessce using plain HTML representation (no ipywidgets)
 
 
-def ipython_display(config, height=600, theme='auto', base_url=None, host_name=None, uid=None, port=None, proxy=False, js_package_version='3.6.11', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, page_mode=False, page_esm=None):
+def ipython_display(config, height=600, theme='auto', base_url=None, host_name=None, uid=None, port=None, proxy=False, js_package_version='3.6.12', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, page_mode=False, page_esm=None):
     from IPython.display import display, HTML
     uid_str = "vitessce" + get_uid_str(uid)
 
@@ -808,7 +825,7 @@ def ipython_display(config, height=600, theme='auto', base_url=None, host_name=N
         "has_host_name": host_name is not None,
         "height": height,
         "theme": theme,
-        "config": config_dict,
+        "_config": config_dict,
         "store_urls": [],
     }
 

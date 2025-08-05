@@ -925,6 +925,19 @@ class VitessceConfig:
             del self.background_servers[port]
 
     def stop_all_servers(self):
+        """
+        Stop all background servers associated with this config instance.
+
+        .. code-block:: python
+            :emphasize-lines: 5
+
+            from vitessce import VitessceConfig
+
+            vc = VitessceConfig(schema_version="1.0.18", name='My Config')
+            vw = vc.widget()
+            # ... do something with the widget ...
+            vc.stop_all_servers()
+        """
         for server in self.background_servers.values():
             server.stop()
         self.background_servers = {}
@@ -1791,6 +1804,17 @@ class VitessceConfig:
         :param int height: The height of the widget, in pixels. By default, 600.
         :param int port: The port to use when serving data objects on localhost. By default, 8000.
         :param bool proxy: Is this widget being served through a proxy, for example with a cloud notebook (e.g. Binder)?
+        :param str js_package_version: The version of the NPM package ('vitessce' if not js_dev_mode else '@vitessce/dev').
+        :param bool js_dev_mode: Should @vitessce/dev be used (typically for debugging purposes)? By default, False.
+        :param str custom_js_url: A URL to a JavaScript file to use (instead of 'vitessce' or '@vitessce/dev' NPM package).
+        :param list[VitesscePlugin] plugins: A list of subclasses of VitesscePlugin. Optional.
+        :param bool remount_on_uid_change: Passed to the remountOnUidChange prop of the <Vitessce/> React component. By default, True.
+        :param bool prefer_local: Should local data be preferred (only applies to `*_artifact` data objects)? By default, True.
+        :param int invoke_timeout: The timeout in milliseconds for invoking Python functions from JavaScript. By default, 300000.
+        :param bool invoke_batched: Should invocations (Zarr gets) be submitted in batch, or individually? By default, True.
+        :param bool page_mode: Whether to render the <Vitessce/> component in grid-mode or page-mode. By default, False.
+        :param str page_esm: The ES module string for the page component creation function. Optional.
+        :param bool prevent_scroll: Should mouseover in the Vitessce widget prevent disable the scrolling of the notebook? By default, True.
 
         :returns: The Jupyter widget.
         :rtype: VitessceWidget

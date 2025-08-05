@@ -599,10 +599,10 @@ class VitesscePlugin:
     """
 
     #: The ES module string for the plugin.
-    plugin_esm = DEFAULT_PLUGIN_ESM # type: str
+    plugin_esm = DEFAULT_PLUGIN_ESM  # type: str
 
     #: A dictionary mapping command name strings to functions. Functions should take two arguments (message, buffers) and return a tuple (response, buffers).
-    commands = {} # type: dict
+    commands = {}  # type: dict
 
     def on_config_change(self, new_config):
         """
@@ -635,12 +635,12 @@ class VitessceWidget(anywidget.AnyWidget):
     # Widget properties are defined as traitlets. Any property tagged with `sync=True`
     # is automatically synced to the frontend *any* time it changes in Python.
     # It is synced back to Python from the frontend *any* time the model is touched.
-    
+
     #: Dictionary representation of the Vitessce JSON configuration. Synced via traitlets upon interactions.
-    _config = Dict({}).tag(sync=True) # type: dict
+    _config = Dict({}).tag(sync=True)  # type: dict
 
     #: The VitessceConfig instance used to create this widget. Not synced upon interactions.
-    config = None # type: vitessce.config.VitessceConfig
+    config = None  # type: vitessce.config.VitessceConfig
 
     height = Int(600).tag(sync=True)
     theme = Unicode('auto').tag(sync=True)
@@ -667,7 +667,7 @@ class VitessceWidget(anywidget.AnyWidget):
         """ """
         """
         Construct a new Vitessce widget. Not intended to be instantiated directly; instead, use ``VitessceConfig.widget``.
-        
+
         :param config: A view config instance.
         :type config: VitessceConfig
         :param str theme: The theme name, either "light" or "dark". By default, "auto", which selects light or dark based on operating system preferences.

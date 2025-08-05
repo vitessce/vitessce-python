@@ -597,8 +597,12 @@ class VitesscePlugin:
     """
     A class that represents a Vitessce widget plugin. Custom plugins can be created by subclassing this class.
     """
-    plugin_esm = DEFAULT_PLUGIN_ESM
-    commands = {}
+
+    #: The ES module string for the plugin.
+    plugin_esm = DEFAULT_PLUGIN_ESM # type: str
+
+    #: A dictionary mapping command name strings to functions. Functions should take two arguments (message, buffers) and return a tuple (response, buffers).
+    commands = {} # type: dict
 
     def on_config_change(self, new_config):
         """
@@ -614,7 +618,16 @@ class VitesscePlugin:
 
 class VitessceWidget(anywidget.AnyWidget):
     """
-    A class to represent a Jupyter widget for Vitessce.
+    A class to represent a Jupyter widget for Vitessce. Not intended to be instantiated directly; instead, use ``VitessceConfig.widget``.
+
+    .. code-block:: python
+        :emphasize-lines: 4
+
+        from vitessce import VitessceConfig
+
+        vc = VitessceConfig.from_object(my_scanpy_object)
+        vw = vc.widget()
+        vw
     """
     _esm = ESM
 
@@ -622,11 +635,12 @@ class VitessceWidget(anywidget.AnyWidget):
     # Widget properties are defined as traitlets. Any property tagged with `sync=True`
     # is automatically synced to the frontend *any* time it changes in Python.
     # It is synced back to Python from the frontend *any* time the model is touched.
-    _config = Dict({}).tag(sync=True)
-    """dict: Dictionary representation of the Vitessce JSON configuration. Synced via traitlets upon interactions."""
+    
+    #: Dictionary representation of the Vitessce JSON configuration. Synced via traitlets upon interactions.
+    _config = Dict({}).tag(sync=True) # type: dict
 
-    config = None
-    """VitessceConfig: The VitessceConfig instance used to create this widget. Not synced upon interactions."""
+    #: The VitessceConfig instance used to create this widget. Not synced upon interactions.
+    config = None # type: vitessce.config.VitessceConfig
 
     height = Int(600).tag(sync=True)
     theme = Unicode('auto').tag(sync=True)
@@ -650,9 +664,10 @@ class VitessceWidget(anywidget.AnyWidget):
     store_urls = List(trait=Unicode(''), default_value=[]).tag(sync=True)
 
     def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='3.6.12', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, prefer_local=True, invoke_timeout=300000, invoke_batched=True, page_mode=False, page_esm=None, prevent_scroll=True):
+        """ """
         """
-        Construct a new Vitessce widget.
-
+        Construct a new Vitessce widget. Not intended to be instantiated directly; instead, use ``VitessceConfig.widget``.
+        
         :param config: A view config instance.
         :type config: VitessceConfig
         :param str theme: The theme name, either "light" or "dark". By default, "auto", which selects light or dark based on operating system preferences.
@@ -671,14 +686,7 @@ class VitessceWidget(anywidget.AnyWidget):
         :param str page_esm: The ES module string for the page component creation function. Optional.
         :param bool prevent_scroll: Should mouseover in the Vitessce widget prevent disable the scrolling of the notebook? By default, True.
 
-        .. code-block:: python
-            :emphasize-lines: 4
-
-            from vitessce import VitessceConfig, VitessceWidget
-
-            vc = VitessceConfig.from_object(my_scanpy_object)
-            vw = vc.widget()
-            vw
+        Note: these parameter docstrings need to be manually kept in sync with the VitessceConfig.widget docstring.
         """
 
         base_url, use_port, VitessceWidget.next_port = get_base_url_and_port(
@@ -817,7 +825,7 @@ def ipython_display(config, height=600, theme='auto', base_url=None, host_name=N
         "has_host_name": host_name is not None,
         "height": height,
         "theme": theme,
-        "config": config_dict,
+        "_config": config_dict,
         "store_urls": [],
     }
 

@@ -925,6 +925,19 @@ class VitessceConfig:
             del self.background_servers[port]
 
     def stop_all_servers(self):
+        """
+        Stop all background servers associated with this config instance.
+
+        .. code-block:: python
+            :emphasize-lines: 5
+
+            from vitessce import VitessceConfig
+
+            vc = VitessceConfig(schema_version="1.0.18", name='My Config')
+            vw = vc.widget()
+            # ... do something with the widget ...
+            vc.stop_all_servers()
+        """
         for server in self.background_servers.values():
             server.stop()
         self.background_servers = {}

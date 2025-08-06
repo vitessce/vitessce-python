@@ -19,6 +19,17 @@ vitessce.config
  :exclude-members: VitessceConfig, VitessceChainableConfig
  :member-order: bysource
 
+vitessce.widget
+***************
+
+.. autoclass:: vitessce.widget.VitessceWidget()
+ :members:
+ :private-members:
+ :exclude-members: close
+
+.. autoclass:: vitessce.widget.VitesscePlugin
+ :members:
+
 vitessce.constants
 ******************
 

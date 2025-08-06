@@ -1399,7 +1399,7 @@ SpatialDataWrapperType = TypeVar('SpatialDataWrapperType', bound='SpatialDataWra
 
 class SpatialDataWrapper(AnnDataWrapper):
 
-    def __init__(self, sdata_path: Optional[str] = None, sdata_url: Optional[str] = None, sdata_store: Optional[Union[str, zarr.storage.StoreLike]] = None, sdata_artifact: Optional[ln.Artifact] = None, image_path: Optional[str] = None, region: Optional[str] = None, coordinate_system: Optional[str] = None, obs_spots_path: Optional[str] = None, obs_segmentations_path: Optional[str] = None, table_path: str = "tables/table", coordination_values=None, **kwargs):
+    def __init__(self, sdata_path: Optional[str] = None, sdata_url: Optional[str] = None, sdata_store: Optional[Union[str, zarr.storage.StoreLike]] = None, sdata_artifact: Optional[ln.Artifact] = None, image_path: Optional[str] = None, region: Optional[str] = None, coordinate_system: Optional[str] = None, obs_spots_path: Optional[str] = None, obs_segmentations_path: Optional[str] = None, table_path: str = "tables/table", is_zip=None, coordination_values=None, **kwargs):
         """
         Wrap a SpatialData object.
 
@@ -1415,6 +1415,7 @@ class SpatialDataWrapper(AnnDataWrapper):
         :type image_path: Optional[str]
         :param coordinate_system: Name of a target coordinate system.
         :type coordinate_system: Optional[str]
+        :param is_zip: Boolean indicating whether the Zarr store is in a zipped format.
         :param affine_transformation: Transformation to be applied to the image. By default, None. Prefer coordinate_system.
         :type affine_transformation: Optional[np.ndarray]
         :param obs_spots_path: Location of shapes that should be interpreted as spot observations, by default None
@@ -1434,7 +1435,7 @@ class SpatialDataWrapper(AnnDataWrapper):
             kwargs.get('adata_store', None),
             kwargs.get('adata_artifact', None)
         ])
-        super().__init__(adata_path=sdata_path, adata_url=sdata_url, adata_store=sdata_store, adata_artifact=sdata_artifact, **kwargs)
+        super().__init__(adata_path=sdata_path, adata_url=sdata_url, adata_store=sdata_store, adata_artifact=sdata_artifact, is_zip=is_zip, **kwargs)
         if "labels_path" in kwargs:
             warnings.warn("`labels_path` is deprecated. Use `obs_segmentations_path` instead.", DeprecationWarning)
             self._obs_segmentations_path = kwargs["labels_path"]
@@ -1540,7 +1541,7 @@ class SpatialDataWrapper(AnnDataWrapper):
             options = gen_feature_labels_schema(self._feature_labels, options)
             if len(options.keys()) > 0:
                 obj_file_def = {
-                    "fileType": ft.SPATIALDATA_ZARR.value,
+                    "fileType": ft.SPATIALDATA_ZARR_ZIP.value if self.is_zip else ft.SPATIALDATA_ZARR.value,
                     "url": self.get_zarr_url(base_url, dataset_uid, obj_i),
                     "options": options
                 }

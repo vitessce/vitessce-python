@@ -163,6 +163,7 @@ class FileType(DocEnum):
     """
     ANNDATA_ZARR = "anndata.zarr", "Joint file type for AnnData objects"
     SPATIALDATA_ZARR = "spatialdata.zarr", "Joint file type for SpatialData objects"
+    SPATIALDATA_ZARR_ZIP = "spatialdata.zarr.zip", "Joint file type for SpatialData objects in a Zarr directory store that has been zipped"
     ANNDATA_H5AD = "anndata.h5ad", "Joint file type for AnnData objects"
     ANNDATA_ZARR_ZIP = "anndata.zarr.zip", "Joint file type for AnnData object in a Zarr directory store that has been zipped"
     OBS_EMBEDDING_CSV = 'obsEmbedding.csv', "File type for obsEmbedding values stored in a CSV file"

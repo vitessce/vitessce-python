@@ -650,7 +650,7 @@ class VitessceWidget(anywidget.AnyWidget):
 
     next_port = DEFAULT_PORT
 
-    js_package_version = Unicode('3.6.12').tag(sync=True)
+    js_package_version = Unicode('3.6.13').tag(sync=True)
     js_dev_mode = Bool(False).tag(sync=True)
     custom_js_url = Unicode('').tag(sync=True)
     plugin_esm = List(trait=Unicode(''), default_value=[]).tag(sync=True)
@@ -663,8 +663,7 @@ class VitessceWidget(anywidget.AnyWidget):
 
     store_urls = List(trait=Unicode(''), default_value=[]).tag(sync=True)
 
-    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='3.6.12', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, prefer_local=True, invoke_timeout=300000, invoke_batched=True, page_mode=False, page_esm=None, prevent_scroll=True):
-        """ """
+    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='3.6.13', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, prefer_local=True, invoke_timeout=300000, invoke_batched=True, page_mode=False, page_esm=None, prevent_scroll=True):
         """
         Construct a new Vitessce widget. Not intended to be instantiated directly; instead, use ``VitessceConfig.widget``.
 
@@ -797,7 +796,7 @@ class VitessceWidget(anywidget.AnyWidget):
 # Launch Vitessce using plain HTML representation (no ipywidgets)
 
 
-def ipython_display(config, height=600, theme='auto', base_url=None, host_name=None, uid=None, port=None, proxy=False, js_package_version='3.6.12', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, page_mode=False, page_esm=None):
+def ipython_display(config, height=600, theme='auto', base_url=None, host_name=None, uid=None, port=None, proxy=False, js_package_version='3.6.13', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, page_mode=False, page_esm=None):
     from IPython.display import display, HTML
     uid_str = "vitessce" + get_uid_str(uid)
 

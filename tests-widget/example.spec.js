@@ -17,7 +17,7 @@ test('Renders Vitessce widget containing a scatterplot view (Marimo)', async ({ 
   await page.goto('http://localhost:3000/marimo.mo.html');
 
   // Expect a title "to contain" a substring.
-  await expect(page).toHaveTitle('marimo');
+  await expect(page).toHaveTitle('marimo.mo');
 
   await expect(page.getByText('Scatterplot (UMAP)')).toBeVisible();
   await expect(page.getByText('523 cells')).toHaveCount(3);

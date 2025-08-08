@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 
 test('Renders Vitessce widget containing a scatterplot view (Jupyter)', async ({ page }) => {
   test.setTimeout(60_000);
-  await page.goto('http://localhost:3000/widget_from_dict.html');
+  await page.goto('http://localhost:3000/__ipynb__/widget_from_dict.html');
 
   // Expect a title "to contain" a substring.
   await expect(page).toHaveTitle('widget_from_dict');
@@ -14,7 +14,7 @@ test('Renders Vitessce widget containing a scatterplot view (Jupyter)', async ({
 
 test('Renders Vitessce widget containing a scatterplot view (Marimo)', async ({ page }) => {
   test.setTimeout(60_000);
-  await page.goto('http://localhost:3000/marimo.html');
+  await page.goto('http://localhost:3000/marimo.mo.html');
 
   // Expect a title "to contain" a substring.
   await expect(page).toHaveTitle('marimo');

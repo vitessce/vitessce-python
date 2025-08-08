@@ -12,6 +12,9 @@ tests/data/*
 ./notebooks/
 docs/notebooks/data/
 docs/notebooks/data-cropped/
+docs/notebooks/kpmp-2024/
+docs/notebooks/segmentations/
+docs/notebooks/*.json
 docs/notebooks/*.html
 docs/notebooks/*.ipynb
 docs/notebooks/*.zarr/
@@ -23,6 +26,8 @@ demos/*/vitessce.local.json
 demos/*/vitessce.remote.json
 .pytest_cache/
 __marimo__/
+assets/
+docs/_static/mo/
 
 # Compiled javascript
 vitessce/static/

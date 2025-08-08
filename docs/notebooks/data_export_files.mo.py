@@ -8,16 +8,6 @@ app = marimo.App()
 def _(mo):
     mo.md(
         r"""
-        # Vitessce Data Preparation Tutorial
-        """
-    )
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(
-        r"""
         # Export data to local files
         """
     )

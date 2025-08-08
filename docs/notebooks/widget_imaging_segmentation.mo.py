@@ -8,16 +8,6 @@ app = marimo.App()
 def _(mo):
     mo.md(
         r"""
-        # Vitessce Widget Tutorial
-        """
-    )
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(
-        r"""
         # Visualization of Segmentation Bitmask
         We visualize raw imaging data + a segmentation bitmask the [MCMicro piplene](https://mcmicro.org/) - see https://www.biorxiv.org/content/10.1101/2021.03.15.435473v1.full and specifically [Figure S1](https://www.google.com/url?q=https://www.biorxiv.org/content/10.1101/2021.03.15.435473v1.full%23F3&sa=D&source=editors&ust=1623173627976000&usg=AOvVaw3JkzCxYyE86q8jxfNCgShh)
         """

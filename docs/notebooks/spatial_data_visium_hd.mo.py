@@ -1,37 +1,24 @@
 import marimo
 
 __generated_with = "0.13.15"
-app = marimo.App()
+app = marimo.App(width="full")
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""
-        # Vitessce Widget Tutorial
-        """
-    )
+    mo.md(r"""# Vitessce Widget Tutorial""")
     return
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""
-        # Visualization of a SpatialData object
-        """
-    )
+    mo.md(r"""# Visualization of a SpatialData object""")
     return
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""
-        ## Import dependencies
-
-        """
-    )
+    mo.md(r"""## Import dependencies""")
     return
 
 
@@ -99,9 +86,9 @@ def _(
 def _(mo):
     mo.md(
         r"""
-        ## Rasterize bins
-        Reference: https://spatialdata.scverse.org/en/stable/tutorials/notebooks/notebooks/examples/technology_visium_hd.html#performant-on-the-fly-data-rasterization
-        """
+    ## Rasterize bins
+    Reference: https://spatialdata.scverse.org/en/stable/tutorials/notebooks/notebooks/examples/technology_visium_hd.html#performant-on-the-fly-data-rasterization
+    """
     )
     return
 
@@ -117,14 +104,14 @@ def _():
 
 
 @app.cell
-def _(read_zarr, spatialdata_filepath):
+def _(
+    rasterize_bins,
+    rasterize_bins_link_table_to_labels,
+    read_zarr,
+    spatialdata_filepath,
+):
     sdata = read_zarr(spatialdata_filepath)
-    sdata
-    return (sdata,)
 
-
-@app.cell
-def _(rasterize_bins, rasterize_bins_link_table_to_labels, sdata):
     for bin_size in ["016", "008", "002"]:
         # rasterize_bins() requires a compresed sparse column (csc) matrix
         sdata.tables[f"square_{bin_size}um"].X = sdata.tables[f"square_{bin_size}um"].X.tocsc()
@@ -143,8 +130,13 @@ def _(rasterize_bins, rasterize_bins_link_table_to_labels, sdata):
             table_name=f"square_{bin_size}um",
             rasterized_labels_name=f"rasterized_{bin_size}um",
         )
-        sdata.write_element(f"rasterized_{bin_size}um")
-    return
+        try:
+            sdata.write_element(f"rasterized_{bin_size}um")
+        except:
+            pass
+        
+    sdata
+    return (sdata,)
 
 
 @app.cell
@@ -157,10 +149,10 @@ def _(sdata):
 def _(mo):
     mo.md(
         r"""
-        ## Configure Vitessce
+    ## Configure Vitessce
 
-        Vitessce needs to know which pieces of data we are interested in visualizing, the visualization types we would like to use, and how we want to coordinate (or link) the views.
-        """
+    Vitessce needs to know which pieces of data we are interested in visualizing, the visualization types we would like to use, and how we want to coordinate (or link) the views.
+    """
     )
     return
 
@@ -221,13 +213,9 @@ def _(
     return (vc,)
 
 
-@app.cell(hide_code=True)
+@app.cell
 def _(mo):
-    mo.md(
-        r"""
-        ### Render the widget
-        """
-    )
+    mo.md(r"""### Render the widget""")
     return
 
 

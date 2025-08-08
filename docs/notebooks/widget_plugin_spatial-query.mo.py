@@ -8,16 +8,6 @@ app = marimo.App()
 def _(mo):
     mo.md(
         r"""
-        # Vitessce Widget Tutorial
-        """
-    )
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(
-        r"""
         # Vitessce SpatialQuery plugin usage demo
         """
     )

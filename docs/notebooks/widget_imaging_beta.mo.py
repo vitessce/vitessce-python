@@ -8,16 +8,6 @@ app = marimo.App()
 def _(mo):
     mo.md(
         r"""
-        # Vitessce Widget Tutorial
-        """
-    )
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(
-        r"""
         # Visualization of Multi-Modal Imaging Data
         We visualize IMS, PAS, and AF imaging data overlaid from the Spraggins Lab of the Biomolecular Multimodal Imaging Center (BIOMC) at Vanderbilt University, uploaded to the HuBMAP data portal.
         """

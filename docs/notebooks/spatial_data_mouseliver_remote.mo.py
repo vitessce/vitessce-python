@@ -1,15 +1,30 @@
 import marimo
 
 __generated_with = "0.13.15"
-app = marimo.App()
+app = marimo.App(width="full")
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""# Vitessce Widget Tutorial""")
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""# Visualization of a SpatialData object and individual Spatial Elements, remote data""")
+    return
 
 
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(
         r"""
-        # Vitessce Widget Tutorial
-        """
+    This notebook explains how to create interactive visualizations of data that are accessible remotely.
+
+
+    We progress through different visualization tasks, first demonstrating how Vitessce facilitates integrated imaging and spatial single-cell visualizations, then demonstrating visualization of non-spatial and image-only datasets.
+    """
     )
     return
 
@@ -18,59 +33,28 @@ def _(mo):
 def _(mo):
     mo.md(
         r"""
-        # Visualization of a SpatialData object and individual Spatial Elements, remote data
-        """
+    <!--## Table of Contents
+
+    - SpatialData (via Zarr)
+    - AnnData via Zarr
+    - AnnData via H5AD
+    - OME-Zarr
+    - OME-TIFF
+    -->
+    """
     )
     return
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""
-        This notebook explains how to create interactive visualizations of data that are accessible remotely.
-
-
-        We progress through different visualization tasks, first demonstrating how Vitessce facilitates integrated imaging and spatial single-cell visualizations, then demonstrating visualization of non-spatial and image-only datasets.
-        """
-    )
+    mo.md(r"""## Utility dependencies""")
     return
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""
-        <!--## Table of Contents
-
-        - SpatialData (via Zarr)
-        - AnnData via Zarr
-        - AnnData via H5AD
-        - OME-Zarr
-        - OME-TIFF
-        -->
-        """
-    )
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(
-        r"""
-        ## Utility dependencies
-        """
-    )
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(
-        r"""
-        First, we import utility dependencies which will be used to download the example dataset and manipulate file paths, zip files, and JSON files.
-        """
-    )
+    mo.md(r"""First, we import utility dependencies which will be used to download the example dataset and manipulate file paths, zip files, and JSON files.""")
     return
 
 
@@ -86,11 +70,7 @@ def _():
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""
-        ## Dependencies for Vitessce
-        """
-    )
+    mo.md(r"""## Dependencies for Vitessce""")
     return
 
 
@@ -98,17 +78,17 @@ def _(mo):
 def _(mo):
     mo.md(
         r"""
-        Here, we import classes and functions from the `vitessce` Python package.
-        This package includes not only APIs for [visualization configuration](https://python-docs.vitessce.io/api_config.html) but also [helper functions](https://python-docs.vitessce.io/api_data.html#vitessce-data-utils) for basic data transformation tasks.
-        To specify mappings between data fields and visualization properties, the package contains [classes](https://python-docs.vitessce.io/api_data.html#module-vitessce.wrappers) which wrap standard single-cell data structures stored in formats including [AnnData](https://doi.org/10.1101/2021.12.16.473007), [SpatialData](https://doi.org/10.1038/s41592-024-02212-x), [OME-TIFF](https://doi.org/10.1007/978-3-030-23937-4_1), and [OME-Zarr](https://doi.org/10.1038/s41592-021-01326-w):
+    Here, we import classes and functions from the `vitessce` Python package.
+    This package includes not only APIs for [visualization configuration](https://python-docs.vitessce.io/api_config.html) but also [helper functions](https://python-docs.vitessce.io/api_data.html#vitessce-data-utils) for basic data transformation tasks.
+    To specify mappings between data fields and visualization properties, the package contains [classes](https://python-docs.vitessce.io/api_data.html#module-vitessce.wrappers) which wrap standard single-cell data structures stored in formats including [AnnData](https://doi.org/10.1101/2021.12.16.473007), [SpatialData](https://doi.org/10.1038/s41592-024-02212-x), [OME-TIFF](https://doi.org/10.1007/978-3-030-23937-4_1), and [OME-Zarr](https://doi.org/10.1038/s41592-021-01326-w):
 
-        - [AnnDataWrapper](https://python-docs.vitessce.io/api_data.html#vitessce.wrappers.AnnDataWrapper)
-        - [ImageOmeTiffWrapper](https://python-docs.vitessce.io/api_data.html#vitessce.wrappers.ImageOmeTiffWrapper)
-        - [ImageOmeZarrWrapper](https://python-docs.vitessce.io/api_data.html#vitessce.wrappers.ImageOmeZarrWrapper)
-        - [ObsSegmentationsOmeTiffWrapper](https://python-docs.vitessce.io/api_data.html#vitessce.wrappers.ObsSegmentationsOmeTiffWrapper)
-        - [ObsSegmentationsOmeZarrWrapper](https://python-docs.vitessce.io/api_data.html#vitessce.wrappers.ObsSegmentationsOmeZarrWrapper)
-        - [SpatialDataWrapper](https://python-docs.vitessce.io/api_data.html#vitessce.wrappers.SpatialDataWrapper)
-        """
+    - [AnnDataWrapper](https://python-docs.vitessce.io/api_data.html#vitessce.wrappers.AnnDataWrapper)
+    - [ImageOmeTiffWrapper](https://python-docs.vitessce.io/api_data.html#vitessce.wrappers.ImageOmeTiffWrapper)
+    - [ImageOmeZarrWrapper](https://python-docs.vitessce.io/api_data.html#vitessce.wrappers.ImageOmeZarrWrapper)
+    - [ObsSegmentationsOmeTiffWrapper](https://python-docs.vitessce.io/api_data.html#vitessce.wrappers.ObsSegmentationsOmeTiffWrapper)
+    - [ObsSegmentationsOmeZarrWrapper](https://python-docs.vitessce.io/api_data.html#vitessce.wrappers.ObsSegmentationsOmeZarrWrapper)
+    - [SpatialDataWrapper](https://python-docs.vitessce.io/api_data.html#vitessce.wrappers.SpatialDataWrapper)
+    """
     )
     return
 
@@ -153,11 +133,17 @@ def _():
 def _(mo):
     mo.md(
         r"""
-        In this blog post, we perform basic data transformation tasks to save individual elements of an integrated SpatialData object to separate files in AnnData, OME-TIFF, and OME-Zarr formats.
-        To perform these data transformations, we import the following dependencies.
-        In general, you will typically not need to import all of these dependencies, either because you are only working with data in one of these formats, or because the data you intend to visualize is already saved to a file or directory.
-        """
+    In this blog post, we perform basic data transformation tasks to save individual elements of an integrated SpatialData object to separate files in AnnData, OME-TIFF, and OME-Zarr formats.
+    To perform these data transformations, we import the following dependencies.
+    In general, you will typically not need to import all of these dependencies, either because you are only working with data in one of these formats, or because the data you intend to visualize is already saved to a file or directory.
+    """
     )
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""## Download example dataset""")
     return
 
 
@@ -165,20 +151,10 @@ def _(mo):
 def _(mo):
     mo.md(
         r"""
-        ## Download example dataset
-        """
-    )
-    return
+    We download a mouse liver dataset which serves as a SpatialData [example dataset](https://github.com/scverse/spatialdata-notebooks/blob/main/notebooks/examples/transformations.ipynb).
 
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(
-        r"""
-        We download a mouse liver dataset which serves as a SpatialData [example dataset](https://github.com/scverse/spatialdata-notebooks/blob/main/notebooks/examples/transformations.ipynb).
-
-        This dataset was generated by [Guilliams et al.](https://doi.org/10.1016/j.cell.2021.12.018) and processed using [SPArrOW](https://doi.org/10.1101/2024.07.04.601829) during the SpatialData [developer workshop](https://doi.org/10.37044/osf.io/8ck3e) in 2024.
-        """
+    This dataset was generated by [Guilliams et al.](https://doi.org/10.1016/j.cell.2021.12.018) and processed using [SPArrOW](https://doi.org/10.1101/2024.07.04.601829) during the SpatialData [developer workshop](https://doi.org/10.37044/osf.io/8ck3e) in 2024.
+    """
     )
     return
 
@@ -214,10 +190,23 @@ def _(base_url):
 
 @app.cell(hide_code=True)
 def _(mo):
+    mo.md(r"""## Visualization of a SpatialData object""")
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
     mo.md(
         r"""
-        ## Visualization of a SpatialData object
-        """
+    SpatialData objects are the most complex type of data structure we will work with in this blog post.
+    SpatialData objects function as contains for multiple types of Spatial Elements:
+
+    - Tables (each table is represented as an AnnData object)
+    - Points (e.g., coordinates of transcripts from FISH-based experiments)
+    - Shapes (vector-based shapes such as polygons and circles)
+    - Labels (label images, i.e., segmentation bitmasks; each label image is stored using OME-Zarr)
+    - Images (microscopy images; each image is stored using OME-Zarr)
+    """
     )
     return
 
@@ -226,28 +215,11 @@ def _(mo):
 def _(mo):
     mo.md(
         r"""
-        SpatialData objects are the most complex type of data structure we will work with in this blog post.
-        SpatialData objects function as contains for multiple types of Spatial Elements:
+    ## Configure Vitessce
 
-        - Tables (each table is represented as an AnnData object)
-        - Points (e.g., coordinates of transcripts from FISH-based experiments)
-        - Shapes (vector-based shapes such as polygons and circles)
-        - Labels (label images, i.e., segmentation bitmasks; each label image is stored using OME-Zarr)
-        - Images (microscopy images; each image is stored using OME-Zarr)
-        """
-    )
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(
-        r"""
-        ## Configure Vitessce
-
-        Vitessce needs to know which pieces of data we are interested in visualizing, the visualization types we would like to use, and how we want to coordinate (or link) the views.
-        To visualize data stored in a SpatialData object, we use the `SpatialDataWrapper` class and specify the paths (relative to the root of the Zarr [directory store](https://zarr.readthedocs.io/en/v2.18.5/api/storage.html#zarr.storage.DirectoryStore)) to different spatial elements of interest.
-        """
+    Vitessce needs to know which pieces of data we are interested in visualizing, the visualization types we would like to use, and how we want to coordinate (or link) the views.
+    To visualize data stored in a SpatialData object, we use the `SpatialDataWrapper` class and specify the paths (relative to the root of the Zarr [directory store](https://zarr.readthedocs.io/en/v2.18.5/api/storage.html#zarr.storage.DirectoryStore)) to different spatial elements of interest.
+    """
     )
     return
 
@@ -280,27 +252,30 @@ def _(
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""
-        ### Render the widget
-        """
-    )
+    mo.md(r"""### Render the widget""")
     return
 
 
 @app.cell
 def _(vc):
-    _vw = vc.widget()
+    _vw = vc.widget(height=900)
     _vw
     return
 
 
 @app.cell(hide_code=True)
 def _(mo):
+    mo.md(r"""## Extract AnnData object from SpatialData object""")
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
     mo.md(
         r"""
-        ## Extract AnnData object from SpatialData object
-        """
+    The above example demonstrates how to visualize a spatial 'omics dataset containing not only single-cell information (e.g., a cell-by-gene expression matrix, cell type annotations) but also an image and cell segmentations.
+    To demonstrate how to use Vitessce to visualize data from a (non-spatial) single-cell experiment, we will extract this information from the SpatialData object and save it to a simpler [AnnData](https://anndata.readthedocs.io/) object (ignoring the imaging and spatially-resolved elements).
+    """
     )
     return
 
@@ -309,9 +284,11 @@ def _(mo):
 def _(mo):
     mo.md(
         r"""
-        The above example demonstrates how to visualize a spatial 'omics dataset containing not only single-cell information (e.g., a cell-by-gene expression matrix, cell type annotations) but also an image and cell segmentations.
-        To demonstrate how to use Vitessce to visualize data from a (non-spatial) single-cell experiment, we will extract this information from the SpatialData object and save it to a simpler [AnnData](https://anndata.readthedocs.io/) object (ignoring the imaging and spatially-resolved elements).
-        """
+    As Zarr-formatted data can be easily visualized by Vitessce, we recommend saving the AnnData object to a Zarr store using the [write_zarr](https://anndata.readthedocs.io/en/stable/generated/anndata.AnnData.write_zarr.html) method.
+    Optionally, the shape of array chunks (for the AnnData `X` array) can be specified as a parameter, to optimize performance based on data access patterns.
+    For example, a common pattern is to visualize data across all cells for one gene.
+    To support such a pattern, the chunk shape can be specified as follows, `(total number of cells, small number of genes)`, resulting in tall-and-skinny array chunks.
+    """
     )
     return
 
@@ -320,53 +297,28 @@ def _(mo):
 def _(mo):
     mo.md(
         r"""
-        As Zarr-formatted data can be easily visualized by Vitessce, we recommend saving the AnnData object to a Zarr store using the [write_zarr](https://anndata.readthedocs.io/en/stable/generated/anndata.AnnData.write_zarr.html) method.
-        Optionally, the shape of array chunks (for the AnnData `X` array) can be specified as a parameter, to optimize performance based on data access patterns.
-        For example, a common pattern is to visualize data across all cells for one gene.
-        To support such a pattern, the chunk shape can be specified as follows, `(total number of cells, small number of genes)`, resulting in tall-and-skinny array chunks.
-        """
+    Alternatively, your AnnData object may already be stored using the H5AD (HDF5-based) format.
+    To demonstrate this scenario, we save the object using the [write_h5ad](https://anndata.readthedocs.io/en/stable/generated/anndata.AnnData.write_h5ad.html) method.
+    """
     )
     return
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""
-        Alternatively, your AnnData object may already be stored using the H5AD (HDF5-based) format.
-        To demonstrate this scenario, we save the object using the [write_h5ad](https://anndata.readthedocs.io/en/stable/generated/anndata.AnnData.write_h5ad.html) method.
-        """
-    )
+    mo.md(r"""To read H5AD-formatted data, Vitessce requires an accompanying JSON [references specification](https://fsspec.github.io/kerchunk/spec.html) file, which can be constructed using the `generate_h5ad_ref_spec` utility function.""")
     return
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""
-        To read H5AD-formatted data, Vitessce requires an accompanying JSON [references specification](https://fsspec.github.io/kerchunk/spec.html) file, which can be constructed using the `generate_h5ad_ref_spec` utility function.
-        """
-    )
+    mo.md(r"""## Visualization of an AnnData object""")
     return
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""
-        ## Visualization of an AnnData object
-        """
-    )
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(
-        r"""
-        ### Zarr-based AnnData
-        """
-    )
+    mo.md(r"""### Zarr-based AnnData""")
     return
 
 
@@ -392,11 +344,7 @@ def _(vc_1):
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""
-        ### H5AD-based AnnData
-        """
-    )
+    mo.md(r"""### H5AD-based AnnData""")
     return
 
 
@@ -428,21 +376,13 @@ def _(vc_2):
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""
-        ## Visualization of an image file
-        """
-    )
+    mo.md(r"""## Visualization of an image file""")
     return
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""
-        ### OME-Zarr image
-        """
-    )
+    mo.md(r"""### OME-Zarr image""")
     return
 
 
@@ -481,11 +421,7 @@ def _(vc_3):
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""
-        ### OME-TIFF image
-        """
-    )
+    mo.md(r"""### OME-TIFF image""")
     return
 
 
@@ -519,33 +455,33 @@ def _(vc_4):
 def _(mo):
     mo.md(
         r"""
-        ## Data location options
+    ## Data location options
 
-        Vitessce can visualize data [not only stored](https://python-docs.vitessce.io/data_options.html) locally (referenced using local file or directory paths) but also stored remotely (referenced using absolute URL paths).
-        Depending on whether the Python kernel running the Jupyter process is running locally versus remotely (e.g., on a cluster or cloud platform such as Google Colab), certain data locations may be challenging to access from the machine running the Jupyter notebook frontend (i.e., the machine on which the web browser used to view the notebook is installed).
+    Vitessce can visualize data [not only stored](https://python-docs.vitessce.io/data_options.html) locally (referenced using local file or directory paths) but also stored remotely (referenced using absolute URL paths).
+    Depending on whether the Python kernel running the Jupyter process is running locally versus remotely (e.g., on a cluster or cloud platform such as Google Colab), certain data locations may be challenging to access from the machine running the Jupyter notebook frontend (i.e., the machine on which the web browser used to view the notebook is installed).
 
-        To provide data via one of these alternative mechanisms, use parameters with the following suffices when instantiating the data wrapper classes.
+    To provide data via one of these alternative mechanisms, use parameters with the following suffices when instantiating the data wrapper classes.
 
-        - `_path`: Local file or directory
-        - `_url`: Remote file or directory
-        - `_store`: Zarr-store-accessible (for zarr-based formats)
-        - `_artifact`: Lamin artifact
+    - `_path`: Local file or directory
+    - `_url`: Remote file or directory
+    - `_store`: Zarr-store-accessible (for zarr-based formats)
+    - `_artifact`: Lamin artifact
 
-        For example, `adata_path` can be exchanged for one of the following options.
+    For example, `adata_path` can be exchanged for one of the following options.
 
-        ```diff
-        AnnDataWrapper(
-        -    adata_path="./mouse_liver.spatialdata.zarr",
-        +    adata_url="https://example.com/mouse_liver.spatialdata.zarr", # Absolute URL
-        +    adata_store="./mouse_liver.spatialdata.zarr", # String interpreted as root of DirectoryStore
-        +    adata_store=zarr.DirectoryStore("./mouse_liver.spatialdata.zarr"), # Instance of zarr.storage
-        +    adata_artifact=adata_zarr_artifact, # Instance of ln.Artifact
-            ...
-        ```
+    ```diff
+    AnnDataWrapper(
+    -    adata_path="./mouse_liver.spatialdata.zarr",
+    +    adata_url="https://example.com/mouse_liver.spatialdata.zarr", # Absolute URL
+    +    adata_store="./mouse_liver.spatialdata.zarr", # String interpreted as root of DirectoryStore
+    +    adata_store=zarr.DirectoryStore("./mouse_liver.spatialdata.zarr"), # Instance of zarr.storage
+    +    adata_artifact=adata_zarr_artifact, # Instance of ln.Artifact
+        ...
+    ```
 
-        Note that the `_store` options are only available for Zarr-based formats, such as AnnDataWrapper, SpatialDataWrapper, and ImageOmeZarrWrapper.
-        Further, when multiple files are required, such as both `adata_path` and `ref_path` (for the JSON reference specification file accompanying an H5AD file) or `img_path` and `offsets_path`, multiple parameter suffices may need to be changed.
-        """
+    Note that the `_store` options are only available for Zarr-based formats, such as AnnDataWrapper, SpatialDataWrapper, and ImageOmeZarrWrapper.
+    Further, when multiple files are required, such as both `adata_path` and `ref_path` (for the JSON reference specification file accompanying an H5AD file) or `img_path` and `offsets_path`, multiple parameter suffices may need to be changed.
+    """
     )
     return
 

@@ -4,6 +4,12 @@ __generated_with = "0.13.15"
 app = marimo.App()
 
 
+@app.cell
+def _():
+    import marimo as mo
+    return (mo,)
+
+
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(
@@ -63,12 +69,6 @@ def _(mo):
 
         """
     )
-    return
-
-
-@app.cell
-def _():
-    ## 3. Convert UCSC Cell Browser project to a Vitessce view config
     return
 
 
@@ -137,12 +137,6 @@ def _(vc):
     vw = vc.widget()
     vw
     return
-
-
-@app.cell
-def _():
-    import marimo as mo
-    return (mo,)
 
 
 if __name__ == "__main__":

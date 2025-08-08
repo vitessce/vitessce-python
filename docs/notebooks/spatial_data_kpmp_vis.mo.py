@@ -8,7 +8,7 @@ app = marimo.App()
 def _(mo):
     mo.md(
         r"""
-        # Vitessce Widget Tutorial
+        # Visualization of a SpatialData object
         """
     )
     return

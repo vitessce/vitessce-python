@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.13.15"
+__generated_with = "0.14.16"
 app = marimo.App(width="full")
 
 
@@ -50,6 +50,12 @@ def _():
         vt,
         zipfile,
     )
+
+
+@app.cell
+def _():
+    import scanpy as sc
+    return (sc,)
 
 
 @app.cell
@@ -134,7 +140,7 @@ def _(
             sdata.write_element(f"rasterized_{bin_size}um")
         except:
             pass
-        
+
     sdata
     return (sdata,)
 
@@ -142,6 +148,53 @@ def _(
 @app.cell
 def _(sdata):
     sdata
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""## Compute a UMAP embedding of the bins in `square_016um`""")
+    return
+
+
+@app.cell
+def _(sdata):
+    sdata.tables['square_016um']
+    return
+
+
+@app.cell
+def _(sc, sdata):
+    sc.pp.neighbors(sdata.tables['square_016um'])
+    sc.tl.umap(sdata.tables['square_016um'])
+    sc.pl.umap(sdata.tables['square_016um'])
+    return
+
+
+@app.cell
+def _(sdata):
+    sdata.tables['square_016um']
+    return
+
+
+@app.function
+def write_element(sdata, name):
+    # Reference: https://github.com/scverse/spatialdata/blob/7604a3d2325079293ff523c5dff4483dffc890cb/tests/io/test_readwrite.py#L216C21-L224C61
+    new_name = f"{name}_new_place"
+    # a. write a backup copy of the data
+    sdata[new_name] = sdata[name]
+    sdata.write_element(new_name)
+    # b. rewrite the original data
+    sdata.delete_element_from_disk(name)
+    sdata.write_element(name)
+    # c. remove the backup copy
+    del sdata[new_name]
+    sdata.delete_element_from_disk(new_name)
+
+
+@app.cell
+def _(sdata):
+    write_element(sdata, "square_016um")
     return
 
 
@@ -202,6 +255,7 @@ def _(
                 'spatialChannelOpacity': 0.5,
                 'obsColorEncoding': 'geneSelection',
                 'featureValueColormapRange': [0, 0.5],
+                'obsHighlight': None
             }])
         }]),
     }, scope_prefix=get_initial_coordination_scope_prefix("A", "obsSegmentations"))

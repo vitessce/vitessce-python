@@ -29,11 +29,11 @@ jobs:
       - name: Install vitessce
         run: uv sync --extra dev --extra all --extra notebook
       - name: Export Jupyter notebook to HTML
-        run: uv run jupyter nbconvert --to=html --execute docs/notebooks/widget_from_dict.ipynb
+        run: uv run jupyter nbconvert --to=html --execute docs/notebooks/__ipynb__/widget_from_dict.ipynb
       - name: Export Marimo notebook to HTML
-        run: uv run marimo export html docs/notebooks/marimo.py -o docs/notebooks/marimo.html
+        run: uv run marimo export html docs/notebooks/marimo.mo.py -o docs/notebooks/marimo.mo.html
       - name: Export Marimo notebook to HTML-WASM
-        run: uv run marimo export html-wasm docs/notebooks/marimo-wasm.py -o docs/notebooks/marimo-wasm.html --mode edit
+        run: uv run marimo export html-wasm docs/notebooks/marimo-wasm.mo.py -o docs/notebooks/marimo-wasm.mo.html --mode edit
       - name: Check that widget renders in HTML output using Playwright
         run: pnpm exec playwright test
         working-directory: ./tests-widget

@@ -17,7 +17,7 @@ def needs_bigtiff(img_arr_shape):
     num_pixels = 1
     for n in img_arr_shape:
         num_pixels *= n
-    return (num_pixels > 2**32)
+    return (num_pixels > 2**31)
 
 
 def rgb_img_to_ome_tiff(img_arr, output_path, img_name="Image", axes="CYX"):

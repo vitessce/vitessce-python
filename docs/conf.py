@@ -3,6 +3,7 @@ import os
 import sys
 import glob
 from os.path import join
+import json
 
 import vitessce
 
@@ -123,9 +124,39 @@ nbsphinx_execute = 'never'
 # -- Strip notebook output -------------------------------------------------
 
 
-for filename in glob.glob(join('notebooks', '*.ipynb'), recursive=True):
+for filename in glob.glob(join('notebooks', "__ipynb__", '*.ipynb'), recursive=True):
     ntbk = nbclean.NotebookCleaner(filename)
     ntbk.clear('stderr')
     ntbk.clear('output')
     ntbk.remove_cells(empty=True)
+    ntbk.remove_cells(search_text="import marimo as mo")
     ntbk.save(filename)
+
+    # Add missing metadata, to enable the code to be interpreted as Python code
+    # for syntax highlighting when rendered by nbsphinx.
+    with open(filename, 'r') as f:
+        ntbk_json = json.load(f)
+    with open(filename, 'w') as f:
+        if len(ntbk_json['metadata']) == 0:
+            # If the metadata is empty, we add the default metadata.
+            # This is needed for nbsphinx to render the notebook correctly.
+            ntbk_json['metadata'] = {
+                "kernelspec": {
+                    "display_name": "Python 3 (ipykernel)",
+                    "language": "python",
+                    "name": "python3"
+                },
+                "language_info": {
+                    "codemirror_mode": {
+                        "name": "ipython",
+                        "version": 3
+                    },
+                    "file_extension": ".py",
+                    "mimetype": "text/x-python",
+                    "name": "python",
+                    "nbconvert_exporter": "python",
+                    "pygments_lexer": "ipython3",
+                    "version": "3.10.14"
+                }
+            }
+        json.dump(ntbk_json, f, indent=2)

@@ -40,7 +40,7 @@ class BackgroundServer:
             self.thread = None
         return self
 
-    def start(self, port=None, timeout=1, daemon=True, log_level="warning"):
+    def start(self, port=None, host=None, timeout=1, daemon=True, log_level="warning"):
         from uvicorn import Config, Server
         from threading import Thread
 
@@ -50,6 +50,7 @@ class BackgroundServer:
         config = Config(
             app=self.app,
             port=port,
+            host=(host if host is not None else "127.0.0.1"),
             timeout_keep_alive=timeout,
             log_level=log_level
         )
@@ -117,15 +118,15 @@ def get_base_url_and_port(port, next_port, proxy=False, base_url=None, host_name
     return base_url, use_port, next_port
 
 
-def serve_routes(config, routes, use_port):
+def serve_routes(config, routes, use_port, server_host):
     if not config.has_server(use_port) and len(routes) > 0:
         server = BackgroundServer(routes)
         config.register_server(use_port, server)
         data_server.register(config)
-        server.start(port=use_port)
+        server.start(port=use_port, host=server_host)
 
 
-def launch_vitessce_io(config, theme='light', port=None, base_url=None, host_name=None, proxy=False, open=True):
+def launch_vitessce_io(config, theme='light', port=None, base_url=None, host_name=None, proxy=False, open=True, server_host=None):
     import webbrowser
     base_url, use_port, _ = get_base_url_and_port(
         port, DEFAULT_PORT, proxy=proxy, base_url=base_url, host_name=host_name)
@@ -136,7 +137,7 @@ def launch_vitessce_io(config, theme='light', port=None, base_url=None, host_nam
     if len(stores) > 0:
         raise ValueError('One or more files in this configuration have been provided via Zarr store, which can only be loaded via the widget. Either use VitessceConfig.widget or VitessceConfig.display (instead of .web_app), or provide the files via _path or _url (rather than _store) parameters.')
 
-    serve_routes(config, routes, use_port)
+    serve_routes(config, routes, use_port, server_host)
     vitessce_url = f"http://vitessce.io/#?theme={theme}&url=data:," + quote_plus(
         json.dumps(config_dict))
     if open:
@@ -663,7 +664,7 @@ class VitessceWidget(anywidget.AnyWidget):
 
     store_urls = List(trait=Unicode(''), default_value=[]).tag(sync=True)
 
-    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='3.6.18', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, prefer_local=True, invoke_timeout=300000, invoke_batched=True, page_mode=False, page_esm=None, prevent_scroll=True):
+    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='3.6.18', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, prefer_local=True, invoke_timeout=300000, invoke_batched=True, page_mode=False, page_esm=None, prevent_scroll=True, server_host=None):
         """
         Construct a new Vitessce widget. Not intended to be instantiated directly; instead, use ``VitessceConfig.widget``.
 
@@ -684,6 +685,7 @@ class VitessceWidget(anywidget.AnyWidget):
         :param bool page_mode: Whether to render the <Vitessce/> component in grid-mode or page-mode. By default, False.
         :param str page_esm: The ES module string for the page component creation function. Optional.
         :param bool prevent_scroll: Should mouseover in the Vitessce widget prevent disable the scrolling of the notebook? By default, True.
+        :param str server_host: The host to which the Uvicorn server should bind. Specify "0.0.0.0" to bind to all interfaces. By default, "127.0.0.1".
 
         Note: these parameter docstrings need to be manually kept in sync with the VitessceConfig.widget docstring.
         """
@@ -732,7 +734,7 @@ class VitessceWidget(anywidget.AnyWidget):
 
         self.observe(handle_config_change, names=['_config'])
 
-        serve_routes(config, routes, use_port)
+        serve_routes(config, routes, use_port, server_host)
 
     def _get_coordination_value(self, coordination_type, coordination_scope):
         obj = self._config['coordinationSpace'][coordination_type]
@@ -796,7 +798,7 @@ class VitessceWidget(anywidget.AnyWidget):
 # Launch Vitessce using plain HTML representation (no ipywidgets)
 
 
-def ipython_display(config, height=600, theme='auto', base_url=None, host_name=None, uid=None, port=None, proxy=False, js_package_version='3.6.18', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, page_mode=False, page_esm=None):
+def ipython_display(config, height=600, theme='auto', base_url=None, host_name=None, uid=None, port=None, proxy=False, js_package_version='3.6.18', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, page_mode=False, page_esm=None, server_host=None):
     from IPython.display import display, HTML
     uid_str = "vitessce" + get_uid_str(uid)
 
@@ -804,7 +806,7 @@ def ipython_display(config, height=600, theme='auto', base_url=None, host_name=N
         port, DEFAULT_PORT, proxy=proxy, base_url=base_url, host_name=host_name)
     config_dict = config.to_dict(base_url=base_url)
     routes = config.get_routes()
-    serve_routes(config, routes, use_port)
+    serve_routes(config, routes, use_port, server_host)
 
     plugins = plugins or []
     plugin_esm = [p.plugin_esm for p in plugins]

@@ -1815,6 +1815,7 @@ class VitessceConfig:
         :param bool page_mode: Whether to render the <Vitessce/> component in grid-mode or page-mode. By default, False.
         :param str page_esm: The ES module string for the page component creation function. Optional.
         :param bool prevent_scroll: Should mouseover in the Vitessce widget prevent disable the scrolling of the notebook? By default, True.
+        :param str server_host: The host to which the Uvicorn server should bind. Specify "0.0.0.0" to bind to all interfaces. By default, "127.0.0.1".
 
         :returns: The Jupyter widget.
         :rtype: VitessceWidget

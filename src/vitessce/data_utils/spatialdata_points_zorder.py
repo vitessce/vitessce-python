@@ -356,6 +356,11 @@ def zquery_rows(morton_sorted: List[int], intervals: List[Tuple[int,int]], merge
         j = bisect_right(morton_sorted, zhi)
         if i < j:
             ranges.append((i, j))
+
+    # TODO: record exactly which rows were queried,
+    # to enable evaluating how many HTTP requests would be needed in network-based case
+    # (will also depend on Arrow row group size)
+    
     return merge_adjacent(ranges) if merge else ranges
 
 

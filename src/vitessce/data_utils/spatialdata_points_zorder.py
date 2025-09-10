@@ -8,17 +8,6 @@ import numpy as np
 from spatialdata import get_element_annotators
 import dask.dataframe as dd
 
-### Perform rectangle range queries
-
-# Given a query rectangle region (x_0, y_0) to (x_1, y_1):
-# Steps:
-# 0. Knowledge of MORTON_CODE_NUM_BITS (and by extension MORTON_CODE_VALUE_MIN/MORTON_CODE_VALUE_MAX). 
-# 1. `O(2)`: Get the first and last rows of the dataframe, to identify (x_min, y_min) and (x_max, y_max) respectively. These values are needed for normalization.
-#     - Update: this does not work. The first point is only guaranteed to have y_min, but its X coordinate may be any value. The last row seems to not be guaranteed to have either x_max or y_max.
-# 2. `O(?)`: Get the morton code value intervals covering the query rectangle region (in morton code space).
-# 3. `O(num_intervals * log(N))`: For each morton code (morton_start, morton_end) interval, perform binary search to identify the corresponding table row ranges.
-# 4. Concatenate the table rows in the resulting table row ranges.
-# 5. If the rectangle covering is loose (as opposed to exact), filter the resulting rows to only those in the query rectangle region.
 
 MORTON_CODE_NUM_BITS = 32 # Resulting morton codes will be stored as uint32.
 MORTON_CODE_VALUE_MIN = 0

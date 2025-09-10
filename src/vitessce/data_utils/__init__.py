@@ -22,4 +22,5 @@ from .spatialdata_points_zorder import (
     sdata_morton_sort_points,
     # Functions for querying
     sdata_morton_query_rect,
+    row_ranges_to_row_indices,
 )

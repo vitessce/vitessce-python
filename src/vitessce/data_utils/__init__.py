@@ -17,3 +17,9 @@ from .ome import (
 from .multivec import (
     adata_to_multivec_zarr,
 )
+from .spatialdata_points_zorder import (
+    # Function for computing codes and sorting
+    sdata_morton_sort_points,
+    # Functions for querying
+    sdata_morton_query_rect,
+)

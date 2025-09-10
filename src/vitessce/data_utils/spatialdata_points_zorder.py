@@ -364,3 +364,16 @@ def zquery_rows(morton_sorted: List[int], intervals: List[Tuple[int,int]], merge
     return merge_adjacent(ranges) if merge else ranges
 
 
+def row_ranges_to_row_indices(intervals: List[Tuple[int,int]]) -> List[int]:
+    """
+    Convert row ranges [i, j) to a list of row indices.
+    Then, can index into pandas DataFrame using df.iloc[indices, :]
+    """
+    indices: List[int] = []
+    for i, j in intervals:
+        indices.extend(list(range(i, j)))
+    return indices
+
+# TODO: add unit tests
+
+# TODO: generalize to 3D morton codes

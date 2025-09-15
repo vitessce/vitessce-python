@@ -156,7 +156,7 @@ def sdata_morton_sort_points(sdata, element):
 
     return sdata
 
-def sdata_morton_query_rect(sdata, element, orig_rect):
+def sdata_morton_query_rect_aux(sdata, element, orig_rect):
     #orig_rect = [[50, 50], [100, 150]] # [[x0, y0], [x1, y1]]
     #norm_rect = [
     #    orig_coord_to_norm_coord(orig_rect[0], orig_x_min=0, orig_x_max=100, orig_y_min=0, orig_y_max=200),
@@ -190,6 +190,14 @@ def sdata_morton_query_rect(sdata, element, orig_rect):
         stop_level = None,
         merge = True,
     )
+
+    return morton_intervals
+
+
+def sdata_morton_query_rect(sdata, element, orig_rect):
+    sorted_ddf = sdata.points[element]
+    morton_intervals = sdata_morton_query_rect_aux(sdata, element, orig_rect)
+
     # Get morton code column as a list of integers
     morton_sorted = sorted_ddf["morton_code_2d"].compute().values.tolist()
 
@@ -197,7 +205,18 @@ def sdata_morton_query_rect(sdata, element, orig_rect):
     # (This uses binary searches internally to find the matching row indices).
     # [ (row_start, row_end), ... ]
     matching_row_ranges = zquery_rows(morton_sorted, morton_intervals, merge = True)
+
     return matching_row_ranges
+
+def sdata_morton_query_rect_debug(sdata, element, orig_rect):
+    # This is the same as the above sdata_morton_query_rect function,
+    # but it also returns the list of row indices that were checked
+    # during the binary searches.
+    sorted_ddf = sdata.points[element]
+    morton_intervals = sdata_morton_query_rect_aux(sdata, element, orig_rect)
+    morton_sorted = sorted_ddf["morton_code_2d"].compute().values.tolist()
+    matching_row_ranges, rows_checked = zquery_rows_aux(morton_sorted, morton_intervals, merge = True)
+    return matching_row_ranges, rows_checked
 
 # --------------------------
 # Functions for rectangle queries.
@@ -334,23 +353,42 @@ def zcover_rectangle(rx0:int, ry0:int, rx1:int, ry1:int, bits:int, stop_level: O
 # Morton intervals -> row ranges in a Morton-sorted column
 # --------------------------
 
+def zquery_rows_aux(morton_sorted: List[int], intervals: List[Tuple[int,int]], merge: bool = True) -> Tuple[List[Tuple[int,int]], List[int]]:
+    """
+    For each Z-interval [zlo, zhi], binary-search in the sorted Morton column
+    and return row index half-open ranges [i, j) to scan.
+    """
+
+    # Keep track of which keys were looked at during the binary searches.
+    # This is used for analysis / debugging, for instance, to enable
+    # evaluating how many HTTP requests would be needed in network-based case
+    # (which will also depend on Arrow row group size).
+    recorded_keys = []
+    def record_key_check(k: int) -> int:
+        # TODO: Does recorded_keys need to be marked as a global here?
+        recorded_keys.append(k)
+        return k
+
+    ranges: List[Tuple[int,int]] = []
+    # TODO: can these multiple binary searches be optimized?
+    # Since we are doing many searches in the same array, and in each search we learn where more elements are located.
+    for zlo, zhi in intervals:
+        i = bisect_left(morton_sorted, zlo, key=record_key_check)
+        # TODO: use lo=i in bisect_right to limit the search range?
+        # TODO: can the second binary search be further optimized since we just did a binary search via bisect_left?
+        j = bisect_right(morton_sorted, zhi, key=record_key_check)
+        if i < j:
+            ranges.append((i, j))
+
+    result = merge_adjacent(ranges) if merge else ranges
+    return result, recorded_keys
+
 def zquery_rows(morton_sorted: List[int], intervals: List[Tuple[int,int]], merge: bool = True) -> List[Tuple[int,int]]:
     """
     For each Z-interval [zlo, zhi], binary-search in the sorted Morton column
     and return row index half-open ranges [i, j) to scan.
     """
-    ranges: List[Tuple[int,int]] = []
-    for zlo, zhi in intervals:
-        i = bisect_left(morton_sorted, zlo)
-        j = bisect_right(morton_sorted, zhi)
-        if i < j:
-            ranges.append((i, j))
-
-    # TODO: record exactly which rows were queried,
-    # to enable evaluating how many HTTP requests would be needed in network-based case
-    # (will also depend on Arrow row group size)
-    
-    return merge_adjacent(ranges) if merge else ranges
+    return zquery_rows_aux(morton_sorted, intervals, merge=merge)[0]
 
 
 def row_ranges_to_row_indices(intervals: List[Tuple[int,int]]) -> List[int]:

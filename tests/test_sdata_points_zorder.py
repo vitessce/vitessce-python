@@ -16,17 +16,18 @@ from vitessce.data_utils.spatialdata_points_zorder import (
 def is_sorted(l):
     return all(l[i] <= l[i + 1] for i in range(len(l) - 1))
 
-def get_sdata():
+
+@pytest.fixture
+def sdata_with_points():
     data_dir = join("docs", "notebooks", "data")
     spatialdata_filepath = join(data_dir, "xenium_rep1_io.spatialdata.zarr")
 
     sdata = read_zarr(spatialdata_filepath)
     return sdata
 
-@pytest.mark.skip(reason="Temporarily disable")
-def test_zorder_sorting():
-    # TODO: use fixture here
-    sdata = get_sdata()
+
+def test_zorder_sorting(sdata_with_points):
+    sdata = sdata_with_points
 
     sdata_morton_sort_points(sdata, "transcripts")
 
@@ -37,9 +38,8 @@ def test_zorder_sorting():
     assert is_sorted(morton_sorted)
 
 
-
-def test_zorder_query():
-    sdata = get_sdata()
+def test_zorder_query(sdata_with_points):
+    sdata = sdata_with_points
 
     sdata_morton_sort_points(sdata, "transcripts")
 
@@ -174,10 +174,3 @@ def test_zorder_query():
     assert len(estimated_row_indices) <= 17643
     
 
-
-
-
-
-
-
-    

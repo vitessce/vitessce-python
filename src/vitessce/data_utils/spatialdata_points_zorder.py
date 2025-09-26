@@ -238,8 +238,8 @@ def orig_coord_to_norm_coord(orig_coord, orig_x_min, orig_x_max, orig_y_min, ori
     orig_x_range = orig_x_max - orig_x_min
     orig_y_range = orig_y_max - orig_y_min
     return [
-        ((orig_x - orig_x_min) / orig_x_range) * MORTON_CODE_VALUE_MAX,
-        ((orig_y - orig_y_min) / orig_y_range) * MORTON_CODE_VALUE_MAX,
+        np.float64(((orig_x - orig_x_min) / orig_x_range) * MORTON_CODE_VALUE_MAX).astype(np.uint32),
+        np.float64(((orig_y - orig_y_min) / orig_y_range) * MORTON_CODE_VALUE_MAX).astype(np.uint32),
     ]
 
 # --------------------------

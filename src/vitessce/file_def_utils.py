@@ -146,6 +146,7 @@ def gen_sdata_obs_segmentations_schema(options, path: str, table_path: str = "ta
             options["obsSegmentations"]['coordinateSystem'] = coordinate_system
     return options
 
+
 def gen_sdata_obs_points_schema(options, path: str, table_path: str = "tables/table", coordinate_system: Optional[str] = None) -> dict:
     if path is not None:
         options["obsPoints"] = {
@@ -156,6 +157,7 @@ def gen_sdata_obs_points_schema(options, path: str, table_path: str = "tables/ta
         if coordinate_system is not None:
             options["obsPoints"]['coordinateSystem'] = coordinate_system
     return options
+
 
 def gen_sdata_obs_spots_schema(options: dict, shapes_path: str, table_path: str = "tables/table", region: Optional[str] = None, coordinate_system: Optional[str] = None) -> dict:
     if shapes_path is not None:

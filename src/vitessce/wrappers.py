@@ -74,6 +74,7 @@ class AbstractWrapper:
         self.routes = []
         self.is_remote = False  # TODO: change to needs_localhost_serving for clarity
         self.is_store = False  # TODO: change to needs_store_registration for clarity
+        self.is_zip = False
         self.file_def_creators = []
         self.base_dir = None
         self.stores = {}
@@ -1325,6 +1326,12 @@ class AnnDataWrapper(AbstractWrapper):
                 return [
                     *self.get_local_file_route(dataset_uid, obj_i, self._adata_path, self.local_file_uid),
                     *self.get_local_file_route(dataset_uid, obj_i, self._ref_path, self.local_ref_uid)
+                ]
+            elif self.is_zip:
+                return [
+                    # TODO: modify so that the .zip file extension is used
+                    # (not necessary, but could help with debugging or with base_dir mode)
+                    *self.get_local_file_route(dataset_uid, obj_i, self._adata_path, self.local_dir_uid)
                 ]
             else:
                 return self.get_local_dir_route(dataset_uid, obj_i, self._adata_path, self.local_dir_uid)

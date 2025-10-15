@@ -28,6 +28,7 @@ from vitessce.file_def_utils import (
     gen_obs_sets_schema,
     gen_sdata_image_schema,
     gen_sdata_obs_segmentations_schema,
+    gen_sdata_obs_points_schema,
     gen_sdata_obs_spots_schema,
     gen_sdata_obs_sets_schema,
     gen_sdata_obs_feature_matrix_schema,
@@ -1406,7 +1407,7 @@ SpatialDataWrapperType = TypeVar('SpatialDataWrapperType', bound='SpatialDataWra
 
 class SpatialDataWrapper(AnnDataWrapper):
 
-    def __init__(self, sdata_path: Optional[str] = None, sdata_url: Optional[str] = None, sdata_store: Optional[Union[str, zarr.storage.StoreLike]] = None, sdata_artifact: Optional[ln.Artifact] = None, image_path: Optional[str] = None, region: Optional[str] = None, coordinate_system: Optional[str] = None, obs_spots_path: Optional[str] = None, obs_segmentations_path: Optional[str] = None, table_path: str = "tables/table", is_zip=None, coordination_values=None, **kwargs):
+    def __init__(self, sdata_path: Optional[str] = None, sdata_url: Optional[str] = None, sdata_store: Optional[Union[str, zarr.storage.StoreLike]] = None, sdata_artifact: Optional[ln.Artifact] = None, image_path: Optional[str] = None, region: Optional[str] = None, coordinate_system: Optional[str] = None, obs_spots_path: Optional[str] = None, obs_segmentations_path: Optional[str] = None, obs_points_path: Optional[str] = None, table_path: str = "tables/table", is_zip=None, coordination_values=None, **kwargs):
         """
         Wrap a SpatialData object.
 
@@ -1429,6 +1430,8 @@ class SpatialDataWrapper(AnnDataWrapper):
         :type obs_spots_path: Optional[str]
         :param obs_segmentations_path: Path to a labels or shapes element (segmentation bitmask label image or segmentation polygon shapes), by default None
         :type obs_segmentations_path: Optional[str]
+        :param obs_points_path: Path to a points element, by default None
+        :type obs_points_path: Optional[str]
         """
         raise_error_if_zero_or_more_than_one([
             sdata_path,
@@ -1458,6 +1461,7 @@ class SpatialDataWrapper(AnnDataWrapper):
         self._kwargs = kwargs
         self._obs_spots_path = obs_spots_path
         self._obs_segmentations_path = obs_segmentations_path
+        self._obs_points_path = obs_points_path
         if self._adata_path is not None:
             self.zarr_folder = 'spatialdata.zarr'
         self.obs_type_label = None
@@ -1545,6 +1549,7 @@ class SpatialDataWrapper(AnnDataWrapper):
             options = gen_sdata_obs_spots_schema(options, self._obs_spots_path, self._table_path, self._region, self._coordinate_system)
             options = gen_sdata_image_schema(options, self._image_path, self._coordinate_system)
             options = gen_sdata_obs_segmentations_schema(options, self._obs_segmentations_path, self._table_path, self._coordinate_system)
+            options = gen_sdata_obs_points_schema(options, self._obs_points_path, self._table_path, self._coordinate_system)
             options = gen_feature_labels_schema(self._feature_labels, options)
             if len(options.keys()) > 0:
                 obj_file_def = {

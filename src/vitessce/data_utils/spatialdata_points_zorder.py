@@ -12,13 +12,14 @@ import dask.dataframe as dd
 import zarr
 
 
-MORTON_CODE_NUM_BITS = 32 # Resulting morton codes will be stored as uint32.
+MORTON_CODE_NUM_BITS = 32  # Resulting morton codes will be stored as uint32.
 MORTON_CODE_VALUE_MIN = 0
-MORTON_CODE_VALUE_MAX = 2**(MORTON_CODE_NUM_BITS/2) - 1
+MORTON_CODE_VALUE_MAX = 2**(MORTON_CODE_NUM_BITS / 2) - 1
 
 # --------------------------
 # Functions for computing Morton codes for SpatialData points (2D).
 # --------------------------
+
 
 def norm_series_to_uint(series, v_min, v_max):
     """
@@ -36,6 +37,7 @@ def norm_series_to_uint(series, v_min, v_max):
     out = out.fillna(0)
     return out
 
+
 def norm_ddf_to_uint(ddf):
     [x_min, x_max, y_min, y_max] = [ddf["x"].min().compute(), ddf["x"].max().compute(), ddf["y"].min().compute(), ddf["y"].max().compute()]
     ddf["x_uint"] = norm_series_to_uint(ddf["x"], x_min, x_max)
@@ -52,33 +54,35 @@ def norm_ddf_to_uint(ddf):
 
     return ddf
 
+
 def _part1by1_16(x):
     """
     Spread each 16-bit value into 32 bits by inserting zeros between bits.
     Input:  uint32 array (values must fit in 16 bits)
     Output: uint32 array (bit-spread)
     """
-        
+
     assert x.dtype.name == 'uint32'
-    
+
     # Mask away any bits above 16 (just in case input wasn't clean).
     x = x & np.uint32(0x0000FFFF)
-    
+
     # First spread: shift left by 8 bits, OR with original, then mask.
     # After this, groups of 8 bits are separated by 8 zeros.
     x = (x | np.left_shift(x, 8)) & np.uint32(0x00FF00FF)
-    
+
     # Spread further: now groups of 4 bits separated by 4 zeros.
     x = (x | np.left_shift(x, 4)) & np.uint32(0x0F0F0F0F)
-    
+
     # Spread further: groups of 2 bits separated by 2 zeros.
     x = (x | np.left_shift(x, 2)) & np.uint32(0x33333333)
-    
+
     # Final spread: single bits separated by a zero bit.
     # Now each original bit is in every other position (positions 0,2,4,...).
     x = (x | np.left_shift(x, 1)) & np.uint32(0x55555555)
-    
+
     return x
+
 
 def _part1by1_32(x):
     """
@@ -91,10 +95,10 @@ def _part1by1_32(x):
 
     # Mask away any bits above 32 (safety).
     x = x.astype(np.uint64) & np.uint64(0x00000000FFFFFFFF)
-    
+
     # First spread: separate into 16-bit chunks spaced out.
     x = (x | np.left_shift(x, 16)) & np.uint64(0x0000FFFF0000FFFF)
-    
+
     # Spread further: each 8-bit chunk separated.
     x = (x | np.left_shift(x, 8)) & np.uint64(0x00FF00FF00FF00FF)
 
@@ -103,12 +107,13 @@ def _part1by1_32(x):
 
     # Spread further: 2-bit groups separated.
     x = (x | np.left_shift(x, 2)) & np.uint64(0x3333333333333333)
-    
+
     # Final spread: single bits separated by zeros.
     # Now each original bit occupies every other position (0,2,4,...).
     x = (x | np.left_shift(x, 1)) & np.uint64(0x5555555555555555)
 
     return x
+
 
 def morton_interleave(ddf):
     """
@@ -116,10 +121,10 @@ def morton_interleave(ddf):
     already scaled to [0, 2^bits - 1].
     Returns Morton codes as uint32 (if bits<=16) or uint64 (if bits<=32).
     """
-    
+
     xi = ddf["x_uint"]
     yi = ddf["y_uint"]
-    
+
     # Spread x and y bits into even (x) and odd (y) positions.
     xs = _part1by1_16(xi)
     ys = _part1by1_16(yi)
@@ -127,17 +132,18 @@ def morton_interleave(ddf):
     # Interleave: shift y bits left by 1 so they go into odd positions,
     # then OR with x bits in even positions.
     code = np.left_shift(ys.astype(np.uint64), 1) | xs.astype(np.uint64)
-        
+
     # Fits in 32 bits since we only had 16+16 input bits.
     return code.astype(np.uint32)
 
+
 def sdata_morton_sort_points(sdata, element):
     ddf = sdata.points[element]
-    
+
     # Compute morton codes
     ddf = norm_ddf_to_uint(ddf)
     ddf["morton_code_2d"] = morton_interleave(ddf)
-    
+
     if "z" in ddf.columns:
         num_unique_z = ddf["z"].unique().shape[0].compute()
         if num_unique_z < 100:
@@ -146,25 +152,26 @@ def sdata_morton_sort_points(sdata, element):
             sorted_ddf = ddf.sort_values(by=["z", "morton_code_2d"], ascending=True)
         else:
             # TODO: include z as a dimension in the morton code in the 3D case?
-            
+
             # For now, just return the data sorted by 2D code.
             sorted_ddf = ddf.sort_values(by="morton_code_2d", ascending=True)
     else:
         sorted_ddf = ddf.sort_values(by="morton_code_2d", ascending=True)
     sdata.points[element] = sorted_ddf
-    
+
     annotating_tables = get_element_annotators(sdata, element)
-    
+
     # TODO: Sort any annotating table(s) as well.
 
     return sdata
 
+
 def sdata_morton_query_rect_aux(sdata, element, orig_rect):
-    #orig_rect = [[50, 50], [100, 150]] # [[x0, y0], [x1, y1]]
-    #norm_rect = [
+    # orig_rect = [[50, 50], [100, 150]] # [[x0, y0], [x1, y1]]
+    # norm_rect = [
     #    orig_coord_to_norm_coord(orig_rect[0], orig_x_min=0, orig_x_max=100, orig_y_min=0, orig_y_max=200),
     #    orig_coord_to_norm_coord(orig_rect[1], orig_x_min=0, orig_x_max=100, orig_y_min=0, orig_y_max=200)
-    #]
+    # ]
 
     sorted_ddf = sdata.points[element]
 
@@ -178,7 +185,6 @@ def sdata_morton_query_rect_aux(sdata, element, orig_rect):
     y_min = bounding_box["y_min"]
     y_max = bounding_box["y_max"]
 
-
     norm_rect = [
         orig_coord_to_norm_coord(orig_rect[0], orig_x_min=x_min, orig_x_max=x_max, orig_y_min=y_min, orig_y_max=y_max),
         orig_coord_to_norm_coord(orig_rect[1], orig_x_min=x_min, orig_x_max=x_max, orig_y_min=y_min, orig_y_max=y_max)
@@ -187,11 +193,11 @@ def sdata_morton_query_rect_aux(sdata, element, orig_rect):
     # Get a list of morton code intervals that cover this rectangle region
     # [ (morton_start, morton_end), ... ]
     morton_intervals = zcover_rectangle(
-        rx0 = norm_rect[0][0], ry0 = norm_rect[0][1],
-        rx1 = norm_rect[1][0], ry1 = norm_rect[1][1],
-        bits = 16,
-        stop_level = None,
-        merge = True,
+        rx0=norm_rect[0][0], ry0=norm_rect[0][1],
+        rx1=norm_rect[1][0], ry1=norm_rect[1][1],
+        bits=16,
+        stop_level=None,
+        merge=True,
     )
 
     return morton_intervals
@@ -210,9 +216,10 @@ def sdata_morton_query_rect(sdata, element, orig_rect):
     # Get a list of row ranges that match the morton intervals.
     # (This uses binary searches internally to find the matching row indices).
     # [ (row_start, row_end), ... ]
-    matching_row_ranges = zquery_rows(morton_sorted, morton_intervals, merge = True)
+    matching_row_ranges = zquery_rows(morton_sorted, morton_intervals, merge=True)
 
     return matching_row_ranges
+
 
 def sdata_morton_query_rect_debug(sdata, element, orig_rect):
     # This is the same as the above sdata_morton_query_rect function,
@@ -221,7 +228,7 @@ def sdata_morton_query_rect_debug(sdata, element, orig_rect):
     sorted_ddf = sdata.points[element]
     morton_intervals = sdata_morton_query_rect_aux(sdata, element, orig_rect)
     morton_sorted = sorted_ddf["morton_code_2d"].compute().values.tolist()
-    matching_row_ranges, rows_checked = zquery_rows_aux(morton_sorted, morton_intervals, merge = True)
+    matching_row_ranges, rows_checked = zquery_rows_aux(morton_sorted, morton_intervals, merge=True)
     return matching_row_ranges, rows_checked
 
 # --------------------------
@@ -229,6 +236,8 @@ def sdata_morton_query_rect_debug(sdata, element, orig_rect):
 # --------------------------
 
 # Convert a coordinate from the normalized [0, 65535] space to the original space.
+
+
 def norm_coord_to_orig_coord(norm_coord, orig_x_min, orig_x_max, orig_y_min, orig_y_max):
     [norm_x, norm_y] = norm_coord
     orig_x_range = orig_x_max - orig_x_min
@@ -239,6 +248,8 @@ def norm_coord_to_orig_coord(norm_coord, orig_x_min, orig_x_max, orig_y_min, ori
     ]
 
 # Convert a coordinate from the original space to the [0, 65535] normalized space.
+
+
 def orig_coord_to_norm_coord(orig_coord, orig_x_min, orig_x_max, orig_y_min, orig_y_max):
     [orig_x, orig_y] = orig_coord
     orig_x_range = orig_x_max - orig_x_min
@@ -251,18 +262,23 @@ def orig_coord_to_norm_coord(orig_coord, orig_x_min, orig_x_max, orig_y_min, ori
 # --------------------------
 # Quadtree / Z-interval helpers
 # --------------------------
-def intersects(ax0:int, ay0:int, ax1:int, ay1:int,
-               bx0:int, by0:int, bx1:int, by1:int) -> bool:
+
+
+def intersects(ax0: int, ay0: int, ax1: int, ay1: int,
+               bx0: int, by0: int, bx1: int, by1: int) -> bool:
     """Axis-aligned box intersection (inclusive integer bounds)."""
     return not (ax1 < bx0 or bx1 < ax0 or ay1 < by0 or by1 < ay0)
 
-def contained(ix0:int, iy0:int, ix1:int, iy1:int,
-              ox0:int, oy0:int, ox1:int, oy1:int) -> bool:
+
+def contained(ix0: int, iy0: int, ix1: int, iy1: int,
+              ox0: int, oy0: int, ox1: int, oy1: int) -> bool:
     """Is inner box entirely inside outer box? (inclusive integer bounds)"""
     return (ox0 <= ix0 <= ix1 <= ox1) and (oy0 <= iy0 <= iy1 <= oy1)
 
-def point_inside(x:int, y:int, rx0:int, ry0:int, rx1:int, ry1:int) -> bool:
+
+def point_inside(x: int, y: int, rx0: int, ry0: int, rx1: int, ry1: int) -> bool:
     return (rx0 <= x <= rx1) and (ry0 <= y <= ry1)
+
 
 def cell_range(prefix: int, level: int, bits: int) -> Tuple[int, int]:
     """
@@ -274,7 +290,8 @@ def cell_range(prefix: int, level: int, bits: int) -> Tuple[int, int]:
     hi = ((prefix + 1) << shift) - 1
     return lo, hi
 
-def merge_adjacent(intervals: List[Tuple[int,int]]) -> List[Tuple[int,int]]:
+
+def merge_adjacent(intervals: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
     """Merge overlapping or directly adjacent intervals."""
     if not intervals:
         return []
@@ -292,7 +309,8 @@ def merge_adjacent(intervals: List[Tuple[int,int]]) -> List[Tuple[int,int]]:
 # Rectangle -> list of Morton intervals
 # --------------------------
 
-def zcover_rectangle(rx0:int, ry0:int, rx1:int, ry1:int, bits:int, stop_level: Optional[int] = None, merge: bool = True) -> List[Tuple[int,int]]:
+
+def zcover_rectangle(rx0: int, ry0: int, rx1: int, ry1: int, bits: int, stop_level: Optional[int] = None, merge: bool = True) -> List[Tuple[int, int]]:
     """
     Compute a (near-)minimal set of Morton code ranges covering the rectangle
     [rx0..rx1] x [ry0..ry1] on an integer grid [0..2^bits-1]^2.
@@ -301,13 +319,13 @@ def zcover_rectangle(rx0:int, ry0:int, rx1:int, ry1:int, bits:int, stop_level: O
     - If stop_level is set (0..bits): stop descending at that level, adding
       partially-overlapping cells as whole ranges (superset cover).
     """
-    if not (0 <= rx0 <= rx1 <= (1<<bits)-1 and 0 <= ry0 <= ry1 <= (1<<bits)-1):
+    if not (0 <= rx0 <= rx1 <= (1 << bits) - 1 and 0 <= ry0 <= ry1 <= (1 << bits) - 1):
         raise ValueError("Rectangle out of bounds for given bits.")
 
-    intervals: List[Tuple[int,int]] = []
+    intervals: List[Tuple[int, int]] = []
 
     # stack entries: (prefix, level, xmin, ymin, xmax, ymax)
-    stack = [(0, 0, 0, 0, (1<<bits)-1, (1<<bits)-1)]
+    stack = [(0, 0, 0, 0, (1 << bits) - 1, (1 << bits) - 1)]
 
     while stack:
         prefix, level, xmin, ymin, xmax, ymax = stack.pop()
@@ -337,20 +355,20 @@ def zcover_rectangle(rx0:int, ry0:int, rx1:int, ry1:int, bits:int, stop_level: O
 
         # q0: (x<=midx, y<=midy) -> child code 0b00
         stack.append(((prefix << 2) | 0,
-                      level+1,
+                      level + 1,
                       xmin, ymin, midx, midy))
         # q1: (x>midx, y<=midy)  -> child code 0b01
         stack.append(((prefix << 2) | 1,
-                      level+1,
-                      midx+1, ymin, xmax, midy))
+                      level + 1,
+                      midx + 1, ymin, xmax, midy))
         # q2: (x<=midx, y>midy)  -> child code 0b10
         stack.append(((prefix << 2) | 2,
-                      level+1,
-                      xmin, midy+1, midx, ymax))
+                      level + 1,
+                      xmin, midy + 1, midx, ymax))
         # q3: (x>midx, y>midy)   -> child code 0b11
         stack.append(((prefix << 2) | 3,
-                      level+1,
-                      midx+1, midy+1, xmax, ymax))
+                      level + 1,
+                      midx + 1, midy + 1, xmax, ymax))
 
     return merge_adjacent(intervals) if merge else intervals
 
@@ -359,7 +377,7 @@ def zcover_rectangle(rx0:int, ry0:int, rx1:int, ry1:int, bits:int, stop_level: O
 # Morton intervals -> row ranges in a Morton-sorted column
 # --------------------------
 
-def zquery_rows_aux(morton_sorted: List[int], intervals: List[Tuple[int,int]], merge: bool = True) -> Tuple[List[Tuple[int,int]], List[int]]:
+def zquery_rows_aux(morton_sorted: List[int], intervals: List[Tuple[int, int]], merge: bool = True) -> Tuple[List[Tuple[int, int]], List[int]]:
     """
     For each Z-interval [zlo, zhi], binary-search in the sorted Morton column
     and return row index half-open ranges [i, j) to scan.
@@ -370,12 +388,13 @@ def zquery_rows_aux(morton_sorted: List[int], intervals: List[Tuple[int,int]], m
     # evaluating how many HTTP requests would be needed in network-based case
     # (which will also depend on Arrow row group size).
     recorded_keys = []
+
     def record_key_check(k: int) -> int:
         # TODO: Does recorded_keys need to be marked as a global here?
         recorded_keys.append(k)
         return k
 
-    ranges: List[Tuple[int,int]] = []
+    ranges: List[Tuple[int, int]] = []
     # TODO: can these multiple binary searches be optimized?
     # Since we are doing many searches in the same array, and in each search we learn where more elements are located.
     for zlo, zhi in intervals:
@@ -389,7 +408,8 @@ def zquery_rows_aux(morton_sorted: List[int], intervals: List[Tuple[int,int]], m
     result = merge_adjacent(ranges) if merge else ranges
     return result, recorded_keys
 
-def zquery_rows(morton_sorted: List[int], intervals: List[Tuple[int,int]], merge: bool = True) -> List[Tuple[int,int]]:
+
+def zquery_rows(morton_sorted: List[int], intervals: List[Tuple[int, int]], merge: bool = True) -> List[Tuple[int, int]]:
     """
     For each Z-interval [zlo, zhi], binary-search in the sorted Morton column
     and return row index half-open ranges [i, j) to scan.
@@ -397,7 +417,7 @@ def zquery_rows(morton_sorted: List[int], intervals: List[Tuple[int,int]], merge
     return zquery_rows_aux(morton_sorted, intervals, merge=merge)[0]
 
 
-def row_ranges_to_row_indices(intervals: List[Tuple[int,int]]) -> List[int]:
+def row_ranges_to_row_indices(intervals: List[Tuple[int, int]]) -> List[int]:
     """
     Convert row ranges [i, j) to a list of row indices.
     Then, can index into pandas DataFrame using df.iloc[indices, :]
@@ -415,7 +435,7 @@ def sdata_points_process_columns(sdata, element, var_name_col=None, table_name=N
     if var_name_col is None:
         # We can try to get it from the spatialdata_attrs metadata.
         var_name_col = sdata.points[element].attrs["spatialdata_attrs"].get("feature_key")
-    
+
     # Appending codes for dictionary-encoded feature_name column.
     if table_name is None and var_name_col is not None:
         annotating_tables = get_element_annotators(sdata, element)
@@ -433,7 +453,7 @@ def sdata_points_process_columns(sdata, element, var_name_col=None, table_name=N
         def try_index(gene_name):
             try:
                 return var_index.index(gene_name)
-            except:
+            except BaseException:
                 return -1
         ddf[f"{var_name_col}_codes"] = ddf[var_name_col].apply(try_index).astype('int32')
 
@@ -454,7 +474,7 @@ def sdata_points_write_bounding_box_attrs(sdata, element) -> dd.DataFrame:
     ddf = sdata.points[element]
 
     [x_min, x_max, y_min, y_max] = [ddf["x"].min().compute(), ddf["x"].max().compute(), ddf["y"].min().compute(), ddf["y"].max().compute()]
-    bounding_box ={
+    bounding_box = {
         "x_min": float(x_min),
         "x_max": float(x_max),
         "y_min": float(y_min),
@@ -468,7 +488,7 @@ def sdata_points_write_bounding_box_attrs(sdata, element) -> dd.DataFrame:
     z = zarr.open(sdata_path, mode='a')
     group = z[f'points/{element}']
     group.attrs['bounding_box'] = bounding_box
-    
+
     # TODO: does anything special need to be done to ensure this is saved to disk?
 
 

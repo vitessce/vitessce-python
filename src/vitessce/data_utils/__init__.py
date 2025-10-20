@@ -20,6 +20,10 @@ from .multivec import (
 from .spatialdata_points_zorder import (
     # Function for computing codes and sorting
     sdata_morton_sort_points,
+    # Other helper functions
+    sdata_points_process_columns,
+    sdata_points_write_bounding_box_attrs,
+    sdata_points_modify_row_group_size,
     # Functions for querying
     sdata_morton_query_rect,
     row_ranges_to_row_indices,

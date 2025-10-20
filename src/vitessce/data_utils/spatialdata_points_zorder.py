@@ -1,5 +1,7 @@
 from typing import Tuple, List, Optional
 
+import os
+from os.path import join
 from bisect import bisect_left, bisect_right
 import pandas as pd
 import numpy as np
@@ -7,6 +9,7 @@ import numpy as np
 
 from spatialdata import get_element_annotators
 import dask.dataframe as dd
+import zarr
 
 
 MORTON_CODE_NUM_BITS = 32 # Resulting morton codes will be stored as uint32.
@@ -196,6 +199,9 @@ def sdata_morton_query_rect_aux(sdata, element, orig_rect):
 
 def sdata_morton_query_rect(sdata, element, orig_rect):
     sorted_ddf = sdata.points[element]
+
+    # TODO: generalize to 3D morton codes
+
     morton_intervals = sdata_morton_query_rect_aux(sdata, element, orig_rect)
 
     # Get morton code column as a list of integers
@@ -401,6 +407,88 @@ def row_ranges_to_row_indices(intervals: List[Tuple[int,int]]) -> List[int]:
         indices.extend(list(range(i, j)))
     return indices
 
-# TODO: add unit tests
 
-# TODO: generalize to 3D morton codes
+# More helper functions.
+def sdata_points_process_columns(sdata, element, var_name_col=None, table_name=None) -> dd.DataFrame:
+    ddf = sdata.points[element]
+
+    if var_name_col is None:
+        # We can try to get it from the spatialdata_attrs metadata.
+        var_name_col = sdata.points[element].attrs["spatialdata_attrs"].get("feature_key")
+    
+    # Appending codes for dictionary-encoded feature_name column.
+    if table_name is None and var_name_col is not None:
+        annotating_tables = get_element_annotators(sdata, element)
+        if len(annotating_tables) == 1:
+            table_name = annotating_tables[0]
+        elif len(annotating_tables) == 0:
+            raise ValueError(f"No annotating table found for Points element {element}, please specify table_name explicitly.")
+        else:
+            raise ValueError(f"Multiple annotating tables found for Points element {element}, please specify table_name explicitly.")
+
+    if var_name_col is not None:
+        var_df = sdata.tables[table_name].var
+        var_index = var_df.index.values.tolist()
+
+        def try_index(gene_name):
+            try:
+                return var_index.index(gene_name)
+            except:
+                return -1
+        ddf[f"{var_name_col}_codes"] = ddf[var_name_col].apply(try_index).astype('int32')
+
+    # Identify dictionary-encoded columns (categorical/string)
+    orig_columns = ddf.columns.tolist()
+    dict_encoded_cols = [col for col in orig_columns if pd.api.types.is_categorical_dtype(ddf[col].dtype) or pd.api.types.is_string_dtype(ddf[col].dtype)]
+
+    # Dictionary-encoded columns (i.e., categorical and string) must be stored as the rightmost columns of the dataframe.
+    ordered_columns = sorted(orig_columns, key=lambda colname: orig_columns.index(colname) if colname not in dict_encoded_cols else len(orig_columns))
+
+    # Reorder the columns of the dataframe
+    ddf = ddf[ordered_columns]
+
+    return ddf
+
+
+def sdata_points_write_bounding_box_attrs(sdata, element) -> dd.DataFrame:
+    ddf = sdata.points[element]
+
+    [x_min, x_max, y_min, y_max] = [ddf["x"].min().compute(), ddf["x"].max().compute(), ddf["y"].min().compute(), ddf["y"].max().compute()]
+    bounding_box ={
+        "x_min": float(x_min),
+        "x_max": float(x_max),
+        "y_min": float(y_min),
+        "y_max": float(y_max),
+    }
+
+    sdata_path = sdata.path
+    # TODO: error if no path
+
+    # Insert the bounding box as metadata for the sdata.points[element] Points element dataframe.
+    z = zarr.open(sdata_path, mode='a')
+    group = z[f'points/{element}']
+    group.attrs['bounding_box'] = bounding_box
+    
+    # TODO: does anything special need to be done to ensure this is saved to disk?
+
+
+def sdata_points_modify_row_group_size(sdata, element, row_group_size: int = 50_000):
+    import pyarrow.parquet as pq
+
+    sdata_path = sdata.path
+    # TODO: error if no path
+
+    # List the parts of the parquet file.
+    parquet_path = join(sdata_path, "points", element, "points.parquet")
+
+    # Read the number of "part.*.parquet" files on disk.
+    part_files = [f for f in os.listdir(parquet_path) if f.startswith("part.") and f.endswith(".parquet")]
+    num_parts = len(part_files)
+
+    # Update the row group size in each .parquet file part.
+    for i in range(num_parts):
+        part_path = join(parquet_path, f"part.{i}.parquet")
+        table_read = pq.read_table(part_path)
+
+        # Write the table to a new Parquet file with the desired row group size.
+        pq.write_table(table_read, part_path, row_group_size=row_group_size)

@@ -155,7 +155,19 @@ def get_uid_str(uid):
 
 # lang: js
 ESM = """
-import { importWithMap } from 'https://unpkg.com/dynamic-importmap@0.1.0';
+let importWithMap;
+try {
+    importWithMap = (await import('https://unpkg.com/dynamic-importmap@0.1.0')).importWithMap;
+} catch(e) {
+    console.warn("Import of dynamic-importmap failed, trying fallback.");
+    importWithMap = (await import('https://cdn.vitessce.io/dynamic-importmap@0.1.0/dist/index.js')).importWithMap;
+}
+
+const successfulImportMap = {
+    imports: {
+
+    },
+};
 const importMap = {
   imports: {
     "react": "https://esm.sh/react@18.2.0?dev",
@@ -163,9 +175,64 @@ const importMap = {
     "react-dom/client": "https://esm.sh/react-dom@18.2.0/client?dev",
   },
 };
+const fallbackImportMap = {
+    imports: {
+        "react": "https://cdn.vitessce.io/react@18.2.0/index.js",
+        "react-dom": "https://cdn.vitessce.io/react-dom@18.2.0/index.js",
+        "react-dom/client": "https://cdn.vitessce.io/react-dom@18.2.0/es2022/client.mjs",
+        // Replaced with version-specific URL below.
+        "vitessce": "https://cdn.vitessce.io/vitessce@3.8.5/dist/index.min.js",
+    },
+};
+/*
+const fallbackDevImportMap = {
+    imports: {
+        "react": "https://cdn.vitessce.io/react@18.2.0/index_dev.js",
+        "react-dom": "https://cdn.vitessce.io/react-dom@18.2.0/index_dev.js",
+        "react-dom/client": "https://cdn.vitessce.io/react-dom@18.2.0/es2022/client.development.mjs",
+        // Replaced with version-specific URL below.
+        "vitessce": "https://cdn.vitessce.io/@vitessce/dev@3.8.5/dist/index.js",
+    },
+};
+*/
 
-const React = await importWithMap("react", importMap);
-const { createRoot } = await importWithMap("react-dom/client", importMap);
+async function importWithMapAndFallback(moduleName, importMap, fallbackMap) {
+    let result = null;
+    if (!fallbackMap) {
+        // fallbackMap is null, user may have provided custom JS URL.
+        result = await importWithMap(moduleName, {
+            imports: {
+                ...importMap.imports,
+                ...successfulImportMap.imports,
+            },
+        });
+        successfulImportMap.imports[moduleName] = importMap.imports[moduleName];
+    } else {
+        try {
+            result = await importWithMap(moduleName, {
+                imports: {
+                    ...importMap.imports,
+                    ...successfulImportMap.imports,
+                },
+            });
+            successfulImportMap.imports[moduleName] = importMap.imports[moduleName];
+        } catch (e) {
+            console.warn(`Importing ${moduleName} failed with importMap`, importMap, "trying fallback", fallbackMap, successfulImportMap);
+            result = await importWithMap(moduleName, {
+                imports: {
+                    ...fallbackMap.imports,
+                    ...successfulImportMap.imports,
+                },
+            });
+            successfulImportMap.imports[moduleName] = fallbackMap.imports[moduleName];
+        }
+    }
+    return result;
+}
+
+
+const React = await importWithMapAndFallback("react", importMap, fallbackImportMap);
+const { createRoot } = await importWithMapAndFallback("react-dom/client", importMap, fallbackImportMap);
 
 const e = React.createElement;
 
@@ -268,10 +335,21 @@ async function render(view) {
 
     const pkgName = (jsDevMode ? "@vitessce/dev" : "vitessce");
 
-    importMap.imports["vitessce"] = (customJsUrl.length > 0
+    const hasCustomJsUrl = customJsUrl.length > 0;
+
+    importMap.imports["vitessce"] = (hasCustomJsUrl
         ? customJsUrl
         : `https://unpkg.com/${pkgName}@${jsPackageVersion}`
     );
+    let fallbackImportMapToUse = null;
+    if (!hasCustomJsUrl) {
+        fallbackImportMapToUse = fallbackImportMap;
+        if (jsDevMode) {
+            fallbackImportMapToUse.imports["vitessce"] = `https://cdn.vitessce.io/vitessce@${jsPackageVersion}/dist/index.min.js`;
+        } else {
+            fallbackImportMapToUse.imports["vitessce"] = `https://cdn.vitessce.io/@vitessce/dev@${jsPackageVersion}/dist/index.js`;
+        }
+    }
 
     const {
         Vitessce,
@@ -292,7 +370,7 @@ async function render(view) {
         useComplexCoordinationSecondary,
         useCoordinationScopes,
         useCoordinationScopesBy,
-    } = await importWithMap("vitessce", importMap);
+    } = await importWithMapAndFallback("vitessce", importMap, fallbackImportMapToUse);
 
     let pluginViewTypes = [];
     let pluginCoordinationTypes = [];
@@ -651,7 +729,7 @@ class VitessceWidget(anywidget.AnyWidget):
 
     next_port = DEFAULT_PORT
 
-    js_package_version = Unicode('3.8.3').tag(sync=True)
+    js_package_version = Unicode('3.8.5').tag(sync=True)
     js_dev_mode = Bool(False).tag(sync=True)
     custom_js_url = Unicode('').tag(sync=True)
     plugin_esm = List(trait=Unicode(''), default_value=[]).tag(sync=True)
@@ -664,7 +742,7 @@ class VitessceWidget(anywidget.AnyWidget):
 
     store_urls = List(trait=Unicode(''), default_value=[]).tag(sync=True)
 
-    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='3.8.3', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, prefer_local=True, invoke_timeout=300000, invoke_batched=True, page_mode=False, page_esm=None, prevent_scroll=True, server_host=None):
+    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='3.8.5', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, prefer_local=True, invoke_timeout=300000, invoke_batched=True, page_mode=False, page_esm=None, prevent_scroll=True, server_host=None):
         """
         Construct a new Vitessce widget. Not intended to be instantiated directly; instead, use ``VitessceConfig.widget``.
 
@@ -798,7 +876,7 @@ class VitessceWidget(anywidget.AnyWidget):
 # Launch Vitessce using plain HTML representation (no ipywidgets)
 
 
-def ipython_display(config, height=600, theme='auto', base_url=None, host_name=None, uid=None, port=None, proxy=False, js_package_version='3.8.3', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, page_mode=False, page_esm=None, server_host=None):
+def ipython_display(config, height=600, theme='auto', base_url=None, host_name=None, uid=None, port=None, proxy=False, js_package_version='3.8.5', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, page_mode=False, page_esm=None, server_host=None):
     from IPython.display import display, HTML
     uid_str = "vitessce" + get_uid_str(uid)
 

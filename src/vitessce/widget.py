@@ -155,7 +155,14 @@ def get_uid_str(uid):
 
 # lang: js
 ESM = """
-import { importWithMap } from 'https://unpkg.com/dynamic-importmap@0.1.0';
+let importWithMap;
+try {
+    importWithMap = (await import('https://unpkg.com/dynamic-importmap@0.1.0')).importWithMap;
+} catch(e) {
+    console.warn("Import of dynamic-importmap failed, trying fallback.");
+    importWithMap = (await import('https://cdn.vitessce.io/dynamic-importmap@0.1.0/dist/index.js')).importWithMap;
+}
+
 const successfulImportMap = {
     imports: {
 
@@ -170,11 +177,10 @@ const importMap = {
 };
 const fallbackImportMap = {
     imports: {
-        //"react": "https://cdn.vitessce.io/react@18.2.0/index.js",
-        //"react-dom": "https://cdn.vitessce.io/react-dom@18.2.0/index.js",
-        //"react-dom/client": "https://cdn.vitessce.io/react-dom@18.2.0/es2022/client.mjs",
-
-        // Replace with version-specific URL below.
+        "react": "https://cdn.vitessce.io/react@18.2.0/index.js",
+        "react-dom": "https://cdn.vitessce.io/react-dom@18.2.0/index.js",
+        "react-dom/client": "https://cdn.vitessce.io/react-dom@18.2.0/es2022/client.mjs",
+        // Replaced with version-specific URL below.
         "vitessce": "https://cdn.vitessce.io/vitessce@3.8.5/dist/index.min.js",
     },
 };
@@ -184,15 +190,13 @@ const fallbackDevImportMap = {
         "react": "https://cdn.vitessce.io/react@18.2.0/index_dev.js",
         "react-dom": "https://cdn.vitessce.io/react-dom@18.2.0/index_dev.js",
         "react-dom/client": "https://cdn.vitessce.io/react-dom@18.2.0/es2022/client.development.mjs",
-        // Replace with version-specific URL below.
+        // Replaced with version-specific URL below.
         "vitessce": "https://cdn.vitessce.io/@vitessce/dev@3.8.5/dist/index.js",
     },
 };
 */
 
 async function importWithMapAndFallback(moduleName, importMap, fallbackMap) {
-    console.log(`Importing ${moduleName} with import map`, importMap, fallbackMap);
-
     let result = null;
     if (!fallbackMap) {
         // fallbackMap is null, user may have provided custom JS URL.
@@ -213,7 +217,7 @@ async function importWithMapAndFallback(moduleName, importMap, fallbackMap) {
             });
             successfulImportMap.imports[moduleName] = importMap.imports[moduleName];
         } catch (e) {
-            console.warn(`Importing ${moduleName} failed with import map`, importMap, e);
+            console.warn(`Importing ${moduleName} failed with importMap`, importMap, "trying fallback", fallbackMap, successfulImportMap);
             result = await importWithMap(moduleName, {
                 imports: {
                     ...fallbackMap.imports,
@@ -315,7 +319,6 @@ function prependBaseUrl(config, proxy, hasHostName) {
 }
 
 async function render(view) {
-    console.log("Rendering Vitessce widget...");
     const cssUid = view.model.get('uid');
     const jsDevMode = view.model.get('js_dev_mode');
     const jsPackageVersion = view.model.get('js_package_version');

@@ -12,5 +12,6 @@ omit =
     src/vitessce/data_utils/ome.py
     src/vitessce/data_utils/entities.py
     src/vitessce/data_utils/multivec.py
+    src/vitessce/data_utils/spatialdata_points_zorder.py
     src/vitessce/widget_plugins/demo_plugin.py
     src/vitessce/widget_plugins/spatial_query.py

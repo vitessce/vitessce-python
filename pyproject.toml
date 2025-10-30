@@ -114,6 +114,8 @@ dev = [
   'boto3>=1.16.30',
   'scikit-misc>=0.1.3',
   'autopep8>=2.0.2',
+  'spatialdata>=0.3.0',
+  'dask[dataframe]==2024.11.1',
 ]
 
 [tool.uv]

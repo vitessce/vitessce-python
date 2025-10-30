@@ -10,11 +10,10 @@ from vitessce.data_utils.spatialdata_points_zorder import (
     sdata_morton_query_rect_debug,
     row_ranges_to_row_indices,
     orig_coord_to_norm_coord,
-    MORTON_CODE_VALUE_MAX,
 )
 
 
-def is_sorted(arr):
+def _is_sorted(arr):
     return all(arr[i] <= arr[i + 1] for i in range(len(arr) - 1))
 
 
@@ -36,22 +35,7 @@ def test_zorder_sorting(sdata_with_points):
     sorted_ddf = sdata.points["transcripts"]
     morton_sorted = sorted_ddf["morton_code_2d"].compute().values.tolist()
 
-    assert is_sorted(morton_sorted)
-
-
-def norm_value_to_uint(value, v_min, v_max):
-    """
-    Scale numeric value (int or float) to integer [0, 2^bits-1].
-    """
-    # Cast to float64
-    value_f64 = value.astype("float64")
-    # Normalize the array values to be between 0.0 and 1.0
-    norm_value_f64 = (value_f64 - v_min) / (v_max - v_min)
-    # Clip to ensure no values are outside 0/1 range
-    clipped_norm_value_f64 = np.clip(norm_value_f64, 0.0, 1.0)
-    # Multiply by the morton code max-value to scale from [0,1] to [0,65535]
-    out = (clipped_norm_value_f64 * MORTON_CODE_VALUE_MAX).astype(np.uint32)
-    return out
+    assert _is_sorted(morton_sorted)
 
 
 def test_zorder_query(sdata_with_points):

@@ -1,8 +1,6 @@
 import pytest
-from os.path import join
-from pathlib import Path, PurePosixPath, PureWindowsPath
+from pathlib import Path
 import numpy as np
-
 from spatialdata import read_zarr
 
 from vitessce.data_utils.spatialdata_points_zorder import (
@@ -16,8 +14,8 @@ from vitessce.data_utils.spatialdata_points_zorder import (
 )
 
 
-def is_sorted(l):
-    return all(l[i] <= l[i + 1] for i in range(len(l) - 1))
+def is_sorted(arr):
+    return all(arr[i] <= arr[i + 1] for i in range(len(arr) - 1))
 
 
 data_path = Path('tests/data')

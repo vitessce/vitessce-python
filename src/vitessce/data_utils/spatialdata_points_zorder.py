@@ -159,7 +159,7 @@ def sdata_morton_sort_points(sdata, element):
         sorted_ddf = ddf.sort_values(by="morton_code_2d", ascending=True)
     sdata.points[element] = sorted_ddf
 
-    annotating_tables = get_element_annotators(sdata, element)
+    # annotating_tables = get_element_annotators(sdata, element)
 
     # TODO: Sort any annotating table(s) as well.
 

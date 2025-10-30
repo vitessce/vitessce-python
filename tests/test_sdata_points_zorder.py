@@ -1,5 +1,6 @@
 import pytest
 from os.path import join
+from pathlib import Path, PurePosixPath, PureWindowsPath
 import numpy as np
 
 from spatialdata import read_zarr
@@ -17,13 +18,11 @@ from vitessce.data_utils.spatialdata_points_zorder import (
 def is_sorted(l):
     return all(l[i] <= l[i + 1] for i in range(len(l) - 1))
 
+data_path = Path('tests/data')
 
 @pytest.fixture
 def sdata_with_points():
-    data_dir = join("docs", "notebooks", "data")
-    spatialdata_filepath = join(data_dir, "xenium_rep1_io.spatialdata.zarr")
-
-    sdata = read_zarr(spatialdata_filepath)
+    sdata = read_zarr(data_path / "xenium_rep1_io.points_only.spatialdata.zarr")
     return sdata
 
 
@@ -70,7 +69,7 @@ def test_zorder_query(sdata_with_points):
     df = df.reset_index(drop=True)
     estimated_row_indices = df.iloc[rect_row_indices].index.tolist()
 
-    assert df.shape[0] == 42638083
+    assert df.shape[0] == 213191
 
     # Do the same query the "dumb" way, by checking all points
 
@@ -94,12 +93,12 @@ def test_zorder_query(sdata_with_points):
     # Check that the estimated rows 100% contain the exact rows.
     # A.issubset(B) checks that all elements of A are in B ("A is a subset of B").
     assert set(exact_row_indices).issubset(set(estimated_row_indices))
-    assert len(exact_row_indices) == 552
-    assert len(estimated_row_indices) <= 631
+    assert len(exact_row_indices) == 4
+    assert len(estimated_row_indices) <= 4
 
     # Check that the number of rows checked is less than the total number of points
-    assert len(rows_checked) <= 85374
-    assert len(matching_row_ranges) == 24 # Kind of an implementation detail.
+    assert len(rows_checked) <= 19858
+    assert len(matching_row_ranges) == 2 # Kind of an implementation detail.
 
     # Do a second check, this time against x_uint/y_uint (the normalized coordinates)
     # TODO: does this ensure that estimated == exact?
@@ -129,9 +128,8 @@ def test_zorder_query(sdata_with_points):
     # True if A is a subset of B and False otherwise.
     assert set(exact_row_indices_norm).issubset(set(estimated_row_indices))
 
-    assert len(exact_row_indices_norm) == 618
-    assert len(estimated_row_indices) <= 631
-
+    assert len(exact_row_indices_norm) == 4
+    assert len(estimated_row_indices) <= 4
     
     # ========= Another query ==========
     orig_rect = [[500.0, 500.0], [600.0, 600.0]] # x0, y0, x1, y1
@@ -156,12 +154,12 @@ def test_zorder_query(sdata_with_points):
     # Check that the estimated rows 100% contain the exact rows.
     # A.issubset(B) checks that all elements of A are in B ("A is a subset of B").
     assert set(exact_row_indices).issubset(set(estimated_row_indices))
-    assert len(exact_row_indices) == 16678
-    assert len(estimated_row_indices) <= 17681
+    assert len(exact_row_indices) == 85
+    assert len(estimated_row_indices) <= 95
 
     # Check that the number of rows checked is less than the total number of points
-    assert len(rows_checked) <= 124661
-    assert len(matching_row_ranges) == 176 # Kind of an implementation detail.
+    assert len(rows_checked) <= 71675
+    assert len(matching_row_ranges) == 13 # Kind of an implementation detail.
 
     # Do the same query the "dumb" way, by checking all points
     in_rect = (
@@ -197,7 +195,7 @@ def test_zorder_query(sdata_with_points):
     assert set(exact_row_indices_norm).issubset(set(estimated_row_indices))
 
     # Check that the estimated rows contain all of the exact rows.
-    assert len(exact_row_indices_norm) == 17590
-    assert len(estimated_row_indices) <= 17681
+    assert len(exact_row_indices_norm) == 91
+    assert len(estimated_row_indices) <= 95
     
 

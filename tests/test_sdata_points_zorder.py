@@ -15,10 +15,13 @@ from vitessce.data_utils.spatialdata_points_zorder import (
     MORTON_CODE_VALUE_MAX,
 )
 
+
 def is_sorted(l):
     return all(l[i] <= l[i + 1] for i in range(len(l) - 1))
 
+
 data_path = Path('tests/data')
+
 
 @pytest.fixture
 def sdata_with_points():
@@ -59,7 +62,7 @@ def test_zorder_query(sdata_with_points):
     sdata_morton_sort_points(sdata, "transcripts")
 
     # Query a rectangle that should return some points
-    orig_rect = [[50.0, 50.0], [100.0, 150.0]] # x0, y0, x1, y1
+    orig_rect = [[50.0, 50.0], [100.0, 150.0]]  # x0, y0, x1, y1
     matching_row_ranges, rows_checked = sdata_morton_query_rect_debug(sdata, "transcripts", orig_rect)
     rect_row_indices = row_ranges_to_row_indices(matching_row_ranges)
 
@@ -98,7 +101,7 @@ def test_zorder_query(sdata_with_points):
 
     # Check that the number of rows checked is less than the total number of points
     assert len(rows_checked) <= 19858
-    assert len(matching_row_ranges) == 2 # Kind of an implementation detail.
+    assert len(matching_row_ranges) == 2  # Kind of an implementation detail.
 
     # Do a second check, this time against x_uint/y_uint (the normalized coordinates)
     # TODO: does this ensure that estimated == exact?
@@ -130,9 +133,9 @@ def test_zorder_query(sdata_with_points):
 
     assert len(exact_row_indices_norm) == 4
     assert len(estimated_row_indices) <= 4
-    
+
     # ========= Another query ==========
-    orig_rect = [[500.0, 500.0], [600.0, 600.0]] # x0, y0, x1, y1
+    orig_rect = [[500.0, 500.0], [600.0, 600.0]]  # x0, y0, x1, y1
 
     # Query using z-order
     matching_row_ranges, rows_checked = sdata_morton_query_rect_debug(sdata, "transcripts", orig_rect)
@@ -159,7 +162,7 @@ def test_zorder_query(sdata_with_points):
 
     # Check that the number of rows checked is less than the total number of points
     assert len(rows_checked) <= 71675
-    assert len(matching_row_ranges) == 13 # Kind of an implementation detail.
+    assert len(matching_row_ranges) == 13  # Kind of an implementation detail.
 
     # Do the same query the "dumb" way, by checking all points
     in_rect = (
@@ -197,5 +200,3 @@ def test_zorder_query(sdata_with_points):
     # Check that the estimated rows contain all of the exact rows.
     assert len(exact_row_indices_norm) == 91
     assert len(estimated_row_indices) <= 95
-    
-

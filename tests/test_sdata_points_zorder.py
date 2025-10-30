@@ -1,6 +1,5 @@
 import pytest
 from pathlib import Path
-import numpy as np
 from spatialdata import read_zarr
 
 from vitessce.data_utils.spatialdata_points_zorder import (

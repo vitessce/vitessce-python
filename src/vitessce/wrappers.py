@@ -1432,6 +1432,10 @@ class SpatialDataWrapper(AnnDataWrapper):
         :type obs_segmentations_path: Optional[str]
         :param obs_points_path: Path to a points element, by default None
         :type obs_points_path: Optional[str]
+        :param str feature_labels_path: Path to a table var column containing feature labels (e.g., alternate gene symbols), instead of the default index column of the `var` dataframe.
+        :param list[str] obs_embedding_paths: Column names like `['obsm/X_umap', 'obsm/X_pca']` for showing scatterplots
+        :param list[str] obs_embedding_names: Overriding names like `['UMAP', 'PCA']` for displaying above scatterplots
+        :param list[str] obs_embedding_dims: Dimensions along which to get data for the scatterplot, like `[[0, 1], [4, 5]]` where `[0, 1]` is just the normal x and y but `[4, 5]` could be comparing the third and fourth principal components, for example.
         """
         raise_error_if_zero_or_more_than_one([
             sdata_path,
@@ -1551,6 +1555,7 @@ class SpatialDataWrapper(AnnDataWrapper):
             options = gen_sdata_obs_segmentations_schema(options, self._obs_segmentations_path, self._table_path, self._coordinate_system)
             options = gen_sdata_obs_points_schema(options, self._obs_points_path, self._table_path, self._coordinate_system)
             options = gen_feature_labels_schema(self._feature_labels, options)
+            options = gen_obs_embedding_schema(options, self._mappings_obsm, self._mappings_obsm_names, self._mappings_obsm_dims)
             if len(options.keys()) > 0:
                 obj_file_def = {
                     "fileType": ft.SPATIALDATA_ZARR_ZIP.value if self.is_zip else ft.SPATIALDATA_ZARR.value,

@@ -481,7 +481,10 @@ class TestWrappers(unittest.TestCase):
                     'obsSets': [{'name': 'Cell Type', 'path': 'obs/CellType'}],
                     'tablePath': 'tables/table'
                 },
-                'image': {'path': 'images/picture'}
+                'image': {'path': 'images/picture'},
+                'obsEmbedding': [
+                    {'dims': [0, 1], 'embeddingType': 'UMAP', 'path': 'obsm/X_umap'},
+                ],
             }})
 
     def test_spatial_data_with_base_dir_2(self):

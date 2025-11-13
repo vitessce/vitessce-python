@@ -65,7 +65,7 @@ all = [
   # scanpy < 1.10.3 does not support numpy >= 2.0.0 and does not
   # Reference: https://github.com/scverse/scanpy/pull/3115/files
   'scanpy>=1.10.2',
-  'ome-zarr<0.10.3',
+  'ome-zarr>=0.12.2',
   'tifffile>=2020.10.1',
 
   'jupyter-server-proxy>=1.5.2',

@@ -125,6 +125,9 @@ override-dependencies = []
 [tool.hatch.build]
 exclude = [".github", "docs", "demos", "binder"]
 
+[tool.hatch.metadata]
+allow-direct-references = true
+
 [project.urls]
 repository = "https://github.com/vitessce/vitessce-python"
 

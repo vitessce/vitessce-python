@@ -14,7 +14,6 @@ def create_xenium_filtered_points():
     zip_filepath = join(data_dir, "xenium_rep1_io.spatialdata.zarr.zip")
     spatialdata_filepath = join(data_dir, "xenium_rep1_io.spatialdata.zarr")
 
-
     if not isdir(spatialdata_filepath):
         if not isfile(zip_filepath):
             os.makedirs(data_dir, exist_ok=True)
@@ -37,12 +36,10 @@ def create_xenium_filtered_points():
 
     # 2. Define a function to take every 100th row from a partition
 
-
     def select_every_200th(partition):
         # Each 'partition' is a Pandas DataFrame
         # .iloc[::100] is the efficient pandas way to get every 100th row
         return partition.iloc[::200]
-
 
     # 3. Apply this function to every partition in the Dask DataFrame
     result = ddf.map_partitions(select_every_200th)
@@ -53,3 +50,6 @@ def create_xenium_filtered_points():
     small_sdata = SpatialData(points={"transcripts": filtered_ddf})
 
     small_sdata.write("xenium_rep1_io.points_only.spatialdata.zarr", overwrite=True)
+
+# Uncomment to run.
+# create_xenium_filtered_points()

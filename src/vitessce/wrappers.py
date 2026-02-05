@@ -1407,7 +1407,7 @@ SpatialDataWrapperType = TypeVar('SpatialDataWrapperType', bound='SpatialDataWra
 
 class SpatialDataWrapper(AnnDataWrapper):
 
-    def __init__(self, sdata_path: Optional[str] = None, sdata_url: Optional[str] = None, sdata_store: Optional[Union[str, zarr.storage.StoreLike]] = None, sdata_artifact: Optional[ln.Artifact] = None, image_path: Optional[str] = None, region: Optional[str] = None, coordinate_system: Optional[str] = None, obs_spots_path: Optional[str] = None, obs_segmentations_path: Optional[str] = None, obs_points_path: Optional[str] = None, table_path: str = "tables/table", is_zip=None, coordination_values=None, **kwargs):
+    def __init__(self, sdata_path: Optional[str] = None, sdata_url: Optional[str] = None, sdata_store: Optional[Union[str, zarr.storage.StoreLike]] = None, sdata_artifact: Optional[ln.Artifact] = None, image_path: Optional[str] = None, region: Optional[str] = None, coordinate_system: Optional[str] = None, obs_spots_path: Optional[str] = None, obs_segmentations_path: Optional[str] = None, obs_points_path: Optional[str] = None, obs_points_feature_index_column: Optional[str] = None, obs_points_morton_code_column: Optional[str] = None, table_path: str = "tables/table", is_zip=None, coordination_values=None, **kwargs):
         """
         Wrap a SpatialData object.
 
@@ -1432,6 +1432,10 @@ class SpatialDataWrapper(AnnDataWrapper):
         :type obs_segmentations_path: Optional[str]
         :param obs_points_path: Path to a points element, by default None
         :type obs_points_path: Optional[str]
+        :param obs_points_feature_index_column: Column in the points dataframe that contains a feature index value (i.e., index into table.var.index to specify a gene) for each point, by default None
+        :type obs_points_feature_index_column: Optional[str]
+        :param obs_points_morton_code_column: Column in the points dataframe that contains a morton code for each point, by default None
+        :type obs_points_morton_code_column: Optional[str]
         :param str feature_labels_path: Path to a table var column containing feature labels (e.g., alternate gene symbols), instead of the default index column of the `var` dataframe.
         :param list[str] obs_embedding_paths: Column names like `['obsm/X_umap', 'obsm/X_pca']` for showing scatterplots
         :param list[str] obs_embedding_names: Overriding names like `['UMAP', 'PCA']` for displaying above scatterplots
@@ -1466,6 +1470,8 @@ class SpatialDataWrapper(AnnDataWrapper):
         self._obs_spots_path = obs_spots_path
         self._obs_segmentations_path = obs_segmentations_path
         self._obs_points_path = obs_points_path
+        self._obs_points_feature_index_column = obs_points_feature_index_column
+        self._obs_points_morton_code_column = obs_points_morton_code_column
         if self._adata_path is not None:
             self.zarr_folder = 'spatialdata.zarr'
         self.obs_type_label = None
@@ -1553,7 +1559,10 @@ class SpatialDataWrapper(AnnDataWrapper):
             options = gen_sdata_obs_spots_schema(options, self._obs_spots_path, self._table_path, self._region, self._coordinate_system)
             options = gen_sdata_image_schema(options, self._image_path, self._coordinate_system)
             options = gen_sdata_obs_segmentations_schema(options, self._obs_segmentations_path, self._table_path, self._coordinate_system)
-            options = gen_sdata_obs_points_schema(options, self._obs_points_path, self._table_path, self._coordinate_system)
+            options = gen_sdata_obs_points_schema(
+                options, self._obs_points_path, self._table_path, self._coordinate_system,
+                self._obs_points_feature_index_column, self._obs_points_morton_code_column
+            )
             options = gen_feature_labels_schema(self._feature_labels, options)
             options = gen_obs_embedding_schema(options, self._mappings_obsm, self._mappings_obsm_names, self._mappings_obsm_dims)
             if len(options.keys()) > 0:

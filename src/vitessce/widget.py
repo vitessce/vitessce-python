@@ -393,17 +393,15 @@ async function render(view) {
 
             if (!data.success) {
                 resolve(undefined);
+                return;
             }
 
-            if (key.includes("spatialdata_attrs") && key.endsWith("0") && !ArrayBuffer.isView(bufferData.buffer)) {
-                // For some reason, the Zarrita.js UnicodeStringArray does not seem to work with
-                // ArrayBuffers (throws a TypeError), so here we convert to Uint8Array if needed.
-                // This error is occurring specifically for the arr.getChunk call within the AnnDataSource._loadString function.
-                // TODO: figure out a more long-term solution.
-                resolve(new Uint8Array(bufferData.buffer));
+            if (ArrayBuffer.isView(bufferData)) {
+                resolve(new Uint8Array(bufferData.buffer, bufferData.byteOffset, bufferData.byteLength));
+                return;
             }
-
-            resolve(bufferData.buffer);
+            resolve(new Uint8Array(bufferData.buffer));
+            return;
         });
     }
 
@@ -435,15 +433,26 @@ async function render(view) {
                         });
                         if (!data.success) return undefined;
 
-                        if (key.includes("spatialdata_attrs") && key.endsWith("0") && !ArrayBuffer.isView(buffers[0].buffer)) {
-                            // For some reason, the Zarrita.js UnicodeStringArray does not seem to work with
-                            // ArrayBuffers (throws a TypeError), so here we convert to Uint8Array if needed.
-                            // This error is occurring specifically for the arr.getChunk call within the AnnDataSource._loadString function.
-                            // TODO: figure out a more long-term solution.
-                            return new Uint8Array(buffers[0].buffer);
+                        if (ArrayBuffer.isView(buffers[0])) {
+                            return new Uint8Array(buffers[0].buffer, buffers[0].byteOffset, buffers[0].byteLength);
                         }
+                        return new Uint8Array(buffers[0].buffer);
+                    }
+                },
+                async getRange(key, rangeQuery) {
+                    if (invokeBatched) {
+                        return enqueue([storeUrl, key, rangeQuery]);
+                    } else {
+                        // Do not submit zarr gets in batches. Instead, submit individually.
+                        const [data, buffers] = await view.experimental.invoke("_zarr_get_range", [storeUrl, key, rangeQuery], {
+                            signal: AbortSignal.timeout(invokeTimeout),
+                        });
+                        if (!data.success) return undefined;
 
-                        return buffers[0].buffer;
+                        if (ArrayBuffer.isView(buffers[0])) {
+                            return new Uint8Array(buffers[0].buffer, buffers[0].byteOffset, buffers[0].byteLength);
+                        }
+                        return new Uint8Array(buffers[0].buffer);
                     }
                 },
             }
@@ -729,7 +738,7 @@ class VitessceWidget(anywidget.AnyWidget):
 
     next_port = DEFAULT_PORT
 
-    js_package_version = Unicode('3.9.2').tag(sync=True)
+    js_package_version = Unicode('3.9.4').tag(sync=True)
     js_dev_mode = Bool(False).tag(sync=True)
     custom_js_url = Unicode('').tag(sync=True)
     plugin_esm = List(trait=Unicode(''), default_value=[]).tag(sync=True)
@@ -742,7 +751,7 @@ class VitessceWidget(anywidget.AnyWidget):
 
     store_urls = List(trait=Unicode(''), default_value=[]).tag(sync=True)
 
-    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='3.9.2', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, prefer_local=True, invoke_timeout=300000, invoke_batched=True, page_mode=False, page_esm=None, prevent_scroll=True, server_host=None):
+    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='3.9.4', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, prefer_local=True, invoke_timeout=300000, invoke_batched=True, page_mode=False, page_esm=None, prevent_scroll=True, server_host=None):
         """
         Construct a new Vitessce widget. Not intended to be instantiated directly; instead, use ``VitessceConfig.widget``.
 
@@ -850,21 +859,42 @@ class VitessceWidget(anywidget.AnyWidget):
         except KeyError:
             buffers = []
         return {"success": len(buffers) == 1}, buffers
+    
+    @anywidget.experimental.command
+    def _zarr_get_range(self, params, buffers):
+        [store_url, key, range_query] = params
+        store = self._stores[store_url]
+        try:
+            full_value = store[key.lstrip("/")]
+            # Reference: https://github.com/manzt/zarrita.js/blob/f63a2521e2b46b22aa26af4146822e4d827dff83/packages/%40zarrita-storage/src/types.ts#L3
+            if "suffixLength" in range_query:
+                suffix_length = range_query["suffixLength"]
+                buffers = [full_value[-suffix_length:]]
+            elif "offset" in range_query and "length" in range_query:
+                offset = range_query["offset"]
+                length = range_query["length"]
+                buffers = [full_value[offset:offset+length]]
+        except KeyError:
+            buffers = []
+        return {"success": len(buffers) == 1}, buffers
 
     @anywidget.experimental.command
     def _zarr_get_multi(self, params_arr, buffers):
-        # This variant of _zarr_get supports batching.
+        # This variant of _zarr_get and _zarr_get_range supports batching.
         result_dicts = []
         result_buffers = []
         for params in params_arr:
-            [store_url, key] = params
-            store = self._stores[store_url]
-            try:
-                result_buffers.append(store[key.lstrip("/")])
-                result_dicts.append({"success": True})
-            except KeyError:
-                result_buffers.append(b'')
+            if len(params) == 2:
+                result_dict, result_buffer_arr = self._zarr_get(params, buffers)
+            elif len(params) == 3:
+                result_dict, result_buffer_arr = self._zarr_get_range(params, buffers)
+            
+            if result_dict["success"] and len(result_buffer_arr) == 1:
+                result_dicts.append(result_dict)
+                result_buffers.append(result_buffer_arr[0])
+            else:
                 result_dicts.append({"success": False})
+                result_buffers.append(b'')
         return result_dicts, result_buffers
 
     @anywidget.experimental.command
@@ -876,7 +906,7 @@ class VitessceWidget(anywidget.AnyWidget):
 # Launch Vitessce using plain HTML representation (no ipywidgets)
 
 
-def ipython_display(config, height=600, theme='auto', base_url=None, host_name=None, uid=None, port=None, proxy=False, js_package_version='3.9.2', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, page_mode=False, page_esm=None, server_host=None):
+def ipython_display(config, height=600, theme='auto', base_url=None, host_name=None, uid=None, port=None, proxy=False, js_package_version='3.9.4', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, page_mode=False, page_esm=None, server_host=None):
     from IPython.display import display, HTML
     uid_str = "vitessce" + get_uid_str(uid)
 

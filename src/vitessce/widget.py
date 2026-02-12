@@ -859,7 +859,7 @@ class VitessceWidget(anywidget.AnyWidget):
         except KeyError:
             buffers = []
         return {"success": len(buffers) == 1}, buffers
-    
+
     @anywidget.experimental.command
     def _zarr_get_range(self, params, buffers):
         [store_url, key, range_query] = params
@@ -873,7 +873,7 @@ class VitessceWidget(anywidget.AnyWidget):
             elif "offset" in range_query and "length" in range_query:
                 offset = range_query["offset"]
                 length = range_query["length"]
-                buffers = [full_value[offset:offset+length]]
+                buffers = [full_value[offset:offset + length]]
         except KeyError:
             buffers = []
         return {"success": len(buffers) == 1}, buffers
@@ -888,7 +888,7 @@ class VitessceWidget(anywidget.AnyWidget):
                 result_dict, result_buffer_arr = self._zarr_get(params, buffers)
             elif len(params) == 3:
                 result_dict, result_buffer_arr = self._zarr_get_range(params, buffers)
-            
+
             if result_dict["success"] and len(result_buffer_arr) == 1:
                 result_dicts.append(result_dict)
                 result_buffers.append(result_buffer_arr[0])

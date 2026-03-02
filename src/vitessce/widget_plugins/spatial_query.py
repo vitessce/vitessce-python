@@ -1,10 +1,14 @@
+import colorsys
+import json
 from oxc_py import transform
 from ..widget import VitesscePlugin
 
 
-PLUGIN_ESM = transform("""
-function createPlugins(utilsForPlugins) {
-    const {
+def _build_plugin_esm(cell_type_list):
+    ct_list_js = json.dumps(cell_type_list)
+    js_source = f"""
+function createPlugins(utilsForPlugins) {{
+    const {{
         React,
         PluginFileType,
         PluginViewType,
@@ -12,120 +16,140 @@ function createPlugins(utilsForPlugins) {
         PluginJointFileType,
         z,
         useCoordination,
-    } = utilsForPlugins;
-    function SpatialQueryView(props) {
-        const { coordinationScopes } = props;
-        const [{
+    }} = utilsForPlugins;
+
+    const CELL_TYPE_LIST = {ct_list_js};
+
+    function SpatialQueryView(props) {{
+        const {{ coordinationScopes }} = props;
+        const [{{
             queryParams,
-            obsSetSelection,
-        }, {
+        }}, {{
             setQueryParams,
-        }] = useCoordination(['queryParams', 'obsSetSelection', 'obsType'], coordinationScopes);
+        }}] = useCoordination(['queryParams', 'obsType'], coordinationScopes);
 
         const [uuid, setUuid] = React.useState(1);
         const [queryType, setQueryType] = React.useState('grid');
+        const [anchorCellType, setAnchorCellType] = React.useState(CELL_TYPE_LIST[0] ?? '');
         const [maxDist, setMaxDist] = React.useState(10);
-        const [minSize, setMinSize] = React.useState(0);
-        const [minCount, setMinCount] = React.useState(0);
         const [minSupport, setMinSupport] = React.useState(0.5);
+        const [k, setK] = React.useState(20);
+        const [nPoints, setNPoints] = React.useState(1000);
 
-        const cellTypeOfInterest = obsSetSelection?.length === 1 && obsSetSelection[0][0] === "Cell Type"
-            ? obsSetSelection[0][1]
-            : null;
+        const isAnchorMode = queryType === 'anchor-type-knn' || queryType === 'anchor-type-dist';
 
-        const onQueryTypeChange = React.useCallback((e) => {
-            setQueryType(e.target.value);
-        }, []);
+        const onQueryTypeChange = React.useCallback((e) => {{
+            const newType = e.target.value;
+            setQueryType(newType);
+            // Update maxDist default when switching modes
+            if (newType === 'anchor-type-knn') {{
+                setMaxDist(20);
+            }} else {{
+                setMaxDist(10);
+            }}
+        }}, []);
+
+        const radiusLabel = queryType === 'anchor-type-knn' ? 'Max. Dist.' : 'Radius';
 
         return (
         <div className="spatial-query">
-            <p>Spatial Query Manager</p>
+            <p>SpatialQuery Manager</p>
             <label>
                 Query type&nbsp;
-                <select onChange={onQueryTypeChange}>
+                <select value={{queryType}} onChange={{onQueryTypeChange}}>
                     <option value="grid">Grid-based</option>
                     <option value="rand">Random-based</option>
-                    <option value="ct-center" disabled={cellTypeOfInterest === null}>Cell type of interest</option>
+                    <option value="anchor-type-knn">Anchor cell - kNN</option>
+                    <option value="anchor-type-dist">Anchor cell - Radius</option>
                 </select>
             </label>
             <br/>
+            {{isAnchorMode && (
             <label>
-                {/* Maximum distance to consider a cell as a neighbor. */}
-                Max. Dist.
-                <input type="range" value={maxDist} onChange={e => setMaxDist(parseFloat(e.target.value))} min={1} max={20} step={1} />
-                {maxDist}
+                Anchor cell&nbsp;
+                <select value={{anchorCellType}} onChange={{e => setAnchorCellType(e.target.value)}}>
+                    {{CELL_TYPE_LIST.map(ct => (
+                        <option key={{ct}} value={{ct}}>{{ct}}</option>
+                    ))}}
+                </select>
+            </label>
+            )}}
+            {{isAnchorMode && <br/>}}
+            <label>
+                {{radiusLabel}}
+                <input type="range" value={{maxDist}} onChange={{e => setMaxDist(parseFloat(e.target.value))}} min={{5}} max={{30}} step={{1}} />
+                {{maxDist}}
             </label>
             <br/>
+            {{queryType === 'anchor-type-knn' && (
             <label>
-                {/* Minimum neighborhood size for each point to consider. */}
-                Min. Size
-                <input type="range" value={minSize} onChange={e => setMinSize(parseFloat(e.target.value))} min={0} max={20} step={0.5} />
-                {minSize}
+                k (neighbors)
+                <input type="range" value={{k}} onChange={{e => setK(parseFloat(e.target.value))}} min={{5}} max={{50}} step={{1}} />
+                {{k}}
+                <br/>
             </label>
-            <br/>
+            )}}
+            {{queryType === 'rand' && (
             <label>
-                {/* Minimum number of cell type to consider. */}
-                Min. Count
-                <input type="range" value={minCount} onChange={e => setMinCount(parseFloat(e.target.value))} min={0} max={100} step={1} />
-                {minCount}
+                Sample points
+                <input type="range" value={{nPoints}} onChange={{e => setNPoints(parseFloat(e.target.value))}} min={{100}} max={{5000}} step={{100}} />
+                {{nPoints}}
+                <br/>
             </label>
-            <br/>
+            )}}
             <label>
-                {/* Threshold of frequency to consider a pattern as a frequent pattern. */}
                 Min. Support
-                <input type="range" value={minSupport} onChange={e => setMinSupport(parseFloat(e.target.value))} min={0} max={1} step={0.01} />
-                {minSupport}
+                <input type="range" value={{minSupport}} onChange={{e => setMinSupport(parseFloat(e.target.value))}} min={{0}} max={{1}} step={{0.01}} />
+                {{minSupport}}
             </label>
             <br/>
-            {/* TODO: disDuplicates: Distinguish duplicates in patterns. */}
-            <button onClick={(e) => {
-                setQueryParams({
-                    cellTypeOfInterest,
+            <button onClick={{(e) => {{
+                setQueryParams({{
+                    cellTypeOfInterest: isAnchorMode ? anchorCellType : null,
                     queryType,
                     maxDist,
-                    minSize,
-                    minCount,
                     minSupport,
+                    k,
+                    nPoints,
                     uuid,
-                });
+                }});
                 setUuid(uuid+1);
-            }}>Find patterns</button>
+            }}}}>Find patterns</button>
         </div>
         );
-    }
+    }}
 
     const pluginCoordinationTypes = [
-        new PluginCoordinationType('queryParams', null, z.object({
+        new PluginCoordinationType('queryParams', null, z.object({{
             cellTypeOfInterest: z.string().nullable(),
-            queryType: z.enum(['grid', 'rand', 'ct-center']),
+            queryType: z.enum(['grid', 'rand', 'anchor-type-knn', 'anchor-type-dist']),
             maxDist: z.number(),
-            minSize: z.number(),
-            minCount: z.number(),
             minSupport: z.number(),
-            disDuplicates: z.boolean(),
+            k: z.number(),
+            nPoints: z.number(),
             uuid: z.number(),
-        }).partial().nullable()),
+        }}).partial().nullable()),
     ];
 
     const pluginViewTypes = [
-        new PluginViewType('spatialQuery', SpatialQueryView, ['queryParams', 'obsSetSelection', 'obsType']),
+        new PluginViewType('spatialQuery', SpatialQueryView, ['queryParams', 'obsType']),
     ];
-    return { pluginViewTypes, pluginCoordinationTypes };
-}
-export default { createPlugins };
-""")
+    return {{ pluginViewTypes, pluginCoordinationTypes }};
+}}
+export default {{ createPlugins }};
+"""
+    return transform(js_source)
 
 
 class SpatialQueryPlugin(VitesscePlugin):
     """
     Spatial-Query plugin view renders controls to change parameters passed to the Spatial-Query methods.
     """
-    plugin_esm = PLUGIN_ESM
     commands = {}
 
-    def __init__(self, 
-                 adata, 
-                 spatial_key="X_spatial", 
+    def __init__(self,
+                 adata,
+                 spatial_key="X_spatial",
                  label_key="cell_type",
                  feature_name="gene_name",
                  if_lognorm=True,
@@ -156,10 +180,10 @@ class SpatialQueryPlugin(VitesscePlugin):
         self.label_key = label_key
 
         self.tt = spatial_query(
-            adata=adata, 
-            dataset='test', 
-            spatial_key=spatial_key, 
-            label_key=label_key, 
+            adata=adata,
+            dataset='test',
+            spatial_key=spatial_key,
+            label_key=label_key,
             feature_name=feature_name,
             leaf_size=10,
             build_gene_index=False,
@@ -168,14 +192,19 @@ class SpatialQueryPlugin(VitesscePlugin):
 
         self.tab20_rgb = [[int(r * 255), int(g * 255), int(b * 255)] for (r, g, b, a) in [plt.cm.tab20(i) for i in range(20)]]
 
+        cell_type_list = adata.obs[label_key].unique().tolist()
+        self.cell_type_list = cell_type_list
+        self.initial_query_params = {}
+
+        # Build ESM with cell type list embedded directly as a JS constant
+        self.plugin_esm = _build_plugin_esm(cell_type_list)
+
         self.additional_obs_sets = {
             "version": "0.1.3",
             "tree": [
                 {
                     "name": "SpatialQuery Results",
-                    "children": [
-
-                    ]
+                    "children": []
                 }
             ]
         }
@@ -228,13 +257,18 @@ class SpatialQueryPlugin(VitesscePlugin):
         }
 
         obs_set_color = []
+        n_motifs = len(fp_tree)
 
-        for row_i, row in fp_tree.iterrows():
+        for motif_i, (row_i, row) in enumerate(fp_tree.iterrows()):
             try:
                 motif = row["itemsets"]
             except KeyError:
                 motif = row["motifs"]
-            cell_i = row["neighbor_id"]
+            # anchor-type queries: use neighbor_id for motif cells, grid/rand use cell_id
+            if "neighbor_id" in row.index:
+                cell_i = row["neighbor_id"]
+            else:
+                cell_i = row["cell_id"]
 
             motif_name = str(list(motif))
 
@@ -249,9 +283,12 @@ class SpatialQueryPlugin(VitesscePlugin):
                 ]
             })
 
-            first_ct_color = self.ct_to_color.get(list(motif)[0], [255, 255, 255])
+            # Assign each motif a unique color by evenly spacing hues around the color wheel
+            hue = motif_i / max(n_motifs, 1)
+            r, g, b = colorsys.hls_to_rgb(hue, 0.55, 0.75)
+            motif_color = [int(r * 255), int(g * 255), int(b * 255)]
             obs_set_color.append({
-                "color": first_ct_color,
+                "color": motif_color,
                 "path": [additional_obs_sets["tree"][0]["name"], motif_name]
             })
 
@@ -267,45 +304,50 @@ class SpatialQueryPlugin(VitesscePlugin):
     def run_sq(self, prev_config):
         query_params = prev_config["coordinationSpace"]["queryParams"]["A"]
 
-        max_dist = query_params.get("maxDist", 150)
-        min_size = query_params.get("minSize", 4)
-        # min_count = query_params.get("minCount", 10)
+        max_dist = query_params.get("maxDist", 10)
         min_support = query_params.get("minSupport", 0.5)
-        # dis_duplicates = query_params.get("disDuplicates", False)  # if distinguish duplicates of cell types in neighborhood
+        k = query_params.get("k", 20)
+        n_points = query_params.get("nPoints", 1000)
         query_type = query_params.get("queryType", "grid")
         cell_type_of_interest = query_params.get("cellTypeOfInterest", None)
 
         query_uuid = query_params["uuid"]
 
-        params_dict = dict(
-            max_dist=max_dist,
-            min_size=min_size,
-            # min_count=min_count,
-            min_support=min_support,
-            # dis_duplicates=dis_duplicates,
-            if_display=True,
-            figsize=(9, 6),
-            return_cellID=True,
-        )
-        print(params_dict)
-
-        # TODO: add unit tests for this functionality
+        print(query_params)
 
         if query_type == "rand":
-            # TODO: implement param similar to return_grid for find_patterns_rand (to return the random points used)
-            fp_tree = self.tt.find_patterns_rand(**params_dict)
-        elif query_type == "grid":
-            params_dict["return_grid"] = True
-            fp_tree, grid_pos = self.tt.find_patterns_grid(**params_dict)
-        elif query_type == "ct-center":
-            fp_tree = self.tt.motif_enrichment_knn(
-                ct=cell_type_of_interest,
-                k=20,  # TODO: make this a parameter in the UI.
+            fp_tree = self.tt.find_patterns_rand(
+                max_dist=max_dist,
+                n_points=int(n_points),
                 min_support=min_support,
-                # dis_duplicates=dis_duplicates,
+                if_display=True,
+                figsize=(9, 6),
                 return_cellID=True,
             )
-            print(fp_tree)
+        elif query_type == "grid":
+            fp_tree, grid_pos = self.tt.find_patterns_grid(
+                max_dist=max_dist,
+                min_support=min_support,
+                if_display=True,
+                figsize=(9, 6),
+                return_cellID=True,
+                return_grid=True,
+            )
+        elif query_type == "anchor-type-knn":
+            fp_tree = self.tt.motif_enrichment_knn(
+                ct=cell_type_of_interest,
+                k=int(k),
+                max_dist=max_dist,
+                min_support=min_support,
+                return_cellID=True,
+            )
+        elif query_type == "anchor-type-dist":
+            fp_tree = self.tt.motif_enrichment_dist(
+                ct=cell_type_of_interest,
+                max_dist=max_dist,
+                min_support=min_support,
+                return_cellID=True,
+            )
 
         # TODO: implement query types that are dependent on motif selection.
 
@@ -316,7 +358,12 @@ class SpatialQueryPlugin(VitesscePlugin):
         # Perform query
         (new_additional_obs_sets, new_obs_set_color) = self.fp_tree_to_obs_sets_tree(fp_tree, query_uuid)
 
-        additional_obs_sets["tree"][0] = new_additional_obs_sets["tree"][0]
+        new_sq_node = new_additional_obs_sets["tree"][0]
+        sq_idx = next((i for i, n in enumerate(additional_obs_sets["tree"]) if n["name"].startswith("SpatialQuery Results")), None)
+        if sq_idx is not None:
+            additional_obs_sets["tree"][sq_idx] = new_sq_node
+        else:
+            additional_obs_sets["tree"].append(new_sq_node)
         prev_config["coordinationSpace"]["additionalObsSets"]["A"] = additional_obs_sets
 
         obs_set_color += new_obs_set_color

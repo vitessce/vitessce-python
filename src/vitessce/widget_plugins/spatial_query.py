@@ -24,9 +24,9 @@ function createPlugins(utilsForPlugins) {
 
         const [uuid, setUuid] = React.useState(1);
         const [queryType, setQueryType] = React.useState('grid');
-        const [maxDist, setMaxDist] = React.useState(100);
-        const [minSize, setMinSize] = React.useState(4);
-        const [minCount, setMinCount] = React.useState(10);
+        const [maxDist, setMaxDist] = React.useState(10);
+        const [minSize, setMinSize] = React.useState(0);
+        const [minCount, setMinCount] = React.useState(0);
         const [minSupport, setMinSupport] = React.useState(0.5);
 
         const cellTypeOfInterest = obsSetSelection?.length === 1 && obsSetSelection[0][0] === "Cell Type"
@@ -52,21 +52,21 @@ function createPlugins(utilsForPlugins) {
             <label>
                 {/* Maximum distance to consider a cell as a neighbor. */}
                 Max. Dist.
-                <input type="range" value={maxDist} onChange={e => setMaxDist(parseFloat(e.target.value))} min={50} max={250} step={1} />
+                <input type="range" value={maxDist} onChange={e => setMaxDist(parseFloat(e.target.value))} min={1} max={20} step={1} />
                 {maxDist}
             </label>
             <br/>
             <label>
                 {/* Minimum neighborhood size for each point to consider. */}
                 Min. Size
-                <input type="range" value={minSize} onChange={e => setMinSize(parseFloat(e.target.value))} min={0} max={20} step={1} />
+                <input type="range" value={minSize} onChange={e => setMinSize(parseFloat(e.target.value))} min={0} max={20} step={0.5} />
                 {minSize}
             </label>
             <br/>
             <label>
                 {/* Minimum number of cell type to consider. */}
                 Min. Count
-                <input type="range" value={minCount} onChange={e => setMinCount(parseFloat(e.target.value))} min={0} max={30} step={1} />
+                <input type="range" value={minCount} onChange={e => setMinCount(parseFloat(e.target.value))} min={0} max={100} step={1} />
                 {minCount}
             </label>
             <br/>
@@ -160,6 +160,7 @@ class SpatialQueryPlugin(VitesscePlugin):
             dataset='test', 
             spatial_key=spatial_key, 
             label_key=label_key, 
+            feature_name=feature_name,
             leaf_size=10,
             build_gene_index=False,
             if_lognorm=if_lognorm,
@@ -171,7 +172,7 @@ class SpatialQueryPlugin(VitesscePlugin):
             "version": "0.1.3",
             "tree": [
                 {
-                    "name": "Spatial-Query Results",
+                    "name": "SpatialQuery Results",
                     "children": [
 
                     ]
@@ -186,7 +187,7 @@ class SpatialQueryPlugin(VitesscePlugin):
             },
             {
                 "color": [255, 255, 255],
-                "path": ["Spatial-Query Results"],
+                "path": ["SpatialQuery Results"],
             }
         ]
 
@@ -218,7 +219,7 @@ class SpatialQueryPlugin(VitesscePlugin):
             "version": "0.1.3",
             "tree": [
                 {
-                    "name": f"Spatial-Query Results {sq_id}",
+                    "name": f"SpatialQuery Results {sq_id}",
                     "children": [
 
                     ]
@@ -233,7 +234,7 @@ class SpatialQueryPlugin(VitesscePlugin):
                 motif = row["itemsets"]
             except KeyError:
                 motif = row["motifs"]
-            cell_i = row["cell_id"]
+            cell_i = row["neighbor_id"]
 
             motif_name = str(list(motif))
 
@@ -248,8 +249,9 @@ class SpatialQueryPlugin(VitesscePlugin):
                 ]
             })
 
+            first_ct_color = self.ct_to_color.get(list(motif)[0], [255, 255, 255])
             obs_set_color.append({
-                "color": [255, 255, 255],
+                "color": first_ct_color,
                 "path": [additional_obs_sets["tree"][0]["name"], motif_name]
             })
 
@@ -282,7 +284,7 @@ class SpatialQueryPlugin(VitesscePlugin):
             min_support=min_support,
             # dis_duplicates=dis_duplicates,
             if_display=True,
-            fig_size=(9, 6),
+            figsize=(9, 6),
             return_cellID=True,
         )
         print(params_dict)

@@ -123,7 +123,13 @@ class SpatialQueryPlugin(VitesscePlugin):
     plugin_esm = PLUGIN_ESM
     commands = {}
 
-    def __init__(self, adata, spatial_key="X_spatial", label_key="cell_type"):
+    def __init__(self, 
+                 adata, 
+                 spatial_key="X_spatial", 
+                 label_key="cell_type",
+                 feature_name="gene_name",
+                 if_lognorm=True,
+                 ):
         """
         Construct a new Vitessce widget.
 
@@ -131,6 +137,8 @@ class SpatialQueryPlugin(VitesscePlugin):
         :type adata: anndata.AnnData
         :param str spatial_key: The key in adata.obsm that contains the (x, y) coordinates of each cell. By default, "X_spatial".
         :param str label_key: The column in adata.obs that contains the cell type labels. By default, "cell_type".
+        :param str feature_name: The key in adata.var that contains the gene names. By default, "gene_name".
+        :param bool if_lognorm: Whether the data in adata.X need to be log-normalized. If input is count data, set to True. By default, True.
 
         .. code-block:: python
 
@@ -140,14 +148,22 @@ class SpatialQueryPlugin(VitesscePlugin):
             # ...
             vc.widget(plugins=[plugin], remount_on_uid_change=False)
         """
-        from SpatialQuery.spatial_query import spatial_query
+        from SpatialQuery import spatial_query
         import matplotlib.pyplot as plt  # Add as dependency / optional dependency?
 
         self.adata = adata
         self.spatial_key = spatial_key
         self.label_key = label_key
 
-        self.tt = spatial_query(adata=adata, dataset='test', spatial_key=spatial_key, label_key=label_key, leaf_size=10)
+        self.tt = spatial_query(
+            adata=adata, 
+            dataset='test', 
+            spatial_key=spatial_key, 
+            label_key=label_key, 
+            leaf_size=10,
+            build_gene_index=False,
+            if_lognorm=if_lognorm,
+            )
 
         self.tab20_rgb = [[int(r * 255), int(g * 255), int(b * 255)] for (r, g, b, a) in [plt.cm.tab20(i) for i in range(20)]]
 

@@ -201,12 +201,7 @@ class SpatialQueryPlugin(VitesscePlugin):
 
         self.additional_obs_sets = {
             "version": "0.1.3",
-            "tree": [
-                {
-                    "name": "SpatialQuery Results",
-                    "children": []
-                }
-            ]
+            "tree": []
         }
 
         self.obs_set_color = [
@@ -214,10 +209,6 @@ class SpatialQueryPlugin(VitesscePlugin):
                 "color": [255, 255, 255],
                 "path": ["Cell Type"],
             },
-            {
-                "color": [255, 255, 255],
-                "path": ["SpatialQuery Results"],
-            }
         ]
 
         self.ct_to_color = dict()
@@ -244,61 +235,65 @@ class SpatialQueryPlugin(VitesscePlugin):
         return matches
 
     def fp_tree_to_obs_sets_tree(self, fp_tree, sq_id):
-        additional_obs_sets = {
-            "version": "0.1.3",
-            "tree": [
-                {
-                    "name": f"SpatialQuery Results {sq_id}",
-                    "children": [
+        sq_motif_name = f"SpatialQuery Results {sq_id} — By Motif"
+        sq_ct_name = f"SpatialQuery Results {sq_id} — By Cell Type"
 
-                    ]
-                }
-            ]
-        }
+        # Pass 1: collect per-motif data and accumulate deduped cell ids per cell type
+        motif_rows = []
+        ct_to_cell_ids = {}
 
-        obs_set_color = []
-        n_motifs = len(fp_tree)
-
-        for motif_i, (row_i, row) in enumerate(fp_tree.iterrows()):
+        for _, row in fp_tree.iterrows():
             try:
                 motif = row["itemsets"]
             except KeyError:
                 motif = row["motifs"]
-            # anchor-type queries: use neighbor_id for motif cells, grid/rand use cell_id
-            if "neighbor_id" in row.index:
-                cell_i = row["neighbor_id"]
-            else:
-                cell_i = row["cell_id"]
+            cell_i = row["neighbor_id"] if "neighbor_id" in row.index else row["cell_id"]
+            motif_rows.append((motif, cell_i))
+            for cell_type in motif:
+                matching = {i for i in cell_i if self.cell_id_to_cell_type.get(self.cell_i_to_cell_id.get(i)) == cell_type}
+                ct_to_cell_ids.setdefault(cell_type, set()).update(matching)
 
+        n_motifs = len(motif_rows)
+        obs_set_color = []
+
+        # Node 1: "By Motif" — each motif is a leaf, colored by motif index
+        by_motif_children = []
+        for motif_i, (motif, cell_i) in enumerate(motif_rows):
             motif_name = str(list(motif))
-
-            additional_obs_sets["tree"][0]["children"].append({
-                "name": motif_name,
-                "children": [
-                    {
-                        "name": cell_type,
-                        "set": self.get_matching_cell_ids(cell_type, cell_i)
-                    }
-                    for cell_type in motif
-                ]
-            })
-
-            # Assign each motif a unique color by evenly spacing hues around the color wheel
             hue = motif_i / max(n_motifs, 1)
             r, g, b = colorsys.hls_to_rgb(hue, 0.55, 0.75)
             motif_color = [int(r * 255), int(g * 255), int(b * 255)]
-            obs_set_color.append({
-                "color": motif_color,
-                "path": [additional_obs_sets["tree"][0]["name"], motif_name]
+            motif_cell_types = set(motif)
+            motif_cell_ids = list({
+                i for i in cell_i
+                if self.cell_id_to_cell_type.get(self.cell_i_to_cell_id.get(i)) in motif_cell_types
             })
+            by_motif_children.append({
+                "name": motif_name,
+                "set": [[self.cell_i_to_cell_id[i], None] for i in motif_cell_ids if i in self.cell_i_to_cell_id]
+            })
+            obs_set_color.append({"color": motif_color, "path": [sq_motif_name, motif_name]})
 
-            for cell_type in motif:
-                color = self.ct_to_color[cell_type]
-                path = [additional_obs_sets["tree"][0]["name"], motif_name, cell_type]
-                obs_set_color.append({
-                    "color": color,
-                    "path": path
-                })
+        # Node 2: "By Cell Type" — each cell type is a leaf (union across motifs), colored by cell type
+        by_ct_children = []
+        for cell_type, cell_ids_set in ct_to_cell_ids.items():
+            by_ct_children.append({
+                "name": cell_type,
+                "set": [[self.cell_i_to_cell_id[i], None] for i in sorted(cell_ids_set) if i in self.cell_i_to_cell_id]
+            })
+            obs_set_color.append({"color": self.ct_to_color[cell_type], "path": [sq_ct_name, cell_type]})
+
+        additional_obs_sets = {
+            "version": "0.1.3",
+            "tree": [
+                {"name": sq_motif_name, "children": by_motif_children},
+                {"name": sq_ct_name, "children": by_ct_children},
+            ]
+        }
+
+        obs_set_color.insert(0, {"color": [255, 255, 255], "path": [sq_motif_name]})
+        obs_set_color.insert(0, {"color": [255, 255, 255], "path": [sq_ct_name]})
+
         return (additional_obs_sets, obs_set_color)
 
     def run_sq(self, prev_config):
@@ -358,24 +353,25 @@ class SpatialQueryPlugin(VitesscePlugin):
         # Perform query
         (new_additional_obs_sets, new_obs_set_color) = self.fp_tree_to_obs_sets_tree(fp_tree, query_uuid)
 
-        new_sq_node = new_additional_obs_sets["tree"][0]
-        sq_idx = next((i for i, n in enumerate(additional_obs_sets["tree"]) if n["name"].startswith("SpatialQuery Results")), None)
-        if sq_idx is not None:
-            additional_obs_sets["tree"][sq_idx] = new_sq_node
-        else:
-            additional_obs_sets["tree"].append(new_sq_node)
+        # Replace any existing SpatialQuery Results nodes (both By Motif and By Cell Type)
+        existing_tree = additional_obs_sets["tree"]
+        existing_tree = [n for n in existing_tree if not n["name"].startswith("SpatialQuery Results")]
+        existing_tree += new_additional_obs_sets["tree"]
+        additional_obs_sets["tree"] = existing_tree
         prev_config["coordinationSpace"]["additionalObsSets"]["A"] = additional_obs_sets
 
         obs_set_color += new_obs_set_color
         prev_config["coordinationSpace"]["obsSetColor"]["A"] = obs_set_color
 
-        motif_to_select = new_additional_obs_sets["tree"][0]["children"][0]["name"]
-        new_obs_set_selection = [[new_additional_obs_sets["tree"][0]["name"], motif_to_select, node["name"]] for node in new_additional_obs_sets["tree"][0]["children"][0]["children"]]
+        # Default selection: all motif leaf nodes under "By Motif" node
+        sq_motif_node = new_additional_obs_sets["tree"][0]  # "...By Motif"
+        new_obs_set_selection = [
+            [sq_motif_node["name"], motif["name"]]
+            for motif in sq_motif_node["children"]
+        ]
         prev_config["coordinationSpace"]["obsSetSelection"]["A"] = new_obs_set_selection
 
-        # TODO: need to fix bug that prevents this from working
-        # Reference: https://github.com/vitessce/vitessce/blob/774328ab5c4436576dd2e8e4fff0758d6c6cce89/packages/view-types/obs-sets-manager/src/ObsSetsManagerSubscriber.js#L104
-        prev_config["coordinationSpace"]["obsSetExpansion"]["A"] = [path[:-1] for path in new_obs_set_selection]
+        prev_config["coordinationSpace"]["obsSetExpansion"]["A"] = [[sq_motif_node["name"]]]
 
         return {**prev_config, "uid": f"with_query_{query_uuid}"}
 

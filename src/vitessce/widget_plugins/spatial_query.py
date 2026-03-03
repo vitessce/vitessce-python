@@ -1,4 +1,6 @@
+import base64
 import colorsys
+import io
 import json
 from oxc_py import transform
 from ..widget import VitesscePlugin
@@ -16,6 +18,7 @@ function createPlugins(utilsForPlugins) {{
         PluginJointFileType,
         z,
         useCoordination,
+        invokeCommand,
     }} = utilsForPlugins;
 
     const CELL_TYPE_LIST = {ct_list_js};
@@ -75,20 +78,20 @@ function createPlugins(utilsForPlugins) {{
             </label>
             )}}
             {{isAnchorMode && <br/>}}
+            {{queryType === 'anchor-type-knn' && (
+            <label>
+                k (neighbors)
+                <input type="range" value={{k}} onChange={{e => setK(parseFloat(e.target.value))}} min={{5}} max={{100}} step={{1}} />
+                {{k}}
+                <br/>
+            </label>
+            )}}
             <label>
                 {{radiusLabel}}
                 <input type="range" value={{maxDist}} onChange={{e => setMaxDist(parseFloat(e.target.value))}} min={{5}} max={{30}} step={{1}} />
                 {{maxDist}}
             </label>
             <br/>
-            {{queryType === 'anchor-type-knn' && (
-            <label>
-                k (neighbors)
-                <input type="range" value={{k}} onChange={{e => setK(parseFloat(e.target.value))}} min={{5}} max={{50}} step={{1}} />
-                {{k}}
-                <br/>
-            </label>
-            )}}
             {{queryType === 'rand' && (
             <label>
                 Sample points
@@ -119,6 +122,37 @@ function createPlugins(utilsForPlugins) {{
         );
     }}
 
+    function HeatmapView(props) {{
+        const {{ coordinationScopes }} = props;
+        const [{{ queryParams }}] = useCoordination(['queryParams'], coordinationScopes);
+
+        const [imgSrc, setImgSrc] = React.useState(null);
+        const [loading, setLoading] = React.useState(false);
+
+        const uuid = queryParams?.uuid;
+
+        React.useEffect(() => {{
+            if (uuid == null) return;
+            setLoading(true);
+            invokeCommand('get_heatmap', {{ uuid }}, []).then(([result]) => {{
+                if (result?.img) {{
+                    setImgSrc('data:image/png;base64,' + result.img);
+                }} else {{
+                    setImgSrc(null);
+                }}
+                setLoading(false);
+            }}).catch(() => setLoading(false));
+        }}, [uuid]);
+
+        return (
+        <div className="spatial-query-heatmap" style={{{{ width: '100%', height: '100%', overflow: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}}}>
+            {{loading && <p>Loading heatmap...</p>}}
+            {{!loading && imgSrc && <img src={{imgSrc}} style={{{{ maxWidth: '100%', maxHeight: '100%' }}}} />}}
+            {{!loading && !imgSrc && <p style={{{{ color: '#888' }}}}>Run a query to see the heatmap.</p>}}
+        </div>
+        );
+    }}
+
     const pluginCoordinationTypes = [
         new PluginCoordinationType('queryParams', null, z.object({{
             cellTypeOfInterest: z.string().nullable(),
@@ -133,6 +167,7 @@ function createPlugins(utilsForPlugins) {{
 
     const pluginViewTypes = [
         new PluginViewType('spatialQuery', SpatialQueryView, ['queryParams', 'obsType']),
+        new PluginViewType('spatialQueryHeatmap', HeatmapView, ['queryParams']),
     ];
     return {{ pluginViewTypes, pluginCoordinationTypes }};
 }}
@@ -145,7 +180,6 @@ class SpatialQueryPlugin(VitesscePlugin):
     """
     Spatial-Query plugin view renders controls to change parameters passed to the Spatial-Query methods.
     """
-    commands = {}
 
     def __init__(self,
                  adata,
@@ -225,6 +259,88 @@ class SpatialQueryPlugin(VitesscePlugin):
         self.cell_i_to_cell_id = dict(zip(range(adata.obs.shape[0]), adata.obs.index.tolist()))
         self.cell_id_to_cell_type = dict(zip(adata.obs.index.tolist(), adata.obs[label_key].tolist()))
 
+        self._last_fp_tree = None
+        self._last_query_type = None
+        self._last_cell_type_of_interest = None
+
+        self.commands = {"get_heatmap": self._handle_get_heatmap}
+
+    def _render_heatmap_base64(self, fp_tree, query_type, cell_type_of_interest):
+        import matplotlib
+        import matplotlib.pyplot as plt
+        import seaborn as sns
+        _prev_backend = matplotlib.get_backend()
+        matplotlib.use("Agg")
+
+        is_enrichment = query_type in ("anchor-type-knn", "anchor-type-dist")
+
+        if is_enrichment:
+            enrich = fp_tree.copy()
+            enrich["frequency"] = enrich["n_center_motif"] / enrich["n_center"]
+            enrich = enrich.sort_values(by="frequency", ascending=False)
+            enrich["motif_group"] = [f"motif_{i+1}" for i in range(len(enrich))]
+            expanded = enrich.explode("motifs")
+            heatmap_data = expanded.pivot_table(
+                index="motifs", columns="motif_group", values="frequency", aggfunc="first"
+            )
+            # Sort columns by descending frequency of each motif
+            col_order = enrich.sort_values("frequency", ascending=False)["motif_group"].tolist()
+            heatmap_data = heatmap_data[[c for c in col_order if c in heatmap_data.columns]]
+            cbar_label = "Frequency"
+            if cell_type_of_interest:
+                title = f"Distribution of enriched motifs around {cell_type_of_interest}"
+            else:
+                title = "Distribution of enriched motifs"
+            xlabel = "Motifs"
+        else:
+            fp = fp_tree.copy()
+            fp = fp.sort_values(by="support", ascending=False).reset_index(drop=True)
+            fp["motif_group"] = [f"motif_{i+1}" for i in range(len(fp))]
+            expanded = fp.explode("itemsets")
+            heatmap_data = expanded.pivot_table(
+                index="itemsets", columns="motif_group", values="support", aggfunc="first"
+            )
+            # Sort columns by descending support of each motif
+            col_order = fp.sort_values("support", ascending=False)["motif_group"].tolist()
+            heatmap_data = heatmap_data[[c for c in col_order if c in heatmap_data.columns]]
+            cbar_label = "Support"
+            title = "Distribution of frequent patterns"
+            xlabel = "Patterns"
+
+        fig, ax = plt.subplots(figsize=(7, 5))
+        sns.heatmap(
+            heatmap_data,
+            cmap="GnBu",
+            linewidths=0.1,
+            linecolor="lightgrey",
+            annot=False,
+            cbar_kws={"label": cbar_label},
+            ax=ax,
+        )
+        ax.set_title(title, fontsize=13, pad=12)
+        ax.set_ylabel("")
+        ax.set_xlabel(xlabel, fontsize=11)
+        ax.tick_params(axis="x", rotation=90, labelsize=10)
+        ax.tick_params(axis="y", rotation=0, labelsize=10)
+        fig.tight_layout()
+
+        buf = io.BytesIO()
+        fig.savefig(buf, format="png", dpi=150, bbox_inches="tight")
+        plt.close(fig)
+        matplotlib.use(_prev_backend)
+        buf.seek(0)
+        return base64.b64encode(buf.read()).decode("utf-8")
+
+    def _handle_get_heatmap(self, _message, _buffers):
+        if self._last_fp_tree is None:
+            return {"img": None}, []
+        img_b64 = self._render_heatmap_base64(
+            self._last_fp_tree,
+            self._last_query_type,
+            self._last_cell_type_of_interest,
+        )
+        return {"img": img_b64}, []
+
     def get_matching_cell_ids(self, cell_type, cell_i):
         cell_ids = [self.cell_i_to_cell_id[i] for i in cell_i]
         matches = []
@@ -234,7 +350,7 @@ class SpatialQueryPlugin(VitesscePlugin):
                 matches.append([cell_id, None])
         return matches
 
-    def fp_tree_to_obs_sets_tree(self, fp_tree, sq_id):
+    def fp_tree_to_obs_sets_tree(self, fp_tree, sq_id, anchor_ct=None):
         sq_motif_name = f"SpatialQuery Results {sq_id} — By Motif"
         sq_ct_name = f"SpatialQuery Results {sq_id} — By Cell Type"
 
@@ -248,7 +364,8 @@ class SpatialQueryPlugin(VitesscePlugin):
             except KeyError:
                 motif = row["motifs"]
             cell_i = row["neighbor_id"] if "neighbor_id" in row.index else row["cell_id"]
-            motif_rows.append((motif, cell_i))
+            center_i = row["center_id"] if "center_id" in row.index else None
+            motif_rows.append((motif, cell_i, center_i))
             for cell_type in motif:
                 matching = {i for i in cell_i if self.cell_id_to_cell_type.get(self.cell_i_to_cell_id.get(i)) == cell_type}
                 ct_to_cell_ids.setdefault(cell_type, set()).update(matching)
@@ -258,7 +375,7 @@ class SpatialQueryPlugin(VitesscePlugin):
 
         # Node 1: "By Motif" — each motif is a leaf, colored by motif index
         by_motif_children = []
-        for motif_i, (motif, cell_i) in enumerate(motif_rows):
+        for motif_i, (motif, cell_i, _center_i) in enumerate(motif_rows):
             motif_name = str(list(motif))
             hue = motif_i / max(n_motifs, 1)
             r, g, b = colorsys.hls_to_rgb(hue, 0.55, 0.75)
@@ -283,12 +400,48 @@ class SpatialQueryPlugin(VitesscePlugin):
             })
             obs_set_color.append({"color": self.ct_to_color[cell_type], "path": [sq_ct_name, cell_type]})
 
+        # Nodes 3+: one top-level node per motif, children are cell types within that motif.
+        # For anchor queries, also include an "{anchor_ct} (anchor)" child for center cells.
+        per_motif_nodes = []
+        for motif_i, (motif, cell_i, center_i) in enumerate(motif_rows):
+            motif_name = str(list(motif))
+            node_name = f"SpatialQuery Results {sq_id} \u2014 Motif {motif_i + 1}: {motif_name}"
+            motif_cell_types = set(motif)
+            motif_ct_children = []
+            for cell_type in motif_cell_types:
+                ct_ids_in_motif = list(dict.fromkeys(
+                    i for i in cell_i
+                    if self.cell_id_to_cell_type.get(self.cell_i_to_cell_id.get(i)) == cell_type
+                ))
+                motif_ct_children.append({
+                    "name": cell_type,
+                    "set": [[self.cell_i_to_cell_id[i], None] for i in ct_ids_in_motif if i in self.cell_i_to_cell_id]
+                })
+                obs_set_color.append({
+                    "color": self.ct_to_color[cell_type],
+                    "path": [node_name, cell_type]
+                })
+            # Add anchor child node if this is an anchor-mode query
+            if anchor_ct is not None and center_i is not None and len(center_i) > 0:
+                anchor_label = f"{anchor_ct} (anchor)"
+                anchor_ids = list(dict.fromkeys(int(i) for i in center_i if i in self.cell_i_to_cell_id))
+                motif_ct_children.append({
+                    "name": anchor_label,
+                    "set": [[self.cell_i_to_cell_id[i], None] for i in anchor_ids]
+                })
+                obs_set_color.append({
+                    "color": self.ct_to_color.get(anchor_ct, [200, 200, 200]),
+                    "path": [node_name, anchor_label]
+                })
+            per_motif_nodes.append({"name": node_name, "children": motif_ct_children})
+            obs_set_color.append({"color": [255, 255, 255], "path": [node_name]})
+
         additional_obs_sets = {
             "version": "0.1.3",
             "tree": [
                 {"name": sq_motif_name, "children": by_motif_children},
                 {"name": sq_ct_name, "children": by_ct_children},
-            ]
+            ] + per_motif_nodes
         }
 
         obs_set_color.insert(0, {"color": [255, 255, 255], "path": [sq_motif_name]})
@@ -336,6 +489,7 @@ class SpatialQueryPlugin(VitesscePlugin):
                 min_support=min_support,
                 return_cellID=True,
             )
+            fp_tree = fp_tree[fp_tree["if_significant"]]
         elif query_type == "anchor-type-dist":
             fp_tree = self.tt.motif_enrichment_dist(
                 ct=cell_type_of_interest,
@@ -343,15 +497,20 @@ class SpatialQueryPlugin(VitesscePlugin):
                 min_support=min_support,
                 return_cellID=True,
             )
+            fp_tree = fp_tree[fp_tree["if_significant"]]
 
-        # TODO: implement query types that are dependent on motif selection.
+        # Cache for heatmap rendering
+        self._last_fp_tree = fp_tree
+        self._last_query_type = query_type
+        self._last_cell_type_of_interest = cell_type_of_interest
 
         # Previous values
         additional_obs_sets = prev_config["coordinationSpace"]["additionalObsSets"]["A"]
         obs_set_color = prev_config["coordinationSpace"]["obsSetColor"]["A"]
 
         # Perform query
-        (new_additional_obs_sets, new_obs_set_color) = self.fp_tree_to_obs_sets_tree(fp_tree, query_uuid)
+        anchor_ct = cell_type_of_interest if query_type in ("anchor-type-knn", "anchor-type-dist") else None
+        (new_additional_obs_sets, new_obs_set_color) = self.fp_tree_to_obs_sets_tree(fp_tree, query_uuid, anchor_ct=anchor_ct)
 
         # Replace any existing SpatialQuery Results nodes (both By Motif and By Cell Type)
         existing_tree = additional_obs_sets["tree"]

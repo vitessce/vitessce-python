@@ -490,6 +490,9 @@ class SpatialQueryPlugin(VitesscePlugin):
                 return_cellID=True,
             )
             fp_tree = fp_tree[fp_tree["if_significant"]]
+            fp_tree = fp_tree.copy()
+            fp_tree["_frequency"] = fp_tree["n_center_motif"] / fp_tree["n_center"]
+            fp_tree = fp_tree.sort_values(by="_frequency", ascending=False).drop(columns=["_frequency"]).reset_index(drop=True)
         elif query_type == "anchor-type-dist":
             fp_tree = self.tt.motif_enrichment_dist(
                 ct=cell_type_of_interest,
@@ -498,6 +501,9 @@ class SpatialQueryPlugin(VitesscePlugin):
                 return_cellID=True,
             )
             fp_tree = fp_tree[fp_tree["if_significant"]]
+            fp_tree = fp_tree.copy()
+            fp_tree["_frequency"] = fp_tree["n_center_motif"] / fp_tree["n_center"]
+            fp_tree = fp_tree.sort_values(by="_frequency", ascending=False).drop(columns=["_frequency"]).reset_index(drop=True)
 
         # Cache for heatmap rendering
         self._last_fp_tree = fp_tree

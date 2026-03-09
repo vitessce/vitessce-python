@@ -128,27 +128,35 @@ function createPlugins(utilsForPlugins) {{
 
         const [imgSrc, setImgSrc] = React.useState(null);
         const [loading, setLoading] = React.useState(false);
+        const [statusMsg, setStatusMsg] = React.useState(null);
 
         const uuid = queryParams?.uuid;
 
         React.useEffect(() => {{
             if (uuid == null) return;
             setLoading(true);
+            setStatusMsg(null);
             invokeCommand('get_heatmap', {{ uuid }}, []).then(([result]) => {{
                 if (result?.img) {{
                     setImgSrc('data:image/png;base64,' + result.img);
+                    setStatusMsg(null);
                 }} else {{
                     setImgSrc(null);
+                    setStatusMsg(result?.message ?? 'No results.');
                 }}
                 setLoading(false);
-            }}).catch(() => setLoading(false));
+            }}).catch(() => {{
+                setImgSrc(null);
+                setStatusMsg('Error loading heatmap.');
+                setLoading(false);
+            }});
         }}, [uuid]);
 
         return (
         <div className="spatial-query-heatmap" style={{{{ width: '100%', height: '100%', overflow: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}}}>
             {{loading && <p>Loading heatmap...</p>}}
             {{!loading && imgSrc && <img src={{imgSrc}} style={{{{ maxWidth: '100%', maxHeight: '100%' }}}} />}}
-            {{!loading && !imgSrc && <p style={{{{ color: '#888' }}}}>Run a query to see the heatmap.</p>}}
+            {{!loading && !imgSrc && <p style={{{{ color: '#888' }}}}>{{statusMsg ?? 'Run a query to see the heatmap.'}}</p>}}
         </div>
         );
     }}
@@ -333,13 +341,15 @@ class SpatialQueryPlugin(VitesscePlugin):
 
     def _handle_get_heatmap(self, _message, _buffers):
         if self._last_fp_tree is None:
-            return {"img": None}, []
+            return {"img": None, "message": None}, []
+        if len(self._last_fp_tree) == 0:
+            return {"img": None, "message": "No significant patterns found."}, []
         img_b64 = self._render_heatmap_base64(
             self._last_fp_tree,
             self._last_query_type,
             self._last_cell_type_of_interest,
         )
-        return {"img": img_b64}, []
+        return {"img": img_b64, "message": None}, []
 
     def get_matching_cell_ids(self, cell_type, cell_i):
         cell_ids = [self.cell_i_to_cell_id[i] for i in cell_i]

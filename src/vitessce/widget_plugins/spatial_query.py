@@ -230,7 +230,7 @@ class SpatialQueryPlugin(VitesscePlugin):
             leaf_size=10,
             build_gene_index=False,
             if_lognorm=if_lognorm,
-            )
+        )
 
         self.tab20_rgb = [[int(r * 255), int(g * 255), int(b * 255)] for (r, g, b, a) in [plt.cm.tab20(i) for i in range(20)]]
 

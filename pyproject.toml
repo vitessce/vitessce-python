@@ -99,6 +99,13 @@ demos = [
   "snakemake",
   "pyyaml",
 ]
+# SpatialQuery
+sq = [
+  # To install: uv sync --extra sq --no-build-isolation-package SpatialQuery
+  # or: uv sync --extra all --extra notebook --extra sq --no-build-isolation-package SpatialQuery
+  "pybind11",
+  "SpatialQuery @ git+https://github.com/ShaokunAn/Spatial-Query@main"
+]
 
 [dependency-groups]
 dev = [
@@ -124,6 +131,9 @@ override-dependencies = []
 
 [tool.hatch.build]
 exclude = [".github", "docs", "demos", "binder"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [project.urls]
 repository = "https://github.com/vitessce/vitessce-python"

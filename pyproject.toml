@@ -101,9 +101,9 @@ demos = [
 ]
 # SpatialQuery
 sq = [
-  # To install: uv sync --extra sq --no-build-isolation-package SpatialQuery
-  # or: uv sync --extra all --extra notebook --extra sq --no-build-isolation-package SpatialQuery
+  # When installing with `uv`, may need --no-build-isolation-package SpatialQuery
   "pybind11",
+  # As of writing, `main` reflects SpatialQuery commit 9dde563 (April 4, 2026).
   "SpatialQuery @ git+https://github.com/ShaokunAn/Spatial-Query@main"
 ]
 

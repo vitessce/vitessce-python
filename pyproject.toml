@@ -104,7 +104,7 @@ sq = [
   # When installing with `uv`, may need --no-build-isolation-package SpatialQuery
   "pybind11",
   # As of writing, `main` reflects SpatialQuery commit 9dde563 (April 4, 2026).
-  "SpatialQuery @ git+https://github.com/ShaokunAn/Spatial-Query@main"
+  "SpatialQuery==0.0.4"
 ]
 
 [dependency-groups]

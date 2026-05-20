@@ -1583,7 +1583,7 @@ class SpatialDataWrapper(AnnDataWrapper):
 
 class MultivecZarrWrapper(AbstractWrapper):
 
-    def __init__(self, zarr_path=None, zarr_url=None, **kwargs):
+    def __init__(self, zarr_path=None, zarr_url=None, is_zip=None, **kwargs):
         super().__init__(**kwargs)
         self._repr = make_repr(locals())
         if zarr_url is not None and zarr_path is not None:
@@ -1594,11 +1594,18 @@ class MultivecZarrWrapper(AbstractWrapper):
                 "Expected either zarr_url or zarr_path to be provided")
         self._zarr_path = zarr_path
         self._zarr_url = zarr_url
+        self.is_zip = is_zip
         if self._zarr_path is not None:
             self.is_remote = False
+            if is_zip is None and '.zip' in str(zarr_path):
+                self.is_zip = True
         else:
             self.is_remote = True
-        self.local_dir_uid = make_unique_filename(".multivec.zarr")
+            if is_zip is None and '.zip' in str(zarr_url):
+                self.is_zip = True
+        if self.is_zip is None:
+            self.is_zip = False
+        self.local_dir_uid = make_unique_filename(".multivec.zarr.zip" if self.is_zip else ".multivec.zarr")
 
     def convert_and_save(self, dataset_uid, obj_i, base_dir=None):
         # Only create out-directory if needed
@@ -1615,6 +1622,8 @@ class MultivecZarrWrapper(AbstractWrapper):
     def make_genomic_profiles_routes(self, dataset_uid, obj_i):
         if self.is_remote:
             return []
+        elif self.is_zip:
+            return self.get_local_file_route(dataset_uid, obj_i, self._zarr_path, self.local_dir_uid)
         else:
             return self.get_local_dir_route(dataset_uid, obj_i, self._zarr_path, self.local_dir_uid)
 
@@ -1626,7 +1635,7 @@ class MultivecZarrWrapper(AbstractWrapper):
     def make_genomic_profiles_file_def_creator(self, dataset_uid, obj_i):
         def genomic_profiles_file_def_creator(base_url):
             obj_file_def = {
-                "fileType": "genomic-profiles.zarr",
+                "fileType": ft.GENOMIC_PROFILES_ZARR_ZIP.value if self.is_zip else ft.GENOMIC_PROFILES_ZARR.value,
                 "url": self.get_zarr_url(base_url, dataset_uid, obj_i)
             }
             if self._request_init is not None:

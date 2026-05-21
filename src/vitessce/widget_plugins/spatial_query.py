@@ -286,7 +286,7 @@ class SpatialQueryPlugin(VitesscePlugin):
             enrich = fp_tree.copy()
             enrich["frequency"] = enrich["n_center_motif"] / enrich["n_center"]
             enrich = enrich.sort_values(by="frequency", ascending=False)
-            enrich["motif_group"] = [f"motif_{i+1}" for i in range(len(enrich))]
+            enrich["motif_group"] = [f"motif_{i + 1}" for i in range(len(enrich))]
             expanded = enrich.explode("motifs")
             heatmap_data = expanded.pivot_table(
                 index="motifs", columns="motif_group", values="frequency", aggfunc="first"
@@ -303,7 +303,7 @@ class SpatialQueryPlugin(VitesscePlugin):
         else:
             fp = fp_tree.copy()
             fp = fp.sort_values(by="support", ascending=False).reset_index(drop=True)
-            fp["motif_group"] = [f"motif_{i+1}" for i in range(len(fp))]
+            fp["motif_group"] = [f"motif_{i + 1}" for i in range(len(fp))]
             expanded = fp.explode("itemsets")
             heatmap_data = expanded.pivot_table(
                 index="itemsets", columns="motif_group", values="support", aggfunc="first"

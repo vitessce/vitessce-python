@@ -8,11 +8,9 @@ import anywidget
 from traitlets import Unicode, Dict, List, Int, Bool
 
 import asyncio
-import zarr
 from zarr.abc.store import RangeByteRequest, SuffixByteRequest
 from zarr.core.buffer.core import default_buffer_prototype
 
-from typing import Any
 
 MAX_PORT_TRIES = 1000
 DEFAULT_PORT = 8000
@@ -919,7 +917,7 @@ class VitessceWidget(anywidget.AnyWidget):
         store = self._stores[store_url]
         try:
             result = await store.get(key.lstrip("/"), prototype=default_buffer_prototype())
-            if result == None:
+            if result is None:
                 buffers = []
             else:
                 buffers = [result.to_bytes()]
@@ -941,12 +939,12 @@ class VitessceWidget(anywidget.AnyWidget):
             elif "offset" in range_query and "length" in range_query:
                 offset = range_query["offset"]
                 length = range_query["length"]
-                range_param = RangeByteRequest(start=offset, end=offset+length)
+                range_param = RangeByteRequest(start=offset, end=(offset + length))
             else:
                 raise ValueError(f"Invalid range query: {range_query}. Must contain either 'suffixLength' or both 'offset' and 'length'.")
 
             result = await store.get(key, byte_range=range_param, prototype=default_buffer_prototype())
-            if result == None:
+            if result is None:
                 buffers = []
             else:
                 buffers = [result.to_bytes()]

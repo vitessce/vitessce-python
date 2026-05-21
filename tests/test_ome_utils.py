@@ -78,17 +78,17 @@ class TestOmeUtils(unittest.TestCase):
                 'omero': {
                     'channels': [
                         {'color': 'FF0000',
-                        'label': 'R',
-                        'window': {'end': 255, 'max': 255, 'min': 0, 'start': 0}
-                        },
+                         'label': 'R',
+                         'window': {'end': 255, 'max': 255, 'min': 0, 'start': 0}
+                         },
                         {'color': '00FF00',
-                        'label': 'G',
-                        'window': {'end': 255, 'max': 255, 'min': 0, 'start': 0}
-                        },
+                         'label': 'G',
+                         'window': {'end': 255, 'max': 255, 'min': 0, 'start': 0}
+                         },
                         {'color': '0000FF',
-                        'label': 'B',
-                        'window': {'end': 255, 'max': 255, 'min': 0, 'start': 0}
-                        }
+                         'label': 'B',
+                         'window': {'end': 255, 'max': 255, 'min': 0, 'start': 0}
+                         }
                     ],
                     'name': 'Test',
                     'rdefs': {

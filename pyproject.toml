@@ -94,7 +94,7 @@ notebook = [
 ]
 demos = [
   "pulp==2.7.0",
-  "snakemake",
+  "snakemake<=8",
   "pyyaml",
 ]
 # SpatialQuery

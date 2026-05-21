@@ -7,6 +7,12 @@ import uuid
 import anywidget
 from traitlets import Unicode, Dict, List, Int, Bool
 
+import asyncio
+import zarr
+from zarr.abc.store import RangeByteRequest, SuffixByteRequest
+from zarr.core.buffer.core import default_buffer_prototype
+
+from typing import Any
 
 MAX_PORT_TRIES = 1000
 DEFAULT_PORT = 8000
@@ -318,6 +324,45 @@ function prependBaseUrl(config, proxy, hasHostName) {
     };
 }
 
+// Fallback UUID for non-secure (http://) contexts where crypto.randomUUID is unavailable.
+// Reference: https://stackoverflow.com/a/8809472
+function generateId() {
+    let d = new Date().getTime(),
+        d2 = ((typeof performance !== 'undefined') && performance.now && (performance.now() * 1000)) || 0;
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    let r = Math.random() * 16;
+    if (d > 0) {
+      r = (d + r) % 16 | 0;
+      d = Math.floor(d / 16);
+    } else {
+      r = (d2 + r) % 16 | 0;
+      d2 = Math.floor(d2 / 16);
+    }
+    return (c == 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+  });
+}
+
+// Custom invoke matching the anywidget-command protocol implemented on the Python side.
+function invoke(model, name, msg, buffers, signal) {
+    const id = generateId();
+    const abortSignal = signal ?? AbortSignal.timeout(30000);
+    return new Promise((resolve, reject) => {
+        if (abortSignal.aborted) { reject(abortSignal.reason); return; }
+        abortSignal.addEventListener("abort", () => {
+            model.off("msg:custom", handler);
+            reject(abortSignal.reason);
+        });
+        function handler(responseMsg, responseBuffers) {
+            if (!responseMsg || responseMsg.id !== id) return;
+            model.off("msg:custom", handler);
+            resolve([responseMsg.response, responseBuffers]);
+        }
+        model.on("msg:custom", handler);
+        model.send({ id, kind: "anywidget-command", name, msg }, undefined, buffers ?? []);
+    });
+}
+
+
 async function render(view) {
     const cssUid = view.model.get('uid');
     const jsDevMode = view.model.get('js_dev_mode');
@@ -382,9 +427,13 @@ async function render(view) {
     let batchId = 0;
 
     async function processBatch(prevPendingArr) {
-        const [dataArr, buffersArr] = await view.experimental.invoke("_zarr_get_multi", prevPendingArr.map(d => d.params), {
-            signal: AbortSignal.timeout(invokeTimeout),
-        });
+        const [dataArr, buffersArr] = await invoke(
+            view.model,
+            "_zarr_get_multi",
+            prevPendingArr.map(d => d.params),
+            null,
+            AbortSignal.timeout(invokeTimeout),
+        );
         prevPendingArr.forEach((prevPendingItem, i) => {
             const data = dataArr[i];
             const bufferData = buffersArr[i];
@@ -428,9 +477,13 @@ async function render(view) {
                         return enqueue([storeUrl, key]);
                     } else {
                         // Do not submit zarr gets in batches. Instead, submit individually.
-                        const [data, buffers] = await view.experimental.invoke("_zarr_get", [storeUrl, key], {
-                            signal: AbortSignal.timeout(invokeTimeout),
-                        });
+                        const [data, buffers] = await invoke(
+                            view.model,
+                            "_zarr_get",
+                            [storeUrl, key],
+                            null,
+                            AbortSignal.timeout(invokeTimeout),
+                        );
                         if (!data.success) return undefined;
 
                         if (ArrayBuffer.isView(buffers[0])) {
@@ -444,9 +497,13 @@ async function render(view) {
                         return enqueue([storeUrl, key, rangeQuery]);
                     } else {
                         // Do not submit zarr gets in batches. Instead, submit individually.
-                        const [data, buffers] = await view.experimental.invoke("_zarr_get_range", [storeUrl, key, rangeQuery], {
-                            signal: AbortSignal.timeout(invokeTimeout),
-                        });
+                        const [data, buffers] = await invoke(
+                            view.model,
+                            "_zarr_get_range",
+                            [storeUrl, key, rangeQuery],
+                            null,
+                            AbortSignal.timeout(invokeTimeout),
+                        );
                         if (!data.success) return undefined;
 
                         if (ArrayBuffer.isView(buffers[0])) {
@@ -460,10 +517,13 @@ async function render(view) {
     );
 
     function invokePluginCommand(commandName, commandParams, commandBuffers) {
-        return view.experimental.invoke("_plugin_command", [commandName, commandParams], {
-            signal: AbortSignal.timeout(invokeTimeout),
-            ...(commandBuffers ? { buffers: commandBuffers } : {}),
-        });
+        return invoke(
+            view.model,
+            "_plugin_command",
+            [commandName, commandParams],
+            commandBuffers ?? null,
+            AbortSignal.timeout(invokeTimeout),
+        );
     }
 
     for (const pluginEsm of pluginEsmArr) {
@@ -823,6 +883,9 @@ class VitessceWidget(anywidget.AnyWidget):
 
         serve_routes(config, routes, use_port, server_host)
 
+        # Set up custom ipywidgets message handlers for invoking commands RPC-style.
+        self.on_msg(self._handle_msg)
+
     def _get_coordination_value(self, coordination_type, coordination_scope):
         obj = self._config['coordinationSpace'][coordination_type]
         obj_scopes = list(obj.keys())
@@ -850,45 +913,61 @@ class VitessceWidget(anywidget.AnyWidget):
         self.config.stop_server(self.port)
         super().close()
 
-    @anywidget.experimental.command
-    def _zarr_get(self, params, buffers):
+    # @anywidget.experimental.command
+    async def _zarr_get(self, params, buffers):
         [store_url, key] = params
         store = self._stores[store_url]
         try:
-            buffers = [store[key.lstrip("/")]]
+            result = await store.get(key.lstrip("/"), prototype=default_buffer_prototype())
+            if result == None:
+                buffers = []
+            else:
+                buffers = [result.to_bytes()]
         except KeyError:
             buffers = []
+        # TODO: catch other types of errors here?
         return {"success": len(buffers) == 1}, buffers
 
-    @anywidget.experimental.command
-    def _zarr_get_range(self, params, buffers):
+    # @anywidget.experimental.command
+    async def _zarr_get_range(self, params, buffers):
         [store_url, key, range_query] = params
         store = self._stores[store_url]
         try:
-            full_value = store[key.lstrip("/")]
+            range_param = None
             # Reference: https://github.com/manzt/zarrita.js/blob/f63a2521e2b46b22aa26af4146822e4d827dff83/packages/%40zarrita-storage/src/types.ts#L3
             if "suffixLength" in range_query:
                 suffix_length = range_query["suffixLength"]
-                buffers = [full_value[-suffix_length:]]
+                range_param = SuffixByteRequest(suffix=suffix_length)
             elif "offset" in range_query and "length" in range_query:
                 offset = range_query["offset"]
                 length = range_query["length"]
-                buffers = [full_value[offset:offset + length]]
+                range_param = RangeByteRequest(start=offset, end=offset+length)
+            else:
+                raise ValueError(f"Invalid range query: {range_query}. Must contain either 'suffixLength' or both 'offset' and 'length'.")
+
+            result = await store.get(key, byte_range=range_param, prototype=default_buffer_prototype())
+            if result == None:
+                buffers = []
+            else:
+                buffers = [result.to_bytes()]
         except KeyError:
             buffers = []
+        # TODO: catch other types of errors here?
         return {"success": len(buffers) == 1}, buffers
 
-    @anywidget.experimental.command
-    def _zarr_get_multi(self, params_arr, buffers):
+    # @anywidget.experimental.command
+    async def _zarr_get_multi(self, params_arr, buffers):
         # This variant of _zarr_get and _zarr_get_range supports batching.
         result_dicts = []
         result_buffers = []
         for params in params_arr:
+            result_dict, result_buffer_arr = {}, []
             if len(params) == 2:
-                result_dict, result_buffer_arr = self._zarr_get(params, buffers)
+                result_dict, result_buffer_arr = await self._zarr_get(params, buffers)
             elif len(params) == 3:
-                result_dict, result_buffer_arr = self._zarr_get_range(params, buffers)
-
+                result_dict, result_buffer_arr = await self._zarr_get_range(params, buffers)
+            else:
+                raise ValueError("Expected params to have len 2 or 3 in _zarr_get_multi")
             if result_dict["success"] and len(result_buffer_arr) == 1:
                 result_dicts.append(result_dict)
                 result_buffers.append(result_buffer_arr[0])
@@ -897,11 +976,52 @@ class VitessceWidget(anywidget.AnyWidget):
                 result_buffers.append(b'')
         return result_dicts, result_buffers
 
-    @anywidget.experimental.command
+    # @anywidget.experimental.command
     def _plugin_command(self, params, buffers):
         [command_name, command_params] = params
         command_func = self._plugin_commands[command_name]
         return command_func(command_params, buffers)
+
+    def _handle_msg(self, msg: dict) -> None:
+        content = msg.get("content", {}).get("data", {}).get("content", {})
+        buffers = msg.get("buffers", [])
+        if content.get("kind") != "anywidget-command":
+            super()._handle_msg(msg)
+            return
+        try:
+            loop = asyncio.get_event_loop()
+        except RuntimeError:
+            return
+        if loop.is_running():
+            loop.create_task(self._dispatch_command(content, buffers))
+        else:
+            loop.run_until_complete(self._dispatch_command(content, buffers))
+
+    async def _dispatch_command(self, msg: dict, buffers: list[bytes]) -> None:
+        name = msg.get("name")
+        params = msg.get("msg")
+        msg_id = msg.get("id")
+        try:
+            if name == "_zarr_get":
+                response, result_buffers = await self._zarr_get(params, buffers)
+            elif name == "_zarr_get_range":
+                response, result_buffers = await self._zarr_get_range(params, buffers)
+            elif name == "_zarr_get_multi":
+                response, result_buffers = await self._zarr_get_multi(params, buffers)
+            elif name == "_plugin_command":
+                response, result_buffers = await self._plugin_command(params, buffers)
+            else:
+                return
+        except Exception as exc:  # noqa: BLE001
+            self.send(
+                {"id": msg_id, "kind": "anywidget-command-response", "response": {"error": repr(exc)}},
+                [],
+            )
+            return
+        self.send(
+            {"id": msg_id, "kind": "anywidget-command-response", "response": response},
+            result_buffers,
+        )
 
 # Launch Vitessce using plain HTML representation (no ipywidgets)
 

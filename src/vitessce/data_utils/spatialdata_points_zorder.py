@@ -6,8 +6,8 @@ from bisect import bisect_left, bisect_right
 import pandas as pd
 import numpy as np
 
-
 from spatialdata import get_element_annotators
+from spatialdata.models import PointsModel
 import dask.dataframe as dd
 import zarr
 
@@ -157,7 +157,7 @@ def sdata_morton_sort_points(sdata, element):
             sorted_ddf = ddf.sort_values(by="morton_code_2d", ascending=True)
     else:
         sorted_ddf = ddf.sort_values(by="morton_code_2d", ascending=True)
-    sdata.points[element] = sorted_ddf
+    sdata.points[element] = PointsModel.parse(sorted_ddf)
 
     # annotating_tables = get_element_annotators(sdata, element)
 

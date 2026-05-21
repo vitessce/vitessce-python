@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "vitessce"
-version = "3.7.9"
+version = "3.8.3"
 authors = [
   { name="Mark Keller", email="mark_keller@hms.harvard.edu" },
 ]
@@ -99,6 +99,13 @@ demos = [
   "snakemake",
   "pyyaml",
 ]
+# SpatialQuery
+sq = [
+  # When installing with `uv`, may need --no-build-isolation-package SpatialQuery
+  "pybind11",
+  # As of writing, `main` reflects SpatialQuery commit 9dde563 (April 4, 2026).
+  "SpatialQuery==0.0.4"
+]
 
 [dependency-groups]
 dev = [
@@ -124,6 +131,9 @@ override-dependencies = []
 
 [tool.hatch.build]
 exclude = [".github", "docs", "demos", "binder"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [project.urls]
 repository = "https://github.com/vitessce/vitessce-python"

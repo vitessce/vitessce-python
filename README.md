@@ -31,6 +31,18 @@ For a development installation (requires NodeJS and NPM),
     $ uv sync --extra dev --extra docs --extra all
 
 
+Alternatively, use conda:
+
+    $ conda create -n vitessce-dev python=3.12
+    $ conda activate vitessce-dev
+    $ pip install -e ".[dev,docs,all]"
+    
+Troubleshooting SpatialQuery installation on macOS:
+    
+    $ # Use the macOS clang instead of from homebrew.
+    $ CC=/usr/bin/clang CXX=/usr/bin/clang++ pip install -e ".[dev,docs,all,sq]"
+    
+
 ## Linting and testing
 
 ```sh

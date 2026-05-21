@@ -147,7 +147,7 @@ def gen_sdata_obs_segmentations_schema(options, path: str, table_path: str = "ta
     return options
 
 
-def gen_sdata_obs_points_schema(options, path: str, table_path: str = "tables/table", coordinate_system: Optional[str] = None) -> dict:
+def gen_sdata_obs_points_schema(options, path: str, table_path: str = "tables/table", coordinate_system: Optional[str] = None, feature_index_column: Optional[str] = None, morton_code_column: Optional[str] = None) -> dict:
     if path is not None:
         options["obsPoints"] = {
             "path": path
@@ -156,6 +156,10 @@ def gen_sdata_obs_points_schema(options, path: str, table_path: str = "tables/ta
             options["obsPoints"]['tablePath'] = table_path
         if coordinate_system is not None:
             options["obsPoints"]['coordinateSystem'] = coordinate_system
+        if feature_index_column is not None:
+            options["obsPoints"]['featureIndexColumn'] = feature_index_column
+        if morton_code_column is not None:
+            options["obsPoints"]['mortonCodeColumn'] = morton_code_column
     return options
 
 

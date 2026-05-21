@@ -15,3 +15,4 @@ omit =
     src/vitessce/data_utils/spatialdata_points_zorder.py
     src/vitessce/widget_plugins/demo_plugin.py
     src/vitessce/widget_plugins/spatial_query.py
+    tests/*.py

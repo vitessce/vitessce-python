@@ -148,8 +148,8 @@ def sdata_morton_sort_points(sdata, element):
 
     # Build a boolean mask for the extreme rows using coordinate value equality.
     is_extreme = (
-        (ddf["x"] == x_min_val) | (ddf["x"] == x_max_val) |
-        (ddf["y"] == y_min_val) | (ddf["y"] == y_max_val)
+        (ddf["x"] == x_min_val) | (ddf["x"] == x_max_val)
+        | (ddf["y"] == y_min_val) | (ddf["y"] == y_max_val)
     )
 
     extreme_pdf = ddf.loc[is_extreme].compute().reset_index(drop=True)
@@ -514,7 +514,6 @@ def sdata_points_process_columns(sdata, element, var_name_col=None, table_name=N
     ddf = ddf[ordered_columns]
 
     return ddf
-
 
 
 def sdata_points_modify_row_group_size(sdata, element, row_group_size: int = 50_000):

@@ -27,7 +27,9 @@ rule all:
 rule convert_to_zarr:
     input:
         cells_h5ad=(RAW_DIR / "uf-processed" / GLOBUS_ID / "cluster_marker_genes.h5ad"),
-        annotations_csv=(RAW_DIR / "annotations_spleen" / f"{GLOBUS_ID}.csv"),
+        # For some reasons f-strings in python 3.12 don't work as expected
+        # Reference: https://github.com/NeuralEnsemble/cobrawap/pull/105
+        annotations_csv=(RAW_DIR / "annotations_spleen" / str(GLOBUS_ID + ".csv")),
         cl_obo=(RAW_DIR / "cl.obo")
     output:
         cells=directory(PROCESSED_DIR / "satija_2020.h5ad.zarr"),

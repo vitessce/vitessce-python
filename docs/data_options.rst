@@ -129,15 +129,18 @@ This is currently supported for the ``AnnDataWrapper`` class using the ``adata_s
     vc.widget()
 
 
-Or, with a Zarr store instance (instead of a local string path to a DirectoryStore):
+Or, with a Zarr store instance (instead of a local string path to a LocalStore/DirectoryStore):
 
 .. code-block:: python
 
     import zarr
+    from obstore.store import HTTPStore
     from vitessce import VitessceConfig, AnnDataWrapper
 
-    # ...
-    store = zarr.storage.FSStore("s3://my_bucket/path/to/my_store.adata.zarr")
+    obs_store = HTTPStore.from_url("https://my_bucket.example.com/path/to/my_store.adata.zarr")
+    store = zarr.storage.ObjectStore(obs_store, read_only=True)
+    # or
+    store = zarr.storage.LocalStore("./path/to/my_store.adata.zarr")
 
     vc = VitessceConfig(name="My Vitessce Configuration")
     vc.add_dataset(name="My Dataset").add_object(AnnDataWrapper(

@@ -196,8 +196,6 @@ class GenomicProfiles():
 
         num_profiles = len(profile_paths)
 
-        compressor = 'default'
-
         chromosomes = [str(chr_name) for chr_name in nc.get_chromorder(
             assembly)[:25]]  # TODO: should more than chr1-chrM be used?
         chroms_length_arr = np.array(
@@ -217,8 +215,8 @@ class GenomicProfiles():
             # Create each resolution group.
             for resolution in resolutions:
                 chr_shape = (num_profiles, math.ceil(chr_len / resolution))
-                chr_group.create_dataset(str(
-                    resolution), shape=chr_shape, dtype="f4", fill_value=np.nan, compressor=compressor)
+                chr_group.create_array(str(
+                    resolution), shape=chr_shape, dtype="f4", fill_value=np.nan)
 
         # f.attrs should contain the properties required for HiGlass's "tileset_info" requests.
         f.attrs['row_infos'] = [

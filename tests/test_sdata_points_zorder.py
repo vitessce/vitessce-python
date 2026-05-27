@@ -9,6 +9,7 @@ from vitessce.data_utils.spatialdata_points_zorder import (
     sdata_morton_query_rect_debug,
     row_ranges_to_row_indices,
     orig_coord_to_norm_coord,
+    MORTON_CODE_EXTREME_VALUE_INDICATOR
 )
 
 
@@ -30,11 +31,22 @@ def test_zorder_sorting(sdata_with_points):
 
     sdata_morton_sort_points(sdata, "transcripts")
 
-    # Check that the morton codes are sorted
     sorted_ddf = sdata.points["transcripts"]
     morton_sorted = sorted_ddf["morton_code_2d"].compute().values.tolist()
 
-    assert _is_sorted(morton_sorted)
+    # Count leading sentinel rows, identified by morton_code_2d == MORTON_CODE_EXTREME_VALUE_INDICATOR
+    sentinel_count = 0
+    for code in morton_sorted[:4]:
+        if code == MORTON_CODE_EXTREME_VALUE_INDICATOR:
+            sentinel_count += 1
+        else:
+            break
+
+    assert sentinel_count >= 2  # at least the x_min and x_max extremes are distinct
+    assert all(code == MORTON_CODE_EXTREME_VALUE_INDICATOR for code in morton_sorted[:sentinel_count])
+
+    # Z-order sorted data begins after the sentinel rows
+    assert _is_sorted(morton_sorted[sentinel_count:])
 
 
 def test_zorder_query(sdata_with_points):
@@ -54,6 +66,13 @@ def test_zorder_query(sdata_with_points):
     estimated_row_indices = df.iloc[rect_row_indices].index.tolist()
 
     assert df.shape[0] == 213191
+
+    # Read bounding box from sentinel rows (morton_code_2d == 0) at the start of the table
+    sentinel_rows = df.iloc[:4][df.iloc[:4]["morton_code_2d"] == MORTON_CODE_EXTREME_VALUE_INDICATOR]
+    x_min = float(sentinel_rows["x"].min())
+    x_max = float(sentinel_rows["x"].max())
+    y_min = float(sentinel_rows["y"].min())
+    y_max = float(sentinel_rows["y"].max())
 
     # Do the same query the "dumb" way, by checking all points
 
@@ -86,12 +105,6 @@ def test_zorder_query(sdata_with_points):
 
     # Do a second check, this time against x_uint/y_uint (the normalized coordinates)
     # TODO: does this ensure that estimated == exact?
-
-    bounding_box = ddf.attrs["bounding_box"]
-    x_min = bounding_box["x_min"]
-    x_max = bounding_box["x_max"]
-    y_min = bounding_box["y_min"]
-    y_max = bounding_box["y_max"]
     norm_rect = [
         orig_coord_to_norm_coord(orig_rect[0], orig_x_min=x_min, orig_x_max=x_max, orig_y_min=y_min, orig_y_max=y_max),
         orig_coord_to_norm_coord(orig_rect[1], orig_x_min=x_min, orig_x_max=x_max, orig_y_min=y_min, orig_y_max=y_max)

@@ -136,7 +136,7 @@ class AbstractWrapper:
                 # Reference: https://github.com/laminlabs/lamindb/blob/58ee954c9f363524e2c47b358727f0b921467078/lamindb/models/save.py#L167
                 local_path = artifact._local_filepath
                 if local_path is not None and os.path.isdir(local_path):
-                    store = zarr.DirectoryStore(local_path)
+                    store = zarr.storage.LocalStore(local_path)
                     artifact_stores[artifact_url] = store
         return artifact_stores
 
@@ -205,7 +205,7 @@ class AbstractWrapper:
             # Set up `store` and `local_dir_path` variables.
             if isinstance(store_or_local_dir_path, str):
                 # TODO: use zarr.FSStore if fsspec is installed?
-                store = zarr.DirectoryStore(store_or_local_dir_path)
+                store = zarr.storage.LocalStore(store_or_local_dir_path)
                 local_dir_path = store_or_local_dir_path
             else:
                 # TODO: check that store_or_local_dir_path is a zarr.Store or StoreLike?
@@ -1199,7 +1199,7 @@ class AnnDataWrapper(AbstractWrapper):
 
         :param str adata_path: A path to an AnnData object written to a Zarr store containing single-cell experiment data.
         :param str adata_url: A remote url pointing to a zarr-backed AnnData store.
-        :param adata_store: A path to pass to zarr.DirectoryStore, or an existing store instance.
+        :param adata_store: A path to pass to zarr.storage.LocalStore, or an existing store instance.
         :type adata_store: str or zarr.Storage
         :param adata_artifact: A lamindb Artifact corresponding to the AnnData object.
         :type adata_artifact: lamindb.Artifact

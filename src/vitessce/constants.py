@@ -191,6 +191,7 @@ class FileType(DocEnum):
     CLUSTERS_JSON = "clusters.json", "A JSON-based expression matrix file type (this file type is poorly named)."
     GENES_JSON = "genes.json", "A JSON-based expression matrix file type."
     GENOMIC_PROFILES_ZARR = "genomic-profiles.zarr", "The Zarr-based genomic profile (multivec) file type."
+    GENOMIC_PROFILES_ZARR_ZIP = "genomic-profiles.zarr.zip", "The Zarr-based genomic profile (multivec) file type, in a Zarr directory store that has been zipped."
     ANNDATA_CELLS_ZARR = "anndata-cells.zarr", "The Zarr-based cells file type from an anndata object."
     ANNDATA_CELL_SETS_ZARR = "anndata-cell-sets.zarr", "The Zarr-based cell-sets file type from an anndata object."
     ANNDATA_EXPRESSION_MATRIX_ZARR = "anndata-expression-matrix.zarr", "The Zarr-based expression matrix file type from an anndata object."

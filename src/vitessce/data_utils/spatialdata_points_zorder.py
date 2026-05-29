@@ -6,15 +6,21 @@ from bisect import bisect_left, bisect_right
 import pandas as pd
 import numpy as np
 
-
 from spatialdata import get_element_annotators
+from spatialdata.models import PointsModel
 import dask.dataframe as dd
-import zarr
 
 
 MORTON_CODE_NUM_BITS = 32  # Resulting morton codes will be stored as uint32.
 MORTON_CODE_VALUE_MIN = 0
 MORTON_CODE_VALUE_MAX = 2**(MORTON_CODE_NUM_BITS / 2) - 1
+
+# In the first few rows (up to four), we set the morton code
+# value to a sentinel value for the rows that contain extrema,
+# x_min, x_max, y_min, and/or y_max data extent.
+# It is possible for the same row to contain extrema along more than one axis,
+# in which case we will only use fewer than four rows for the extrema.
+MORTON_CODE_EXTREME_VALUE_INDICATOR = 0
 
 # --------------------------
 # Functions for computing Morton codes for SpatialData points (2D).
@@ -42,16 +48,6 @@ def norm_ddf_to_uint(ddf):
     [x_min, x_max, y_min, y_max] = [ddf["x"].min().compute(), ddf["x"].max().compute(), ddf["y"].min().compute(), ddf["y"].max().compute()]
     ddf["x_uint"] = norm_series_to_uint(ddf["x"], x_min, x_max)
     ddf["y_uint"] = norm_series_to_uint(ddf["y"], y_min, y_max)
-
-    # Insert the bounding box as metadata for the sdata.points[element] Points element dataframe.
-    # TODO: does anything special need to be done to ensure this is saved to disk?
-    ddf.attrs["bounding_box"] = {
-        "x_min": float(x_min),
-        "x_max": float(x_max),
-        "y_min": float(y_min),
-        "y_max": float(y_max),
-    }
-
     return ddf
 
 
@@ -140,24 +136,57 @@ def morton_interleave(ddf):
 def sdata_morton_sort_points(sdata, element):
     ddf = sdata.points[element]
 
-    # Compute morton codes
+    # Add normalized integer columns and morton codes using the full dataset bounding box.
     ddf = norm_ddf_to_uint(ddf)
     ddf["morton_code_2d"] = morton_interleave(ddf)
+
+    # Identify the extreme coordinate values.
+    x_min_val = ddf["x"].min().compute()
+    x_max_val = ddf["x"].max().compute()
+    y_min_val = ddf["y"].min().compute()
+    y_max_val = ddf["y"].max().compute()
+
+    # Build a boolean mask for the extreme rows using coordinate value equality.
+    is_extreme = (
+        (ddf["x"] == x_min_val) | (ddf["x"] == x_max_val)
+        | (ddf["y"] == y_min_val) | (ddf["y"] == y_max_val)
+    )
+
+    extreme_pdf = ddf.loc[is_extreme].compute().reset_index(drop=True)
+
+    # Checking based on the row indices would be cleaner, but dask does not
+    # guarantee unique indices across partitions.
+    # Reference: https://docs.dask.org/en/stable/generated/dask.dataframe.DataFrame.reset_index.html
+    # Instead, our `is_extreme` uses the min/max values themselves to identify the matching rows,
+    # which can potentially return more than four rows if multiple rows match these extreme values.
+    # TODO: in that case, reorder the extreme rows so the first four form the bounding box,
+    # and any additional rows should be moved into `rest_df` before the morton-based sorting occurs.
+    assert extreme_pdf.shape[0] <= 4
+
+    # Mark sentinel rows with morton_code_2d = MORTON_CODE_EXTREME_VALUE_INDICATOR so the reader can identify them without
+    # relying on a hard-coded count or fixed row positions.
+    extreme_pdf["morton_code_2d"] = np.uint32(MORTON_CODE_EXTREME_VALUE_INDICATOR)
+
+    # Exclude the extreme rows from the rest.
+    rest_ddf = ddf.loc[~is_extreme]
 
     if "z" in ddf.columns:
         num_unique_z = ddf["z"].unique().shape[0].compute()
         if num_unique_z < 100:
             # Heuristic for interpreting the 3D data as 2.5D
             # Reference: https://github.com/scverse/spatialdata/issues/961
-            sorted_ddf = ddf.sort_values(by=["z", "morton_code_2d"], ascending=True)
+            sorted_rest = rest_ddf.sort_values(by=["z", "morton_code_2d"], ascending=True)
         else:
             # TODO: include z as a dimension in the morton code in the 3D case?
-
-            # For now, just return the data sorted by 2D code.
-            sorted_ddf = ddf.sort_values(by="morton_code_2d", ascending=True)
+            sorted_rest = rest_ddf.sort_values(by="morton_code_2d", ascending=True)
     else:
-        sorted_ddf = ddf.sort_values(by="morton_code_2d", ascending=True)
-    sdata.points[element] = sorted_ddf
+        sorted_rest = rest_ddf.sort_values(by="morton_code_2d", ascending=True)
+
+    # Prepend the sentinel rows (morton_code_2d == MORTON_CODE_EXTREME_VALUE_INDICATOR) before the morton-sorted data.
+    sentinel_ddf = dd.from_pandas(extreme_pdf, npartitions=1)
+    result_ddf = dd.concat([sentinel_ddf, sorted_rest], ignore_index=True, interleave_partitions=True)
+
+    sdata.points[element] = PointsModel.parse(result_ddf)
 
     # annotating_tables = get_element_annotators(sdata, element)
 
@@ -175,15 +204,14 @@ def sdata_morton_query_rect_aux(sdata, element, orig_rect):
 
     sorted_ddf = sdata.points[element]
 
-    # TODO: fail if no morton_code_2d column
-    # TODO: fail if not sorted as expected
-    # TODO: fail if no bounding box metadata
-
-    bounding_box = sorted_ddf.attrs["bounding_box"]
-    x_min = bounding_box["x_min"]
-    x_max = bounding_box["x_max"]
-    y_min = bounding_box["y_min"]
-    y_max = bounding_box["y_max"]
+    # Sentinel rows are identified by morton_code_2d == 0 and always precede the z-order data.
+    # There are at most 4 (one per axis extreme), fewer when a single point covers multiple extremes.
+    head = sorted_ddf.head(4)
+    sentinel_rows = head[head["morton_code_2d"] == MORTON_CODE_EXTREME_VALUE_INDICATOR]
+    x_min = float(sentinel_rows["x"].min())
+    x_max = float(sentinel_rows["x"].max())
+    y_min = float(sentinel_rows["y"].min())
+    y_max = float(sentinel_rows["y"].max())
 
     norm_rect = [
         orig_coord_to_norm_coord(orig_rect[0], orig_x_min=x_min, orig_x_max=x_max, orig_y_min=y_min, orig_y_max=y_max),
@@ -210,13 +238,24 @@ def sdata_morton_query_rect(sdata, element, orig_rect):
 
     morton_intervals = sdata_morton_query_rect_aux(sdata, element, orig_rect)
 
-    # Get morton code column as a list of integers
+    # Get morton code column as a list of integers.
     morton_sorted = sorted_ddf["morton_code_2d"].compute().values.tolist()
+
+    # Count leading sentinel rows (morton_code_2d == 0); stop at the first non-zero code.
+    sentinel_count = 0
+    for code in morton_sorted[:4]:
+        if code == MORTON_CODE_EXTREME_VALUE_INDICATOR:
+            sentinel_count += 1
+        else:
+            break
 
     # Get a list of row ranges that match the morton intervals.
     # (This uses binary searches internally to find the matching row indices).
     # [ (row_start, row_end), ... ]
-    matching_row_ranges = zquery_rows(morton_sorted, morton_intervals, merge=True)
+    matching_row_ranges = zquery_rows(morton_sorted[sentinel_count:], morton_intervals, merge=True)
+
+    # Offset ranges to account for the sentinel rows at the start of the table.
+    matching_row_ranges = [(i + sentinel_count, j + sentinel_count) for i, j in matching_row_ranges]
 
     return matching_row_ranges
 
@@ -228,7 +267,14 @@ def sdata_morton_query_rect_debug(sdata, element, orig_rect):
     sorted_ddf = sdata.points[element]
     morton_intervals = sdata_morton_query_rect_aux(sdata, element, orig_rect)
     morton_sorted = sorted_ddf["morton_code_2d"].compute().values.tolist()
-    matching_row_ranges, rows_checked = zquery_rows_aux(morton_sorted, morton_intervals, merge=True)
+    sentinel_count = 0
+    for code in morton_sorted[:4]:
+        if code == MORTON_CODE_EXTREME_VALUE_INDICATOR:
+            sentinel_count += 1
+        else:
+            break
+    matching_row_ranges, rows_checked = zquery_rows_aux(morton_sorted[sentinel_count:], morton_intervals, merge=True)
+    matching_row_ranges = [(i + sentinel_count, j + sentinel_count) for i, j in matching_row_ranges]
     return matching_row_ranges, rows_checked
 
 # --------------------------
@@ -468,28 +514,6 @@ def sdata_points_process_columns(sdata, element, var_name_col=None, table_name=N
     ddf = ddf[ordered_columns]
 
     return ddf
-
-
-def sdata_points_write_bounding_box_attrs(sdata, element) -> dd.DataFrame:
-    ddf = sdata.points[element]
-
-    [x_min, x_max, y_min, y_max] = [ddf["x"].min().compute(), ddf["x"].max().compute(), ddf["y"].min().compute(), ddf["y"].max().compute()]
-    bounding_box = {
-        "x_min": float(x_min),
-        "x_max": float(x_max),
-        "y_min": float(y_min),
-        "y_max": float(y_max),
-    }
-
-    sdata_path = sdata.path
-    # TODO: error if no path
-
-    # Insert the bounding box as metadata for the sdata.points[element] Points element dataframe.
-    z = zarr.open(sdata_path, mode='a')
-    group = z[f'points/{element}']
-    group.attrs['bounding_box'] = bounding_box
-
-    # TODO: does anything special need to be done to ensure this is saved to disk?
 
 
 def sdata_points_modify_row_group_size(sdata, element, row_group_size: int = 50_000):

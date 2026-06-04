@@ -7,6 +7,7 @@ import zarr
 from zarr.abc.store import Store
 from zarr.core.buffer import Buffer, BufferPrototype
 
+
 class SyncStoreWrapper(zarr.core.sync.SyncMixin):
     def __init__(self, store: Store) -> None:
         """Synchronous Store wrapper

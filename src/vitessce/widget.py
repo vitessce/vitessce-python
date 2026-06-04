@@ -7,9 +7,9 @@ import uuid
 import anywidget
 from traitlets import Unicode, Dict, List, Int, Bool
 
-import asyncio
 from zarr.abc.store import RangeByteRequest, SuffixByteRequest
 from zarr.core.buffer.core import default_buffer_prototype
+from .sync_store import SyncStoreWrapper
 
 
 MAX_PORT_TRIES = 1000
@@ -912,11 +912,11 @@ class VitessceWidget(anywidget.AnyWidget):
         super().close()
 
     # @anywidget.experimental.command
-    async def _zarr_get(self, params, buffers):
+    def _zarr_get(self, params, buffers):
         [store_url, key] = params
-        store = self._stores[store_url]
+        store = SyncStoreWrapper(self._stores[store_url])
         try:
-            result = await store.get(key.lstrip("/"), prototype=default_buffer_prototype())
+            result = store.get(key.lstrip("/"), prototype=default_buffer_prototype())
             if result is None:
                 buffers = []
             else:
@@ -927,9 +927,9 @@ class VitessceWidget(anywidget.AnyWidget):
         return {"success": len(buffers) == 1}, buffers
 
     # @anywidget.experimental.command
-    async def _zarr_get_range(self, params, buffers):
+    def _zarr_get_range(self, params, buffers):
         [store_url, key, range_query] = params
-        store = self._stores[store_url]
+        store = SyncStoreWrapper(self._stores[store_url])
         try:
             range_param = None
             # Reference: https://github.com/manzt/zarrita.js/blob/f63a2521e2b46b22aa26af4146822e4d827dff83/packages/%40zarrita-storage/src/types.ts#L3
@@ -943,7 +943,7 @@ class VitessceWidget(anywidget.AnyWidget):
             else:
                 raise ValueError(f"Invalid range query: {range_query}. Must contain either 'suffixLength' or both 'offset' and 'length'.")
 
-            result = await store.get(key, byte_range=range_param, prototype=default_buffer_prototype())
+            result = store.get(key, byte_range=range_param, prototype=default_buffer_prototype())
             if result is None:
                 buffers = []
             else:
@@ -954,16 +954,16 @@ class VitessceWidget(anywidget.AnyWidget):
         return {"success": len(buffers) == 1}, buffers
 
     # @anywidget.experimental.command
-    async def _zarr_get_multi(self, params_arr, buffers):
+    def _zarr_get_multi(self, params_arr, buffers):
         # This variant of _zarr_get and _zarr_get_range supports batching.
         result_dicts = []
         result_buffers = []
         for params in params_arr:
             result_dict, result_buffer_arr = {}, []
             if len(params) == 2:
-                result_dict, result_buffer_arr = await self._zarr_get(params, buffers)
+                result_dict, result_buffer_arr = self._zarr_get(params, buffers)
             elif len(params) == 3:
-                result_dict, result_buffer_arr = await self._zarr_get_range(params, buffers)
+                result_dict, result_buffer_arr = self._zarr_get_range(params, buffers)
             else:
                 raise ValueError("Expected params to have len 2 or 3 in _zarr_get_multi")
             if result_dict["success"] and len(result_buffer_arr) == 1:
@@ -986,28 +986,21 @@ class VitessceWidget(anywidget.AnyWidget):
         if content.get("kind") != "anywidget-command":
             super()._handle_msg(msg)
             return
-        try:
-            loop = asyncio.get_event_loop()
-        except RuntimeError:
-            return
-        if loop.is_running():
-            loop.create_task(self._dispatch_command(content, buffers))
-        else:
-            loop.run_until_complete(self._dispatch_command(content, buffers))
+        self._dispatch_command(content, buffers)
 
-    async def _dispatch_command(self, msg: dict, buffers: list[bytes]) -> None:
+    def _dispatch_command(self, msg: dict, buffers: list[bytes]) -> None:
         name = msg.get("name")
         params = msg.get("msg")
         msg_id = msg.get("id")
         try:
             if name == "_zarr_get":
-                response, result_buffers = await self._zarr_get(params, buffers)
+                response, result_buffers = self._zarr_get(params, buffers)
             elif name == "_zarr_get_range":
-                response, result_buffers = await self._zarr_get_range(params, buffers)
+                response, result_buffers = self._zarr_get_range(params, buffers)
             elif name == "_zarr_get_multi":
-                response, result_buffers = await self._zarr_get_multi(params, buffers)
+                response, result_buffers = self._zarr_get_multi(params, buffers)
             elif name == "_plugin_command":
-                response, result_buffers = await self._plugin_command(params, buffers)
+                response, result_buffers = self._plugin_command(params, buffers)
             else:
                 return
         except Exception as exc:  # noqa: BLE001

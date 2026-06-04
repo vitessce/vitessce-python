@@ -8,6 +8,7 @@ omit =
     src/vitessce/wrappers.py
     src/vitessce/repr.py
     src/vitessce/utils.py
+    src/vitessce/sync_store.py
     src/vitessce/data_utils/anndata.py
     src/vitessce/data_utils/ome.py
     src/vitessce/data_utils/entities.py

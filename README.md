@@ -5,6 +5,7 @@
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/vitessce/vitessce-python/main?filepath=docs/notebooks/widget_pbmc.ipynb)
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/vitessce/vitessce-python/blob/main/docs/notebooks/widget_on_colab.ipynb)
+[![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/vitessce/vitessce-python/blob/main/docs/notebooks/widget_on_colab.ipynb)
 
 
 Python API and Jupyter widget facilitating interactive visualization of spatial single-cell data with [Vitessce](https://github.com/vitessce/vitessce).

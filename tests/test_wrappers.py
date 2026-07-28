@@ -531,6 +531,7 @@ class TestWrappers(unittest.TestCase):
                 "obsType": "spot"
             }
         })
+
     def test_obs_segmentations_ng_precomputed_local(self):
         w = ObsSegmentationsNgPrecomputedWrapper(
             data_path=data_path / 'test.ng.precomputed',

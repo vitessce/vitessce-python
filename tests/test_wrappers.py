@@ -21,6 +21,8 @@ from vitessce import (
     ObsSegmentationsOmeTiffWrapper,
     ImageOmeZarrWrapper,
     ObsSegmentationsOmeZarrWrapper,
+    ObsSegmentationsNgPrecomputedWrapper,
+    ObsPointsNgAnnotationsWrapper,
 )
 
 from vitessce.wrappers import SpatialDataWrapper, file_path_to_url_path
@@ -529,3 +531,71 @@ class TestWrappers(unittest.TestCase):
                 "obsType": "spot"
             }
         })
+    def test_obs_segmentations_ng_precomputed_local(self):
+        w = ObsSegmentationsNgPrecomputedWrapper(
+            data_path=data_path / 'test.ng.precomputed',
+            coordination_values={'fileUid': 'segmentation'},
+            options={'segments': ['1', '2', '3']},
+        )
+        w.local_dir_uid = 'test.ng.precomputed'
+
+        file_def_creator = w.make_file_def_creator("A", "0")
+        file_def = file_def_creator('http://localhost:8000')
+        self.assertEqual(file_def, {
+            'fileType': 'obsSegmentations.ng-precomputed',
+            'url': 'http://localhost:8000/A/0/test.ng.precomputed',
+            'coordinationValues': {'fileUid': 'segmentation'},
+            'options': {'segments': ['1', '2', '3']},
+        })
+
+    def test_obs_segmentations_ng_precomputed_remote(self):
+        w = ObsSegmentationsNgPrecomputedWrapper(
+            data_url='https://example.com/data/precomputed',
+            coordination_values={'fileUid': 'segmentation'},
+        )
+        file_def_creator = w.make_file_def_creator("A", "0")
+        file_def = file_def_creator('http://localhost:8000')
+        self.assertEqual(file_def, {
+            'fileType': 'obsSegmentations.ng-precomputed',
+            'url': 'https://example.com/data/precomputed',
+            'coordinationValues': {'fileUid': 'segmentation'},
+        })
+        self.assertEqual(w.make_routes("A", "0"), [])
+
+    def test_obs_segmentations_ng_precomputed_requires_exactly_one_source(self):
+        with self.assertRaises(ValueError):
+            ObsSegmentationsNgPrecomputedWrapper()
+        with self.assertRaises(ValueError):
+            ObsSegmentationsNgPrecomputedWrapper(
+                data_path=data_path / 'test.ng.precomputed',
+                data_url='https://example.com/data/precomputed',
+            )
+
+    def test_obs_points_ng_annotations_local(self):
+        w = ObsPointsNgAnnotationsWrapper(
+            data_path=data_path / 'test.ng.annotations',
+            coordination_values={'fileUid': 'annotation_points'},
+            options={'featureIndexProp': 'phenotype', 'pointIndexProp': 'cell_id'},
+        )
+        w.local_dir_uid = 'test.ng.annotations'
+
+        file_def_creator = w.make_file_def_creator("A", "0")
+        file_def = file_def_creator('http://localhost:8000')
+        self.assertEqual(file_def, {
+            'fileType': 'obsPoints.ng-annotations',
+            'url': 'http://localhost:8000/A/0/test.ng.annotations',
+            'coordinationValues': {'fileUid': 'annotation_points'},
+            'options': {'featureIndexProp': 'phenotype', 'pointIndexProp': 'cell_id'},
+        })
+
+    def test_obs_points_ng_annotations_remote(self):
+        w = ObsPointsNgAnnotationsWrapper(
+            data_url='https://example.com/data/annotations',
+        )
+        file_def_creator = w.make_file_def_creator("A", "0")
+        file_def = file_def_creator('http://localhost:8000')
+        self.assertEqual(file_def, {
+            'fileType': 'obsPoints.ng-annotations',
+            'url': 'https://example.com/data/annotations',
+        })
+        self.assertEqual(w.make_routes("A", "0"), [])

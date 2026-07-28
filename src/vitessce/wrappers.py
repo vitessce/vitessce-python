@@ -1643,6 +1643,7 @@ class MultivecZarrWrapper(AbstractWrapper):
             return obj_file_def
         return genomic_profiles_file_def_creator
 
+
 class ObsSegmentationsNgPrecomputedWrapper(AbstractWrapper):
     """
     Wrap a Neuroglancer precomputed segmentation + meshes directory
@@ -1688,6 +1689,7 @@ class ObsSegmentationsNgPrecomputedWrapper(AbstractWrapper):
                 file_def["options"] = self._options
             return file_def
         return file_def_creator
+
 
 class ObsPointsNgAnnotationsWrapper(AbstractWrapper):
     """

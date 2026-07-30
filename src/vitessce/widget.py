@@ -175,6 +175,8 @@ const successfulImportMap = {
 const importMap = {
   imports: {
     "react": "https://esm.sh/react@18.2.0?dev",
+    // needed when using custom_js_url
+    "react/jsx-runtime": "https://esm.sh/react@18.2.0/jsx-runtime?dev",
     "react-dom": "https://esm.sh/react-dom@18.2.0?dev",
     "react-dom/client": "https://esm.sh/react-dom@18.2.0/client?dev",
   },
@@ -184,6 +186,8 @@ const fallbackImportMap = {
         "react": "https://cdn.vitessce.io/react@18.2.0/index.js",
         "react-dom": "https://cdn.vitessce.io/react-dom@18.2.0/index.js",
         "react-dom/client": "https://cdn.vitessce.io/react-dom@18.2.0/es2022/client.mjs",
+        // needed when using custom_js_url
+        "react/jsx-runtime": "https://esm.sh/react@18.2.0/jsx-runtime?dev",
         // Replaced with version-specific URL below.
         "vitessce": "https://cdn.vitessce.io/vitessce@VERSION/dist/index.min.js",
     },

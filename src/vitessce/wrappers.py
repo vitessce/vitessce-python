@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 from collections import defaultdict
 import os
-from os.path import join
+from os.path import join, isdir
 import tempfile
 from typing import Callable, Optional, Type, TypeVar, Union
 from uuid import uuid4
@@ -1642,3 +1642,109 @@ class MultivecZarrWrapper(AbstractWrapper):
                 obj_file_def['requestInit'] = self._request_init
             return obj_file_def
         return genomic_profiles_file_def_creator
+
+
+class ObsSegmentationsNgPrecomputedWrapper(AbstractWrapper):
+    """
+    Wrap a Neuroglancer precomputed segmentation + meshes directory
+    (as produced by e.g. tissue_map_tools's igneous_converters functions).
+    """
+    def __init__(self, data_path=None, data_url=None, coordination_values=None, options=None, **kwargs):
+        super().__init__(**kwargs)
+        raise_error_if_zero_or_more_than_one([data_path, data_url])
+        self._data_path = data_path
+        self._data_url = data_url
+        self._coordination_values = coordination_values
+        self._options = options
+        self.is_remote = data_url is not None
+        self.local_dir_uid = "ng_precomputed_segmentation"
+        self._repr = make_repr(locals())
+
+    def convert_and_save(self, dataset_uid, obj_i, base_dir=None):
+        super().convert_and_save(dataset_uid, obj_i, base_dir=base_dir)
+        self.file_def_creators.append(self.make_file_def_creator(dataset_uid, obj_i))
+        self.routes += self.make_routes(dataset_uid, obj_i)
+
+    def make_routes(self, dataset_uid, obj_i):
+        if not self.is_remote:
+            if not isdir(self._data_path):
+                raise ValueError(f"data_path {self._data_path} is not a directory")
+            return self.get_local_dir_route(dataset_uid, obj_i, self._data_path, self.local_dir_uid)
+        return []
+
+    def get_data_url(self, base_url="", dataset_uid="", obj_i=""):
+        if self.is_remote:
+            return self._data_url
+        return self.get_local_dir_url(base_url, dataset_uid, obj_i, self._data_path, self.local_dir_uid)
+
+    def make_file_def_creator(self, dataset_uid, obj_i):
+        def file_def_creator(base_url):
+            file_def = {
+                "fileType": "obsSegmentations.ng-precomputed",
+                "url": self.get_data_url(base_url, dataset_uid, obj_i),
+            }
+            if self._coordination_values is not None:
+                file_def["coordinationValues"] = self._coordination_values
+            if self._options is not None:
+                file_def["options"] = self._options
+            return file_def
+        return file_def_creator
+
+
+class ObsPointsNgAnnotationsWrapper(AbstractWrapper):
+    """
+    Wrap a single Neuroglancer precomputed point-annotation directory
+    (e.g. one produced by tissue_map_tools's
+    from_spatialdata_points_to_precomputed_points).
+
+    :param str data_path: Path to a local annotation directory (a subdirectory
+        of a precomputed root, containing its own `info` file). Mutually
+        exclusive with `data_url`.
+    :param str data_url: URL to a remote annotation directory already being
+        served. Mutually exclusive with `data_path`.
+    :param dict coordination_values: Coordination values for this file, e.g.
+        `{"fileUid": "annotation_inv_points"}`.
+    :param dict options: Options for this file type, e.g.
+        `{"featureIndexProp": "phenotype", "pointIndexProp": "cell_id"}`.
+    """
+
+    def __init__(self, data_path=None, data_url=None, coordination_values=None, options=None, **kwargs):
+        super().__init__(**kwargs)
+        raise_error_if_zero_or_more_than_one([data_path, data_url])
+        self._data_path = data_path
+        self._data_url = data_url
+        self._coordination_values = coordination_values
+        self._options = options
+        self.is_remote = data_url is not None
+        self.local_dir_uid = "ng_precomputed_annotations"
+        self._repr = make_repr(locals())
+
+    def convert_and_save(self, dataset_uid, obj_i, base_dir=None):
+        super().convert_and_save(dataset_uid, obj_i, base_dir=base_dir)
+        self.file_def_creators.append(self.make_file_def_creator(dataset_uid, obj_i))
+        self.routes += self.make_routes(dataset_uid, obj_i)
+
+    def make_routes(self, dataset_uid, obj_i):
+        if not self.is_remote:
+            if not isdir(self._data_path):
+                raise ValueError(f"data_path {self._data_path} is not a directory")
+            return self.get_local_dir_route(dataset_uid, obj_i, self._data_path, self.local_dir_uid)
+        return []
+
+    def get_data_url(self, base_url="", dataset_uid="", obj_i=""):
+        if self.is_remote:
+            return self._data_url
+        return self.get_local_dir_url(base_url, dataset_uid, obj_i, self._data_path, self.local_dir_uid)
+
+    def make_file_def_creator(self, dataset_uid, obj_i):
+        def file_def_creator(base_url):
+            file_def = {
+                "fileType": "obsPoints.ng-annotations",
+                "url": self.get_data_url(base_url, dataset_uid, obj_i),
+            }
+            if self._coordination_values is not None:
+                file_def["coordinationValues"] = self._coordination_values
+            if self._options is not None:
+                file_def["options"] = self._options
+            return file_def
+        return file_def_creator

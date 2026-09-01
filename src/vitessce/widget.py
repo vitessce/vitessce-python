@@ -245,7 +245,7 @@ const { createRoot } = await importWithMapAndFallback("react-dom/client", import
 const e = React.createElement;
 
 function isAbsoluteUrl(s) {
-    return s?.startsWith('http://') || s?.startsWith('https://');
+    return s?.startsWith('http://') || s?.startsWith('https://') || s?.startsWith('data:') || s?.startsWith('blob:') || s?.startsWith('file:') || s?.startsWith('//');
 }
 const WORKSPACES_URL_KEYWORD = 'https://workspaces-pt';
 const OPTIONS_URL_KEYS = ['offsetsUrl', 'refSpecUrl'];

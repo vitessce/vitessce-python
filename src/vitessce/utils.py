@@ -34,6 +34,7 @@ def get_initial_coordination_scope_name(dataset_uid, data_type, i=None):
     prefix = get_initial_coordination_scope_prefix(dataset_uid, data_type)
     return f"{prefix}{0 if i is None else i}"
 
+
 def make_ids_csv_data_url(ids):
     """
     Build a `data:` URL containing a small inline CSV with a single `id`

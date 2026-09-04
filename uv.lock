@@ -3892,7 +3892,7 @@ wheels = [
 
 [[package]]
 name = "vitessce"
-version = "3.9.4"
+version = "3.9.5"
 source = { editable = "." }
 dependencies = [
     { name = "black" },

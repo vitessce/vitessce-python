@@ -35,7 +35,7 @@ def get_initial_coordination_scope_name(dataset_uid, data_type, i=None):
     return f"{prefix}{0 if i is None else i}"
 
 
-def make_ids_csv_data_url(ids):
+def make_ids_csv_data_url(ids, for_web_app=False):
     """
     Build a `data:` URL containing a small inline CSV with a single `id`
     column, given a list of observation IDs (e.g. segment IDs).
@@ -56,10 +56,13 @@ def make_ids_csv_data_url(ids):
     writer = csv.writer(buf)
     writer.writerow(["id"])
     writer.writerows([[i] for i in ids])
-    return f"data:text/csv,{quote(buf.getvalue())}"
+    encoded = quote(buf.getvalue())
+    if for_web_app:
+        encoded = quote(encoded, safe="")
+    return f"data:text/csv,{encoded}"
 
 
-def make_colors_csv_data_url(id_to_color):
+def make_colors_csv_data_url(id_to_color, for_web_app=False):
     """
     Build a `data:` URL containing a small inline CSV with `id` and
     `color` columns, given a dict mapping observation ID to a color
@@ -80,4 +83,7 @@ def make_colors_csv_data_url(id_to_color):
     writer = csv.writer(buf)
     writer.writerow(["id", "color"])
     writer.writerows(id_to_color.items())
-    return f"data:text/csv,{quote(buf.getvalue())}"
+    encoded = quote(buf.getvalue())
+    if for_web_app:
+        encoded = quote(encoded, safe="")
+    return f"data:text/csv,{encoded}"

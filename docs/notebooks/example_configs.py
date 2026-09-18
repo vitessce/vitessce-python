@@ -11,12 +11,12 @@ dries = {
                 {
                     "type": "cells",
                     "fileType": "cells.json",
-                    "url": "https://s3.amazonaws.com/vitessce-data/0.0.31/master_release/dries/dries.cells.json"
+                    "url": "https://data-1.vitessce.io/0.0.31/master_release/dries/dries.cells.json"
                 },
                 {
                     "type": "cell-sets",
                     "fileType": "cell-sets.json",
-                    "url": "https://s3.amazonaws.com/vitessce-data/0.0.31/master_release/dries/dries.cell-sets.json"
+                    "url": "https://data-1.vitessce.io/0.0.31/master_release/dries/dries.cell-sets.json"
                 }
             ]
         }

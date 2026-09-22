@@ -662,12 +662,10 @@ async function render(view) {
 
         return e('div', { ref: divRef, style: { height: height + 'px' } },
             e(React.Suspense, { fallback: e('div', {}, 'Loading...') },
-                e(React.StrictMode, {},
                     e(Vitessce, vitessceProps,
                         (pageMode ? e(PageComponent, {}) : null)
                     ),
                 ),
-            ),
         );
     }
 

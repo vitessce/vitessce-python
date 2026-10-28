@@ -1649,6 +1649,7 @@ class ObsSegmentationsNgPrecomputedWrapper(AbstractWrapper):
     Wrap a Neuroglancer precomputed segmentation + meshes directory
     (as produced by e.g. tissue_map_tools's igneous_converters functions).
     """
+
     def __init__(self, data_path=None, data_url=None, coordination_values=None, options=None, **kwargs):
         super().__init__(**kwargs)
         raise_error_if_zero_or_more_than_one([data_path, data_url])
@@ -1748,7 +1749,6 @@ class ObsPointsNgAnnotationsWrapper(AbstractWrapper):
                 file_def["options"] = self._options
             return file_def
         return file_def_creator
-
 
 
 class ObsLocationsNgAnnotationsWrapper(AbstractWrapper):

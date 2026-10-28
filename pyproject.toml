@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "vitessce"
-version = "3.9.7"
+version = "3.9.8"
 authors = [
   { name="Mark Keller", email="mark_keller@hms.harvard.edu" },
 ]
@@ -37,7 +37,7 @@ dev = []
 docs = [
   'sphinx==4.2.0',
   'sphinx-rtd-theme==1.0.0',
-  
+
   # Pin sub-dependencies of sphinx
   # Reference: https://github.com/sphinx-doc/sphinx/issues/11130
   'sphinxcontrib-applehelp==1.0.4',
@@ -46,7 +46,7 @@ docs = [
   'sphinxcontrib-jsmath==1.0.1',
   'sphinxcontrib-qthelp==1.0.3',
   'sphinxcontrib-serializinghtml==1.1.5',
-  
+
   'nbsphinx==0.8.8',
   'nbclean==0.3.2',
   # Pin sqlalchemy to before 1.4 to fix issue importing nbclean.NotebookCleaner
@@ -144,4 +144,3 @@ package-dir = {"" = "src"}
 pythonpath = ["src"]
 testpaths = ["tests"]
 addopts = ["--doctest-modules", "--verbose", "--ignore=docs", "--ignore=demos"]
-

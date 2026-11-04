@@ -194,3 +194,41 @@ def test_zorder_query(sdata_with_points):
     # Check that the estimated rows contain all of the exact rows.
     assert len(exact_row_indices_norm) == 91
     assert len(estimated_row_indices) <= 95
+
+
+def test_zorder_sorting_tied_extremes():
+    # Multiple rows share the same extreme y value (y_max),
+    # so more than four rows match one of the extreme values.
+    import pandas as pd
+    import dask.dataframe as dd
+    from spatialdata import SpatialData
+    from spatialdata.models import PointsModel
+
+    df = pd.DataFrame({
+        "x": [1.703125, 187.515625, 212.281250, 556.359375, 1866.359375, 900.0, 1000.0],
+        "y": [9739.718750, 10126.531250, 10126.531250, 4.859375, 1787.921875, 5000.0, 10126.531250],
+    })
+    points = PointsModel.parse(dd.from_pandas(df, npartitions=2))
+    sdata = SpatialData(points={"transcripts": points})
+
+    sdata_morton_sort_points(sdata, "transcripts")
+
+    result = sdata.points["transcripts"].compute().reset_index(drop=True)
+    assert result.shape[0] == df.shape[0]
+
+    morton_sorted = result["morton_code_2d"].values.tolist()
+    sentinel_count = 0
+    for code in morton_sorted[:4]:
+        if code == MORTON_CODE_EXTREME_VALUE_INDICATOR:
+            sentinel_count += 1
+        else:
+            break
+    assert sentinel_count <= 4
+
+    sentinel_rows = result.iloc[:sentinel_count]
+    assert sentinel_rows["x"].min() == df["x"].min()
+    assert sentinel_rows["x"].max() == df["x"].max()
+    assert sentinel_rows["y"].min() == df["y"].min()
+    assert sentinel_rows["y"].max() == df["y"].max()
+
+    assert _is_sorted(morton_sorted[sentinel_count:])

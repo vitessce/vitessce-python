@@ -133,6 +133,45 @@ def morton_interleave(ddf):
     return code.astype(np.uint32)
 
 
+def _select_bounding_box_rows(extreme_pdf, x_min_val, x_max_val, y_min_val, y_max_val):
+    """
+    Given a pandas DataFrame of rows that each contain at least one extreme
+    coordinate value, select a subset of at most four rows that together
+    contain all four extrema (x_min, x_max, y_min, y_max).
+
+    Rows that contain multiple extrema are preferred, so that fewer
+    sentinel rows are needed.
+
+    :returns: Tuple of (sentinel_pdf, leftover_pdf). Both have a fresh RangeIndex.
+    """
+    hits = pd.DataFrame({
+        "x_min": (extreme_pdf["x"] == x_min_val).values,
+        "x_max": (extreme_pdf["x"] == x_max_val).values,
+        "y_min": (extreme_pdf["y"] == y_min_val).values,
+        "y_max": (extreme_pdf["y"] == y_max_val).values,
+    })
+    # Greedy set cover over the four extrema: repeatedly pick the row
+    # that covers the most not-yet-covered extrema.
+    # Since there are only four extrema, at most four rows are selected.
+    uncovered = set(hits.columns)
+    selected = []
+    while uncovered:
+        cols = sorted(uncovered)
+        num_covered = hits[cols].sum(axis=1)
+        best_pos = int(num_covered.values.argmax())
+        if num_covered.iloc[best_pos] == 0:
+            # Should not happen, since each extremum value is attained by at least one row.
+            break
+        selected.append(best_pos)
+        uncovered -= {col for col in cols if hits[col].iloc[best_pos]}
+
+    is_selected = np.zeros(extreme_pdf.shape[0], dtype=bool)
+    is_selected[selected] = True
+    sentinel_pdf = extreme_pdf.iloc[sorted(selected)].reset_index(drop=True)
+    leftover_pdf = extreme_pdf.iloc[~is_selected].reset_index(drop=True)
+    return sentinel_pdf, leftover_pdf
+
+
 def sdata_morton_sort_points(sdata, element):
     ddf = sdata.points[element]
 
@@ -158,24 +197,33 @@ def sdata_morton_sort_points(sdata, element):
     # guarantee unique indices across partitions.
     # Reference: https://docs.dask.org/en/stable/generated/dask.dataframe.DataFrame.reset_index.html
     # Instead, our `is_extreme` uses the min/max values themselves to identify the matching rows,
-    # which can potentially return more than four rows if multiple rows match these extreme values.
-    # TODO: in that case, reorder the extreme rows so the first four form the bounding box,
-    # and any additional rows should be moved into `rest_df` before the morton-based sorting occurs.
-    assert extreme_pdf.shape[0] <= 4
+    # which can potentially return more than four rows if multiple rows match these extreme values
+    # (e.g., several points share the same max y value).
+    # In that case, select at most four rows that together cover the bounding box,
+    # and move any additional extreme rows back into the rest of the data
+    # (keeping their real morton codes) before the morton-based sorting occurs.
+    sentinel_pdf, leftover_pdf = _select_bounding_box_rows(
+        extreme_pdf, x_min_val, x_max_val, y_min_val, y_max_val
+    )
+    assert sentinel_pdf.shape[0] <= 4
 
     # Mark sentinel rows with morton_code_2d = MORTON_CODE_EXTREME_VALUE_INDICATOR so the reader can identify them without
     # relying on a hard-coded count or fixed row positions.
-    extreme_pdf["morton_code_2d"] = np.uint32(MORTON_CODE_EXTREME_VALUE_INDICATOR)
+    sentinel_pdf["morton_code_2d"] = np.uint32(MORTON_CODE_EXTREME_VALUE_INDICATOR)
 
-    # Exclude the extreme rows from the rest.
+    # Exclude the sentinel rows from the rest.
     rest_ddf = ddf.loc[~is_extreme]
+    if leftover_pdf.shape[0] > 0:
+        rest_ddf = dd.concat([rest_ddf, dd.from_pandas(leftover_pdf, npartitions=1)], interleave_partitions=True)
 
+    sorted_by_z = False
     if "z" in ddf.columns:
         num_unique_z = ddf["z"].unique().shape[0].compute()
         if num_unique_z < 100:
             # Heuristic for interpreting the 3D data as 2.5D
             # Reference: https://github.com/scverse/spatialdata/issues/961
             sorted_rest = rest_ddf.sort_values(by=["z", "morton_code_2d"], ascending=True)
+            sorted_by_z = True
         else:
             # TODO: include z as a dimension in the morton code in the 3D case?
             sorted_rest = rest_ddf.sort_values(by="morton_code_2d", ascending=True)
@@ -183,7 +231,7 @@ def sdata_morton_sort_points(sdata, element):
         sorted_rest = rest_ddf.sort_values(by="morton_code_2d", ascending=True)
 
     # Prepend the sentinel rows (morton_code_2d == MORTON_CODE_EXTREME_VALUE_INDICATOR) before the morton-sorted data.
-    sentinel_ddf = dd.from_pandas(extreme_pdf, npartitions=1)
+    sentinel_ddf = dd.from_pandas(sentinel_pdf, npartitions=1)
     result_ddf = dd.concat([sentinel_ddf, sorted_rest], ignore_index=True, interleave_partitions=True)
 
     sdata.points[element] = PointsModel.parse(result_ddf)
@@ -191,6 +239,18 @@ def sdata_morton_sort_points(sdata, element):
     # annotating_tables = get_element_annotators(sdata, element)
 
     # TODO: Sort any annotating table(s) as well.
+
+    # Verify that the morton_code_2d column is monotonically increasing.
+    # The leading sentinel rows have morton_code_2d == MORTON_CODE_EXTREME_VALUE_INDICATOR (0),
+    # so they do not break monotonicity.
+    if sorted_by_z:
+        # In the 2.5D case, the morton codes are only monotonic within each z value.
+        sorted_cols_pdf = sdata.points[element][["z", "morton_code_2d"]].compute()
+        rest_cols_pdf = sorted_cols_pdf.iloc[sentinel_pdf.shape[0]:]
+        assert rest_cols_pdf["z"].is_monotonic_increasing
+        assert rest_cols_pdf.groupby("z", sort=False)["morton_code_2d"].apply(lambda s: s.is_monotonic_increasing).all()
+    else:
+        assert sdata.points[element]["morton_code_2d"].compute().is_monotonic_increasing
 
     return sdata
 
@@ -501,7 +561,7 @@ def sdata_points_process_columns(sdata, element, var_name_col=None, table_name=N
                 return var_index.index(gene_name)
             except BaseException:
                 return -1
-        ddf[f"{var_name_col}_codes"] = ddf[var_name_col].apply(try_index).astype('int32')
+        ddf[f"{var_name_col}_codes"] = ddf[var_name_col].apply(try_index, meta=(var_name_col, 'int32')).astype('int32')
 
     # Identify dictionary-encoded columns (categorical/string)
     orig_columns = ddf.columns.tolist()

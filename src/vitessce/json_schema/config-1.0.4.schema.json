@@ -1,0 +1,164 @@
+{
+  "$ref": "#/definitions/config-1.0.4",
+  "definitions": {
+    "config-1.0.4": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "string",
+          "const": "1.0.4"
+        },
+        "name": {
+          "type": "string"
+        },
+        "public": {
+          "type": "boolean"
+        },
+        "description": {
+          "type": "string"
+        },
+        "datasets": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "uid": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "files": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "fileType": {
+                      "type": "string"
+                    },
+                    "url": {
+                      "type": "string"
+                    },
+                    "options": {},
+                    "requestInit": {
+                      "type": "object",
+                      "properties": {
+                        "method": {
+                          "type": "string"
+                        },
+                        "headers": {
+                          "type": "object",
+                          "additionalProperties": {}
+                        },
+                        "body": {
+                          "type": "string"
+                        },
+                        "mode": {
+                          "type": "string"
+                        },
+                        "credentials": {
+                          "type": "string"
+                        },
+                        "cache": {
+                          "type": "string"
+                        },
+                        "redirect": {
+                          "type": "string"
+                        },
+                        "referrer": {
+                          "type": "string"
+                        },
+                        "integrity": {
+                          "type": "string"
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "fileType"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "uid",
+              "files"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "coordinationSpace": {
+          "type": "object",
+          "properties": {},
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": {}
+          }
+        },
+        "layout": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "component": {
+                "type": "string"
+              },
+              "props": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "x": {
+                "type": "integer"
+              },
+              "y": {
+                "type": "integer"
+              },
+              "w": {
+                "type": "integer"
+              },
+              "h": {
+                "type": "integer"
+              },
+              "coordinationScopes": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "component",
+              "x",
+              "y"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "initStrategy": {
+          "type": "string",
+          "enum": [
+            "none",
+            "auto"
+          ]
+        }
+      },
+      "required": [
+        "version",
+        "name",
+        "datasets",
+        "layout",
+        "initStrategy"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

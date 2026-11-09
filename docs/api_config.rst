@@ -36,3 +36,12 @@ vitessce.constants
 .. automodule:: vitessce.constants
  :members:
  :exclude-members: DocEnum
+
+vitessce.validation
+*******************
+
+.. automodule:: vitessce.validation
+ :members: validate_config
+
+.. automodule:: vitessce.upgraders
+ :members: upgrade_config

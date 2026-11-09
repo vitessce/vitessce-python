@@ -19,6 +19,9 @@ from .utils import (
 
 from .repr import make_repr
 
+from .upgraders import upgrade_config
+from .validation import validate_config
+
 from .constants import (
     CoordinationType,
     ViewType,

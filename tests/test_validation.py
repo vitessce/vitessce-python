@@ -112,3 +112,10 @@ def test_plugin_types(config):
 ])
 def test_bad_input(bad_config, expected):
     assert validate_config(bad_config) == expected
+
+
+def test_schema_version_matches_widget():
+    from vitessce.validation import JSON_SCHEMA_VERSION
+    from vitessce.widget import DEFAULT_JS_PACKAGE_VERSION
+    # Bumping the widget's JS version also requires refreshing the vendored schemas.
+    assert JSON_SCHEMA_VERSION == DEFAULT_JS_PACKAGE_VERSION

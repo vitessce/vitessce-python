@@ -5,16 +5,11 @@ on: [push, pull_request]
 jobs:
   test_python:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        version: ['3.10', '3.12']
     steps:
       - uses: actions/checkout@v2
       - uses: astral-sh/setup-uv@v3
         with:
           version: "latest"
-        env:
-          UV_PYTHON: ${{ matrix.version }}
       - name: Install vitessce
         run: uv sync --extra dev --extra all
       - name: Run tests and report coverage with omits

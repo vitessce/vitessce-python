@@ -125,7 +125,7 @@ default-groups = ["dev"]
 override-dependencies = []
 
 [tool.hatch.build]
-exclude = [".github", "docs", "demos", "binder"]
+exclude = [".github", ".claude", "docs", "demos", "binder"]
 
 [tool.hatch.metadata]
 allow-direct-references = true

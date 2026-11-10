@@ -19,9 +19,6 @@ classifiers = [
   'Intended Audience :: Developers',
   'Intended Audience :: Science/Research',
   'Topic :: Multimedia :: Graphics',
-  'Programming Language :: Python :: 3.9',
-  'Programming Language :: Python :: 3.10',
-  'Programming Language :: Python :: 3.11',
   'Programming Language :: Python :: 3.12',
 ]
 dependencies = [
@@ -135,10 +132,6 @@ allow-direct-references = true
 
 [project.urls]
 repository = "https://github.com/vitessce/vitessce-python"
-
-[tool.setuptools]
-packages = ["vitessce", "vitessce.data_utils", "vitessce.widget_plugins"]
-package-dir = {"" = "src"}
 
 # Reference: https://stackoverflow.com/a/50156706
 [tool.pytest.ini_options]

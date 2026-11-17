@@ -94,7 +94,8 @@ notebook = [
 ]
 demos = [
   "pulp==2.7.0",
-  "snakemake",
+  # snakemake>=8 removed the `subworkflow` directive used by demos/Snakefile.
+  "snakemake<8",
   "pyyaml",
 ]
 # SpatialQuery
@@ -125,6 +126,9 @@ dev = [
 [tool.uv]
 default-groups = ["dev"]
 override-dependencies = []
+# datrie (a dependency of snakemake<8) 0.8.2 ships pre-generated C code
+# that fails to compile with GCC 14; 0.8.3 regenerates it via Cython.
+constraint-dependencies = ["datrie>=0.8.3"]
 
 [tool.hatch.build]
 exclude = [".github", "docs", "demos", "binder"]

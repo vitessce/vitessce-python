@@ -38,7 +38,11 @@ class BackgroundServer:
         assert self.server is not None
         try:
             self.server.should_exit = True
-            self.thread.join()
+            # During interpreter shutdown, daemon threads are frozen and can
+            # never finish, so joining them would hang forever
+            # (e.g. when VitessceWidget.__del__ -> close() runs at exit).
+            if not sys.is_finalizing():
+                self.thread.join(timeout=5)
         finally:
             self.server = None
             self.thread = None

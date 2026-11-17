@@ -1,0 +1,200 @@
+{
+  "$ref": "#/definitions/config-1.0.17",
+  "definitions": {
+    "config-1.0.17": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "string",
+          "const": "1.0.17"
+        },
+        "name": {
+          "type": "string"
+        },
+        "public": {
+          "type": "boolean"
+        },
+        "description": {
+          "type": "string"
+        },
+        "datasets": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "uid": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "files": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "fileType": {
+                      "type": "string"
+                    },
+                    "url": {
+                      "type": "string"
+                    },
+                    "options": {},
+                    "requestInit": {
+                      "type": "object",
+                      "properties": {
+                        "method": {
+                          "type": "string"
+                        },
+                        "headers": {
+                          "type": "object",
+                          "additionalProperties": {}
+                        },
+                        "body": {
+                          "type": "string"
+                        },
+                        "mode": {
+                          "type": "string"
+                        },
+                        "credentials": {
+                          "type": "string"
+                        },
+                        "cache": {
+                          "type": "string"
+                        },
+                        "redirect": {
+                          "type": "string"
+                        },
+                        "referrer": {
+                          "type": "string"
+                        },
+                        "integrity": {
+                          "type": "string"
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "coordinationValues": {
+                      "type": "object",
+                      "additionalProperties": {}
+                    }
+                  },
+                  "required": [
+                    "fileType"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "uid",
+              "files"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "coordinationSpace": {
+          "type": "object",
+          "properties": {},
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": {}
+          }
+        },
+        "layout": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "uid": {
+                "type": "string"
+              },
+              "component": {
+                "type": "string"
+              },
+              "props": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "x": {
+                "type": "integer"
+              },
+              "y": {
+                "type": "integer"
+              },
+              "w": {
+                "type": "integer"
+              },
+              "h": {
+                "type": "integer"
+              },
+              "coordinationScopes": {
+                "type": "object",
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  ]
+                }
+              },
+              "coordinationScopesBy": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "$ref": "#/definitions/config-1.0.17/properties/layout/items/properties/coordinationScopes/additionalProperties"
+                    }
+                  }
+                }
+              },
+              "coordinationValues": {
+                "type": "object",
+                "additionalProperties": {}
+              }
+            },
+            "required": [
+              "component",
+              "x",
+              "y"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "initStrategy": {
+          "type": "string",
+          "enum": [
+            "none",
+            "auto"
+          ]
+        },
+        "uid": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "version",
+        "name",
+        "datasets",
+        "layout",
+        "initStrategy"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

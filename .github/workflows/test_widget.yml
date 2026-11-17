@@ -4,7 +4,8 @@ on: [push, pull_request]
 
 jobs:
   test_python:
-    runs-on: ubuntu-latest
+    # Pinned: Playwright has no chromium build for ubuntu-26.04 yet.
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         version: ['3.10', '3.12']

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "vitessce"
-version = "3.9.8"
+version = "3.10.0"
 authors = [
   { name="Mark Keller", email="mark_keller@hms.harvard.edu" },
 ]
@@ -30,6 +30,7 @@ dependencies = [
   'black>=21.11b1',
   'numpy>=1.21.2',
   'zarr>=3.0.0',
+  'jsonschema>=4.0.0',
 ]
 
 [project.optional-dependencies]

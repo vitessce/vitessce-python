@@ -54,6 +54,7 @@ try:
         SpatialDataWrapper,
         ObsSegmentationsNgPrecomputedWrapper,
         ObsPointsNgAnnotationsWrapper,
+        ObsLocationsNgAnnotationsWrapper,
     )
 except ModuleNotFoundError as e:  # pragma: no cover
     warn(f'Extra installs are necessary to use wrappers: {e}')

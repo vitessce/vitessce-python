@@ -2,7 +2,7 @@
 Validate view configs against the JSON schemas from the ``@vitessce/json-schema`` NPM package.
 
 The ``json_schema/`` directory holds the ``dist/`` files of that package at ``JSON_SCHEMA_VERSION``.
-To refresh them, for example when bumping ``js_package_version`` in ``widget.py``, run:
+To refresh them, for example when bumping ``DEFAULT_JS_PACKAGE_VERSION`` in ``widget.py``, run:
 
     curl -sL https://registry.npmjs.org/@vitessce/json-schema/-/json-schema-<version>.tgz | tar xz -C /tmp
     cp /tmp/package/dist/*.json src/vitessce/json_schema/

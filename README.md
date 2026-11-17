@@ -25,7 +25,7 @@ These contain demos of different use cases and integrations with single-cell dat
 
 ## Development
 
-For a development installation (requires NodeJS and NPM),
+For a development installation,
 
     $ git clone https://github.com/vitessce/vitessce-python.git
     $ cd vitessce-python
@@ -36,12 +36,12 @@ Alternatively, use conda:
 
     $ conda create -n vitessce-dev python=3.12
     $ conda activate vitessce-dev
-    $ pip install -e ".[dev,docs,all]"
+    $ pip install -e ".[docs,all]" --group dev
     
 Troubleshooting SpatialQuery installation on macOS:
     
     $ # Use the macOS clang instead of from homebrew.
-    $ CC=/usr/bin/clang CXX=/usr/bin/clang++ pip install -e ".[dev,docs,all,sq]"
+    $ CC=/usr/bin/clang CXX=/usr/bin/clang++ pip install -e ".[docs,all,sq]" --group dev
     
 
 ## Linting and testing

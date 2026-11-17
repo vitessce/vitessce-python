@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(uv sync *)",
+      "Bash(uv run pytest *)",
+      "Bash(uv run flake8 *)",
+      "Bash(uv run autopep8 *)",
+      "Bash(uv run coverage *)"
+    ]
+  }
+}

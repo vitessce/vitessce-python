@@ -178,20 +178,34 @@ const successfulImportMap = {
 };
 const importMap = {
   imports: {
-    "react": "https://esm.sh/react@18.2.0?dev",
+    "react": "https://esm.sh/react@19.2.6?dev",
     // needed when using custom_js_url
-    "react/jsx-runtime": "https://esm.sh/react@18.2.0/jsx-runtime?dev",
-    "react-dom": "https://esm.sh/react-dom@18.2.0?dev",
-    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client?dev",
+    "react/jsx-runtime": "https://esm.sh/react@19.2.6/jsx-runtime?dev",
+    "react-dom": "https://esm.sh/react-dom@19.2.6?dev",
+    "react-dom/client": "https://esm.sh/react-dom@19.2.6/client?dev",
+    // needed for three-based views which dynamically import their three-related dependencies.
+    // The `external=` param makes esm.sh leave these as bare specifiers (resolved via this import map)
+    // rather than bundling/resolving its own copies, which would result in
+    // "Multiple instances of Three.js being imported" (and duplicate React/R3F instances).
+    // Note: @pmndrs/pointer-events imports three without declaring it as a dependency,
+    // so it must be externalized and mapped explicitly as well.
+    "three": "https://esm.sh/three@0.162.0?dev",
+    // Prefix mapping for subpath imports like "three/addons/loaders/GLTFLoader.js".
+    // Uses esm.sh path-style query params since query strings cannot be appended to prefix mappings.
+    "three/": "https://esm.sh/three@0.162.0&dev&external=three/",
+    "@react-three/fiber": "https://esm.sh/@react-three/fiber@^9.0.0?dev&external=react,react-dom,three",
+    "@react-three/drei": "https://esm.sh/@react-three/drei@^10.0.0?dev&external=react,react-dom,three,@react-three/fiber",
+    "@react-three/xr": "https://esm.sh/@react-three/xr@^6.0.0?dev&external=react,react-dom,three,@react-three/fiber,@react-three/drei,@pmndrs/pointer-events",
+    "@pmndrs/pointer-events": "https://esm.sh/@pmndrs/pointer-events@~6.6.32?dev&external=three"
   },
 };
 const fallbackImportMap = {
     imports: {
-        "react": "https://cdn.vitessce.io/react@18.2.0/index.js",
-        "react-dom": "https://cdn.vitessce.io/react-dom@18.2.0/index.js",
-        "react-dom/client": "https://cdn.vitessce.io/react-dom@18.2.0/es2022/client.mjs",
+        "react": "https://cdn.vitessce.io/react@19.2.6/index.js",
+        "react-dom": "https://cdn.vitessce.io/react-dom@19.2.6/index.js",
+        "react-dom/client": "https://cdn.vitessce.io/react-dom@19.2.6/es2022/client.mjs",
         // needed when using custom_js_url
-        "react/jsx-runtime": "https://esm.sh/react@18.2.0/jsx-runtime?dev",
+        "react/jsx-runtime": "https://esm.sh/react@19.2.6/jsx-runtime?dev",
         // Replaced with version-specific URL below.
         "vitessce": "https://cdn.vitessce.io/vitessce@VERSION/dist/index.min.js",
     },
@@ -199,9 +213,9 @@ const fallbackImportMap = {
 /*
 const fallbackDevImportMap = {
     imports: {
-        "react": "https://cdn.vitessce.io/react@18.2.0/index_dev.js",
-        "react-dom": "https://cdn.vitessce.io/react-dom@18.2.0/index_dev.js",
-        "react-dom/client": "https://cdn.vitessce.io/react-dom@18.2.0/es2022/client.development.mjs",
+        "react": "https://cdn.vitessce.io/react@19.2.6/index_dev.js",
+        "react-dom": "https://cdn.vitessce.io/react-dom@19.2.6/index_dev.js",
+        "react-dom/client": "https://cdn.vitessce.io/react-dom@19.2.6/es2022/client.development.mjs",
         // Replaced with version-specific URL below.
         "vitessce": "https://cdn.vitessce.io/@vitessce/dev@VERSION/dist/index.js",
     },
@@ -802,7 +816,7 @@ class VitessceWidget(anywidget.AnyWidget):
 
     next_port = DEFAULT_PORT
 
-    js_package_version = Unicode('4.1.2').tag(sync=True)
+    js_package_version = Unicode('4.2.1').tag(sync=True)
     js_dev_mode = Bool(False).tag(sync=True)
     custom_js_url = Unicode('').tag(sync=True)
     plugin_esm = List(trait=Unicode(''), default_value=[]).tag(sync=True)
@@ -815,7 +829,7 @@ class VitessceWidget(anywidget.AnyWidget):
 
     store_urls = List(trait=Unicode(''), default_value=[]).tag(sync=True)
 
-    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='4.1.2', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, prefer_local=True, invoke_timeout=300000, invoke_batched=True, page_mode=False, page_esm=None, prevent_scroll=True, server_host=None):
+    def __init__(self, config, height=600, theme='auto', uid=None, port=None, proxy=False, js_package_version='4.2.1', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, prefer_local=True, invoke_timeout=300000, invoke_batched=True, page_mode=False, page_esm=None, prevent_scroll=True, server_host=None):
         """
         Construct a new Vitessce widget. Not intended to be instantiated directly; instead, use ``VitessceConfig.widget``.
 
@@ -1023,7 +1037,7 @@ class VitessceWidget(anywidget.AnyWidget):
 # Launch Vitessce using plain HTML representation (no ipywidgets)
 
 
-def ipython_display(config, height=600, theme='auto', base_url=None, host_name=None, uid=None, port=None, proxy=False, js_package_version='4.1.2', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, page_mode=False, page_esm=None, server_host=None):
+def ipython_display(config, height=600, theme='auto', base_url=None, host_name=None, uid=None, port=None, proxy=False, js_package_version='4.2.1', js_dev_mode=False, custom_js_url='', plugins=None, remount_on_uid_change=True, page_mode=False, page_esm=None, server_host=None):
     from IPython.display import display, HTML
     uid_str = "vitessce" + get_uid_str(uid)
 
